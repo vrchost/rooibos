@@ -110,6 +110,7 @@ STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
     'pseudostreaming': 'rooibos.storage.pesudostreaming.PseudoStreamingStorageSystem',
+    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
 }
 
 GROUP_MANAGERS = {
