@@ -35,3 +35,13 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
     def is_local(self):
         return True
     
+    def get_files(self):
+        result = []
+        location = os.path.normpath(self.location)
+        for path, dirs, files in os.walk(location):
+            path = path[len(location):]
+            if path.startswith(os.path.sep):
+                path = path[len(os.path.sep):]
+            result.extend(os.path.join(path, file) for file in files)
+        return result
+    

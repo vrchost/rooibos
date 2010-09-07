@@ -20,7 +20,8 @@
 {% var as related_pages %}
 {"pages": [
     {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url storage-manage %}", "title": "Storage Management"}
+    {"url": "{% url storage-manage %}", "title": "Storage Management"},
+    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"}
 ]}
 {% endvar %}
 

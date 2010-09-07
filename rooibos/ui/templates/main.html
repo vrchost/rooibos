@@ -24,7 +24,7 @@
         var position = 0;
         var interval;
         var hovertimeout;
-        
+
         function nextImage(newposition) {
             if (position == newposition) return;
             var title = $("#image-preview .image-title a");
@@ -38,16 +38,16 @@
             subtitle.fadeOut(500, function() { subtitle.html(d[2]).attr("href", d[3]).fadeIn(500); });
             $("#image-preview .image-preview-thumb").removeClass("active-image-preview-thumb").eq(position).addClass("active-image-preview-thumb");
         }
-        
+
         function autoAdvance() {
             clearInterval(interval);
             interval = setInterval(function() { index = (index + 1) % 8; nextImage(order[index]); }, 10000);
         }
-        
+
         $(window).load(function () {
             autoAdvance();
         });
-        
+
         $(document).ready(function() {
             $("#image-preview .image-preview-thumb").hover(
                 function() {
@@ -76,7 +76,7 @@
   {% include "ie6warning.html" %}
 
   <div id="image-preview">
-    
+
     {% if records %}
 
     <div id="image-preview-container">
@@ -104,13 +104,13 @@
     <div class="image-title"><a href="{{ records.0.get_absolute_url }}">{{ records.0.title }}</a></div>
     <div class="image-subtitle"><a href="{% url solr-search-collection collection.id, collection.name %}">{{ collection.title }}</a></div>
     {% endwith %}
-    
+
     {% endif %}
   </div>
-  
+
 
   <div class="columns">
-  
+
     <div class="column">
     {% if not user.is_authenticated %}
         <h2>Log in</h2>
@@ -119,25 +119,25 @@
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}
     </div>
-    
+
     <div class="column announcements">
-        
+
         <h2>Announcements</h2>
-        
+
         {% get_comment_list for flatpages.flatpage 1 as comments %}
         {% for comment in comments %}
-            {{ comment.comment|linebreaks }}
+            {{ comment.comment|safe|linebreaks }}
             <div class="byline">Posted {{ comment.submit_date|naturalday }} by {{ comment.user }}.</div>
         {% endfor %}
-        
+
     </div>
-        
+
   </div>
-  
+
     <div class="columns columns-bottom">
         <div class="column"></div>
         <div class="column"></div>
     </div>
-    
+
 
 {% endblock %}

@@ -15,8 +15,24 @@ class CloudFilesStorageSystem(CloudFilesStorage):
                                                    'mediaid': media.id,
                                                    'media': media.name})
 
+    def _create_local_copy(self, storage, media, derivative=None):
+        m = derivative or Media.objects.create(record=media.record,
+                                               storage=storage.get_derivative_storage(),
+                                               mimetype=media.mimetype,
+                                               master=media,
+                                               name='-local-copy')
+        m.save_file('%s-local-copy' + os.path.splitext(media.url)[1], media.load_file())
+
     def get_absolute_file_path(self, storage, media):
-        return None
+        try:
+            m = media.derivatives.get(name='-local-copy')
+            if not m.file_exists():
+                m = self._create_local_copy(storage, media, derivative=m)
+        except Media.DoesNotExist:
+            m = self._create_local_copy(storage, media)
+        except Exception, ex:
+            print ex
+        return m.get_absolute_file_path()
 
     def get_available_name(self, name):
         (name, ext) = os.path.splitext(name)

@@ -99,6 +99,10 @@ class Storage(models.Model):
     def is_local(self):
         return self.storage_system and self.storage_system.is_local()
 
+    def get_files(self):
+        storage = self.storage_system
+        return storage.get_files() if storage and hasattr(storage, 'get_files') else []
+
 
 class Media(models.Model):
     record = models.ForeignKey(Record)

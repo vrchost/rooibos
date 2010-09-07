@@ -19,6 +19,8 @@ from rooibos.storage.models import Storage, Media
 from rooibos.storage.views import create_proxy_url_if_needed
 from rooibos.ui import update_record_selection
 from rooibos.util import safe_int, json_view
+from rooibos.util.models import OwnedWrapper
+from rooibos.contrib.tagging.models import Tag
 import django.contrib.auth
 
 
@@ -124,6 +126,11 @@ def record(request, id, name):
 
 @json_view
 def presentations_for_current_user(request):
+    
+    def tags_for_presentation(presentation):
+        ownedwrapper = OwnedWrapper.objects.get_for_object(request.user, presentation)
+        return [tag.name for tag in Tag.objects.get_for_object(ownedwrapper)]
+    
     if request.user.is_anonymous():
         return dict(presentations=[])
     presentations = Presentation.objects.filter(owner=request.user).order_by('title')
@@ -135,7 +142,8 @@ def presentations_for_current_user(request):
                  hidden=p.hidden,
                  description=p.description,
                  created=p.created.isoformat(),
-                 modified=p.modified.isoformat())
+                 modified=p.modified.isoformat(),
+                 tags=tags_for_presentation(p))
             for p in presentations
         ]
     }

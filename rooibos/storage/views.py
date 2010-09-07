@@ -18,7 +18,7 @@ from models import Media, Storage, TrustedSubnet, ProxyUrl
 from rooibos.access import accessible_ids, accessible_ids_list, filter_by_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object
 from rooibos.contrib.ipaddr import IP
 from rooibos.data.models import Collection, Record, Field, FieldValue, CollectionItem, standardfield
-from rooibos.storage import get_image_for_record, get_thumbnail_for_record
+from rooibos.storage import get_image_for_record, get_thumbnail_for_record, match_up_media
 from rooibos.util import json_view
 import logging
 import os
@@ -30,6 +30,8 @@ import mimetypes
 
 
 def add_content_length(func):
+    # Disable to make it work with latest PyISAPIe
+    return func
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
         if type(response) == HttpResponse:
@@ -42,9 +44,9 @@ def add_content_length(func):
 @cache_control(private=True, max_age=3600)
 def retrieve(request, recordid, record, mediaid, media):
 
-    # check if media exists    
+    # check if media exists
     mediaobj = get_object_or_404(Media.objects.filter(id=mediaid, record__id=recordid))
-    
+
     # check permissions
     try:
         mediaobj = Media.objects.get(id=mediaid,
@@ -63,7 +65,7 @@ def retrieve(request, recordid, record, mediaid, media):
         content = mediaobj.load_file()
     except IOError:
         raise Http404()
-    
+
     if content:
         return HttpResponse(content=content, mimetype=str(mediaobj.mimetype))
     else:
@@ -101,10 +103,10 @@ def media_upload(request, recordid, record):
         file = forms.FileField()
 
     if request.method == 'POST':
-        
+
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-            
+
             storage = Storage.objects.get(name=form.cleaned_data['storage'])
             file = request.FILES['file']
             mimetype = mimetypes.guess_type(file.name)[0] or file.content_type
@@ -134,7 +136,7 @@ def media_upload(request, recordid, record):
 @cache_control(private=True, max_age=3600)
 def record_thumbnail(request, id, name):
     record = Record.get_or_404(id, request.user)
-    media = get_thumbnail_for_record(record, request.user, crop_to_square=request.GET.has_key('square'))    
+    media = get_thumbnail_for_record(record, request.user, crop_to_square=request.GET.has_key('square'))
     if media:
         try:
             content = media.load_file()
@@ -193,9 +195,9 @@ def call_proxy_url(request, uuid):
 
 @login_required
 def manage_storages(request):
-    
+
     storages = filter_by_access(request.user, Storage, manage=True).order_by('title')
-    
+
     return render_to_response('storage_manage.html',
                           {'storages': storages,
                            },
@@ -204,27 +206,27 @@ def manage_storages(request):
 
 @login_required
 def manage_storage(request, storageid=None, storagename=None):
-    
+
     if storageid and storagename:
         storage = get_object_or_404(filter_by_access(request.user, Storage, manage=True), id=storageid)
     else:
         storage = Storage(system='local')
-    
+
     if not storage.id:
         system_choices = [(s,s) for s in settings.STORAGE_SYSTEMS.keys()]
     else:
         system_choices = [(storage.system, storage.system)]
-    
+
     class StorageForm(forms.ModelForm):
         system = forms.CharField(widget=forms.Select(choices=system_choices))
-        
+
         def clean_system(self):
             return self.cleaned_data['system'] if not self.instance.id else self.instance.system
-        
+
         class Meta:
             model = Storage
             exclude = ('name', 'derivative')
-    
+
     if request.method == "POST":
         if request.POST.get('delete-storage'):
             if not request.user.is_superuser:
@@ -234,13 +236,13 @@ def manage_storage(request, storageid=None, storagename=None):
             return HttpResponseRedirect(reverse('storage-manage'))
         else:
             form = StorageForm(request.POST, instance=storage)
-            if form.is_valid():   
+            if form.is_valid():
                 form.save()
                 return HttpResponseRedirect(reverse('storage-manage-storage', kwargs=dict(
                     storageid=form.instance.id, storagename=form.instance.name)))
     else:
         form = StorageForm(instance=storage)
-    
+
     return render_to_response('storage_edit.html',
                           {'storage': storage,
                            'form': form,
@@ -264,7 +266,7 @@ def import_files(request):
         create_records = forms.BooleanField(required=False)
         replace_files = forms.BooleanField(required=False, label='Replace files of same type')
         personal_records = forms.BooleanField(required=False)
-        
+
         def clean(self):
             cleaned_data = self.cleaned_data
             if any(self.errors):
@@ -279,14 +281,14 @@ def import_files(request):
 
 
     if request.method == 'POST':
-        
+
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
-           
+
             create_records = form.cleaned_data['create_records']
             replace_files = form.cleaned_data['replace_files']
             personal_records = form.cleaned_data['personal_records']
-           
+
             collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), write=True if not personal_records else None))
             storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), write=True))
             file = request.FILES['file']
@@ -304,7 +306,7 @@ def import_files(request):
             records = Record.by_fieldvalue(idfields, id).filter(collection=collection, owner=owner)
             result = "File skipped."
             record = None
-            
+
             if len(records) == 1:
                 # Matching record found
                 record = records[0]
@@ -358,21 +360,65 @@ def import_files(request):
             request.user.message_set.create(message=result)
             next = request.GET.get('next', request.get_full_path())
             return HttpResponseRedirect(next)
-            
+
         else:
             # invalid form submission
             if request.POST.get('swfupload') == 'true':
                 html = render_to_string('storage_import_file_response.html',
                                  {'result': form.errors},
                                  context_instance=RequestContext(request)
-                                 )                
+                                 )
                 return HttpResponse(content=simplejson.dumps(dict(status='ok', html=html)),
                                     mimetype='application/json')
-                
+
     else:
         form = UploadFileForm()
 
     return render_to_response('storage_import_files.html',
+                              {'form': form,
+                               },
+                              context_instance=RequestContext(request))
+
+
+@login_required
+def match_up_files(request):
+    available_storage = get_list_or_404(filter_by_access(request.user, Storage.objects.filter(master=None), manage=True).order_by('title').values_list('id', 'title'))
+    available_collections = get_list_or_404(filter_by_access(request.user, Collection, manage=True))
+
+    class MatchUpForm(forms.Form):
+        collection = forms.ChoiceField(choices=((c.id, c.title) for c in sorted(available_collections, key=lambda c: c.title)))
+        storage = forms.ChoiceField(choices=available_storage)
+
+    if request.method == 'POST':
+
+        form = MatchUpForm(request.POST)
+        if form.is_valid():
+
+            collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), manage=True))
+            storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), manage=True))
+
+            matches = match_up_media(storage, collection)
+
+            for record, filename in matches:
+                id = os.path.splitext(os.path.split(filename)[1])[0]
+                mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
+                media = Media.objects.create(record=record,
+                                             name=id,
+                                             storage=storage,
+                                             url=filename,
+                                             mimetype=mimetype)
+
+            request.user.message_set.create(message='%s files were matched up with existing records.' % len(matches))
+            return HttpResponseRedirect('%s?collection=%s&storage=%s' % (
+                reverse('storage-match-up-files'),
+                collection.id,
+                storage.id
+                ))
+
+    else:
+        form = MatchUpForm(request.GET)
+
+    return render_to_response('storage_match_up_files.html',
                               {'form': form,
                                },
                               context_instance=RequestContext(request))

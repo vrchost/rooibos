@@ -826,6 +826,7 @@ ul.errorlist li {
 .announcements .byline {
     font-size: x-small;
     font-style: italic;
+    padding-top: 0.5em;
 }
 
 #loginform label {

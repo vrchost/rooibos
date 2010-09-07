@@ -48,13 +48,8 @@ urls = [
     url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_DIR}, name='static'),
     ]
 
-if 'apps.jmutube' in apps:
-    urls.append(url(r'^jmutube/', include('apps.jmutube.urls')))
-if 'apps.svohp' in apps:
-    urls.append(url(r'^svohp/', include('apps.svohp.urls')))
-if 'apps.ovc' in apps:
-    urls.append(url(r'^ovc/', include('apps.ovc.urls')))
-if 'apps.furiousflower' in apps:
-    urls.append(url(r'^furiousflower/', include('apps.furiousflower.urls')))
+for app in apps:
+    if not '.' in app[5:]:
+        urls.append(url(r'^%s/' % app[5:], include('%s.urls' % app)))
 
 urlpatterns = patterns('', *urls)

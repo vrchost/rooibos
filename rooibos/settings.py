@@ -147,12 +147,13 @@ additional_settings = [
     'settings_local',
 ]
 
-if os.environ.get('ROOIBOS_ADDITIONAL_SETTINGS'):
-    additional_settings.append(os.environ.get('ROOIBOS_ADDITIONAL_SETTINGS'))
+additional_settings.extend(filter(None, os.environ.get('ROOIBOS_ADDITIONAL_SETTINGS', '').split(';')))
 
 # Load settings for additional applications
-for settings in additional_settings:
-#    print "Loading additional settings from %s" % settings
+
+
+while additional_settings:
+    settings = additional_settings.pop(0)
     module = __import__(settings, globals(), locals(), 'rooibos')
     for setting in dir(module):
         if setting == setting.upper():
@@ -162,9 +163,8 @@ for settings in additional_settings:
                 elif isinstance(locals()[setting], tuple):
                     locals()[setting] += (getattr(module, setting))
                 else:
-#                    print "Overriding %s" % setting
                     locals()[setting] = getattr(module, setting)
             else:
                 locals()[setting] = getattr(module, setting)
         elif setting == 'additional_settings':
-            additional_settings += getattr(module, setting)
+            additional_settings[:0] = getattr(module, setting)

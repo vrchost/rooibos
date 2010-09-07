@@ -8,7 +8,7 @@ from django.conf import settings
 from django.db import connection
 from django.db.models import Q, F
 from rooibos.access import accessible_ids, get_effective_permissions_and_restrictions
-from rooibos.data.models import Collection
+from rooibos.data.models import Collection, Record, standardfield
 from rooibos.presentation.models import Presentation
 from models import Media, Storage
 
@@ -157,3 +157,30 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
 
 def get_thumbnail_for_record(record, user=None, crop_to_square=False):
     return get_image_for_record(record, user, width=100, height=100, crop_to_square=crop_to_square)
+
+
+def match_up_media(storage, collection):
+
+    if not hasattr(storage, 'get_files'):
+        return []
+
+    # get list of files
+    files = storage.get_files()
+
+    # remove files that already have media objects
+    for media in Media.objects.filter(storage=storage):
+        try:
+            files.remove(os.path.normpath(media.url))
+        except ValueError:
+            pass
+
+    # find records that have an ID matching one of the remaining files
+    idfields = standardfield('identifier', equiv=True)
+    results = []
+    for file in files:
+        id = os.path.splitext(os.path.split(file)[1])[0]
+        records = Record.by_fieldvalue(idfields, id).filter(collection=collection, owner=None)
+        if len(records) == 1:
+            results.append((records[0], file))
+
+    return results

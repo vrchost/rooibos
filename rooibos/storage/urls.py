@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     url(r'^import/$', import_files, name='storage-import'),
     url(r'^storage/(?P<storageid>\d+)/(?P<storagename>[-\w]+)/$', manage_storage, name='storage-manage-storage'),
     url(r'^storage/new/$', manage_storage, name='storage-create-storage'),
+    url(r'^match-up-files/$', match_up_files, name='storage-match-up-files'),
 )

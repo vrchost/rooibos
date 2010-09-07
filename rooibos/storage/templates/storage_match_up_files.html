@@ -1,0 +1,51 @@
+{% extends "master.html" %}
+{% load ui %}
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+
+$(document).ready(function() {
+
+});
+
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url ui-management %}", "title": "Management"},
+    {"url": "{% url storage-manage %}", "title": "Storage Management"},
+	{"url": "{% url data-collections-manage %}", "title": "Collection Management"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Match Up Media Files</h1>
+
+<form method="post" action="{{ request.get_full_path }}">
+<table>
+	<tr>
+		<th>{{ form.collection.label }}
+		</th>
+		<td>{{ form.collection }}
+		</td>
+	</tr>
+	<tr>
+		<th>{{ form.storage.label }}
+		</th>
+		<td>{{ form.storage }}
+		</td>
+	</tr>
+</table>
+<input type="submit" value="Match Up Media"/>
+</form>
+
+{% endblock %}

@@ -60,7 +60,7 @@ IsapiEnvAuto = [
   #"HTTP_URL",
   #"HTTP_USER_AGENT",
   #"HTTP_VERSION",
-  #"HTTPS",
+  "HTTPS",
   #"HTTPS_KEYSIZE",
   #"HTTPS_SECRETKEYSIZE",
   #"HTTPS_SERVER_ISSUER",

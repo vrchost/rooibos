@@ -13,7 +13,7 @@ from django.conf import settings
 from rooibos.data.models import *
 from rooibos.storage.models import Media, ProxyUrl, Storage, TrustedSubnet
 from localfs import LocalFileSystemStorageSystem
-from rooibos.storage import get_thumbnail_for_record, get_image_for_record
+from rooibos.storage import get_thumbnail_for_record, get_image_for_record, match_up_media
 from rooibos.access.models import AccessControl
 from rooibos.presentation.models import Presentation, PresentationItem
 from sqlite3 import OperationalError
@@ -402,3 +402,60 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertEqual('hello world', response.content)
+
+
+
+class AutoConnectMediaTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(self.tempdir, 'sub'))
+        self.collection = Collection.objects.create(title='AutoconnectMediaTest')
+        self.storage = Storage.objects.create(title='AutoconnectMediaTest', system='local', base=self.tempdir)
+        self.records = []
+        self.create_file('id_1')
+        self.create_file('id_2')
+        self.create_file(os.path.join('sub', 'id_99'))
+        
+    def tearDown(self):
+        for record in self.records:
+            record.delete()
+        self.storage.delete()
+        self.collection.delete()
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+        
+    def create_record(self, id):
+        record = Record.objects.create(name='id')
+        CollectionItem.objects.create(collection=self.collection, record=record)
+        FieldValue.objects.create(record=record, field=standardfield('identifier'), value=id)
+        self.records.append(record)
+        return record
+    
+    def create_file(self, id):
+        file = open(os.path.join(self.tempdir, '%s.txt' % id), 'w')
+        file.write('test')
+        file.close()
+    
+    def test_get_files(self):
+        files = sorted(self.storage.get_files())
+        self.assertEqual(3, len(files))
+        self.assertEqual('id_1.txt', files[0])
+        self.assertEqual('id_2.txt', files[1])
+        self.assertEqual(os.path.join('sub', 'id_99.txt'), files[2])
+
+    def test_get_files_in_subdirectories(self):
+        pass
+    
+    def test_connect_files(self):
+        r1 = self.create_record('id_1')
+        r2 = self.create_record('id_2')
+        r3 = self.create_record('id_3')
+        Media.objects.create(record=r1, storage=self.storage, url='id_1.txt')
+        
+        matches = match_up_media(self.storage, self.collection)
+        
+        self.assertEqual(1, len(matches))
+        match = matches[0]
+        record, file_url = match
+        self.assertEqual(r2, record)
+        self.assertEqual('id_2.txt', file_url)
