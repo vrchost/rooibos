@@ -51,7 +51,7 @@ class FieldValueTestCase(unittest.TestCase):
     def testPresentationContext(self):
         record = Record.objects.create()
         owned_collection = Collection.objects.create(title='Owned collection', owner=self.user)
-       
+
         v1 = record.fieldvalue_set.create(field=self.titleField, value='v')
         v2 = record.fieldvalue_set.create(field=self.titleField, value='v-u1', owner=self.user)
         v3 = record.fieldvalue_set.create(field=self.titleField, value='v-u2', owner=self.user2)
@@ -64,7 +64,7 @@ class FieldValueTestCase(unittest.TestCase):
             self.assertTrue(v.value in expected)
             expected.remove(v.value)
         self.assertEqual([], expected)
-        
+
         values = record.get_fieldvalues(owner=self.user2, context=owned_collection, include_context_owner=True)
         expected = ['v', 'v-u1', 'v-u2', 'v-u1-ctx']
         for v in values:
@@ -182,64 +182,64 @@ class CsvImportTestCase(unittest.TestCase):
     def testAnalyze(self):
 
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
-        
+
         self.assertFalse(testimport.analyzed)
-        
+
         data = testimport.analyze()
-        
+
         self.assertTrue(testimport.analyzed)
-        
+
         self.assertEqual(2, len(data))
-        
+
         self.assertEqual('A001', data[0]['ID'][0])
         self.assertEqual('a001.jpg', data[0]['Filename'][0])
         self.assertEqual('Test', data[0]['Title'][0])
         self.assertEqual('Knab, Andreas', data[0]['Creator'][0])
         self.assertEqual('Harrisonburg, VA', data[0]['Location'][0])
         self.assertEqual(None, data[0]['Unused'])
-        
+
         self.assertEqual('A002', data[1]['ID'][0])
         self.assertEqual('a002.jpg', data[1]['Filename'][0])
         self.assertEqual('Another Test', data[1]['Title'][0])
         self.assertEqual('Andreas Knab;John Doe', data[1]['Creator'][0])
         self.assertEqual('Virginia', data[1]['Location'][0])
         self.assertEqual(None, data[1]['Unused'])
-        
+
         # These don't match anything
         self.assertEqual(None, testimport.mapping['ID'])
         self.assertEqual(None, testimport.mapping['Filename'])
         self.assertEqual(None, testimport.mapping['Unused'])
-        
+
         # These should match standards fields
         self.assertNotEqual(None, testimport.mapping['Title'])
         self.assertNotEqual(None, testimport.mapping['Creator'])
         self.assertNotEqual(None, testimport.mapping['Location'])
-    
-        self.assertEqual(None, testimport.get_identifier_field())    
+
+        self.assertEqual(None, testimport.get_identifier_field())
 
         # Map the ID field and try again
         testimport.mapping['ID'] = Field.objects.get(name='identifier', standard__prefix='dc')
         self.assertEqual('ID', testimport.get_identifier_field())
-        
-        
-    def testImport(self):        
+
+
+    def testImport(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
-        
+
         self.assertFalse(testimport.analyzed)
-        
+
         data = testimport.analyze()
-        
+
         self.assertTrue(testimport.analyzed)
 
 
     def testFindDuplicateIdentifiers(self):
         testimport = SpreadsheetImport(StringIO(), [self.collection])
-        
+
         dup = testimport.find_duplicate_identifiers()
         self.assertEqual(0, len(dup))
-        
+
         dcidentifier = Field.objects.get(name='identifier', standard__prefix='dc')
-        
+
         def create_record(id):
             record = Record.objects.create()
             self.records.append(record)
@@ -249,29 +249,29 @@ class CsvImportTestCase(unittest.TestCase):
         create_record('X001')
         create_record('X002')
         create_record('X002')
-        
+
         dup = testimport.find_duplicate_identifiers()
         self.assertEqual(1, len(dup))
         self.assertEqual('X002', dup[0])
-        
+
 
     def testNoIdentifierException(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
         self.assertRaises(SpreadsheetImport.NoIdentifierException, testimport.run)
-        
-        
+
+
     def testImportSimple(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
         self.assertEqual(0, self.collection.records.count())
         testimport.analyze()
-        
+
         dc = dict(
             identifier=Field.objects.get(name='identifier', standard__prefix='dc'),
             title=Field.objects.get(name='title', standard__prefix='dc'),
             creator=Field.objects.get(name='creator', standard__prefix='dc'),
             coverage=Field.objects.get(name='coverage', standard__prefix='dc'),
         )
-        
+
         testimport.mapping = {
             'ID': dc['identifier'],
             'Filename': None,
@@ -280,13 +280,13 @@ class CsvImportTestCase(unittest.TestCase):
             'Location': dc['coverage'],
         }
         testimport.name_field = 'ID'
-        
+
         self.assertNotEqual(None, testimport.get_identifier_field())
-        
+
         testimport.run()
-        
+
         self.assertEquals(2, self.collection.records.count())
-        
+
         r1 = self.collection.records.get(name='A001'.lower())
         self.assertEqual('A001', r1.fieldvalue_set.get(field=dc['identifier']).value)
 
@@ -297,7 +297,7 @@ class CsvImportTestCase(unittest.TestCase):
             identifier=Field.objects.get(name='identifier', standard__prefix='dc'),
             title=Field.objects.get(name='title', standard__prefix='dc'),
             creator=Field.objects.get(name='creator', standard__prefix='dc'),
-        )        
+        )
         testimport.mapping = {
             'ID': dc['identifier'],
             'Split': dc['title'],
@@ -324,47 +324,47 @@ class CsvImportTestCase(unittest.TestCase):
         CollectionItem.objects.create(record=r2, collection=self.collection)
         r2.fieldvalue_set.create(field=identifier, value='X002')
         r2.fieldvalue_set.create(field=title, value='Owned')
-        
+
         testimport = SpreadsheetImport(StringIO("Identifier,Title\nX001,NewTitle1\nX002,NewTitle2\nX003,NewTitle3"),
                                        [self.collection],
                                        owner=self.user)
         testimport.name_field = 'Identifier'
         testimport.run()
-        
+
         self.assertEqual(1, testimport.added)
         self.assertEqual(1, testimport.updated)
         self.assertEqual(1, testimport.owner_skipped)
-        
+
         r1 = self.collection.records.get(name='x001')
         r2 = self.collection.records.get(name='x002')
         r3 = self.collection.records.get(name='x003')
-        
+
         self.assertEqual(None, r1.owner)
         self.assertEqual(self.user, r2.owner)
         self.assertEqual(self.user, r3.owner)
-        
+
         self.assertEqual('Standard', r1.title)
         self.assertEqual('NewTitle2', r2.title)
         self.assertEqual('NewTitle3', r3.title)
-    
+
     def testRecordMultiRowImport(self):
         identifier = Field.objects.get(name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
-        
+
         testimport = SpreadsheetImport(StringIO("Identifier,Title\nY001,Title1\n,Title2"),
                                        [self.collection])
         testimport.name_field = 'Identifier'
         testimport.run()
-        
+
         self.assertEqual(1, testimport.added)
         self.assertEqual(0, testimport.no_id_skipped)
-        
+
         r1 = self.collection.records.get(name='y001')
         titles = r1.fieldvalue_set.filter(field=title)
-        
+
         self.assertEqual('Title1', titles[0].value)
         self.assertEqual('Title2', titles[1].value)
-        
+
     def testRecordMultiRowImport2(self):
         identifier = Field.objects.get(name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
@@ -390,7 +390,7 @@ Z003,Title8"""),
         t1 = self.collection.records.get(name='z001').fieldvalue_set.filter(field=title)
         t2 = self.collection.records.get(name='z002').fieldvalue_set.filter(field=title)
         t3 = self.collection.records.get(name='z003').fieldvalue_set.filter(field=title)
-        
+
         self.assertEqual('Title2', t1[0].value)
         self.assertEqual('Title3', t1[1].value)
 
@@ -408,7 +408,7 @@ Z003,Title8"""),
         CollectionItem.objects.create(record=r1, collection=self.collection)
         r1.fieldvalue_set.create(field=identifier, value='Q001')
         r1.fieldvalue_set.create(field=title, value='Title')
-        
+
         testimport = SpreadsheetImport(StringIO("Identifier,Title\nQ002,NewTitle1\nQ001,NewTitle2"),
                                        [self.collection])
         testimport.name_field = 'Identifier'
@@ -421,7 +421,7 @@ Z003,Title8"""),
 
         t1 = self.collection.records.get(name='q001').fieldvalue_set.filter(field=title)
         t2 = self.collection.records.get(name='q002').fieldvalue_set.filter(field=title)
-        
+
         self.assertEqual('Title', t1[0].value)
         self.assertEqual('NewTitle1', t2[0].value)
 
@@ -435,7 +435,7 @@ Z003,Title8"""),
         r1.fieldvalue_set.create(field=identifier, value='S001')
         r1.fieldvalue_set.create(field=title, value='Title')
         r1.fieldvalue_set.create(field=system, value='Keep this')
-        
+
         testimport = SpreadsheetImport(StringIO("Identifier,Title\nS002,NewTitle2\nS001,NewTitle1"),
                                        [self.collection])
         testimport.name_field = 'Identifier'
@@ -449,7 +449,7 @@ Z003,Title8"""),
         t1 = self.collection.records.get(name='s001').fieldvalue_set.filter(field=title)
         t2 = self.collection.records.get(name='s002').fieldvalue_set.filter(field=title)
         s = self.collection.records.get(name='s001').fieldvalue_set.filter(field=system)
-        
+
         self.assertEqual('NewTitle1', t1[0].value)
         self.assertEqual('NewTitle2', t2[0].value)
         self.assertEqual('Keep this', s[0].value)
@@ -463,7 +463,7 @@ Z003,Title8"""),
         CollectionItem.objects.create(record=r1, collection=self.collection)
         r1.fieldvalue_set.create(field=identifier, value='R001')
         r1.fieldvalue_set.create(field=title, value='Title')
-        
+
         testimport = SpreadsheetImport(StringIO("Identifier,Title\nR002,NewTitle1\nR001,NewTitle2"),
                                        [self.collection])
         testimport.name_field = 'Identifier'
@@ -476,10 +476,10 @@ Z003,Title8"""),
 
         t1 = self.collection.records.get(name='r001').fieldvalue_set.filter(field=title)
         t2 = self.collection.records.filter(name='r002')
-        
+
         self.assertEqual('NewTitle2', t1[0].value)
         self.assertFalse(t2)
-        
+
     def testTestOnly(self):
         identifier = Field.objects.get(name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
@@ -513,8 +513,8 @@ T003,Title8"""),
 
         t1 = self.collection.records.get(name='t001').fieldvalue_set.filter(field=title)
         self.assertEqual('Title', t1[0].value)
-        
-        
+
+
     def testUpdateNames(self):
         identifier = Field.objects.get(name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
@@ -535,3 +535,32 @@ T003,Title8"""),
 
         r1 = Record.objects.get(id=r1.id)
         self.assertEqual('new-title-1', r1.name)
+
+    def testBOM(self):
+
+        """Make sure the import can handle the BOM at the beginning of some UTF-8 files"""
+
+        BOM = "\xef\xbb\xbf"
+        testimport = SpreadsheetImport(StringIO(BOM + csv_file), [self.collection])
+        data = testimport.analyze()
+
+        self.assertTrue(testimport.mapping.has_key('ID'))
+        self.assertTrue(testimport.mapping.has_key('Filename'))
+        self.assertTrue(testimport.mapping.has_key('Unused'))
+        self.assertTrue(testimport.mapping.has_key('Title'))
+        self.assertTrue(testimport.mapping.has_key('Creator'))
+        self.assertTrue(testimport.mapping.has_key('Location'))
+
+    def testNoBOM(self):
+
+        """Make sure the import can handle the lack of BOM at the beginning of some UTF-8 files"""
+
+        testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
+        data = testimport.analyze()
+
+        self.assertTrue(testimport.mapping.has_key('ID'))
+        self.assertTrue(testimport.mapping.has_key('Filename'))
+        self.assertTrue(testimport.mapping.has_key('Unused'))
+        self.assertTrue(testimport.mapping.has_key('Title'))
+        self.assertTrue(testimport.mapping.has_key('Creator'))
+        self.assertTrue(testimport.mapping.has_key('Location'))

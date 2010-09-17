@@ -1,12 +1,13 @@
 {% extends "master.html" %}
 {% load ui %}
+{% load access_control %}
 
 {% block content %}
 
 <h1>{{ presentation.title }}</h1>
 
 <form action="{% url presentation-edit presentation.id, presentation.name %}" method="POST" class="vertical">
-    
+
 {{ form.title.label_tag }}
 {{ form.title }}
 {{ form.title.errors }}
@@ -76,5 +77,19 @@
 {% endvar %}
 
 {{ block.super }}
+
+  <div class="facet active-facet" id="presentation_sidebar_permissions">
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url presentation %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-body">
+        {% permissions_display presentation %}
+    </div>
+  </div>
+
+  <div class="facet active-facet" id="presentation_sidebar_effective_permissions">
+    <div class="facet-header">Effective Permissions</div>
+    <div class="facet-body">
+        {% effective_permissions_form presentation %}
+    </div>
+  </div>
 
 {% endblock %}

@@ -46,7 +46,7 @@ class Presentation(models.Model):
 
     def records(self):
         return [i.record for i in self.items.all()]
-        
+
     def visible_item_count(self):
         return self.items.filter(hidden=False).count()
 
@@ -64,12 +64,13 @@ class Presentation(models.Model):
     def verify_password(self, request):
         self.unlocked = (not self.password) or (request.session.get('passwords', dict()).get(self.id) == self.password)
         return self.unlocked
-        
+
     @staticmethod
     def published_Q(owner=None):
         publish_permission = Permission.objects.get(codename='publish_presentations')
         valid_publishers = User.objects.filter(Q(id__in=publish_permission.user_set.all()) |
-                                               Q(groups__id__in=publish_permission.group_set.all()))
+                                               Q(groups__id__in=publish_permission.group_set.all()) |
+                                               Q(is_superuser=True))
         q = Q(owner__in=valid_publishers) & Q(hidden=False)
         if owner:
             return q | Q(owner=owner)
@@ -102,14 +103,14 @@ class PresentationItem(models.Model):
         q = Q(field=titlefield) | Q(field__in=titlefield.get_equivalent_fields())
         fv = self.get_fieldvalues(q=q)
         return None if not fv else fv[0].value
-    
+
     def _annotation_filter(self):
         return dict(owner=self.presentation.owner,
                     context_id=self.id,
                     context_type=ContentType.objects.get_for_model(PresentationItem),
                     field=standardfield('description'),
                     record=self.record)
-    
+
     def annotation_getter(self):
         if self.id:
             try:
@@ -120,7 +121,7 @@ class PresentationItem(models.Model):
             return self._saved_annotation
         else:
             return None
-        
+
     def annotation_setter(self, value):
         if self.id:
             if value:
@@ -140,7 +141,7 @@ class PresentationItem(models.Model):
         else:
             # we are not saved yet, so remember annotation for later
             self._saved_annotation = value
-    
+
     annotation = property(annotation_getter, annotation_setter)
 
     def save(self, *args, **kwargs):

@@ -48,13 +48,20 @@ class Storage(models.Model):
             return classobj(base=self.base)
         else:
             return None
-        
+
     def get_absolute_url(self):
         return reverse('storage-manage-storage', args=(self.id, self.name))
 
     def get_absolute_media_url(self, media):
         storage = self.storage_system
         return storage and storage.get_absolute_media_url(self, media) or None
+
+    def get_delivery_media_url(self, media):
+        storage = self.storage_system
+        url = None
+        if hasattr(storage, 'get_delivery_media_url'):
+            url = storage.get_delivery_media_url(self, media)
+        return url or self.get_absolute_media_url(media)
 
     def get_absolute_file_path(self, media):
         storage = self.storage_system
@@ -95,7 +102,7 @@ class Storage(models.Model):
                 self.derivative = Storage.objects.get(master=self)
                 sync_access(self, self.derivative)
         return self.derivative
-    
+
     def is_local(self):
         return self.storage_system and self.storage_system.is_local()
 
@@ -129,6 +136,9 @@ class Media(models.Model):
 
     def get_absolute_url(self):
         return self.storage and self.storage.get_absolute_media_url(self) or self.url
+
+    def get_delivery_url(self):
+        return self.storage and self.storage.get_delivery_media_url(self) or self.url
 
     def get_absolute_file_path(self):
         return self.storage and self.storage.get_absolute_file_path(self) or None
@@ -187,12 +197,12 @@ class Media(models.Model):
             self.bitrate = bitrate
             if save:
                 self.save()
-                
+
     def clear_derivatives(self):
         for m in self.derivatives.all():
             m.delete_file()
         self.derivatives.all().delete()
-        
+
     def is_local(self):
         return self.storage and self.storage.is_local()
 

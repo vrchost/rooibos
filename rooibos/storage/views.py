@@ -303,7 +303,8 @@ def import_files(request):
             idfield = standardfield('identifier')
             idfields = standardfield('identifier', equiv=True)
 
-            records = Record.by_fieldvalue(idfields, id).filter(collection=collection, owner=owner)
+            # Match identifiers that are either full file name (with extension) or just base name match
+            records = Record.by_fieldvalue(idfields, (id, file.name)).filter(collection=collection, owner=owner)
             result = "File skipped."
             record = None
 

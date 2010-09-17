@@ -8,6 +8,7 @@ import logging
 from django.utils import simplejson
 from StringIO import StringIO
 from subprocess import Popen, PIPE
+from rooibos.data.models import FieldValue, get_system_field
 import Image
 
 def _seconds_to_timestamp(seconds):
@@ -50,7 +51,7 @@ def identify(file):
     except Exception, e:
         logging.debug('Error identifying %s: %s' % (file, e))
         return None, None, None
-    
+
 
 def capture_video_frame(videofile, offset=5):
     params = '-r 1 -ss %s -t 00:00:01 -vframes 1 -f image2' % _seconds_to_timestamp(offset)
@@ -107,7 +108,15 @@ def get_image(media):
     if media.mimetype.startswith('image/'):
         return media.load_file()
     if media.mimetype.startswith('video/'):
-        return capture_video_frame(media.get_absolute_file_path())
+        # retrieve offset if available
+        try:
+            offset = int(media.record.fieldvalue_set.filter(
+                field=get_system_field(),
+                label='thumbnail-offset',
+            )[0].value)
+        except IndexError, ValueError:
+            offset = 5
+        return capture_video_frame(media.get_absolute_file_path(), offset=offset)
     if media.mimetype.startswith('audio/'):
         return render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
     return None

@@ -4,11 +4,11 @@ import csv
 
 
 class SpreadsheetImport(object):
-    
+
     events = ['on_added', 'on_added_skipped', 'on_updated', 'on_updated_skipped',
               'on_duplicate_in_file_skipped', 'on_no_id_skipped', 'on_owner_skipped',
               'on_duplicate_in_collection_skipped', 'on_continuation']
-    
+
     def __init__(self, csv_file, collections, separator=';', preferred_fieldset=None,
                  owner=None, mapping=None, separate_fields=None, labels=None, order=None,
                  hidden=None, **kwargs):
@@ -57,17 +57,19 @@ class SpreadsheetImport(object):
             self.decode_error = True
             value = ''
         return map(lambda s: s.strip(), value.split(self.separator)) if (self.separator and split) else [value.strip()]
-        
+
     def _split_values(self, row):
         return dict((key, self._split_value(val, self.separate_fields.get(key))) for key, val in row.iteritems())
 
     def _get_reader(self):
         self.csv_file.seek(0)
+        start = 3 if (self.csv_file.read(3) == "\xef\xbb\xbf") else 0  # skip BOM in some UTF-8 files
+        self.csv_file.seek(start)
         dialect = csv.Sniffer().sniff(self.csv_file.read(1024))
         dialect.doublequote = True
-        self.csv_file.seek(0)
+        self.csv_file.seek(start)
         return csv.DictReader(self.csv_file, dialect=dialect)
-        
+
     def _guess_mapping(self, field):
         scores = {}
         for standard_field in self._fields:
@@ -85,30 +87,30 @@ class SpreadsheetImport(object):
                     score = 1
                 if not scores.has_key(score):
                     scores[score] = standard_field
-            
+
         return scores[max(scores.keys())] if scores else None
-        
-    def analyze(self, preview_rows=5, mapping=None, separate_fields=None):          
+
+    def analyze(self, preview_rows=5, mapping=None, separate_fields=None):
         reader = self._get_reader()
         if mapping:
             self.mapping = mapping
         if separate_fields:
             self.separate_fields = separate_fields
-        
-        rows = [self._split_values(row) for i, row in zip(range(preview_rows), reader)]        
+
+        rows = [self._split_values(row) for i, row in zip(range(preview_rows), reader)]
         if not rows:
             return None
 
         fields = filter(None, rows[0].keys())
         self.field_hash = hash('\t'.join(sorted(fields)))
-        if not self.mapping:       
+        if not self.mapping:
             self.mapping = dict((field, self._guess_mapping(field)) for field in fields)
         if not self.separate_fields:
             self.separate_fields = dict((field, True) for field in fields)
 
-        self.analyzed = True        
+        self.analyzed = True
         return rows
-    
+
     def get_identifier_field(self, mapping=None):
         if not mapping:
             mapping = self.mapping
@@ -116,31 +118,31 @@ class SpreadsheetImport(object):
             if mapped and mapped.id in self._identifier_ids:
                 return field
         return None
-    
+
     def find_duplicate_identifiers(self):
         query = (FieldValue.objects.filter(record__collection__in=self.collections, field__in=self._identifier_ids)
                            .values('value').annotate(c=Count('id')).exclude(c=1))
         identifiers = query.values_list('value', flat=True)
-        return identifiers    
-    
-    
+        return identifiers
+
+
     class NoIdentifierException(Exception):
         def __init__(self, value):
             self.value = value
         def __str__(self):
             return repr(self.value)
 
-    
+
     def run(self, update=True, add=True, test=False, update_names=False, target_collections=[], skip_rows=0):
         if not self.analyzed:
             self.analyze(preview_rows=1)
-            
+
         identifier_field = self.get_identifier_field()
         if not identifier_field:
             raise SpreadsheetImport.NoIdentifierException('No column is mapped to an identifier field')
-        
+
         system_field = get_system_field()
-        
+
         def apply_values(record, row, is_new=False):
             if not is_new:
                 record.fieldvalue_set.filter(~Q(field=system_field), owner=None).delete()
@@ -153,16 +155,16 @@ class SpreadsheetImport(object):
                                                      label=self.labels.get(field),
                                                      order=self.order.get(field, order),
                                                      hidden=self.hidden.get(field, False))
-        
-        
+
+
         reader = self._get_reader()
-        
+
         self.added = self.added_skipped = self.updated = self.updated_skipped = \
                      self.duplicate_in_file_skipped = self.no_id_skipped = self.owner_skipped = \
                      self.duplicate_in_collection_skipped = 0
         self.processed_ids = dict()
-        
-        
+
+
         def process_row(row):
             ids = row[identifier_field]
             if self.processed_ids.has_key('\n'.join(ids)):
@@ -171,7 +173,7 @@ class SpreadsheetImport(object):
                     func(ids)
                 return
             self.processed_ids['\n'.join(ids)] = None
-            fvs = FieldValue.objects.select_related('record').filter(record__collection__in=self.collections,                                                                     
+            fvs = FieldValue.objects.select_related('record').filter(record__collection__in=self.collections,
                                                                      owner=None,
                                                                      field__in=self._identifier_ids,
                                                                      value__in=ids)
@@ -186,7 +188,7 @@ class SpreadsheetImport(object):
                             CollectionItem.objects.get_or_create(record=record, collection=collection)
                     self.added += 1
                     for func in self.on_added:
-                        func(ids)                    
+                        func(ids)
                 else:
                     # adding new records is disabled
                     self.added_skipped += 1
@@ -221,18 +223,18 @@ class SpreadsheetImport(object):
                 self.duplicate_in_collection_skipped += 1
                 for func in self.on_duplicate_in_collection_skipped:
                     func(ids)
-        
-        
+
+
         for skip in range(skip_rows):
             reader.next()
-        
+
         last_row = None
         for i, row in enumerate(reader):
             row = self._split_values(row)
             if not last_row:
                 last_row = row
                 continue
-            
+
             # compare IDs of current and last rows
             last_id = last_row.get(identifier_field)
             if not last_id:
@@ -241,9 +243,9 @@ class SpreadsheetImport(object):
                 for func in self.on_no_id_skipped:
                     func(None)
                 continue
-            
+
             current_id = row.get(identifier_field)
-            
+
             if not current_id or (last_id == current_id):
                 # combine current and last rows
                 for key, values in row.iteritems():
@@ -257,6 +259,6 @@ class SpreadsheetImport(object):
             else:
                 process_row(last_row)
                 last_row = row
-        
+
         if last_row:
             process_row(last_row)

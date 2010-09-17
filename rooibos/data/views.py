@@ -52,7 +52,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     writable_collections = list(accessible_ids_list(request.user, Collection, write=True))
     readable_collections = list(accessible_ids_list(request.user, Collection))
     can_edit = request.user.is_authenticated()
-    
+
     next = request.GET.get('next')
 
     if id and name:
@@ -85,7 +85,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                                                   storage__id__in=accessible_ids(request.user, Storage),
                                                   master=None)
     edit = edit and request.user.is_authenticated()
-    
+
     class FieldSetForm(forms.Form):
         fieldset = FieldSetChoiceField(user=request.user, default_label='Default' if not edit else None)
 
@@ -109,7 +109,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                 grouped.setdefault((f.fieldset.title, f.fieldset.id), []).append(f.field)
             others = list(Field.objects.exclude(id__in=[f.field.id for f in fsf]).order_by('label').values_list('id', 'label'))
             choices = [('', '-' * 10)] + [(set[0], [(f.id, f.label) for f in fields])
-                for set, fields in sorted(grouped.iteritems(), key=lambda s: s[0][0])]            
+                for set, fields in sorted(grouped.iteritems(), key=lambda s: s[0][0])]
             if others:
                 choices.append(('Others', others))
             return choices
@@ -121,7 +121,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
 
             def clean_field(self):
                 return Field.objects.get(id=self.cleaned_data['field'])
-                
+
             def clean_context_type(self):
                 context = self.cleaned_data.get('context_type')
                 if context:
@@ -144,7 +144,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
 
 
         class CollectionForm(forms.Form):
-            
+
             id = forms.IntegerField(widget=forms.HiddenInput)
             title = forms.CharField(widget=DisplayOnlyTextWidget)
             member = forms.BooleanField(required=False)
@@ -159,17 +159,17 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
 
         FieldValueFormSet = modelformset_factory(FieldValue, form=FieldValueForm,
                                                  exclude=FieldValueForm.Meta.exclude, can_delete=True, extra=3)
-        
+
         CollectionFormSet = formset_factory(CollectionForm, extra=0)
-        
-        
+
+
         if request.method == 'POST':
             formset = FieldValueFormSet(request.POST, request.FILES, queryset=fieldvalues, prefix='fv')
             collectionformset = CollectionFormSet(request.POST, request.FILES, prefix='c') if not (customize or context) else None
             if formset.is_valid() and (customize or context or collectionformset.is_valid()):# or metadataform.is_valid()):
-                
+
                 record.save()
-                
+
                 if not (customize or context):
                     collections = dict((c['id'],c)
                         for c in collectionformset.cleaned_data
@@ -221,21 +221,21 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
 
             formset = FieldValueFormSet(queryset=fieldvalues, prefix='fv', initial=initial)
             if not (customize or context):
-                
+
                 collections = dict(
                     ((coll.id, dict(id=coll.id, title=coll.title))
                         for coll in Collection.objects.filter(id__in=valid_collections)
                     )
                 )
-                
+
                 for item in record.collectionitem_set.all():
                     collections.get(item.collection_id, {}).update(dict(
                         member=True,
                         shared=not item.hidden,
                     ))
-                
+
                 collections = sorted(collections.values(), key=lambda c: c['title'])
-                
+
                 collectionformset = CollectionFormSet(prefix='c', initial=collections)
 
     else:
@@ -265,17 +265,17 @@ def _get_scratch_dir():
     path = os.path.join(settings.SCRATCH_DIR, 'data-import')
     if not os.path.exists(path):
         os.makedirs(path)
-    return path    
+    return path
 
 def _get_filename(request, file):
     return request.COOKIES[settings.SESSION_COOKIE_NAME] + '-' + file
 
 @login_required
 def data_import(request):
-    
+
     class UploadFileForm(forms.Form):
         file = forms.FileField()
-        
+
         def clean_file(self):
             file = self.cleaned_data['file']
             if os.path.splitext(file.name)[1] != '.csv':
@@ -284,18 +284,18 @@ def data_import(request):
 
     utf8_error = False
 
-    if request.method == 'POST':        
+    if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
             file = request.FILES['file']
-            
+
             filename = "".join(random.sample(string.letters + string.digits, 32))
             full_path = os.path.join(_get_scratch_dir(), _get_filename(request, filename))
             dest = open(full_path, 'wb+')
             for chunk in file.chunks():
                 dest.write(chunk)
             dest.close()
-            
+
             file = open(full_path, 'r')
             try:
                 for line in file:
@@ -308,32 +308,32 @@ def data_import(request):
 
     else:
         form = UploadFileForm()
-    
+
     return render_to_response('data_import.html',
                               {'form': form,
                                'utf8_error': utf8_error,
                               },
                               context_instance=RequestContext(request))
-    
+
 
 class DisplayOnlyTextWidget(forms.HiddenInput):
     def render(self, name, value, attrs):
         return super(DisplayOnlyTextWidget, self).render(name, value, attrs) + \
             mark_safe(self.initial if hasattr(self, 'initial') else (value or u''))
-    
+
 
 @login_required
 def data_import_file(request, file):
-    
+
     available_collections = filter_by_access(request.user, Collection)
     writable_collection_ids = accessible_ids_list(request.user, Collection, write=True)
     if not available_collections:
         raise Http404
     available_fieldsets = FieldSet.for_user(request.user)
-    
+
     def _get_fields():
         return Field.objects.select_related('standard').all().order_by('standard', 'name')
-    
+
     def _field_choices():
         fsf = list(FieldSetField.objects.select_related('fieldset', 'field').all().order_by('fieldset__name', 'order', 'field__label'))
         grouped = {}
@@ -341,7 +341,7 @@ def data_import_file(request, file):
             grouped.setdefault((f.fieldset.title, f.fieldset.id), []).append(f.field)
         others = list(Field.objects.exclude(id__in=[f.field.id for f in fsf]).order_by('label').values_list('id', 'label'))
         choices = [('', '-' * 10)] + [(set[0], [(f.id, f.label) for f in fields])
-            for set, fields in sorted(grouped.iteritems(), key=lambda s: s[0][0])]            
+            for set, fields in sorted(grouped.iteritems(), key=lambda s: s[0][0])]
         if others:
             choices.append(('Others', others))
         return choices
@@ -353,7 +353,7 @@ def data_import_file(request, file):
     #        grouped.setdefault(f.standard and f.standard.title or 'Other', []).append(f)
     #    return [('0', '[do not import]'), ('-1', '[new field]')] + \
     #           [(g, [(f.id, f.label) for f in grouped[g]]) for g in grouped]
-    
+
     class ImportOptionsForm(forms.Form):
         separator = forms.CharField(required=False)
         collections = forms.MultipleChoiceField(choices=((c.id, '%s%s' % ('*' if c.id in writable_collection_ids else '', c.title)) for c in sorted(available_collections, key=lambda c: c.title)),
@@ -364,7 +364,7 @@ def data_import_file(request, file):
         add = forms.BooleanField(label='Add new records', initial=True, required=False)
         test = forms.BooleanField(label='Test import only', initial=False, required=False)
         personal = forms.BooleanField(label='Personal records', initial=True, required=False)
-        
+
         def clean(self):
             cleaned_data = self.cleaned_data
             if any(self.errors):
@@ -377,9 +377,9 @@ def data_import_file(request, file):
                         del cleaned_data['collections']
                         return cleaned_data
             return cleaned_data
-        
+
     class MappingForm(forms.Form):
-        fieldname = forms.CharField(widget=DisplayOnlyTextWidget)
+        fieldname = forms.CharField(widget=DisplayOnlyTextWidget, required=False)
         mapping = forms.ChoiceField(choices=_field_choices(), required=False)
         separate = forms.BooleanField(required=False)
         label = forms.CharField(required=False)
@@ -402,28 +402,28 @@ def data_import_file(request, file):
 
     def analyze(collections=None, separator=None, separate_fields=None, fieldset=None):
         try:
-            with open(os.path.join(_get_scratch_dir(), _get_filename(request, file)), 'rb') as csvfile:        
+            with open(os.path.join(_get_scratch_dir(), _get_filename(request, file)), 'rb') as csvfile:
                 imp = SpreadsheetImport(csvfile, collections, separator=separator,
                                         separate_fields=separate_fields, preferred_fieldset=fieldset)
                 return imp, imp.analyze()
         except IOError:
             raise Http404()
 
-    if request.method == 'POST':        
+    if request.method == 'POST':
         form = ImportOptionsForm(request.POST)
         mapping_formset = MappingFormSet(request.POST, prefix='m')
         if form.is_valid() and mapping_formset.is_valid():
-            
+
             imp, preview_rows = analyze(available_collections.filter(id__in=form.cleaned_data['collections']),
                        form.cleaned_data['separator'],
                        dict((f.cleaned_data['fieldname'], f.cleaned_data['separate'])
                             for f in mapping_formset.forms),
                        available_fieldsets.get(id=form.cleaned_data['fieldset']) if int(form.cleaned_data.get('fieldset') or 0) else None)
-            
+
             store_settings(request.user,
                            'data_import_file_%s' % imp.field_hash,
                            simplejson.dumps(dict(options=form.cleaned_data, mapping=mapping_formset.cleaned_data)))
-            
+
             if request.POST.get('import_button'):
                 j = JobInfo.objects.create(owner=request.user,
                                        func='csvimport',
@@ -455,7 +455,7 @@ def data_import_file(request, file):
             imp, preview_rows = analyze()
     else:
         imp, preview_rows = analyze()
-        
+
         # try to load previously stored settings
         key = 'data_import_file_%s' % imp.field_hash
         values = load_settings(request.user, key)
@@ -467,9 +467,9 @@ def data_import_file(request, file):
             mapping = [dict(fieldname=f, mapping=v.id if v else 0, separate=True)
                        for f, v in imp.mapping.iteritems()]
             options = None
-        
+
         mapping = sorted(mapping, key=lambda m: m['fieldname'])
-        
+
         mapping_formset = MappingFormSet(initial=mapping, prefix='m')
         form = ImportOptionsForm(initial=options)
 
@@ -481,7 +481,7 @@ def data_import_file(request, file):
                               },
                               context_instance=RequestContext(request))
 
-    
+
 @json_view
 def record_preview(request, id):
     record = Record.get_or_404(id, request.user)
@@ -493,9 +493,9 @@ def record_preview(request, id):
 
 @login_required
 def manage_collections(request):
-    
+
     collections = filter_by_access(request.user, Collection, manage=True)
-    
+
     return render_to_response('data_manage_collections.html',
                           {
                            'collections': collections,
@@ -505,7 +505,7 @@ def manage_collections(request):
 
 @login_required
 def manage_collection(request, id=None, name=None):
-    
+
     if id and name:
         collection = get_object_or_404(Collection,
                                        id__in=accessible_ids(request.user, Collection, manage=True),
@@ -523,14 +523,14 @@ def manage_collection(request, id=None, name=None):
         owner = forms.ModelChoiceField(queryset=User.objects,
             widget=forms.Select if request.user.is_superuser else forms.HiddenInput,
                                    required=False)
-        
+
         def clean_owner(self):
             if not request.user.is_superuser:
                 # non-admins cannot change collection owner
-                return collection.owner                
+                return collection.owner
             else:
                 return self.cleaned_data['owner']
-        
+
         class Meta:
             model = Collection
             fields = ('title', 'hidden', 'owner', 'description', 'agreement', 'children')
@@ -550,11 +550,10 @@ def manage_collection(request, id=None, name=None):
                     id=form.instance.id, name=form.instance.name)))
     else:
         form = CollectionForm(instance=collection)
-    
+
     return render_to_response('data_collection_edit.html',
                           {'form': form,
                            'collection': collection,
                            'can_delete': collection.id and (request.user.is_superuser or collection.owner == request.user),
                           },
                           context_instance=RequestContext(request))
-   

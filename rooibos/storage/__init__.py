@@ -178,8 +178,10 @@ def match_up_media(storage, collection):
     idfields = standardfield('identifier', equiv=True)
     results = []
     for file in files:
-        id = os.path.splitext(os.path.split(file)[1])[0]
-        records = Record.by_fieldvalue(idfields, id).filter(collection=collection, owner=None)
+        # Match identifiers that are either full file name (with extension) or just base name match
+        filename = os.path.split(file)[1]
+        id = os.path.splitext(filename)[0]
+        records = Record.by_fieldvalue(idfields, (id, filename)).filter(collection=collection, owner=None)
         if len(records) == 1:
             results.append((records[0], file))
 

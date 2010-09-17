@@ -3,8 +3,13 @@
 # with a blank setting in settings_local.template.py
 
 import os
+import sys
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
+lib_dir = os.path.join(install_dir, 'rooibos', 'contrib')
+
+if not install_dir in sys.path: sys.path.append(install_dir)
+if not lib_dir in sys.path: sys.path.append(lib_dir)
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -168,3 +173,6 @@ while additional_settings:
                 locals()[setting] = getattr(module, setting)
         elif setting == 'additional_settings':
             additional_settings[:0] = getattr(module, setting)
+        elif setting == 'remove_settings':
+            for remove_setting in getattr(module, setting):
+                del locals()[remove_setting]

@@ -1,0 +1,1784 @@
+-- MySQL dump 10.13  Distrib 5.1.37, for Win32 (ia32)
+--
+-- Host: localhost    Database: rooibos_sample
+-- ------------------------------------------------------
+-- Server version	5.1.37
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `access_accesscontrol`
+--
+
+DROP TABLE IF EXISTS `access_accesscontrol`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `access_accesscontrol` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `usergroup_id` int(11) DEFAULT NULL,
+  `read` tinyint(1) DEFAULT NULL,
+  `write` tinyint(1) DEFAULT NULL,
+  `manage` tinyint(1) DEFAULT NULL,
+  `restrictions_repr` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `content_type_id` (`content_type_id`,`object_id`,`user_id`,`usergroup_id`),
+  KEY `access_accesscontrol_content_type_id` (`content_type_id`),
+  KEY `access_accesscontrol_user_id` (`user_id`),
+  KEY `access_accesscontrol_usergroup_id` (`usergroup_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `access_accesscontrol`
+--
+
+LOCK TABLES `access_accesscontrol` WRITE;
+/*!40000 ALTER TABLE `access_accesscontrol` DISABLE KEYS */;
+/*!40000 ALTER TABLE `access_accesscontrol` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `access_attribute`
+--
+
+DROP TABLE IF EXISTS `access_attribute`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `access_attribute` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `attribute` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `access_attribute_group_id` (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `access_attribute`
+--
+
+LOCK TABLES `access_attribute` WRITE;
+/*!40000 ALTER TABLE `access_attribute` DISABLE KEYS */;
+/*!40000 ALTER TABLE `access_attribute` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `access_attributevalue`
+--
+
+DROP TABLE IF EXISTS `access_attributevalue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `access_attributevalue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `attribute_id` int(11) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `access_attributevalue_attribute_id` (`attribute_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `access_attributevalue`
+--
+
+LOCK TABLES `access_attributevalue` WRITE;
+/*!40000 ALTER TABLE `access_attributevalue` DISABLE KEYS */;
+/*!40000 ALTER TABLE `access_attributevalue` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `access_extendedgroup`
+--
+
+DROP TABLE IF EXISTS `access_extendedgroup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `access_extendedgroup` (
+  `group_ptr_id` int(11) NOT NULL,
+  `type` varchar(1) NOT NULL,
+  PRIMARY KEY (`group_ptr_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `access_extendedgroup`
+--
+
+LOCK TABLES `access_extendedgroup` WRITE;
+/*!40000 ALTER TABLE `access_extendedgroup` DISABLE KEYS */;
+/*!40000 ALTER TABLE `access_extendedgroup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `access_subnet`
+--
+
+DROP TABLE IF EXISTS `access_subnet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `access_subnet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `subnet` varchar(80) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `access_subnet_group_id` (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `access_subnet`
+--
+
+LOCK TABLES `access_subnet` WRITE;
+/*!40000 ALTER TABLE `access_subnet` DISABLE KEYS */;
+/*!40000 ALTER TABLE `access_subnet` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_group`
+--
+
+DROP TABLE IF EXISTS `auth_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_group`
+--
+
+LOCK TABLES `auth_group` WRITE;
+/*!40000 ALTER TABLE `auth_group` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_group` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_group_permissions`
+--
+
+DROP TABLE IF EXISTS `auth_group_permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_group_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `group_id` (`group_id`,`permission_id`),
+  KEY `permission_id_refs_id_5886d21f` (`permission_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_group_permissions`
+--
+
+LOCK TABLES `auth_group_permissions` WRITE;
+/*!40000 ALTER TABLE `auth_group_permissions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_group_permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_message`
+--
+
+DROP TABLE IF EXISTS `auth_message`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_message` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `message` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `auth_message_user_id` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_message`
+--
+
+LOCK TABLES `auth_message` WRITE;
+/*!40000 ALTER TABLE `auth_message` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_message` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_permission`
+--
+
+DROP TABLE IF EXISTS `auth_permission`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `codename` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `content_type_id` (`content_type_id`,`codename`),
+  KEY `auth_permission_content_type_id` (`content_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=159 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_permission`
+--
+
+LOCK TABLES `auth_permission` WRITE;
+/*!40000 ALTER TABLE `auth_permission` DISABLE KEYS */;
+INSERT INTO `auth_permission` VALUES (1,'Can add permission',1,'add_permission'),(2,'Can change permission',1,'change_permission'),(3,'Can delete permission',1,'delete_permission'),(4,'Can add group',2,'add_group'),(5,'Can change group',2,'change_group'),(6,'Can delete group',2,'delete_group'),(7,'Can add user',3,'add_user'),(8,'Can change user',3,'change_user'),(9,'Can delete user',3,'delete_user'),(10,'Can add message',4,'add_message'),(11,'Can change message',4,'change_message'),(12,'Can delete message',4,'delete_message'),(13,'Can add content type',5,'add_contenttype'),(14,'Can change content type',5,'change_contenttype'),(15,'Can delete content type',5,'delete_contenttype'),(16,'Can add session',6,'add_session'),(17,'Can change session',6,'change_session'),(18,'Can delete session',6,'delete_session'),(19,'Can add site',7,'add_site'),(20,'Can change site',7,'change_site'),(21,'Can delete site',7,'delete_site'),(22,'Can add flat page',8,'add_flatpage'),(23,'Can change flat page',8,'change_flatpage'),(24,'Can delete flat page',8,'delete_flatpage'),(25,'Can add log entry',9,'add_logentry'),(26,'Can change log entry',9,'change_logentry'),(27,'Can delete log entry',9,'delete_logentry'),(28,'Can add comment',10,'add_comment'),(29,'Can change comment',10,'change_comment'),(30,'Can delete comment',10,'delete_comment'),(31,'Can moderate comments',10,'can_moderate'),(32,'Can add comment flag',11,'add_commentflag'),(33,'Can change comment flag',11,'change_commentflag'),(34,'Can delete comment flag',11,'delete_commentflag'),(35,'Can add redirect',12,'add_redirect'),(36,'Can change redirect',12,'change_redirect'),(37,'Can delete redirect',12,'delete_redirect'),(38,'Can add analytics',13,'add_analytics'),(39,'Can change analytics',13,'change_analytics'),(40,'Can delete analytics',13,'delete_analytics'),(41,'Can add collection',14,'add_collection'),(42,'Can change collection',14,'change_collection'),(43,'Can delete collection',14,'delete_collection'),(44,'Can add collection item',15,'add_collectionitem'),(45,'Can change collection item',15,'change_collectionitem'),(46,'Can delete collection item',15,'delete_collectionitem'),(47,'Can add record',16,'add_record'),(48,'Can change record',16,'change_record'),(49,'Can delete record',16,'delete_record'),(50,'Can add metadata standard',17,'add_metadatastandard'),(51,'Can change metadata standard',17,'change_metadatastandard'),(52,'Can delete metadata standard',17,'delete_metadatastandard'),(53,'Can add vocabulary',18,'add_vocabulary'),(54,'Can change vocabulary',18,'change_vocabulary'),(55,'Can delete vocabulary',18,'delete_vocabulary'),(56,'Can add vocabulary term',19,'add_vocabularyterm'),(57,'Can change vocabulary term',19,'change_vocabularyterm'),(58,'Can delete vocabulary term',19,'delete_vocabularyterm'),(59,'Can add field',20,'add_field'),(60,'Can change field',20,'change_field'),(61,'Can delete field',20,'delete_field'),(62,'Can add field set',21,'add_fieldset'),(63,'Can change field set',21,'change_fieldset'),(64,'Can delete field set',21,'delete_fieldset'),(65,'Can add field set field',22,'add_fieldsetfield'),(66,'Can change field set field',22,'change_fieldsetfield'),(67,'Can delete field set field',22,'delete_fieldsetfield'),(68,'Can add field value',23,'add_fieldvalue'),(69,'Can change field value',23,'change_fieldvalue'),(70,'Can delete field value',23,'delete_fieldvalue'),(71,'Can add display field value',24,'add_displayfieldvalue'),(72,'Can change display field value',24,'change_displayfieldvalue'),(73,'Can delete display field value',24,'delete_displayfieldvalue'),(74,'Can add object history',25,'add_objecthistory'),(75,'Can change object history',25,'change_objecthistory'),(76,'Can delete object history',25,'delete_objecthistory'),(77,'Can add owned wrapper',26,'add_ownedwrapper'),(78,'Can change owned wrapper',26,'change_ownedwrapper'),(79,'Can delete owned wrapper',26,'delete_ownedwrapper'),(80,'Can add access control',27,'add_accesscontrol'),(81,'Can change access control',27,'change_accesscontrol'),(82,'Can delete access control',27,'delete_accesscontrol'),(83,'Can add extended group',28,'add_extendedgroup'),(84,'Can change extended group',28,'change_extendedgroup'),(85,'Can delete extended group',28,'delete_extendedgroup'),(86,'Can add subnet',29,'add_subnet'),(87,'Can change subnet',29,'change_subnet'),(88,'Can delete subnet',29,'delete_subnet'),(89,'Can add attribute',30,'add_attribute'),(90,'Can change attribute',30,'change_attribute'),(91,'Can delete attribute',30,'delete_attribute'),(92,'Can add attribute value',31,'add_attributevalue'),(93,'Can change attribute value',31,'change_attributevalue'),(94,'Can delete attribute value',31,'delete_attributevalue'),(95,'Can add solr index updates',32,'add_solrindexupdates'),(96,'Can change solr index updates',32,'change_solrindexupdates'),(97,'Can delete solr index updates',32,'delete_solrindexupdates'),(98,'Can add storage',33,'add_storage'),(99,'Can change storage',33,'change_storage'),(100,'Can delete storage',33,'delete_storage'),(101,'Can add media',34,'add_media'),(102,'Can change media',34,'change_media'),(103,'Can delete media',34,'delete_media'),(104,'Can add trusted subnet',35,'add_trustedsubnet'),(105,'Can change trusted subnet',35,'change_trustedsubnet'),(106,'Can delete trusted subnet',35,'delete_trustedsubnet'),(107,'Can add proxy url',36,'add_proxyurl'),(108,'Can change proxy url',36,'change_proxyurl'),(109,'Can delete proxy url',36,'delete_proxyurl'),(110,'Can add presentation',37,'add_presentation'),(111,'Can change presentation',37,'change_presentation'),(112,'Can delete presentation',37,'delete_presentation'),(113,'Can publish presentations',37,'publish_presentations'),(114,'Can add presentation item',38,'add_presentationitem'),(115,'Can change presentation item',38,'change_presentationitem'),(116,'Can delete presentation item',38,'delete_presentationitem'),(117,'Can add presentation item info',39,'add_presentationiteminfo'),(118,'Can change presentation item info',39,'change_presentationiteminfo'),(119,'Can delete presentation item info',39,'delete_presentationiteminfo'),(120,'Can add activity',40,'add_activity'),(121,'Can change activity',40,'change_activity'),(122,'Can delete activity',40,'delete_activity'),(123,'Can add accumulated activity',41,'add_accumulatedactivity'),(124,'Can change accumulated activity',41,'change_accumulatedactivity'),(125,'Can delete accumulated activity',41,'delete_accumulatedactivity'),(126,'Can add hit count',42,'add_hitcount'),(127,'Can change hit count',42,'change_hitcount'),(128,'Can delete hit count',42,'delete_hitcount'),(129,'Can add tag',43,'add_tag'),(130,'Can change tag',43,'change_tag'),(131,'Can delete tag',43,'delete_tag'),(132,'Can add tagged item',44,'add_taggeditem'),(133,'Can change tagged item',44,'change_taggeditem'),(134,'Can delete tagged item',44,'delete_taggeditem'),(135,'Can add job info',45,'add_jobinfo'),(136,'Can change job info',45,'change_jobinfo'),(137,'Can delete job info',45,'delete_jobinfo'),(138,'Can add preference',46,'add_preference'),(139,'Can change preference',46,'change_preference'),(140,'Can delete preference',46,'delete_preference'),(141,'Can add user profile',47,'add_userprofile'),(142,'Can change user profile',47,'change_userprofile'),(143,'Can delete user profile',47,'delete_userprofile'),(144,'Can add impersonation',48,'add_impersonation'),(145,'Can change impersonation',48,'change_impersonation'),(146,'Can delete impersonation',48,'delete_impersonation'),(147,'Can add migration history',49,'add_migrationhistory'),(148,'Can change migration history',49,'change_migrationhistory'),(149,'Can delete migration history',49,'delete_migrationhistory'),(150,'Can add computer',50,'add_computer'),(151,'Can change computer',50,'change_computer'),(152,'Can delete computer',50,'delete_computer'),(153,'Can add schedule',51,'add_schedule'),(154,'Can change schedule',51,'change_schedule'),(155,'Can delete schedule',51,'delete_schedule'),(156,'Can add mapping',52,'add_mapping'),(157,'Can change mapping',52,'change_mapping'),(158,'Can delete mapping',52,'delete_mapping');
+/*!40000 ALTER TABLE `auth_permission` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_user`
+--
+
+DROP TABLE IF EXISTS `auth_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `username` varchar(30) NOT NULL,
+  `first_name` varchar(30) NOT NULL,
+  `last_name` varchar(30) NOT NULL,
+  `email` varchar(75) NOT NULL,
+  `password` varchar(128) NOT NULL,
+  `is_staff` tinyint(1) NOT NULL,
+  `is_active` tinyint(1) NOT NULL,
+  `is_superuser` tinyint(1) NOT NULL,
+  `last_login` datetime NOT NULL,
+  `date_joined` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_user`
+--
+
+LOCK TABLES `auth_user` WRITE;
+/*!40000 ALTER TABLE `auth_user` DISABLE KEYS */;
+INSERT INTO `auth_user` VALUES (2,'admin','Admin','Admin','admin@example.com','sha1$bc241$8bc918c29c4d1e313ca858bb1218b6c268b53961',1,1,1,'2010-09-13 13:07:24','2008-12-10 18:43:26');
+/*!40000 ALTER TABLE `auth_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_user_groups`
+--
+
+DROP TABLE IF EXISTS `auth_user_groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_user_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`group_id`),
+  KEY `group_id_refs_id_f116770` (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_user_groups`
+--
+
+LOCK TABLES `auth_user_groups` WRITE;
+/*!40000 ALTER TABLE `auth_user_groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_user_groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `auth_user_user_permissions`
+--
+
+DROP TABLE IF EXISTS `auth_user_user_permissions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `auth_user_user_permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`permission_id`),
+  KEY `permission_id_refs_id_67e79cb` (`permission_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `auth_user_user_permissions`
+--
+
+LOCK TABLES `auth_user_user_permissions` WRITE;
+/*!40000 ALTER TABLE `auth_user_user_permissions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `auth_user_user_permissions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cache`
+--
+
+DROP TABLE IF EXISTS `cache`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cache` (
+  `cache_key` varchar(255) NOT NULL,
+  `value` longtext NOT NULL,
+  `expires` datetime NOT NULL,
+  PRIMARY KEY (`cache_key`),
+  KEY `cache_expires` (`expires`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cache`
+--
+
+LOCK TABLES `cache` WRITE;
+/*!40000 ALTER TABLE `cache` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cache` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `crass_computer`
+--
+
+DROP TABLE IF EXISTS `crass_computer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `crass_computer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `building` varchar(50) NOT NULL,
+  `room` varchar(50) NOT NULL,
+  `mac_address` varchar(12) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `crass_computer`
+--
+
+LOCK TABLES `crass_computer` WRITE;
+/*!40000 ALTER TABLE `crass_computer` DISABLE KEYS */;
+INSERT INTO `crass_computer` VALUES (3,'Harrison','112','0016cbab3af9'),(7,'Harrison','1241','001ff346b300'),(5,'Harrison','1246','0016cbab7cba'),(1,'Harrison','2101','0016cbb0f58f'),(2,'Harrison','2102','0016cbaa9c1a'),(6,'Harrison','2113','001ff3469bee'),(4,'Harrison','2114','0016cbab3c3b');
+/*!40000 ALTER TABLE `crass_computer` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `crass_mapping`
+--
+
+DROP TABLE IF EXISTS `crass_mapping`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `crass_mapping` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `time_stamp` datetime NOT NULL,
+  `source_file` varchar(250) NOT NULL,
+  `target_file` varchar(250) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `crass_mapping_user_id` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `crass_mapping`
+--
+
+LOCK TABLES `crass_mapping` WRITE;
+/*!40000 ALTER TABLE `crass_mapping` DISABLE KEYS */;
+/*!40000 ALTER TABLE `crass_mapping` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `crass_schedule`
+--
+
+DROP TABLE IF EXISTS `crass_schedule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `crass_schedule` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `computer_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `crass_schedule_computer_id` (`computer_id`),
+  KEY `crass_schedule_user_id` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `crass_schedule`
+--
+
+LOCK TABLES `crass_schedule` WRITE;
+/*!40000 ALTER TABLE `crass_schedule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `crass_schedule` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_collection`
+--
+
+DROP TABLE IF EXISTS `data_collection`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_collection` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  `description` longtext NOT NULL,
+  `agreement` longtext,
+  `password` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `data_collection_owner_id` (`owner_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_collection`
+--
+
+LOCK TABLES `data_collection` WRITE;
+/*!40000 ALTER TABLE `data_collection` DISABLE KEYS */;
+INSERT INTO `data_collection` VALUES (1,'Sample Collection','sample-collection',NULL,0,'','','');
+/*!40000 ALTER TABLE `data_collection` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_collection_children`
+--
+
+DROP TABLE IF EXISTS `data_collection_children`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_collection_children` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from_collection_id` int(11) NOT NULL,
+  `to_collection_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `from_collection_id` (`from_collection_id`,`to_collection_id`),
+  KEY `to_collection_id_refs_id_4c1d14c8` (`to_collection_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_collection_children`
+--
+
+LOCK TABLES `data_collection_children` WRITE;
+/*!40000 ALTER TABLE `data_collection_children` DISABLE KEYS */;
+/*!40000 ALTER TABLE `data_collection_children` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_collectionitem`
+--
+
+DROP TABLE IF EXISTS `data_collectionitem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_collectionitem` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `collection_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_collectionitem_collection_id` (`collection_id`),
+  KEY `data_collectionitem_record_id` (`record_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_collectionitem`
+--
+
+LOCK TABLES `data_collectionitem` WRITE;
+/*!40000 ALTER TABLE `data_collectionitem` DISABLE KEYS */;
+INSERT INTO `data_collectionitem` VALUES (1,1,1,0),(2,1,2,0),(3,1,3,0),(4,1,4,0),(5,1,5,0),(6,1,6,0),(7,1,7,0),(8,1,8,0),(9,1,9,0),(10,1,10,0),(11,1,11,0),(12,1,12,0),(13,1,13,0),(14,1,14,0),(15,1,15,0),(16,1,16,0),(17,1,17,0),(18,1,18,0),(19,1,19,0),(20,1,20,0),(21,1,21,0),(22,1,22,0),(23,1,23,0),(24,1,24,0),(25,1,25,0),(26,1,26,0),(27,1,27,0),(28,1,28,0),(29,1,29,0),(30,1,30,0),(31,1,31,0),(32,1,32,0),(33,1,33,0),(34,1,34,0),(35,1,35,0),(36,1,36,0),(37,1,37,0),(38,1,38,0),(39,1,39,0),(40,1,40,0),(41,1,41,0),(42,1,42,0),(43,1,43,0),(44,1,44,0),(45,1,45,0),(46,1,46,0),(47,1,47,0),(48,1,48,0),(49,1,49,0),(50,1,50,0);
+/*!40000 ALTER TABLE `data_collectionitem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_displayfieldvalue`
+--
+
+DROP TABLE IF EXISTS `data_displayfieldvalue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_displayfieldvalue` (
+  `fieldvalue_ptr_id` int(11) NOT NULL,
+  PRIMARY KEY (`fieldvalue_ptr_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_displayfieldvalue`
+--
+
+LOCK TABLES `data_displayfieldvalue` WRITE;
+/*!40000 ALTER TABLE `data_displayfieldvalue` DISABLE KEYS */;
+/*!40000 ALTER TABLE `data_displayfieldvalue` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_field`
+--
+
+DROP TABLE IF EXISTS `data_field`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_field` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `old_name` varchar(100) DEFAULT NULL,
+  `standard_id` int(11) DEFAULT NULL,
+  `vocabulary_id` int(11) DEFAULT NULL,
+  `_order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`,`standard_id`),
+  KEY `data_field_name` (`name`),
+  KEY `data_field_standard_id` (`standard_id`),
+  KEY `data_field_vocabulary_id` (`vocabulary_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_field`
+--
+
+LOCK TABLES `data_field` WRITE;
+/*!40000 ALTER TABLE `data_field` DISABLE KEYS */;
+INSERT INTO `data_field` VALUES (1,'Contributor','contributor',NULL,1,NULL,0),(16,'Tags','tags',NULL,2,NULL,0),(17,'Agent','agent',NULL,3,NULL,0),(18,'Cultural Context','culturalcontext',NULL,3,NULL,1),(2,'Coverage','coverage',NULL,1,NULL,1),(19,'Date','date',NULL,3,NULL,2),(3,'Creator','creator',NULL,1,NULL,2),(4,'Date','date',NULL,1,NULL,3),(20,'Description','description',NULL,3,NULL,3),(21,'Inscription','inscription',NULL,3,NULL,4),(5,'Description','description',NULL,1,NULL,4),(22,'Location','location',NULL,3,NULL,5),(6,'Format','format',NULL,1,NULL,5),(23,'Material','material',NULL,3,NULL,6),(7,'Identifier','identifier',NULL,1,NULL,6),(24,'Measurements','measurements',NULL,3,NULL,7),(8,'Language','language',NULL,1,NULL,7),(9,'Publisher','publisher',NULL,1,NULL,8),(25,'Relation','relation',NULL,3,NULL,8),(10,'Relation','relation',NULL,1,NULL,9),(26,'Rights','rights',NULL,3,NULL,9),(27,'Source','source',NULL,3,NULL,10),(11,'Rights','rights',NULL,1,NULL,10),(12,'Source','source',NULL,1,NULL,11),(28,'State/Edition','stateedition',NULL,3,NULL,11),(13,'Subject','subject',NULL,1,NULL,12),(29,'Style/Period','styleperiod',NULL,3,NULL,12),(14,'Title','title',NULL,1,NULL,13),(30,'Subject','subject',NULL,3,NULL,13),(31,'Technique','technique',NULL,3,NULL,14),(15,'Type','type',NULL,1,NULL,14),(32,'Textual Reference','textref',NULL,3,NULL,15),(33,'Title','title',NULL,3,NULL,16),(34,'Work Type','worktype',NULL,3,NULL,17),(35,'System Value','system-value',NULL,NULL,NULL,0);
+/*!40000 ALTER TABLE `data_field` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_field_equivalent`
+--
+
+DROP TABLE IF EXISTS `data_field_equivalent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_field_equivalent` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `from_field_id` int(11) NOT NULL,
+  `to_field_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `from_field_id` (`from_field_id`,`to_field_id`),
+  KEY `to_field_id_refs_id_4640bb5d` (`to_field_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_field_equivalent`
+--
+
+LOCK TABLES `data_field_equivalent` WRITE;
+/*!40000 ALTER TABLE `data_field_equivalent` DISABLE KEYS */;
+INSERT INTO `data_field_equivalent` VALUES (7,17,1),(34,22,2),(25,3,17),(36,2,22),(61,13,16),(68,29,13),(9,1,17),(26,17,3),(13,2,18),(21,19,2),(67,29,2),(33,22,1),(17,18,2),(27,4,19),(70,13,29),(35,1,22),(23,2,19),(28,19,4),(31,5,20),(32,20,5),(47,24,6),(43,23,6),(75,31,6),(48,6,24),(44,6,23),(76,6,31),(79,32,7),(80,7,32),(51,10,25),(52,25,10),(57,11,26),(58,26,11),(59,12,27),(60,27,12),(73,30,13),(64,16,13),(69,2,29),(74,13,30),(81,33,14),(82,14,33),(83,34,15),(84,15,34);
+/*!40000 ALTER TABLE `data_field_equivalent` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_fieldset`
+--
+
+DROP TABLE IF EXISTS `data_fieldset`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_fieldset` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `standard` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_fieldset_name` (`name`),
+  KEY `data_fieldset_owner_id` (`owner_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_fieldset`
+--
+
+LOCK TABLES `data_fieldset` WRITE;
+/*!40000 ALTER TABLE `data_fieldset` DISABLE KEYS */;
+INSERT INTO `data_fieldset` VALUES (2,'Dublin Core','dc',NULL,1),(3,'VRA Core 4','vra-core-4',NULL,1);
+/*!40000 ALTER TABLE `data_fieldset` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_fieldsetfield`
+--
+
+DROP TABLE IF EXISTS `data_fieldsetfield`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_fieldsetfield` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fieldset_id` int(11) NOT NULL,
+  `field_id` int(11) NOT NULL,
+  `label` varchar(100) NOT NULL,
+  `order` int(11) NOT NULL,
+  `importance` smallint(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_fieldsetfield_fieldset_id` (`fieldset_id`),
+  KEY `data_fieldsetfield_field_id` (`field_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=34 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_fieldsetfield`
+--
+
+LOCK TABLES `data_fieldsetfield` WRITE;
+/*!40000 ALTER TABLE `data_fieldsetfield` DISABLE KEYS */;
+INSERT INTO `data_fieldsetfield` VALUES (33,3,34,'',0,1),(19,3,20,'',0,1),(20,3,21,'',0,1),(21,3,22,'',0,1),(22,3,23,'',0,1),(23,3,24,'',0,1),(24,3,25,'',0,1),(25,3,26,'',0,1),(26,3,27,'',0,1),(27,3,28,'',0,1),(28,3,29,'',0,1),(29,3,30,'',0,1),(30,3,31,'',0,1),(31,3,32,'',0,1),(32,3,33,'',0,1),(18,3,19,'',0,1),(17,3,18,'',0,1),(16,3,17,'',0,1),(1,2,7,'',1,1),(2,2,14,'',2,10),(3,2,5,'',3,10),(4,2,3,'',4,10),(5,2,2,'',5,8),(6,2,4,'',6,8),(7,2,15,'',7,6),(8,2,13,'',8,8),(9,2,1,'',9,1),(10,2,6,'',10,6),(11,2,8,'',11,1),(12,2,9,'',12,1),(13,2,11,'',13,1),(14,2,10,'',14,1),(15,2,12,'',15,1);
+/*!40000 ALTER TABLE `data_fieldsetfield` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_fieldvalue`
+--
+
+DROP TABLE IF EXISTS `data_fieldvalue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_fieldvalue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `record_id` int(11) NOT NULL,
+  `field_id` int(11) NOT NULL,
+  `refinement` varchar(100) DEFAULT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  `label` varchar(100) DEFAULT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  `order` int(11) NOT NULL,
+  `group` int(11) DEFAULT NULL,
+  `value` longtext NOT NULL,
+  `index_value` varchar(32) NOT NULL,
+  `date_start` decimal(12,0) DEFAULT NULL,
+  `date_end` decimal(12,0) DEFAULT NULL,
+  `numeric_value` decimal(18,4) DEFAULT NULL,
+  `language` varchar(5) DEFAULT NULL,
+  `context_type_id` int(11) DEFAULT NULL,
+  `context_id` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_fieldvalue_record_id` (`record_id`),
+  KEY `data_fieldvalue_field_id` (`field_id`),
+  KEY `data_fieldvalue_owner_id` (`owner_id`),
+  KEY `data_fieldvalue_index_value` (`index_value`),
+  KEY `data_fieldvalue_context_type_id` (`context_type_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=232 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_fieldvalue`
+--
+
+LOCK TABLES `data_fieldvalue` WRITE;
+/*!40000 ALTER TABLE `data_fieldvalue` DISABLE KEYS */;
+INSERT INTO `data_fieldvalue` VALUES (1,1,14,NULL,NULL,'',0,1,NULL,'Eiffel Tower','Eiffel Tower',NULL,NULL,NULL,NULL,NULL,NULL),(2,1,7,NULL,NULL,'',0,99,NULL,'afr1236.jpg','afr1236.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(3,1,3,NULL,NULL,'Artist',0,3,NULL,'Gustave','Gustave',NULL,NULL,NULL,NULL,NULL,NULL),(4,1,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(5,1,2,NULL,NULL,'City or Site',0,34,NULL,'Paris','Paris',NULL,NULL,NULL,NULL,NULL,NULL),(6,2,14,NULL,NULL,'',0,1,NULL,'Eiffel Tower','Eiffel Tower',NULL,NULL,NULL,NULL,NULL,NULL),(7,2,7,NULL,NULL,'',0,99,NULL,'afr3131a.jpg','afr3131a.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(8,2,3,NULL,NULL,'Artist',0,3,NULL,'Gustave','Gustave',NULL,NULL,NULL,NULL,NULL,NULL),(9,2,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(10,2,2,NULL,NULL,'City or Site',0,34,NULL,'Paris','Paris',NULL,NULL,NULL,NULL,NULL,NULL),(11,3,14,NULL,NULL,'',0,1,NULL,'Cathedral','Cathedral',NULL,NULL,NULL,NULL,NULL,NULL),(12,3,7,NULL,NULL,'',0,99,NULL,'age0124.jpg','age0124.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(13,3,2,NULL,NULL,'Country',0,36,NULL,'Germany','Germany',NULL,NULL,NULL,NULL,NULL,NULL),(14,3,2,NULL,NULL,'City or Site',0,34,NULL,'Speyer','Speyer',NULL,NULL,NULL,NULL,NULL,NULL),(15,4,14,NULL,NULL,'',0,1,NULL,'Forum Boarium - Temple of Fortuna Virilis (Portunus)','Forum Boarium - Temple of Fortun',NULL,NULL,NULL,NULL,NULL,NULL),(16,4,7,NULL,NULL,'',0,99,NULL,'ait0717.jpg','ait0717.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(17,4,2,NULL,NULL,'Country',0,36,NULL,'Italy','Italy',NULL,NULL,NULL,NULL,NULL,NULL),(18,4,2,NULL,NULL,'City or Site',0,34,NULL,'Rome','Rome',NULL,NULL,NULL,NULL,NULL,NULL),(19,5,14,NULL,NULL,'',0,1,NULL,'River City','River City',NULL,NULL,NULL,NULL,NULL,NULL),(20,5,7,NULL,NULL,'',0,99,NULL,'arc1638.jpg','arc1638.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(21,5,23,NULL,NULL,'',0,43,NULL,'concrete, steel','concrete, steel',NULL,NULL,NULL,NULL,NULL,NULL),(22,5,3,NULL,NULL,'Artist',0,3,NULL,'Bertrand','Bertrand',NULL,NULL,NULL,NULL,NULL,NULL),(23,5,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(24,5,2,NULL,NULL,'City or Site',0,34,NULL,'Chicago','Chicago',NULL,NULL,NULL,NULL,NULL,NULL),(25,6,14,NULL,NULL,'',0,1,NULL,'National Gallery of Canada','National Gallery of Canada',NULL,NULL,NULL,NULL,NULL,NULL),(26,6,7,NULL,NULL,'',0,99,NULL,'arc5258.jpg','arc5258.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(27,6,23,NULL,NULL,'',0,43,NULL,'concrete, granite, glass','concrete, granite, glass',NULL,NULL,NULL,NULL,NULL,NULL),(28,6,3,NULL,NULL,'Artist',0,3,NULL,'Moshe','Moshe',NULL,NULL,NULL,NULL,NULL,NULL),(29,6,2,NULL,NULL,'Country',0,36,NULL,'Canada','Canada',NULL,NULL,NULL,NULL,NULL,NULL),(30,6,2,NULL,NULL,'City or Site',0,34,NULL,'Ottawa','Ottawa',NULL,NULL,NULL,NULL,NULL,NULL),(31,7,14,NULL,NULL,'',0,1,NULL,'National Gallery of Canada','National Gallery of Canada',NULL,NULL,NULL,NULL,NULL,NULL),(32,7,7,NULL,NULL,'',0,99,NULL,'arc5262.jpg','arc5262.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(33,7,23,NULL,NULL,'',0,43,NULL,'concrete, granite, glass','concrete, granite, glass',NULL,NULL,NULL,NULL,NULL,NULL),(34,7,3,NULL,NULL,'Artist',0,3,NULL,'Moshe','Moshe',NULL,NULL,NULL,NULL,NULL,NULL),(35,7,2,NULL,NULL,'Country',0,36,NULL,'Canada','Canada',NULL,NULL,NULL,NULL,NULL,NULL),(36,7,2,NULL,NULL,'City or Site',0,34,NULL,'Ottawa','Ottawa',NULL,NULL,NULL,NULL,NULL,NULL),(37,8,14,NULL,NULL,'',0,1,NULL,'Bibliotheca Alexandrina','Bibliotheca Alexandrina',NULL,NULL,NULL,NULL,NULL,NULL),(38,8,7,NULL,NULL,'',0,99,NULL,'arc5364.jpg','arc5364.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(39,8,23,NULL,NULL,'',0,43,NULL,'concrete, glass, granite','concrete, glass, granite',NULL,NULL,NULL,NULL,NULL,NULL),(40,8,3,NULL,NULL,'Artist',0,3,NULL,'Snøhetta AS','Snøhetta AS',NULL,NULL,NULL,NULL,NULL,NULL),(41,8,2,NULL,NULL,'Country',0,36,NULL,'Egypt','Egypt',NULL,NULL,NULL,NULL,NULL,NULL),(42,8,2,NULL,NULL,'City or Site',0,34,NULL,'Alexandria','Alexandria',NULL,NULL,NULL,NULL,NULL,NULL),(43,9,14,NULL,NULL,'',0,1,NULL,'Bibliotheca Alexandrina','Bibliotheca Alexandrina',NULL,NULL,NULL,NULL,NULL,NULL),(44,9,7,NULL,NULL,'',0,99,NULL,'arc5425.jpg','arc5425.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(45,9,23,NULL,NULL,'',0,43,NULL,'concrete, glass, granite','concrete, glass, granite',NULL,NULL,NULL,NULL,NULL,NULL),(46,9,3,NULL,NULL,'Artist',0,3,NULL,'Snøhetta AS','Snøhetta AS',NULL,NULL,NULL,NULL,NULL,NULL),(47,9,2,NULL,NULL,'Country',0,36,NULL,'Egypt','Egypt',NULL,NULL,NULL,NULL,NULL,NULL),(48,9,2,NULL,NULL,'City or Site',0,34,NULL,'Alexandria','Alexandria',NULL,NULL,NULL,NULL,NULL,NULL),(49,10,14,NULL,NULL,'',0,1,NULL,'Peace Monument','Peace Monument',NULL,NULL,NULL,NULL,NULL,NULL),(50,10,7,NULL,NULL,'',0,99,NULL,'arc7078.jpg','arc7078.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(51,10,23,NULL,NULL,'',0,43,NULL,'steel, glass','steel, glass',NULL,NULL,NULL,NULL,NULL,NULL),(52,10,3,NULL,NULL,'Artist',0,3,NULL,'Clara','Clara',NULL,NULL,NULL,NULL,NULL,NULL),(53,10,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(54,10,2,NULL,NULL,'City or Site',0,34,NULL,'Paris','Paris',NULL,NULL,NULL,NULL,NULL,NULL),(55,11,14,NULL,NULL,'',0,1,NULL,'Assisi','Assisi',NULL,NULL,NULL,NULL,NULL,NULL),(56,11,7,NULL,NULL,'',0,99,NULL,'arc7688.jpg','arc7688.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(57,11,2,NULL,NULL,'Country',0,36,NULL,'Italy','Italy',NULL,NULL,NULL,NULL,NULL,NULL),(58,11,2,NULL,NULL,'City or Site',0,34,NULL,'Assisi','Assisi',NULL,NULL,NULL,NULL,NULL,NULL),(59,12,14,NULL,NULL,'',0,1,NULL,'Villa Giulia','Villa Giulia',NULL,NULL,NULL,NULL,NULL,NULL),(60,12,7,NULL,NULL,'',0,99,NULL,'arc8682.jpg','arc8682.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(61,12,23,NULL,NULL,'',0,43,NULL,'stone, marble, stucco, fresco','stone, marble, stucco, fresco',NULL,NULL,NULL,NULL,NULL,NULL),(62,12,3,NULL,NULL,'Artist',0,3,NULL,'Bartolomeo','Bartolomeo',NULL,NULL,NULL,NULL,NULL,NULL),(63,12,2,NULL,NULL,'Country',0,36,NULL,'Italy','Italy',NULL,NULL,NULL,NULL,NULL,NULL),(64,12,2,NULL,NULL,'City or Site',0,34,NULL,'Rome','Rome',NULL,NULL,NULL,NULL,NULL,NULL),(65,13,14,NULL,NULL,'',0,1,NULL,'Villa Giulia','Villa Giulia',NULL,NULL,NULL,NULL,NULL,NULL),(66,13,7,NULL,NULL,'',0,99,NULL,'arc8729.jpg','arc8729.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(67,13,23,NULL,NULL,'',0,43,NULL,'stone, marble, stucco, fresco','stone, marble, stucco, fresco',NULL,NULL,NULL,NULL,NULL,NULL),(68,13,3,NULL,NULL,'Artist',0,3,NULL,'Bartolomeo','Bartolomeo',NULL,NULL,NULL,NULL,NULL,NULL),(69,13,2,NULL,NULL,'Country',0,36,NULL,'Italy','Italy',NULL,NULL,NULL,NULL,NULL,NULL),(70,13,2,NULL,NULL,'City or Site',0,34,NULL,'Rome','Rome',NULL,NULL,NULL,NULL,NULL,NULL),(71,14,14,NULL,NULL,'',0,1,NULL,'Susie Cooper Earthenware Ceramics','Susie Cooper Earthenware Ceramic',NULL,NULL,NULL,NULL,NULL,NULL),(72,14,7,NULL,NULL,'',0,99,NULL,'ard4274.jpg','ard4274.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(73,14,23,NULL,NULL,'',0,43,NULL,'ceramic','ceramic',NULL,NULL,NULL,NULL,NULL,NULL),(74,14,3,NULL,NULL,'Artist',0,3,NULL,'Susie','Susie',NULL,NULL,NULL,NULL,NULL,NULL),(75,14,2,NULL,NULL,'Country',0,36,NULL,'England','England',NULL,NULL,NULL,NULL,NULL,NULL),(76,15,14,NULL,NULL,'',0,1,NULL,'Casa Batllo','Casa Batllo',NULL,NULL,NULL,NULL,NULL,NULL),(77,15,7,NULL,NULL,'',0,99,NULL,'das0201.jpg','das0201.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(78,15,3,NULL,NULL,'Artist',0,3,NULL,'Antoni','Antoni',NULL,NULL,NULL,NULL,NULL,NULL),(79,15,2,NULL,NULL,'Country',0,36,NULL,'Spain','Spain',NULL,NULL,NULL,NULL,NULL,NULL),(80,15,2,NULL,NULL,'City or Site',0,34,NULL,'Barcelona','Barcelona',NULL,NULL,NULL,NULL,NULL,NULL),(81,16,14,NULL,NULL,'',0,1,NULL,'City of Arts and Sciences','City of Arts and Sciences',NULL,NULL,NULL,NULL,NULL,NULL),(82,16,7,NULL,NULL,'',0,99,NULL,'das1788.jpg','das1788.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(83,16,3,NULL,NULL,'Artist',0,3,NULL,'Santiago','Santiago',NULL,NULL,NULL,NULL,NULL,NULL),(84,16,2,NULL,NULL,'Country',0,36,NULL,'Spain','Spain',NULL,NULL,NULL,NULL,NULL,NULL),(85,16,2,NULL,NULL,'City or Site',0,34,NULL,'Valencia','Valencia',NULL,NULL,NULL,NULL,NULL,NULL),(86,17,14,NULL,NULL,'',0,1,NULL,'Robie House, interior: living room','Robie House, interior: living ro',NULL,NULL,NULL,NULL,NULL,NULL),(87,17,7,NULL,NULL,'',0,99,NULL,'dva0002.jpg','dva0002.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(88,17,3,NULL,NULL,'Artist',0,3,NULL,'Frank Lloyd','Frank Lloyd',NULL,NULL,NULL,NULL,NULL,NULL),(89,17,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(90,17,2,NULL,NULL,'City or Site',0,34,NULL,'Chicago, IL','Chicago, IL',NULL,NULL,NULL,NULL,NULL,NULL),(91,18,14,NULL,NULL,'',0,1,NULL,'The Niccolini Cowper Madonna','The Niccolini Cowper Madonna',NULL,NULL,NULL,NULL,NULL,NULL),(92,18,7,NULL,NULL,'',0,99,NULL,'dva0009.jpg','dva0009.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(93,18,3,NULL,NULL,'Artist',0,3,NULL,'Raphael','Raphael',NULL,NULL,NULL,NULL,NULL,NULL),(94,18,2,NULL,NULL,'Country',0,36,NULL,'Italy','Italy',NULL,NULL,NULL,NULL,NULL,NULL),(95,19,14,NULL,NULL,'',0,1,NULL,'Marshmallow Sofa','Marshmallow Sofa',NULL,NULL,NULL,NULL,NULL,NULL),(96,19,7,NULL,NULL,'',0,99,NULL,'dva0016.jpg','dva0016.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(97,19,3,NULL,NULL,'Artist',0,3,NULL,'George Nelson Associates (Designers 1947-1983)','George Nelson Associates (Design',NULL,NULL,NULL,NULL,NULL,NULL),(98,19,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(99,20,14,NULL,NULL,'',0,1,NULL,'From the series \"One Hundred Famous Places in Edo\" #22: The Furu River at Hiroo','From the series \"One Hundred Fam',NULL,NULL,NULL,NULL,NULL,NULL),(100,20,7,NULL,NULL,'',0,99,NULL,'dva0077.jpg','dva0077.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(101,20,3,NULL,NULL,'Artist',0,3,NULL,'Ando Hiroshige','Ando Hiroshige',NULL,NULL,NULL,NULL,NULL,NULL),(102,20,2,NULL,NULL,'Country',0,36,NULL,'Japan','Japan',NULL,NULL,NULL,NULL,NULL,NULL),(103,21,14,NULL,NULL,'',0,1,NULL,'Migration of the Negro series #30: Families often gathered to discuss whether to go north or to stay south','Migration of the Negro series #3',NULL,NULL,NULL,NULL,NULL,NULL),(104,21,7,NULL,NULL,'',0,99,NULL,'dva0104.jpg','dva0104.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(105,21,3,NULL,NULL,'Artist',0,3,NULL,'Jacob','Jacob',NULL,NULL,NULL,NULL,NULL,NULL),(106,21,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(107,22,14,NULL,NULL,'',0,1,NULL,'Crying Girl','Crying Girl',NULL,NULL,NULL,NULL,NULL,NULL),(108,22,7,NULL,NULL,'',0,99,NULL,'dva1092.jpg','dva1092.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(109,22,3,NULL,NULL,'Artist',0,3,NULL,'Roy','Roy',NULL,NULL,NULL,NULL,NULL,NULL),(110,22,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(111,23,14,NULL,NULL,'',0,1,NULL,'Dad\'s Coming!','Dad\'s Coming!',NULL,NULL,NULL,NULL,NULL,NULL),(112,23,7,NULL,NULL,'',0,99,NULL,'dva1535.jpg','dva1535.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(113,23,3,NULL,NULL,'Artist',0,3,NULL,'Winslow','Winslow',NULL,NULL,NULL,NULL,NULL,NULL),(114,23,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(115,24,14,NULL,NULL,'',0,1,NULL,'Shulawitsa Kohana Kachina (Fire God)','Shulawitsa Kohana Kachina (Fire ',NULL,NULL,NULL,NULL,NULL,NULL),(116,24,7,NULL,NULL,'',0,99,NULL,'dva1621.jpg','dva1621.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(117,24,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(118,24,2,NULL,NULL,'City or Site',0,34,NULL,'New Mexico','New Mexico',NULL,NULL,NULL,NULL,NULL,NULL),(119,25,14,NULL,NULL,'',0,1,NULL,'Ghostdance/Pedmarks','Ghostdance/Pedmarks',NULL,NULL,NULL,NULL,NULL,NULL),(120,25,7,NULL,NULL,'',0,99,NULL,'dva1765.jpg','dva1765.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(121,25,3,NULL,NULL,'Artist',0,3,NULL,'Lynda','Lynda',NULL,NULL,NULL,NULL,NULL,NULL),(122,25,2,NULL,NULL,'Country',0,36,NULL,'United States','United States',NULL,NULL,NULL,NULL,NULL,NULL),(123,26,14,NULL,NULL,'',0,1,NULL,'Our Women and the War, from Harper\'s Weekly\"\"','Our Women and the War, from Harp',NULL,NULL,NULL,NULL,NULL,NULL),(124,26,7,NULL,NULL,'',0,99,NULL,'dva3479.jpg','dva3479.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(125,26,3,NULL,NULL,'Artist',0,3,NULL,'Winslow','Winslow',NULL,NULL,NULL,NULL,NULL,NULL),(126,27,14,NULL,NULL,'',0,1,NULL,'Great Stupa (Stupa 1)','Great Stupa (Stupa 1)',NULL,NULL,NULL,NULL,NULL,NULL),(127,27,7,NULL,NULL,'',0,99,NULL,'jia2101.jpg','jia2101.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(128,27,23,NULL,NULL,'',0,43,NULL,'rubble core with sandstone facing','rubble core with sandstone facin',NULL,NULL,NULL,NULL,NULL,NULL),(129,27,2,NULL,NULL,'Country',0,36,NULL,'India','India',NULL,NULL,NULL,NULL,NULL,NULL),(130,27,2,NULL,NULL,'City or Site',0,34,NULL,'Sanchi, Madhya Pradesh','Sanchi, Madhya Pradesh',NULL,NULL,NULL,NULL,NULL,NULL),(131,28,14,NULL,NULL,'',0,1,NULL,'Head of a ruler','Head of a ruler',NULL,NULL,NULL,NULL,NULL,NULL),(132,28,7,NULL,NULL,'',0,99,NULL,'jic0844.jpg','jic0844.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(133,28,23,NULL,NULL,'',0,43,NULL,'Arsenical copper','Arsenical copper',NULL,NULL,NULL,NULL,NULL,NULL),(134,28,2,NULL,NULL,'Country',0,36,NULL,'Iran','Iran',NULL,NULL,NULL,NULL,NULL,NULL),(135,29,14,NULL,NULL,'',0,1,NULL,'Temple of Hadrian','Temple of Hadrian',NULL,NULL,NULL,NULL,NULL,NULL),(136,29,7,NULL,NULL,'',0,99,NULL,'jta0216.jpg','jta0216.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(137,29,2,NULL,NULL,'Country',0,36,NULL,'Turkey','Turkey',NULL,NULL,NULL,NULL,NULL,NULL),(138,29,2,NULL,NULL,'City or Site',0,34,NULL,'Ephesus','Ephesus',NULL,NULL,NULL,NULL,NULL,NULL),(139,30,14,NULL,NULL,'',0,1,NULL,'Garden of Earthly Delights Altar: Exterior','Garden of Earthly Delights Altar',NULL,NULL,NULL,NULL,NULL,NULL),(140,30,7,NULL,NULL,'',0,99,NULL,'lff1113.jpg','lff1113.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(141,30,23,NULL,NULL,'',0,43,NULL,'wood','wood',NULL,NULL,NULL,NULL,NULL,NULL),(142,30,3,NULL,NULL,'Artist',0,3,NULL,'Hieronymus','Hieronymus',NULL,NULL,NULL,NULL,NULL,NULL),(143,31,14,NULL,NULL,'',0,1,NULL,'Marriage Feast at Cana','Marriage Feast at Cana',NULL,NULL,NULL,NULL,NULL,NULL),(144,31,7,NULL,NULL,'',0,99,NULL,'lif2330.jpg','lif2330.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(145,31,23,NULL,NULL,'',0,43,NULL,'oil on canvas','oil on canvas',NULL,NULL,NULL,NULL,NULL,NULL),(146,31,3,NULL,NULL,'Artist',0,3,NULL,'Paolo','Paolo',NULL,NULL,NULL,NULL,NULL,NULL),(147,32,14,NULL,NULL,'',0,1,NULL,'Marriage Feast at Cana','Marriage Feast at Cana',NULL,NULL,NULL,NULL,NULL,NULL),(148,32,7,NULL,NULL,'',0,99,NULL,'lif2335.jpg','lif2335.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(149,32,23,NULL,NULL,'',0,43,NULL,'oil on canvas','oil on canvas',NULL,NULL,NULL,NULL,NULL,NULL),(150,32,3,NULL,NULL,'Artist',0,3,NULL,'Paolo','Paolo',NULL,NULL,NULL,NULL,NULL,NULL),(151,33,14,NULL,NULL,'',0,1,NULL,'Salt Cellar for François I (\'Saliera\')','Salt Cellar for François I (\'Sal',NULL,NULL,NULL,NULL,NULL,NULL),(152,33,7,NULL,NULL,'',0,99,NULL,'lix0004.jpg','lix0004.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(153,33,3,NULL,NULL,'Artist',0,3,NULL,'Benvenuto','Benvenuto',NULL,NULL,NULL,NULL,NULL,NULL),(154,34,14,NULL,NULL,'',0,1,NULL,'Peacock Dish','Peacock Dish',NULL,NULL,NULL,NULL,NULL,NULL),(155,34,7,NULL,NULL,'',0,99,NULL,'ltw0001.jpg','ltw0001.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(156,34,23,NULL,NULL,'',0,43,NULL,'fritware with slip and lead glaze','fritware with slip and lead glaz',NULL,NULL,NULL,NULL,NULL,NULL),(157,34,2,NULL,NULL,'Country',0,36,NULL,'Turkey','Turkey',NULL,NULL,NULL,NULL,NULL,NULL),(158,34,2,NULL,NULL,'City or Site',0,34,NULL,'Iznik','Iznik',NULL,NULL,NULL,NULL,NULL,NULL),(159,35,14,NULL,NULL,'',0,1,NULL,'Taj Mahal','Taj Mahal',NULL,NULL,NULL,NULL,NULL,NULL),(160,35,7,NULL,NULL,'',0,99,NULL,'mia2010.jpg','mia2010.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(161,35,23,NULL,NULL,'',0,43,NULL,'faced with white marble inlaid with colored stones','faced with white marble inlaid w',NULL,NULL,NULL,NULL,NULL,NULL),(162,35,3,NULL,NULL,'Artist',0,3,NULL,'Ustad Ahmad Ma\'mar','Ustad Ahmad Ma\'mar',NULL,NULL,NULL,NULL,NULL,NULL),(163,35,2,NULL,NULL,'Country',0,36,NULL,'India','India',NULL,NULL,NULL,NULL,NULL,NULL),(164,35,2,NULL,NULL,'City or Site',0,34,NULL,'Agra','Agra',NULL,NULL,NULL,NULL,NULL,NULL),(165,36,14,NULL,NULL,'',0,1,NULL,'The Third of May: Execution of the Madrilenos','The Third of May: Execution of t',NULL,NULL,NULL,NULL,NULL,NULL),(166,36,7,NULL,NULL,'',0,99,NULL,'nsf0093.jpg','nsf0093.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(167,36,23,NULL,NULL,'',0,43,NULL,'canvas','canvas',NULL,NULL,NULL,NULL,NULL,NULL),(168,36,3,NULL,NULL,'Artist',0,3,NULL,'Francisco de','Francisco de',NULL,NULL,NULL,NULL,NULL,NULL),(169,37,14,NULL,NULL,'',0,1,NULL,'Altamira Cave','Altamira Cave',NULL,NULL,NULL,NULL,NULL,NULL),(170,37,7,NULL,NULL,'',0,99,NULL,'psp0109.jpg','psp0109.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(171,37,23,NULL,NULL,'',0,43,NULL,'Yellow, red and brown ochre and charcoal','Yellow, red and brown ochre and ',NULL,NULL,NULL,NULL,NULL,NULL),(172,37,2,NULL,NULL,'Country',0,36,NULL,'Spain','Spain',NULL,NULL,NULL,NULL,NULL,NULL),(173,37,2,NULL,NULL,'City or Site',0,34,NULL,'Santander (near)','Santander (near)',NULL,NULL,NULL,NULL,NULL,NULL),(174,38,14,NULL,NULL,'',0,1,NULL,'Temple of Ramesses II','Temple of Ramesses II',NULL,NULL,NULL,NULL,NULL,NULL),(175,38,7,NULL,NULL,'',0,99,NULL,'seg0023.jpg','seg0023.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(176,38,2,NULL,NULL,'Country',0,36,NULL,'Egypt','Egypt',NULL,NULL,NULL,NULL,NULL,NULL),(177,38,2,NULL,NULL,'City or Site',0,34,NULL,'Abu Sunbul','Abu Sunbul',NULL,NULL,NULL,NULL,NULL,NULL),(178,39,14,NULL,NULL,'',0,1,NULL,'Chateau de Versailles','Chateau de Versailles',NULL,NULL,NULL,NULL,NULL,NULL),(179,39,7,NULL,NULL,'',0,99,NULL,'sfr0427.jpg','sfr0427.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(180,39,23,NULL,NULL,'',0,43,NULL,'Bronze','Bronze',NULL,NULL,NULL,NULL,NULL,NULL),(181,39,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(182,39,2,NULL,NULL,'City or Site',0,34,NULL,'Versailles','Versailles',NULL,NULL,NULL,NULL,NULL,NULL),(183,40,14,NULL,NULL,'',0,1,NULL,'Cathedral of Notre Dame, Reims','Cathedral of Notre Dame, Reims',NULL,NULL,NULL,NULL,NULL,NULL),(184,40,7,NULL,NULL,'',0,99,NULL,'sfr0485.jpg','sfr0485.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(185,40,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(186,40,2,NULL,NULL,'City or Site',0,34,NULL,'Reims','Reims',NULL,NULL,NULL,NULL,NULL,NULL),(187,41,14,NULL,NULL,'',0,1,NULL,'The Terrace at Sainte-Adresse','The Terrace at Sainte-Adresse',NULL,NULL,NULL,NULL,NULL,NULL),(188,41,7,NULL,NULL,'',0,99,NULL,'xir032462.jpg','xir032462.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(189,41,23,NULL,NULL,'',0,43,NULL,'oil paint on canvas','oil paint on canvas',NULL,NULL,NULL,NULL,NULL,NULL),(190,41,3,NULL,NULL,'Artist',0,3,NULL,'Claude','Claude',NULL,NULL,NULL,NULL,NULL,NULL),(191,42,14,NULL,NULL,'',0,1,NULL,'Oath of the Tennis Court [grisaille sketch]','Oath of the Tennis Court [grisai',NULL,NULL,NULL,NULL,NULL,NULL),(192,42,7,NULL,NULL,'',0,99,NULL,'xir034107.jpg','xir034107.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(193,42,23,NULL,NULL,'',0,43,NULL,'gouache, ink and pencil on paper','gouache, ink and pencil on paper',NULL,NULL,NULL,NULL,NULL,NULL),(194,42,3,NULL,NULL,'Artist',0,3,NULL,'Jacques-Louis','Jacques-Louis',NULL,NULL,NULL,NULL,NULL,NULL),(195,42,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(196,43,14,NULL,NULL,'',0,1,NULL,'Federigo da Montefeltro and his son Guidobaldo','Federigo da Montefeltro and his ',NULL,NULL,NULL,NULL,NULL,NULL),(197,43,7,NULL,NULL,'',0,99,NULL,'xir058599.jpg','xir058599.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(198,43,3,NULL,NULL,'Artist',0,3,NULL,'Joos van Gent','Joos van Gent',NULL,NULL,NULL,NULL,NULL,NULL),(199,44,14,NULL,NULL,'',0,1,NULL,'Hunarnama (Volume II)','Hunarnama (Volume II)',NULL,NULL,NULL,NULL,NULL,NULL),(200,44,7,NULL,NULL,'',0,99,NULL,'xir156161.jpg','xir156161.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(201,44,23,NULL,NULL,'',0,43,NULL,'gouache on paper','gouache on paper',NULL,NULL,NULL,NULL,NULL,NULL),(202,44,3,NULL,NULL,'Artist',0,3,NULL,'Osman','Osman',NULL,NULL,NULL,NULL,NULL,NULL),(203,44,2,NULL,NULL,'Country',0,36,NULL,'Ottoman Empire (H)','Ottoman Empire (H)',NULL,NULL,NULL,NULL,NULL,NULL),(204,45,14,NULL,NULL,'',0,1,NULL,'Gold Funerary Mask of Tutankhamun','Gold Funerary Mask of Tutankhamu',NULL,NULL,NULL,NULL,NULL,NULL),(205,45,7,NULL,NULL,'',0,99,NULL,'xir162303.jpg','xir162303.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(206,45,23,NULL,NULL,'',0,43,NULL,'Gold inlaid with semi-precious stones','Gold inlaid with semi-precious s',NULL,NULL,NULL,NULL,NULL,NULL),(207,45,2,NULL,NULL,'Country',0,36,NULL,'Egypt','Egypt',NULL,NULL,NULL,NULL,NULL,NULL),(208,46,14,NULL,NULL,'',0,1,NULL,'Eiffel Tower','Eiffel Tower',NULL,NULL,NULL,NULL,NULL,NULL),(209,46,7,NULL,NULL,'',0,99,NULL,'xir163472.jpg','xir163472.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(210,46,3,NULL,NULL,'Artist',0,3,NULL,'Gustave','Gustave',NULL,NULL,NULL,NULL,NULL,NULL),(211,46,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(212,46,2,NULL,NULL,'City or Site',0,34,NULL,'Paris','Paris',NULL,NULL,NULL,NULL,NULL,NULL),(213,47,14,NULL,NULL,'',0,1,NULL,'Eiffel Tower','Eiffel Tower',NULL,NULL,NULL,NULL,NULL,NULL),(214,47,7,NULL,NULL,'',0,99,NULL,'xir163473.jpg','xir163473.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(215,47,3,NULL,NULL,'Artist',0,3,NULL,'Gustave','Gustave',NULL,NULL,NULL,NULL,NULL,NULL),(216,47,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(217,47,2,NULL,NULL,'City or Site',0,34,NULL,'Paris','Paris',NULL,NULL,NULL,NULL,NULL,NULL),(218,48,14,NULL,NULL,'',0,1,NULL,'Sarah Bernhardt in costume','Sarah Bernhardt in costume',NULL,NULL,NULL,NULL,NULL,NULL),(219,48,7,NULL,NULL,'',0,99,NULL,'xir192377.jpg','xir192377.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(220,48,23,NULL,NULL,'',0,43,NULL,'Photograhic print on paper','Photograhic print on paper',NULL,NULL,NULL,NULL,NULL,NULL),(221,48,3,NULL,NULL,'Artist',0,3,NULL,'Nadar','Nadar',NULL,NULL,NULL,NULL,NULL,NULL),(222,48,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(223,49,14,NULL,NULL,'',0,1,NULL,'Les Antiquités judaïques','Les Antiquités judaïques',NULL,NULL,NULL,NULL,NULL,NULL),(224,49,7,NULL,NULL,'',0,99,NULL,'xir208568.jpg','xir208568.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(225,49,23,NULL,NULL,'',0,43,NULL,'ink and pigment on vellum','ink and pigment on vellum',NULL,NULL,NULL,NULL,NULL,NULL),(226,49,3,NULL,NULL,'Artist',0,3,NULL,'Jean','Jean',NULL,NULL,NULL,NULL,NULL,NULL),(227,49,2,NULL,NULL,'Country',0,36,NULL,'France','France',NULL,NULL,NULL,NULL,NULL,NULL),(228,50,14,NULL,NULL,'',0,1,NULL,'Self Portrait','Self Portrait',NULL,NULL,NULL,NULL,NULL,NULL),(229,50,7,NULL,NULL,'',0,99,NULL,'xir224971.jpg','xir224971.jpg',NULL,NULL,NULL,NULL,NULL,NULL),(230,50,23,NULL,NULL,'',0,43,NULL,'oil paint on canvas','oil paint on canvas',NULL,NULL,NULL,NULL,NULL,NULL),(231,50,3,NULL,NULL,'Artist',0,3,NULL,'Kazimir','Kazimir',NULL,NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `data_fieldvalue` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_metadatastandard`
+--
+
+DROP TABLE IF EXISTS `data_metadatastandard`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_metadatastandard` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `prefix` varchar(16) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `prefix` (`prefix`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_metadatastandard`
+--
+
+LOCK TABLES `data_metadatastandard` WRITE;
+/*!40000 ALTER TABLE `data_metadatastandard` DISABLE KEYS */;
+INSERT INTO `data_metadatastandard` VALUES (1,'Dublin Core','dublin-core','dc'),(2,'Tagging','tagging','tag'),(3,'VRA Core 4','vra-core-4','vra');
+/*!40000 ALTER TABLE `data_metadatastandard` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_record`
+--
+
+DROP TABLE IF EXISTS `data_record`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_record` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `parent_id` int(11) DEFAULT NULL,
+  `source` varchar(1024) DEFAULT NULL,
+  `manager` varchar(50) DEFAULT NULL,
+  `next_update` datetime DEFAULT NULL,
+  `owner_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `data_record_parent_id` (`parent_id`),
+  KEY `data_record_owner_id` (`owner_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=51 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_record`
+--
+
+LOCK TABLES `data_record` WRITE;
+/*!40000 ALTER TABLE `data_record` DISABLE KEYS */;
+INSERT INTO `data_record` VALUES (1,'2010-09-13 13:46:58','2010-09-13 13:47:03','r-6465258',NULL,NULL,NULL,NULL,NULL),(2,'2010-09-13 13:46:58','2010-09-13 13:47:03','r-4418516',NULL,NULL,NULL,NULL,NULL),(3,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-1675860',NULL,NULL,NULL,NULL,NULL),(4,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6623180',NULL,NULL,NULL,NULL,NULL),(5,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6860593',NULL,NULL,NULL,NULL,NULL),(6,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-1130434',NULL,NULL,NULL,NULL,NULL),(7,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4754071',NULL,NULL,NULL,NULL,NULL),(8,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-9410946',NULL,NULL,NULL,NULL,NULL),(9,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6384646',NULL,NULL,NULL,NULL,NULL),(10,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-5025242',NULL,NULL,NULL,NULL,NULL),(11,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-2966836',NULL,NULL,NULL,NULL,NULL),(12,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-5740161',NULL,NULL,NULL,NULL,NULL),(13,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-3269409',NULL,NULL,NULL,NULL,NULL),(14,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-7307847',NULL,NULL,NULL,NULL,NULL),(15,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-3144494',NULL,NULL,NULL,NULL,NULL),(16,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-2647309',NULL,NULL,NULL,NULL,NULL),(17,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-8638900',NULL,NULL,NULL,NULL,NULL),(18,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4932941',NULL,NULL,NULL,NULL,NULL),(19,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-7830473',NULL,NULL,NULL,NULL,NULL),(20,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-2176340',NULL,NULL,NULL,NULL,NULL),(21,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-3579451',NULL,NULL,NULL,NULL,NULL),(22,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-5049758',NULL,NULL,NULL,NULL,NULL),(23,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-5331913',NULL,NULL,NULL,NULL,NULL),(24,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6665811',NULL,NULL,NULL,NULL,NULL),(25,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-1292627',NULL,NULL,NULL,NULL,NULL),(26,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6101370',NULL,NULL,NULL,NULL,NULL),(27,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-1185376',NULL,NULL,NULL,NULL,NULL),(28,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-9291184',NULL,NULL,NULL,NULL,NULL),(29,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-8236056',NULL,NULL,NULL,NULL,NULL),(30,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6144275',NULL,NULL,NULL,NULL,NULL),(31,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-9229228',NULL,NULL,NULL,NULL,NULL),(32,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-8774067',NULL,NULL,NULL,NULL,NULL),(33,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4889675',NULL,NULL,NULL,NULL,NULL),(34,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4263495',NULL,NULL,NULL,NULL,NULL),(35,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4422147',NULL,NULL,NULL,NULL,NULL),(36,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-7330569',NULL,NULL,NULL,NULL,NULL),(37,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-3282982',NULL,NULL,NULL,NULL,NULL),(38,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-9183174',NULL,NULL,NULL,NULL,NULL),(39,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-6635183',NULL,NULL,NULL,NULL,NULL),(40,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-2159271',NULL,NULL,NULL,NULL,NULL),(41,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-2684678',NULL,NULL,NULL,NULL,NULL),(42,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4525918',NULL,NULL,NULL,NULL,NULL),(43,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-1900501',NULL,NULL,NULL,NULL,NULL),(44,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4589541',NULL,NULL,NULL,NULL,NULL),(45,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4462012',NULL,NULL,NULL,NULL,NULL),(46,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4400276',NULL,NULL,NULL,NULL,NULL),(47,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4187898',NULL,NULL,NULL,NULL,NULL),(48,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-8800447',NULL,NULL,NULL,NULL,NULL),(49,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-4777103',NULL,NULL,NULL,NULL,NULL),(50,'2010-09-13 13:46:58','2010-09-13 13:47:04','r-3399908',NULL,NULL,NULL,NULL,NULL);
+/*!40000 ALTER TABLE `data_record` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_vocabulary`
+--
+
+DROP TABLE IF EXISTS `data_vocabulary`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_vocabulary` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `description` longtext,
+  `standard` tinyint(1) DEFAULT NULL,
+  `origin` longtext,
+  PRIMARY KEY (`id`),
+  KEY `data_vocabulary_name` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_vocabulary`
+--
+
+LOCK TABLES `data_vocabulary` WRITE;
+/*!40000 ALTER TABLE `data_vocabulary` DISABLE KEYS */;
+/*!40000 ALTER TABLE `data_vocabulary` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `data_vocabularyterm`
+--
+
+DROP TABLE IF EXISTS `data_vocabularyterm`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `data_vocabularyterm` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `vocabulary_id` int(11) NOT NULL,
+  `term` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data_vocabularyterm_vocabulary_id` (`vocabulary_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `data_vocabularyterm`
+--
+
+LOCK TABLES `data_vocabularyterm` WRITE;
+/*!40000 ALTER TABLE `data_vocabularyterm` DISABLE KEYS */;
+/*!40000 ALTER TABLE `data_vocabularyterm` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_admin_log`
+--
+
+DROP TABLE IF EXISTS `django_admin_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_admin_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `action_time` datetime NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `content_type_id` int(11) DEFAULT NULL,
+  `object_id` longtext,
+  `object_repr` varchar(200) NOT NULL,
+  `action_flag` smallint(5) unsigned NOT NULL,
+  `change_message` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `django_admin_log_user_id` (`user_id`),
+  KEY `django_admin_log_content_type_id` (`content_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_admin_log`
+--
+
+LOCK TABLES `django_admin_log` WRITE;
+/*!40000 ALTER TABLE `django_admin_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `django_admin_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_comment_flags`
+--
+
+DROP TABLE IF EXISTS `django_comment_flags`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_comment_flags` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `comment_id` int(11) NOT NULL,
+  `flag` varchar(30) NOT NULL,
+  `flag_date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`,`comment_id`,`flag`),
+  KEY `django_comment_flags_user_id` (`user_id`),
+  KEY `django_comment_flags_comment_id` (`comment_id`),
+  KEY `django_comment_flags_flag` (`flag`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_comment_flags`
+--
+
+LOCK TABLES `django_comment_flags` WRITE;
+/*!40000 ALTER TABLE `django_comment_flags` DISABLE KEYS */;
+/*!40000 ALTER TABLE `django_comment_flags` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_comments`
+--
+
+DROP TABLE IF EXISTS `django_comments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `object_pk` longtext NOT NULL,
+  `site_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `user_name` varchar(50) NOT NULL,
+  `user_email` varchar(75) NOT NULL,
+  `user_url` varchar(200) NOT NULL,
+  `comment` longtext NOT NULL,
+  `submit_date` datetime NOT NULL,
+  `ip_address` char(15) DEFAULT NULL,
+  `is_public` tinyint(1) NOT NULL,
+  `is_removed` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `django_comments_content_type_id` (`content_type_id`),
+  KEY `django_comments_site_id` (`site_id`),
+  KEY `django_comments_user_id` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_comments`
+--
+
+LOCK TABLES `django_comments` WRITE;
+/*!40000 ALTER TABLE `django_comments` DISABLE KEYS */;
+INSERT INTO `django_comments` VALUES (1,8,'1',1,2,'Admin','','','Welcome!\r\nAnnouncements go here.','2008-12-11 17:04:22','',1,0);
+/*!40000 ALTER TABLE `django_comments` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_content_type`
+--
+
+DROP TABLE IF EXISTS `django_content_type`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_content_type` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `app_label` varchar(100) NOT NULL,
+  `model` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `app_label` (`app_label`,`model`)
+) ENGINE=MyISAM AUTO_INCREMENT=53 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_content_type`
+--
+
+LOCK TABLES `django_content_type` WRITE;
+/*!40000 ALTER TABLE `django_content_type` DISABLE KEYS */;
+INSERT INTO `django_content_type` VALUES (1,'permission','auth','permission'),(2,'group','auth','group'),(3,'user','auth','user'),(4,'message','auth','message'),(5,'content type','contenttypes','contenttype'),(6,'session','sessions','session'),(7,'site','sites','site'),(8,'flat page','flatpages','flatpage'),(9,'log entry','admin','logentry'),(10,'comment','comments','comment'),(11,'comment flag','comments','commentflag'),(12,'redirect','redirects','redirect'),(13,'analytics','google_analytics','analytics'),(14,'collection','data','collection'),(15,'collection item','data','collectionitem'),(16,'record','data','record'),(17,'metadata standard','data','metadatastandard'),(18,'vocabulary','data','vocabulary'),(19,'vocabulary term','data','vocabularyterm'),(20,'field','data','field'),(21,'field set','data','fieldset'),(22,'field set field','data','fieldsetfield'),(23,'field value','data','fieldvalue'),(24,'display field value','data','displayfieldvalue'),(25,'object history','migration','objecthistory'),(26,'owned wrapper','util','ownedwrapper'),(27,'access control','access','accesscontrol'),(28,'extended group','access','extendedgroup'),(29,'subnet','access','subnet'),(30,'attribute','access','attribute'),(31,'attribute value','access','attributevalue'),(32,'solr index updates','solr','solrindexupdates'),(33,'storage','storage','storage'),(34,'media','storage','media'),(35,'trusted subnet','storage','trustedsubnet'),(36,'proxy url','storage','proxyurl'),(37,'presentation','presentation','presentation'),(38,'presentation item','presentation','presentationitem'),(39,'presentation item info','presentation','presentationiteminfo'),(40,'activity','statistics','activity'),(41,'accumulated activity','statistics','accumulatedactivity'),(42,'hit count','federatedsearch','hitcount'),(43,'tag','tagging','tag'),(44,'tagged item','tagging','taggeditem'),(45,'job info','workers','jobinfo'),(46,'preference','userprofile','preference'),(47,'user profile','userprofile','userprofile'),(48,'impersonation','impersonate','impersonation'),(49,'migration history','south','migrationhistory'),(50,'computer','crass','computer'),(51,'schedule','crass','schedule'),(52,'mapping','crass','mapping');
+/*!40000 ALTER TABLE `django_content_type` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_flatpage`
+--
+
+DROP TABLE IF EXISTS `django_flatpage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_flatpage` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `url` varchar(100) NOT NULL,
+  `title` varchar(200) NOT NULL,
+  `content` longtext NOT NULL,
+  `enable_comments` tinyint(1) NOT NULL,
+  `template_name` varchar(70) NOT NULL,
+  `registration_required` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `django_flatpage_url` (`url`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_flatpage`
+--
+
+LOCK TABLES `django_flatpage` WRITE;
+/*!40000 ALTER TABLE `django_flatpage` DISABLE KEYS */;
+INSERT INTO `django_flatpage` VALUES (1,'/about/','About','About this site',0,'',0);
+/*!40000 ALTER TABLE `django_flatpage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_flatpage_sites`
+--
+
+DROP TABLE IF EXISTS `django_flatpage_sites`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_flatpage_sites` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `flatpage_id` int(11) NOT NULL,
+  `site_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `flatpage_id` (`flatpage_id`,`site_id`),
+  KEY `site_id_refs_id_4e3eeb57` (`site_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_flatpage_sites`
+--
+
+LOCK TABLES `django_flatpage_sites` WRITE;
+/*!40000 ALTER TABLE `django_flatpage_sites` DISABLE KEYS */;
+INSERT INTO `django_flatpage_sites` VALUES (1,1,1);
+/*!40000 ALTER TABLE `django_flatpage_sites` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_redirect`
+--
+
+DROP TABLE IF EXISTS `django_redirect`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_redirect` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `old_path` varchar(200) NOT NULL,
+  `new_path` varchar(200) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `site_id` (`site_id`,`old_path`),
+  KEY `django_redirect_site_id` (`site_id`),
+  KEY `django_redirect_old_path` (`old_path`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_redirect`
+--
+
+LOCK TABLES `django_redirect` WRITE;
+/*!40000 ALTER TABLE `django_redirect` DISABLE KEYS */;
+/*!40000 ALTER TABLE `django_redirect` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_session`
+--
+
+DROP TABLE IF EXISTS `django_session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_session` (
+  `session_key` varchar(40) NOT NULL,
+  `session_data` longtext NOT NULL,
+  `expire_date` datetime NOT NULL,
+  PRIMARY KEY (`session_key`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_session`
+--
+
+LOCK TABLES `django_session` WRITE;
+/*!40000 ALTER TABLE `django_session` DISABLE KEYS */;
+INSERT INTO `django_session` VALUES ('80348d986d52eb9943d878c26171ab16','gAJ9cQEoVRBzZWxlY3RlZF9yZWNvcmRzcQJjX19idWlsdGluX18Kc2V0CnEDXXEEKEsBSwJLJ0so\nSypLLksvSzBLMUsKZYVScQVVDV9hdXRoX3VzZXJfaWRxBooBAlUSX2F1dGhfdXNlcl9iYWNrZW5k\ncQdVKWRqYW5nby5jb250cmliLmF1dGguYmFja2VuZHMuTW9kZWxCYWNrZW5kcQh1LjQzYzgxN2M1\nNzczNzQ5OTIzMzA4MDc0MmFjMjI5MTUz\n','2010-09-13 20:41:43');
+/*!40000 ALTER TABLE `django_session` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `django_site`
+--
+
+DROP TABLE IF EXISTS `django_site`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `django_site` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `domain` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `django_site`
+--
+
+LOCK TABLES `django_site` WRITE;
+/*!40000 ALTER TABLE `django_site` DISABLE KEYS */;
+INSERT INTO `django_site` VALUES (1,'localhost','localhost');
+/*!40000 ALTER TABLE `django_site` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `federatedsearch_hitcount`
+--
+
+DROP TABLE IF EXISTS `federatedsearch_hitcount`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `federatedsearch_hitcount` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `query` varchar(255) NOT NULL,
+  `source` varchar(32) NOT NULL,
+  `hits` int(11) NOT NULL,
+  `results` longtext,
+  `valid_until` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `federatedsearch_hitcount_query` (`query`),
+  KEY `federatedsearch_hitcount_source` (`source`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `federatedsearch_hitcount`
+--
+
+LOCK TABLES `federatedsearch_hitcount` WRITE;
+/*!40000 ALTER TABLE `federatedsearch_hitcount` DISABLE KEYS */;
+INSERT INTO `federatedsearch_hitcount` VALUES (1,'france','NIX',100,NULL,'2010-09-14 14:23:11'),(2,'france','Flickr',7831359,NULL,'2010-09-14 14:23:12'),(3,'france','ARTstor',300,NULL,'2010-09-14 14:23:26');
+/*!40000 ALTER TABLE `federatedsearch_hitcount` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `google_analytics_analytics`
+--
+
+DROP TABLE IF EXISTS `google_analytics_analytics`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `google_analytics_analytics` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `site_id` int(11) NOT NULL,
+  `analytics_code` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `google_analytics_analytics_site_id` (`site_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `google_analytics_analytics`
+--
+
+LOCK TABLES `google_analytics_analytics` WRITE;
+/*!40000 ALTER TABLE `google_analytics_analytics` DISABLE KEYS */;
+/*!40000 ALTER TABLE `google_analytics_analytics` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `impersonate_impersonation`
+--
+
+DROP TABLE IF EXISTS `impersonate_impersonation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `impersonate_impersonation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `impersonate_impersonation_group_id` (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `impersonate_impersonation`
+--
+
+LOCK TABLES `impersonate_impersonation` WRITE;
+/*!40000 ALTER TABLE `impersonate_impersonation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `impersonate_impersonation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `impersonate_impersonation_groups`
+--
+
+DROP TABLE IF EXISTS `impersonate_impersonation_groups`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `impersonate_impersonation_groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `impersonation_id` int(11) NOT NULL,
+  `group_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `impersonation_id` (`impersonation_id`,`group_id`),
+  KEY `group_id_refs_id_3d71b86` (`group_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `impersonate_impersonation_groups`
+--
+
+LOCK TABLES `impersonate_impersonation_groups` WRITE;
+/*!40000 ALTER TABLE `impersonate_impersonation_groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `impersonate_impersonation_groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `impersonate_impersonation_users`
+--
+
+DROP TABLE IF EXISTS `impersonate_impersonation_users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `impersonate_impersonation_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `impersonation_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `impersonation_id` (`impersonation_id`,`user_id`),
+  KEY `user_id_refs_id_48b07684` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `impersonate_impersonation_users`
+--
+
+LOCK TABLES `impersonate_impersonation_users` WRITE;
+/*!40000 ALTER TABLE `impersonate_impersonation_users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `impersonate_impersonation_users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `migration_objecthistory`
+--
+
+DROP TABLE IF EXISTS `migration_objecthistory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `migration_objecthistory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
+  `m2m_content_type_id` int(11) DEFAULT NULL,
+  `m2m_object_id` int(10) unsigned DEFAULT NULL,
+  `type` varchar(8) DEFAULT NULL,
+  `original_id` varchar(256) NOT NULL,
+  `content_hash` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `migration_objecthistory_content_type_id` (`content_type_id`),
+  KEY `migration_objecthistory_m2m_content_type_id` (`m2m_content_type_id`),
+  KEY `migration_objecthistory_type` (`type`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `migration_objecthistory`
+--
+
+LOCK TABLES `migration_objecthistory` WRITE;
+/*!40000 ALTER TABLE `migration_objecthistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `migration_objecthistory` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `presentation_presentation`
+--
+
+DROP TABLE IF EXISTS `presentation_presentation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `presentation_presentation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `owner_id` int(11) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  `source` varchar(1024) DEFAULT NULL,
+  `description` longtext,
+  `password` varchar(32) DEFAULT NULL,
+  `fieldset_id` int(11) DEFAULT NULL,
+  `hide_default_data` tinyint(1) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  KEY `presentation_presentation_owner_id` (`owner_id`),
+  KEY `presentation_presentation_fieldset_id` (`fieldset_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `presentation_presentation`
+--
+
+LOCK TABLES `presentation_presentation` WRITE;
+/*!40000 ALTER TABLE `presentation_presentation` DISABLE KEYS */;
+INSERT INTO `presentation_presentation` VALUES (1,'France','france-2',2,0,NULL,'','',NULL,0,'2010-09-13 14:23:43','2010-09-13 14:24:46');
+/*!40000 ALTER TABLE `presentation_presentation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `presentation_presentationitem`
+--
+
+DROP TABLE IF EXISTS `presentation_presentationitem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `presentation_presentationitem` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `presentation_id` int(11) NOT NULL,
+  `record_id` int(11) NOT NULL,
+  `hidden` tinyint(1) NOT NULL,
+  `type` varchar(16) NOT NULL,
+  `order` smallint(6) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `presentation_presentationitem_presentation_id` (`presentation_id`),
+  KEY `presentation_presentationitem_record_id` (`record_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `presentation_presentationitem`
+--
+
+LOCK TABLES `presentation_presentationitem` WRITE;
+/*!40000 ALTER TABLE `presentation_presentationitem` DISABLE KEYS */;
+INSERT INTO `presentation_presentationitem` VALUES (1,1,1,0,'',1),(2,1,2,0,'',2),(3,1,10,0,'',3),(4,1,39,0,'',4),(5,1,40,0,'',5),(6,1,42,0,'',6),(7,1,46,0,'',7),(8,1,47,0,'',8),(9,1,48,0,'',9),(10,1,49,0,'',10);
+/*!40000 ALTER TABLE `presentation_presentationitem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `presentation_presentationiteminfo`
+--
+
+DROP TABLE IF EXISTS `presentation_presentationiteminfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `presentation_presentationiteminfo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `item_id` int(11) NOT NULL,
+  `media_id` int(11) NOT NULL,
+  `info` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `presentation_presentationiteminfo_item_id` (`item_id`),
+  KEY `presentation_presentationiteminfo_media_id` (`media_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `presentation_presentationiteminfo`
+--
+
+LOCK TABLES `presentation_presentationiteminfo` WRITE;
+/*!40000 ALTER TABLE `presentation_presentationiteminfo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `presentation_presentationiteminfo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `solr_solrindexupdates`
+--
+
+DROP TABLE IF EXISTS `solr_solrindexupdates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `solr_solrindexupdates` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `record` int(11) NOT NULL,
+  `delete` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=101 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `solr_solrindexupdates`
+--
+
+LOCK TABLES `solr_solrindexupdates` WRITE;
+/*!40000 ALTER TABLE `solr_solrindexupdates` DISABLE KEYS */;
+/*!40000 ALTER TABLE `solr_solrindexupdates` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `south_migrationhistory`
+--
+
+DROP TABLE IF EXISTS `south_migrationhistory`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `south_migrationhistory` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `app_name` varchar(255) NOT NULL,
+  `migration` varchar(255) NOT NULL,
+  `applied` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `south_migrationhistory`
+--
+
+LOCK TABLES `south_migrationhistory` WRITE;
+/*!40000 ALTER TABLE `south_migrationhistory` DISABLE KEYS */;
+/*!40000 ALTER TABLE `south_migrationhistory` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `statistics_accumulatedactivity`
+--
+
+DROP TABLE IF EXISTS `statistics_accumulatedactivity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `statistics_accumulatedactivity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) DEFAULT NULL,
+  `object_id` int(10) unsigned DEFAULT NULL,
+  `date` date NOT NULL,
+  `event` varchar(64) NOT NULL,
+  `final` tinyint(1) NOT NULL,
+  `count` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `statistics_accumulatedactivity_content_type_id` (`content_type_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `statistics_accumulatedactivity`
+--
+
+LOCK TABLES `statistics_accumulatedactivity` WRITE;
+/*!40000 ALTER TABLE `statistics_accumulatedactivity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `statistics_accumulatedactivity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `statistics_activity`
+--
+
+DROP TABLE IF EXISTS `statistics_activity`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `statistics_activity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) DEFAULT NULL,
+  `object_id` int(10) unsigned DEFAULT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `event` varchar(64) NOT NULL,
+  `data` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `statistics_activity_content_type_id` (`content_type_id`),
+  KEY `statistics_activity_user_id` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `statistics_activity`
+--
+
+LOCK TABLES `statistics_activity` WRITE;
+/*!40000 ALTER TABLE `statistics_activity` DISABLE KEYS */;
+/*!40000 ALTER TABLE `statistics_activity` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `storage_media`
+--
+
+DROP TABLE IF EXISTS `storage_media`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `storage_media` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `record_id` int(11) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `url` varchar(1024) NOT NULL,
+  `storage_id` int(11) NOT NULL,
+  `mimetype` varchar(128) NOT NULL,
+  `width` int(11) DEFAULT NULL,
+  `height` int(11) DEFAULT NULL,
+  `bitrate` int(11) DEFAULT NULL,
+  `master_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `record_id` (`record_id`,`name`),
+  KEY `storage_media_record_id` (`record_id`),
+  KEY `storage_media_name` (`name`),
+  KEY `storage_media_storage_id` (`storage_id`),
+  KEY `storage_media_master_id` (`master_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=111 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `storage_media`
+--
+
+LOCK TABLES `storage_media` WRITE;
+/*!40000 ALTER TABLE `storage_media` DISABLE KEYS */;
+INSERT INTO `storage_media` VALUES (1,1,'afr1236','afr1236.jpg',1,'image/jpeg',1024,1494,NULL,NULL),(2,2,'afr3131a','afr3131a.jpg',1,'image/jpeg',1024,1494,NULL,NULL),(3,3,'age0124','age0124.jpg',1,'image/jpeg',1024,1521,NULL,NULL),(4,4,'ait0717','ait0717.jpg',1,'image/jpeg',1522,1024,NULL,NULL),(5,5,'arc1638','arc1638.jpg',1,'image/jpeg',1536,1005,NULL,NULL),(6,6,'arc5258','arc5258.jpg',1,'image/jpeg',1536,999,NULL,NULL),(7,7,'arc5262','arc5262.jpg',1,'image/jpeg',1003,1536,NULL,NULL),(8,8,'arc5364','arc5364.jpg',1,'image/jpeg',1516,1024,NULL,NULL),(9,9,'arc5425','arc5425.jpg',1,'image/jpeg',1536,1019,NULL,NULL),(10,10,'arc7078','arc7078.jpg',1,'image/jpeg',1003,1536,NULL,NULL),(11,11,'arc7688','arc7688.jpg',1,'image/jpeg',1536,1003,NULL,NULL),(12,12,'arc8682','arc8682.jpg',1,'image/jpeg',1536,994,NULL,NULL),(13,13,'arc8729','arc8729.jpg',1,'image/jpeg',1536,1012,NULL,NULL),(14,14,'ard4274','ard4274.jpg',1,'image/jpeg',1536,924,NULL,NULL),(15,15,'das0201','das0201.jpg',1,'image/jpeg',1024,1365,NULL,NULL),(16,16,'das1788','das1788.jpg',1,'image/jpeg',1365,1024,NULL,NULL),(17,17,'dva0002','dva0002.jpg',1,'image/jpeg',1536,1008,NULL,NULL),(18,18,'dva0009','dva0009.jpg',1,'image/jpeg',1024,1454,NULL,NULL),(19,19,'dva0016','dva0016.jpg',1,'image/jpeg',1314,1024,NULL,NULL),(20,20,'dva0077','dva0077.jpg',1,'image/jpeg',1024,1525,NULL,NULL),(21,21,'dva0104','dva0104.jpg',1,'image/jpeg',1536,1016,NULL,NULL),(22,22,'dva1092','dva1092.jpg',1,'image/jpeg',1024,1043,NULL,NULL),(23,23,'dva1535','dva1535.jpg',1,'image/jpeg',1482,1024,NULL,NULL),(24,24,'dva1621','dva1621.jpg',1,'image/jpeg',902,1536,NULL,NULL),(25,25,'dva1765','dva1765.jpg',1,'image/jpeg',1024,1516,NULL,NULL),(26,26,'dva3479','dva3479.jpg',1,'image/jpeg',1501,1024,NULL,NULL),(27,27,'jia2101','jia2101.jpg',1,'image/jpeg',1536,1021,NULL,NULL),(28,28,'jic0844','jic0844.jpg',1,'image/jpeg',1024,1405,NULL,NULL),(29,29,'jta0216','jta0216.jpg',1,'image/jpeg',1536,1019,NULL,NULL),(30,30,'lff1113','lff1113.jpg',1,'image/jpeg',1024,1176,NULL,NULL),(31,31,'lif2330','lif2330.jpg',1,'image/jpeg',1515,1024,NULL,NULL),(32,32,'lif2335','lif2335.jpg',1,'image/jpeg',1017,1536,NULL,NULL),(33,33,'lix0004','lix0004.jpg',1,'image/jpeg',1013,1536,NULL,NULL),(34,34,'ltw0001','ltw0001.jpg',1,'image/jpeg',1317,1024,NULL,NULL),(35,35,'mia2010','mia2010.jpg',1,'image/jpeg',1536,1021,NULL,NULL),(36,36,'nsf0093','nsf0093.jpg',1,'image/jpeg',1354,1024,NULL,NULL),(37,37,'psp0109','psp0109.jpg',1,'image/jpeg',1503,1024,NULL,NULL),(38,38,'seg0023','seg0023.jpg',1,'image/jpeg',1024,1517,NULL,NULL),(39,39,'sfr0427','sfr0427.jpg',1,'image/jpeg',1494,1024,NULL,NULL),(40,40,'sfr0485','sfr0485.jpg',1,'image/jpeg',1024,1503,NULL,NULL),(41,41,'xir032462','xir032462.jpg',1,'image/jpeg',1382,1024,NULL,NULL),(42,42,'xir034107','xir034107.jpg',1,'image/jpeg',1496,1024,NULL,NULL),(43,43,'xir058599','xir058599.jpg',1,'image/jpeg',950,1536,NULL,NULL),(44,44,'xir156161','xir156161.jpg',1,'image/jpeg',936,1536,NULL,NULL),(45,45,'xir162303','xir162303.jpg',1,'image/jpeg',1024,1446,NULL,NULL),(46,46,'xir163472','xir163472.jpg',1,'image/jpeg',1024,1367,NULL,NULL),(47,47,'xir163473','xir163473.jpg',1,'image/jpeg',1024,1368,NULL,NULL),(48,48,'xir192377','xir192377.jpg',1,'image/jpeg',1024,1408,NULL,NULL),(49,49,'xir208568','xir208568.jpg',1,'image/jpeg',1024,1373,NULL,NULL),(50,50,'xir224971','xir224971.jpg',1,'image/jpeg',1028,1024,NULL,NULL),(51,5,'m-9244365','51-100x65.jpg',2,'image/jpeg',100,65,NULL,5),(52,2,'m-4540601','52-68x100.jpg',2,'image/jpeg',68,100,NULL,2),(53,1,'m-4016296','53-68x100.jpg',2,'image/jpeg',68,100,NULL,1),(54,6,'m-9297479','54-100x65.jpg',2,'image/jpeg',100,65,NULL,6),(55,4,'m-2620100','55-100x67.jpg',2,'image/jpeg',100,67,NULL,4),(56,3,'m-4636104','56-67x100.jpg',2,'image/jpeg',67,100,NULL,3),(57,7,'m-4495800','57-65x100.jpg',2,'image/jpeg',65,100,NULL,7),(58,8,'m-9719281','58-100x67.jpg',2,'image/jpeg',100,67,NULL,8),(59,9,'m-1667262','59-100x66.jpg',2,'image/jpeg',100,66,NULL,9),(60,11,'m-4346756','60-100x65.jpg',2,'image/jpeg',100,65,NULL,11),(61,10,'m-3406229','61-65x100.jpg',2,'image/jpeg',65,100,NULL,10),(62,12,'m-8965848','62-100x64.jpg',2,'image/jpeg',100,64,NULL,12),(63,13,'m-4420511','63-100x65.jpg',2,'image/jpeg',100,65,NULL,13),(64,14,'m-5489836','64-100x60.jpg',2,'image/jpeg',100,60,NULL,14),(65,15,'m-3083443','65-75x100.jpg',2,'image/jpeg',75,100,NULL,15),(66,16,'m-6657163','66-100x75.jpg',2,'image/jpeg',100,75,NULL,16),(67,17,'m-5806330','67-100x65.jpg',2,'image/jpeg',100,65,NULL,17),(68,18,'m-7640494','68-70x100.jpg',2,'image/jpeg',70,100,NULL,18),(69,19,'m-7245060','69-100x77.jpg',2,'image/jpeg',100,77,NULL,19),(70,20,'m-7614451','70-67x100.jpg',2,'image/jpeg',67,100,NULL,20),(71,21,'m-3749613','71-100x66.jpg',2,'image/jpeg',100,66,NULL,21),(72,22,'m-8156755','72-99x100.jpg',2,'image/jpeg',99,100,NULL,22),(73,23,'m-1058159','73-100x69.jpg',2,'image/jpeg',100,69,NULL,23),(74,24,'m-2052515','74-58x100.jpg',2,'image/jpeg',58,100,NULL,24),(75,25,'m-6375564','75-67x100.jpg',2,'image/jpeg',67,100,NULL,25),(76,26,'m-8373411','76-100x68.jpg',2,'image/jpeg',100,68,NULL,26),(77,28,'m-4629529','77-72x100.jpg',2,'image/jpeg',72,100,NULL,28),(78,27,'m-9527983','78-100x66.jpg',2,'image/jpeg',100,66,NULL,27),(79,29,'m-4875412','79-100x66.jpg',2,'image/jpeg',100,66,NULL,29),(80,30,'m-4606309','80-87x100.jpg',2,'image/jpeg',87,100,NULL,30),(81,31,'m-7775216','81-100x67.jpg',2,'image/jpeg',100,67,NULL,31),(82,32,'m-6156134','82-66x100.jpg',2,'image/jpeg',66,100,NULL,32),(83,33,'m-5916170','83-66x100.jpg',2,'image/jpeg',66,100,NULL,33),(84,34,'m-4714436','84-100x77.jpg',2,'image/jpeg',100,77,NULL,34),(85,35,'m-7553784','85-100x66.jpg',2,'image/jpeg',100,66,NULL,35),(86,36,'m-4146876','86-100x75.jpg',2,'image/jpeg',100,75,NULL,36),(87,37,'m-8975191','87-100x68.jpg',2,'image/jpeg',100,68,NULL,37),(88,38,'m-5880682','88-67x100.jpg',2,'image/jpeg',67,100,NULL,38),(89,39,'m-2057308','89-100x68.jpg',2,'image/jpeg',100,68,NULL,39),(90,40,'m-8041797','90-68x100.jpg',2,'image/jpeg',68,100,NULL,40),(91,41,'m-9095752','91-100x74.jpg',2,'image/jpeg',100,74,NULL,41),(92,42,'m-7093300','92-100x68.jpg',2,'image/jpeg',100,68,NULL,42),(93,43,'m-2571068','93-62x100.jpg',2,'image/jpeg',62,100,NULL,43),(94,44,'m-7466213','94-60x100.jpg',2,'image/jpeg',60,100,NULL,44),(95,45,'m-8657712','95-70x100.jpg',2,'image/jpeg',70,100,NULL,45),(96,46,'m-4672095','96-75x100.jpg',2,'image/jpeg',75,100,NULL,46),(97,47,'m-2478274','97-75x100.jpg',2,'image/jpeg',75,100,NULL,47),(98,48,'m-8529637','98-72x100.jpg',2,'image/jpeg',72,100,NULL,48),(99,49,'m-8998559','99-74x100.jpg',2,'image/jpeg',74,100,NULL,49),(100,50,'m-9183447','100-100x99.jpg',2,'image/jpeg',100,99,NULL,50),(101,1,'m-7610369','101-100x100.jpg',2,'image/jpeg',100,100,NULL,1),(102,40,'m-5490683','102-100x100.jpg',2,'image/jpeg',100,100,NULL,40),(103,10,'m-7366423','103-100x100.jpg',2,'image/jpeg',100,100,NULL,10),(104,2,'m-7355028','104-100x100.jpg',2,'image/jpeg',100,100,NULL,2),(105,39,'m-9891448','105-100x100.jpg',2,'image/jpeg',100,100,NULL,39),(106,42,'m-6334213','106-100x100.jpg',2,'image/jpeg',100,100,NULL,42),(107,46,'m-5268075','107-100x100.jpg',2,'image/jpeg',100,100,NULL,46),(108,48,'m-6224957','108-100x100.jpg',2,'image/jpeg',100,100,NULL,48),(109,47,'m-1164831','109-100x100.jpg',2,'image/jpeg',100,100,NULL,47),(110,49,'m-8396638','110-100x100.jpg',2,'image/jpeg',100,100,NULL,49);
+/*!40000 ALTER TABLE `storage_media` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `storage_proxyurl`
+--
+
+DROP TABLE IF EXISTS `storage_proxyurl`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `storage_proxyurl` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `subnet_id` int(11) NOT NULL,
+  `url` varchar(1024) NOT NULL,
+  `context` varchar(256) DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_backend` varchar(256) DEFAULT NULL,
+  `last_access` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `storage_proxyurl_subnet_id` (`subnet_id`),
+  KEY `storage_proxyurl_user_id` (`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `storage_proxyurl`
+--
+
+LOCK TABLES `storage_proxyurl` WRITE;
+/*!40000 ALTER TABLE `storage_proxyurl` DISABLE KEYS */;
+/*!40000 ALTER TABLE `storage_proxyurl` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `storage_storage`
+--
+
+DROP TABLE IF EXISTS `storage_storage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `storage_storage` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(100) NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `system` varchar(50) NOT NULL,
+  `base` varchar(1024) DEFAULT NULL,
+  `urlbase` varchar(1024) DEFAULT NULL,
+  `serverbase` varchar(1024) DEFAULT NULL,
+  `derivative_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `derivative_id` (`derivative_id`),
+  KEY `storage_storage_name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `storage_storage`
+--
+
+LOCK TABLES `storage_storage` WRITE;
+/*!40000 ALTER TABLE `storage_storage` DISABLE KEYS */;
+INSERT INTO `storage_storage` VALUES (1,'Sample Storage','sample-storage','local','d:/work/rooibos/sample/images','','',2),(2,'Sample Storage','sample-storage-2','local','d:/dev/rooibos-scratch/sample-storage',NULL,NULL,NULL);
+/*!40000 ALTER TABLE `storage_storage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `storage_trustedsubnet`
+--
+
+DROP TABLE IF EXISTS `storage_trustedsubnet`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `storage_trustedsubnet` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `subnet` varchar(80) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `storage_trustedsubnet`
+--
+
+LOCK TABLES `storage_trustedsubnet` WRITE;
+/*!40000 ALTER TABLE `storage_trustedsubnet` DISABLE KEYS */;
+/*!40000 ALTER TABLE `storage_trustedsubnet` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tagging_tag`
+--
+
+DROP TABLE IF EXISTS `tagging_tag`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tagging_tag` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tagging_tag`
+--
+
+LOCK TABLES `tagging_tag` WRITE;
+/*!40000 ALTER TABLE `tagging_tag` DISABLE KEYS */;
+INSERT INTO `tagging_tag` VALUES (1,'europe'),(2,'france');
+/*!40000 ALTER TABLE `tagging_tag` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `tagging_taggeditem`
+--
+
+DROP TABLE IF EXISTS `tagging_taggeditem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tagging_taggeditem` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tag_id` int(11) NOT NULL,
+  `content_type_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tag_id` (`tag_id`,`content_type_id`,`object_id`),
+  KEY `tagging_taggeditem_tag_id` (`tag_id`),
+  KEY `tagging_taggeditem_content_type_id` (`content_type_id`),
+  KEY `tagging_taggeditem_object_id` (`object_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `tagging_taggeditem`
+--
+
+LOCK TABLES `tagging_taggeditem` WRITE;
+/*!40000 ALTER TABLE `tagging_taggeditem` DISABLE KEYS */;
+INSERT INTO `tagging_taggeditem` VALUES (1,1,26,3),(2,2,26,3);
+/*!40000 ALTER TABLE `tagging_taggeditem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `userprofile_preference`
+--
+
+DROP TABLE IF EXISTS `userprofile_preference`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `userprofile_preference` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `setting` varchar(128) NOT NULL,
+  `value` longtext NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `userprofile_preference`
+--
+
+LOCK TABLES `userprofile_preference` WRITE;
+/*!40000 ALTER TABLE `userprofile_preference` DISABLE KEYS */;
+INSERT INTO `userprofile_preference` VALUES (1,'data_import_file_-1274187344','{\"mapping\": [{\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"AdditionalInfo\", \"hidden\": false, \"ORDER\": 1}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist1_Corporate\", \"hidden\": false, \"ORDER\": 2}, {\"separate\": true, \"mapping\": \"3\", \"label\": \"Artist\", \"fieldname\": \"Artist1_DisplayName\", \"hidden\": false, \"ORDER\": 3}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist1_Gender\", \"hidden\": false, \"ORDER\": 4}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist1_Lifetime\", \"hidden\": false, \"ORDER\": 5}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist1_Nationality\", \"hidden\": false, \"ORDER\": 6}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist1_SortName\", \"hidden\": false, \"ORDER\": 7}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_Corporate\", \"hidden\": false, \"ORDER\": 8}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_DisplayName\", \"hidden\": false, \"ORDER\": 9}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_Gender\", \"hidden\": false, \"ORDER\": 10}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_Lifetime\", \"hidden\": false, \"ORDER\": 11}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_Nationality\", \"hidden\": false, \"ORDER\": 12}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist2_SortName\", \"hidden\": false, \"ORDER\": 13}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_Corporate\", \"hidden\": false, \"ORDER\": 14}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_DisplayName\", \"hidden\": false, \"ORDER\": 15}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_Gender\", \"hidden\": false, \"ORDER\": 16}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_Lifetime\", \"hidden\": false, \"ORDER\": 17}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_Nationality\", \"hidden\": false, \"ORDER\": 18}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist3_SortName\", \"hidden\": false, \"ORDER\": 19}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_Corporate\", \"hidden\": false, \"ORDER\": 20}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_DisplayName\", \"hidden\": false, \"ORDER\": 21}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_Gender\", \"hidden\": false, \"ORDER\": 22}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_Lifetime\", \"hidden\": false, \"ORDER\": 23}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_Nationality\", \"hidden\": false, \"ORDER\": 24}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist4_SortName\", \"hidden\": false, \"ORDER\": 25}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_Corporate\", \"hidden\": false, \"ORDER\": 26}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_DisplayName\", \"hidden\": false, \"ORDER\": 27}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_Gender\", \"hidden\": false, \"ORDER\": 28}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_Lifetime\", \"hidden\": false, \"ORDER\": 29}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_Nationality\", \"hidden\": false, \"ORDER\": 30}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Artist5_SortName\", \"hidden\": false, \"ORDER\": 31}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Attribution\", \"hidden\": false, \"ORDER\": 32}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"CatalogNum\", \"hidden\": false, \"ORDER\": 33}, {\"separate\": true, \"mapping\": \"2\", \"label\": \"City or Site\", \"fieldname\": \"CityOrSite\", \"hidden\": false, \"ORDER\": 34}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Classification\", \"hidden\": false, \"ORDER\": 35}, {\"separate\": true, \"mapping\": \"2\", \"label\": \"Country\", \"fieldname\": \"Country\", \"hidden\": false, \"ORDER\": 36}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Depth\", \"hidden\": false, \"ORDER\": 37}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Dimensions\", \"hidden\": false, \"ORDER\": 38}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Extent\", \"hidden\": false, \"ORDER\": 39}, {\"separate\": true, \"mapping\": \"7\", \"label\": \"\", \"fieldname\": \"Filename\", \"hidden\": false, \"ORDER\": 99}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Height\", \"hidden\": false, \"ORDER\": 41}, {\"separate\": true, \"mapping\": \"21\", \"label\": \"\", \"fieldname\": \"Inscription\", \"hidden\": false, \"ORDER\": 42}, {\"separate\": true, \"mapping\": \"23\", \"label\": \"\", \"fieldname\": \"Material\", \"hidden\": false, \"ORDER\": 43}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Medium\", \"hidden\": false, \"ORDER\": 44}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"MuseumCity\", \"hidden\": false, \"ORDER\": 45}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"MuseumCountry\", \"hidden\": false, \"ORDER\": 46}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"MuseumName\", \"hidden\": false, \"ORDER\": 47}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Origin\", \"hidden\": false, \"ORDER\": 48}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Period\", \"hidden\": false, \"ORDER\": 49}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"PrincipalView\", \"hidden\": false, \"ORDER\": 50}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"RepositoryID\", \"hidden\": false, \"ORDER\": 51}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Support\", \"hidden\": false, \"ORDER\": 52}, {\"separate\": true, \"mapping\": \"14\", \"label\": \"\", \"fieldname\": \"Title\", \"hidden\": false, \"ORDER\": 1}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Units\", \"hidden\": false, \"ORDER\": 54}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Vendor\", \"hidden\": false, \"ORDER\": 55}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"ViewDescription\", \"hidden\": false, \"ORDER\": 56}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"Width\", \"hidden\": false, \"ORDER\": 57}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"WorkDate\", \"hidden\": false, \"ORDER\": 58}, {\"separate\": true, \"mapping\": \"\", \"label\": \"\", \"fieldname\": \"WorkDescription\", \"hidden\": false, \"ORDER\": 59}], \"options\": {\"fieldset\": null, \"personal\": false, \"update\": true, \"add\": true, \"collections\": [\"1\"], \"test\": false, \"separator\": \"\"}}'),(2,'ui_results_sidebar_facet_title_t','true'),(3,'ui_results_sidebar_facet_format_t','true'),(4,'ui_results_sidebar_facet_creator_t','true'),(5,'ui_results_sidebar_facet_coverage_t','true');
+/*!40000 ALTER TABLE `userprofile_preference` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `userprofile_userprofile`
+--
+
+DROP TABLE IF EXISTS `userprofile_userprofile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `userprofile_userprofile` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_id` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `userprofile_userprofile`
+--
+
+LOCK TABLES `userprofile_userprofile` WRITE;
+/*!40000 ALTER TABLE `userprofile_userprofile` DISABLE KEYS */;
+INSERT INTO `userprofile_userprofile` VALUES (1,2);
+/*!40000 ALTER TABLE `userprofile_userprofile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `userprofile_userprofile_preferences`
+--
+
+DROP TABLE IF EXISTS `userprofile_userprofile_preferences`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `userprofile_userprofile_preferences` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userprofile_id` int(11) NOT NULL,
+  `preference_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userprofile_id` (`userprofile_id`,`preference_id`),
+  KEY `preference_id_refs_id_22f1571c` (`preference_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `userprofile_userprofile_preferences`
+--
+
+LOCK TABLES `userprofile_userprofile_preferences` WRITE;
+/*!40000 ALTER TABLE `userprofile_userprofile_preferences` DISABLE KEYS */;
+INSERT INTO `userprofile_userprofile_preferences` VALUES (1,1,1),(2,1,2),(3,1,3),(4,1,4),(5,1,5);
+/*!40000 ALTER TABLE `userprofile_userprofile_preferences` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `util_ownedwrapper`
+--
+
+DROP TABLE IF EXISTS `util_ownedwrapper`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `util_ownedwrapper` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_type_id` int(11) NOT NULL,
+  `object_id` int(10) unsigned NOT NULL,
+  `user_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `content_type_id` (`content_type_id`,`object_id`,`user_id`),
+  KEY `util_ownedwrapper_content_type_id` (`content_type_id`),
+  KEY `util_ownedwrapper_user_id` (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `util_ownedwrapper`
+--
+
+LOCK TABLES `util_ownedwrapper` WRITE;
+/*!40000 ALTER TABLE `util_ownedwrapper` DISABLE KEYS */;
+INSERT INTO `util_ownedwrapper` VALUES (1,16,48,2),(2,16,8,2),(3,37,1,2);
+/*!40000 ALTER TABLE `util_ownedwrapper` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `workers_jobinfo`
+--
+
+DROP TABLE IF EXISTS `workers_jobinfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `workers_jobinfo` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `owner_id` int(11) DEFAULT NULL,
+  `func` varchar(128) NOT NULL,
+  `arg` longtext NOT NULL,
+  `status` longtext,
+  `created_time` datetime NOT NULL,
+  `status_time` datetime DEFAULT NULL,
+  `completed` tinyint(1) NOT NULL,
+  `result` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `workers_jobinfo_owner_id` (`owner_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `workers_jobinfo`
+--
+
+LOCK TABLES `workers_jobinfo` WRITE;
+/*!40000 ALTER TABLE `workers_jobinfo` DISABLE KEYS */;
+INSERT INTO `workers_jobinfo` VALUES (1,2,'csvimport','{\"fieldset\": null, \"personal\": false, \"labels\": {\"Dimensions\": \"\", \"Title\": \"\", \"Support\": \"\", \"Filename\": \"\", \"Artist1_SortName\": \"\", \"Artist5_Nationality\": \"\", \"Height\": \"\", \"PrincipalView\": \"\", \"Artist3_Corporate\": \"\", \"Artist3_SortName\": \"\", \"Artist5_DisplayName\": \"\", \"Units\": \"\", \"Artist4_Gender\": \"\", \"MuseumCountry\": \"\", \"Artist2_SortName\": \"\", \"Artist3_Lifetime\": \"\", \"Medium\": \"\", \"Attribution\": \"\", \"Artist2_Nationality\": \"\", \"RepositoryID\": \"\", \"Artist3_DisplayName\": \"\", \"Material\": \"\", \"Artist2_Gender\": \"\", \"Artist1_DisplayName\": \"Artist\", \"Artist4_Corporate\": \"\", \"Artist3_Nationality\": \"\", \"WorkDescription\": \"\", \"Artist4_SortName\": \"\", \"Artist4_Lifetime\": \"\", \"AdditionalInfo\": \"\", \"WorkDate\": \"\", \"Artist3_Gender\": \"\", \"Artist1_Corporate\": \"\", \"Country\": \"Country\", \"Artist4_DisplayName\": \"\", \"Artist1_Lifetime\": \"\", \"ViewDescription\": \"\", \"Depth\": \"\", \"Artist5_SortName\": \"\", \"Artist2_Corporate\": \"\", \"Vendor\": \"\", \"Artist2_Lifetime\": \"\", \"Artist4_Nationality\": \"\", \"Origin\": \"\", \"Inscription\": \"\", \"Classification\": \"\", \"Artist1_Nationality\": \"\", \"Width\": \"\", \"Artist2_DisplayName\": \"\", \"Period\": \"\", \"CityOrSite\": \"City or Site\", \"Artist1_Gender\": \"\", \"MuseumCity\": \"\", \"Artist5_Lifetime\": \"\", \"CatalogNum\": \"\", \"Extent\": \"\", \"Artist5_Gender\": \"\", \"Artist5_Corporate\": \"\", \"MuseumName\": \"\"}, \"mapping\": {\"Inscription\": 21, \"Title\": 14, \"Country\": 2, \"Material\": 23, \"Filename\": 7, \"Artist1_DisplayName\": 3, \"CityOrSite\": 2}, \"update\": true, \"add\": true, \"collections\": [1], \"file\": \"80348d986d52eb9943d878c26171ab16-FDkeEtCv1jwofYrhyO9ZAsWaHqNX6Rn2\", \"test\": false, \"separator\": \"\", \"hidden\": {\"Dimensions\": false, \"Title\": false, \"Support\": false, \"Filename\": false, \"Artist1_SortName\": false, \"Artist5_Nationality\": false, \"Height\": false, \"PrincipalView\": false, \"Artist3_Corporate\": false, \"Artist3_SortName\": false, \"Artist5_DisplayName\": false, \"Units\": false, \"Artist4_Gender\": false, \"MuseumCountry\": false, \"Artist2_SortName\": false, \"Artist3_Lifetime\": false, \"Medium\": false, \"Attribution\": false, \"Artist2_Nationality\": false, \"RepositoryID\": false, \"Artist3_DisplayName\": false, \"Material\": false, \"Artist2_Gender\": false, \"Artist1_DisplayName\": false, \"Artist4_Corporate\": false, \"Artist3_Nationality\": false, \"WorkDescription\": false, \"Artist4_SortName\": false, \"Artist4_Lifetime\": false, \"AdditionalInfo\": false, \"WorkDate\": false, \"Artist3_Gender\": false, \"Artist1_Corporate\": false, \"Country\": false, \"Artist4_DisplayName\": false, \"Artist1_Lifetime\": false, \"ViewDescription\": false, \"Depth\": false, \"Artist5_SortName\": false, \"Artist2_Corporate\": false, \"Vendor\": false, \"Artist2_Lifetime\": false, \"Artist4_Nationality\": false, \"Origin\": false, \"Inscription\": false, \"Classification\": false, \"Artist1_Nationality\": false, \"Width\": false, \"Artist2_DisplayName\": false, \"Period\": false, \"CityOrSite\": false, \"Artist1_Gender\": false, \"MuseumCity\": false, \"Artist5_Lifetime\": false, \"CatalogNum\": false, \"Extent\": false, \"Artist5_Gender\": false, \"Artist5_Corporate\": false, \"MuseumName\": false}, \"order\": {\"Dimensions\": 38, \"Title\": 1, \"Support\": 52, \"Filename\": 99, \"Artist1_SortName\": 7, \"Artist5_Nationality\": 30, \"Height\": 41, \"PrincipalView\": 50, \"Artist3_Corporate\": 14, \"Artist3_SortName\": 19, \"Artist5_DisplayName\": 27, \"Units\": 54, \"Artist4_Gender\": 22, \"MuseumCountry\": 46, \"Artist2_SortName\": 13, \"Artist3_Lifetime\": 17, \"Medium\": 44, \"Attribution\": 32, \"Artist2_Nationality\": 12, \"RepositoryID\": 51, \"Artist3_DisplayName\": 15, \"Material\": 43, \"Artist2_Gender\": 10, \"Artist1_DisplayName\": 3, \"Artist4_Corporate\": 20, \"Artist3_Nationality\": 18, \"WorkDescription\": 59, \"Artist4_SortName\": 25, \"Artist4_Lifetime\": 23, \"AdditionalInfo\": 1, \"WorkDate\": 58, \"Artist3_Gender\": 16, \"Artist1_Corporate\": 2, \"Country\": 36, \"Artist4_DisplayName\": 21, \"Artist1_Lifetime\": 5, \"ViewDescription\": 56, \"Depth\": 37, \"Artist5_SortName\": 31, \"Artist2_Corporate\": 8, \"Vendor\": 55, \"Artist2_Lifetime\": 11, \"Artist4_Nationality\": 24, \"Origin\": 48, \"Inscription\": 42, \"Classification\": 35, \"Artist1_Nationality\": 6, \"Width\": 57, \"Artist2_DisplayName\": 9, \"Period\": 49, \"CityOrSite\": 34, \"Artist1_Gender\": 4, \"MuseumCity\": 45, \"Artist5_Lifetime\": 29, \"CatalogNum\": 33, \"Extent\": 39, \"Artist5_Gender\": 28, \"Artist5_Corporate\": 26, \"MuseumName\": 47}, \"separate_fields\": {\"Dimensions\": true, \"Title\": true, \"Support\": true, \"Filename\": true, \"Artist1_SortName\": true, \"Artist5_Nationality\": true, \"Height\": true, \"PrincipalView\": true, \"Artist3_Corporate\": true, \"Artist3_SortName\": true, \"Artist5_DisplayName\": true, \"Units\": true, \"Artist4_Gender\": true, \"MuseumCountry\": true, \"Artist2_SortName\": true, \"Artist3_Lifetime\": true, \"Medium\": true, \"Attribution\": true, \"Artist2_Nationality\": true, \"RepositoryID\": true, \"Artist3_DisplayName\": true, \"Material\": true, \"Artist2_Gender\": true, \"Artist1_DisplayName\": true, \"Artist4_Corporate\": true, \"Artist3_Nationality\": true, \"WorkDescription\": true, \"Artist4_SortName\": true, \"Artist4_Lifetime\": true, \"AdditionalInfo\": true, \"WorkDate\": true, \"Artist3_Gender\": true, \"Artist1_Corporate\": true, \"Country\": true, \"Artist4_DisplayName\": true, \"Artist1_Lifetime\": true, \"ViewDescription\": true, \"Depth\": true, \"Artist5_SortName\": true, \"Artist2_Corporate\": true, \"Vendor\": true, \"Artist2_Lifetime\": true, \"Artist4_Nationality\": true, \"Origin\": true, \"Inscription\": true, \"Classification\": true, \"Artist1_Nationality\": true, \"Width\": true, \"Artist2_DisplayName\": true, \"Period\": true, \"CityOrSite\": true, \"Artist1_Gender\": true, \"MuseumCity\": true, \"Artist5_Lifetime\": true, \"CatalogNum\": true, \"Extent\": true, \"Artist5_Gender\": true, \"Artist5_Corporate\": true, \"MuseumName\": true}}','Complete','2010-09-13 13:47:03','2010-09-13 13:47:04',1,'50 rows processed');
+/*!40000 ALTER TABLE `workers_jobinfo` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2010-09-13 14:44:53

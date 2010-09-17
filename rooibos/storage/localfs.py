@@ -14,6 +14,12 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
                                                    'mediaid': media.id,
                                                    'media': media.name})
 
+    def get_delivery_media_url(self, storage, media):
+        if storage.urlbase:
+            return storage.urlbase % dict(filename=media.url)
+        else:
+            return None
+
     def get_absolute_file_path(self, storage, media):
         return self.path(media.url)
 
@@ -34,7 +40,7 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
 
     def is_local(self):
         return True
-    
+
     def get_files(self):
         result = []
         location = os.path.normpath(self.location)
@@ -44,4 +50,3 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
                 path = path[len(os.path.sep):]
             result.extend(os.path.join(path, file) for file in files)
         return result
-    

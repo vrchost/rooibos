@@ -32,7 +32,7 @@ $(document).ready(function() {
 <h1>{{ record.title }}</h1>
 
 
-<a href="{{ media.get_absolute_url }}" id="player"
-style="margin-top: 70px;display:block; width:{{ media.width|default:"520" }}px; height:{{ media.height|default:"330" }}px"></a> 
+<a href="{{ media.get_delivery_url }}" id="player"
+style="margin-top: 70px;display:block; width:{{ media.width|default:"520" }}px; height:{{ media.height|default:"330" }}px"></a>
 
 {% endblock %}

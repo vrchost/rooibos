@@ -1,0 +1,20 @@
+﻿Filename	CatalogNum	Chapter	Plate	OtherFig	SetType	Title	Author	Edition	
+jia2101.jpg	Jia-2101	5	116		Basic	A History of Far Eastern Art	Lee, Sherman E.	5th Ed.
+nsf0093.jpg	Nsf-0093	20	18		Basic	Art Across Time	Schneider Adams	2nd ed.
+nsf0093.jpg	Nsf-0093	18	10		Basic	Art and Ideas	Fleming	10th ed.
+nsf0093.jpg	nsf-0093	27	17		Basic	Art History	Stokstad	Revised 2nd edition
+nsf0093.jpg	Nsf-0093	31	3		Basic	Art: A History of Painting, Sculpture and Architecture	Hartt	4th ed.
+dva1092.jpg	Dva-1092	38	36		Basic	Art: A History of Painting, Sculpture and Architecture	Hartt	4th ed.
+nsf0093.jpg	nsf-0093	21	542		Basic	Artforms	Preble, Duane and Sarah Preble	7th ed. revised
+nsf0093.jpg	Nsf-0093	17	10		Basic	Culture and Values	Cunningham & Reich	6th ed.
+nsf0093.jpg	Nsf-0093	14	1		Basic	Exploring Art	Margaret Lazzari	1st ed.
+jia2101.jpg	Jia-2101	6	5		Basic	Gardner's Art Through the Ages	Kleiner and Mamiya	12th ed.
+nsf0093.jpg	Nsf-0093	28	43		Basic	Gardner's Art Through the Ages	Kleiner and Mamiya	12th ed.
+nsf0093.jpg	Nsf-0093	21	25		Basic	History of Art	Janson	6th ed.
+lif2330.jpg	Lif-2330	19	57		Basic	History of Italian Renaissance Art	Hartt & Wilkins	5th ed.
+lif2330.jpg	Lif-2330	19	656	656	Basic	History of Italian Renaissance Art	Hartt	4th ed.
+nsf0093.jpg	Nsf-0093	5	20		Basic	Living with Art	Gilbert	6th ed.
+lff1113.jpg	lff-1113	16	15		Basic	Northern Renaissance Art	James Snyder	2nd ed.
+jia2101.jpg	Jia-2101	6	6		Basic	The Visual Arts: A History	Honour & Fleming	6th ed.
+nsf0093.jpg	Nsf-0093	15	8		Basic	The Visual Arts: A History	Honour & Fleming	6th ed.
+nsf0093.jpg	Nsf-0093	17	8		Basic	Understanding Art	Lois Fichner-Rathus	7th ed.

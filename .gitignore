@@ -9,3 +9,4 @@ rooibos/*/migrations/
 solr/wrapper.*
 solr/wrapper-license.conf
 config.xml
+CACHE

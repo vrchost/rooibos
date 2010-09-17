@@ -54,17 +54,17 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         media = Media.objects.create(record=self.record, name='image', storage=self.storage)
         content = StringIO('hello world')
         media.save_file('test.txt', content)
-        
+
         media2 = Media.objects.create(record=self.record, name='image', storage=self.storage)
         self.assertNotEqual('image', media2.name)
-        
+
         content2 = StringIO('hallo welt')
         media2.save_file('test.txt', content2)
         self.assertNotEqual('test.txt', media2.url)
-        
+
         self.assertEqual('hello world', media.load_file().read())
         self.assertEqual('hallo welt', media2.load_file().read())
-        
+
 
     def test_thumbnail(self):
         Media.objects.filter(record=self.record).delete()
@@ -80,7 +80,7 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
 
     def test_crop_to_square(self):
-        
+
         Media.objects.filter(record=self.record).delete()
         media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
         with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
@@ -157,7 +157,7 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         # limit user2 image size
         user2_storage_acl.restrictions = dict(width=200, height=200)
         user2_storage_acl.save()
-        
+
         # we should now get a smaller image
         result = get_image_for_record(self.record, width=400, height=400, user=user2)
         self.assertEqual(200, result.width)
@@ -177,11 +177,11 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
 
     def testDerivativeStorageRaceCondition(self):
-        
+
         s = Storage.objects.create(title='Test', system='local')
         derivatives = dict()
         errors = dict()
-        
+
         class GetDerivativeStorageThread(Thread):
             def run(self):
                 try:
@@ -194,14 +194,28 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
                         errors.setdefault('Cannot run this test with in-memory sqlite database', None)
                     else:
                         raise e
-                
+
         threads = [GetDerivativeStorageThread() for i in range(10)]
         map(Thread.start, threads)
         map(Thread.join, threads)
-        
+
         self.assertEqual({}, errors)
         self.assertEqual(1, len(derivatives.keys()))
 
+
+    def testDeliveryUrl(self):
+        s = Storage.objects.create(title='TestDelivery',
+                                   system='local',
+                                   base='t:/streaming/directory',
+                                   urlbase='rtmp://streaming:80/videos/mp4:test/%(filename)s')
+
+        media = Media.objects.create(record=self.record,
+                                     name='tiff',
+                                     mimetype='video/mp4',
+                                     storage=s,
+                                     url='test.mp4')
+
+        self.assertEqual('rtmp://streaming:80/videos/mp4:test/test.mp4', media.get_delivery_url())
 
 
 class ImageCompareTest(unittest.TestCase):
@@ -360,7 +374,7 @@ class PseudoStreamingStorageSystemTestCase(unittest.TestCase):
 
 
 class ProtectedContentDownloadTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='ProtectedTest')
@@ -384,10 +398,10 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
     def test_save_and_retrieve_file(self):
-        
+
         if not any(map(lambda c: c.endswith('.auth.middleware.BasicAuthenticationMiddleware'), settings.MIDDLEWARE_CLASSES)):
             return
-        
+
         c = Client()
         # not logged in
         response = c.get(self.media.get_absolute_url())
@@ -397,7 +411,7 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         response = c.get(self.media.get_absolute_url(), HTTP_AUTHORIZATION='basic %s' % 'protectedtest:test'.encode('base64').strip())
         self.assertEqual(200, response.status_code)
         self.assertEqual('hello world', response.content)
-        
+
         # now logged in
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -416,26 +430,26 @@ class AutoConnectMediaTestCase(unittest.TestCase):
         self.create_file('id_1')
         self.create_file('id_2')
         self.create_file(os.path.join('sub', 'id_99'))
-        
+
     def tearDown(self):
         for record in self.records:
             record.delete()
         self.storage.delete()
         self.collection.delete()
         shutil.rmtree(self.tempdir, ignore_errors=True)
-        
+
     def create_record(self, id):
         record = Record.objects.create(name='id')
         CollectionItem.objects.create(collection=self.collection, record=record)
         FieldValue.objects.create(record=record, field=standardfield('identifier'), value=id)
         self.records.append(record)
         return record
-    
+
     def create_file(self, id):
         file = open(os.path.join(self.tempdir, '%s.txt' % id), 'w')
         file.write('test')
         file.close()
-    
+
     def test_get_files(self):
         files = sorted(self.storage.get_files())
         self.assertEqual(3, len(files))
@@ -445,15 +459,15 @@ class AutoConnectMediaTestCase(unittest.TestCase):
 
     def test_get_files_in_subdirectories(self):
         pass
-    
+
     def test_connect_files(self):
         r1 = self.create_record('id_1')
         r2 = self.create_record('id_2')
         r3 = self.create_record('id_3')
         Media.objects.create(record=r1, storage=self.storage, url='id_1.txt')
-        
+
         matches = match_up_media(self.storage, self.collection)
-        
+
         self.assertEqual(1, len(matches))
         match = matches[0]
         record, file_url = match

@@ -53,7 +53,9 @@ def login(request):
         user = authenticate(username=username, password=password)
         if (user is not None) and user.is_active:
             django.contrib.auth.login(request, user)
-            return dict(result='ok', sessionid=request.session.session_key)
+            return dict(result='ok', 
+                        sessionid=request.session.session_key,
+                        userid=user.id)
         else:
             return dict(result='Login failed')
     else:
