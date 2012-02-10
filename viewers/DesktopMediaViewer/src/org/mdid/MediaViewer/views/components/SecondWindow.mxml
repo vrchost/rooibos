@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:components="org.mdid.MediaViewer.views.components.*"
+		  backgroundAlpha="1"
+		  backgroundColor="#000000"
+		  minWidth="750"
+		  minHeight="580"
+		  title="MediaViewer Companion Window"
+		  windowActivate="handleFocusInOut(event)"
+		  windowDeactivate="handleFocusInOut(event)"
+		  creationComplete="init()"
+		  showStatusBar="false"
+		  >
+	<!-- skinClass="assets.skins.CustomWindowApplicationSkin" -->
+	<s:layout>
+		<s:VerticalLayout 
+			horizontalAlign="center" 
+			verticalAlign="middle"
+			gap="0"
+			paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"
+			/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.events.AIREvent;
+			
+			import org.mdid.MediaViewer.SecondContext;
+			import org.robotlegs.core.IContext;
+			import org.robotlegs.core.IInjector;
+			import org.robotlegs.utilities.modular.core.IModuleContext;
+			
+			public var context:IModuleContext;
+			public var mdidSupportURL:String;
+			
+			[Bindable]
+			public var isSmoothBitmap:Boolean;
+			
+			public function dispose():void {
+				context.dispose();
+				context = null;
+			}
+			
+			private var revertStateTimer:Timer = new Timer(450, 1);
+			private function init():void {
+				revertStateTimer.addEventListener(TimerEvent.TIMER, revertStateToDefault);
+			}
+			private function revertStateToDefault(e:TimerEvent):void {
+				revertStateTimer.stop();
+				this.borderRect.visible = false;
+			}
+			protected function handleFocusInOut(e:AIREvent):void {
+				this.appholder.topbar.focusIndicator.source = (e.type == AIREvent.WINDOW_ACTIVATE) ? this.appholder.topbar.focus_in : this.appholder.topbar.focus_out;				
+				this.appholder.topbar.focusIndicator_refl.invalidateDisplayList();
+				if (this.appholder.topbar.smallpinbutton.styleName == "SmallPinButton") {
+					this.borderRect.width = this.appholder.width;
+					this.borderRect.height = this.appholder.height;
+					this.borderStroke.color = (e.type == AIREvent.WINDOW_ACTIVATE) ? 0x00F944 : 0xC3C3C3;
+					this.borderRect.visible = true;
+					revertStateTimer.reset();
+					revertStateTimer.start();
+				}
+			}
+
+		]]>
+	</fx:Script>
+		
+	<s:states>
+		<s:State name="default"/>
+	</s:states>	
+	
+	<components:AppHolder id="appholder"/>
+	<s:Rect id="borderRect" x="0" y="0" includeInLayout="false" alpha=".67">
+		<s:stroke>
+			<s:SolidColorStroke id="borderStroke" color="0x00F944" weight="8"/>
+		</s:stroke>
+	</s:Rect>
+	
+</s:Window>

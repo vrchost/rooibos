@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:components="org.mdid.MediaViewer.views.components.*"
+		  verticalCenter="0"
+		  width="100%" height="100%" 
+		  creationComplete="init()"
+		  >
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			import org.mdid.MediaViewer.events.EdgeEvent;
+			
+			private var rightEdgeTimer:Timer = new Timer(850, 0);
+			private var leftEdgeTimer:Timer = new Timer(850, 0);
+			private var bottomEdgeTimer:Timer = new Timer(325, 0);
+			private var topEdgeTimer:Timer = new Timer(325, 0);
+			
+			protected function init():void {
+				rightEdgeTimer.addEventListener(TimerEvent.TIMER, handleRightEdgeTimerEvent);
+				leftEdgeTimer.addEventListener(TimerEvent.TIMER, handleLeftEdgeTimerEvent);
+				bottomEdgeTimer.addEventListener(TimerEvent.TIMER, handleBottomEdgeTimerEvent);
+				topEdgeTimer.addEventListener(TimerEvent.TIMER, handleTopEdgeTimerEvent);
+			}
+			
+			protected function left_clickHandler(event:MouseEvent=null):void {
+				if (this.leftEdge.previous.source != this.leftEdge.previousVestige) {
+					var eventType:String = event != null && event.shiftKey ? EdgeEvent.FIRST : EdgeEvent.PREVIOUS;
+					this.dispatchEvent(new EdgeEvent(eventType));
+				}
+			}
+			protected function right_clickHandler(event:MouseEvent=null):void {
+				if (this.rightEdge.next.source != this.rightEdge.nextVestige) {
+					var eventType:String = event != null && event.shiftKey ? EdgeEvent.LAST : EdgeEvent.NEXT;
+					this.dispatchEvent(new EdgeEvent(eventType));
+				}
+			}
+			protected function bottom_clickHandler(event:MouseEvent=null):void {
+				if (this.bottomEdge.zoomout.source != this.bottomEdge.zoomoutVestige) {
+					var eventType:String = event != null && event.shiftKey ? EdgeEvent.ZOOMOUTMAX : EdgeEvent.ZOOMOUT;
+					this.dispatchEvent(new EdgeEvent(eventType));
+				}
+			}
+			
+			protected function top_clickHandler(event:MouseEvent=null):void {
+				if (this.topEdge.zoomin.source != this.topEdge.zoominVestige) {
+					var eventType:String = event != null && event.shiftKey ? EdgeEvent.ZOOMINMAX : EdgeEvent.ZOOMIN;
+					this.dispatchEvent(new EdgeEvent(eventType));
+				}
+			}
+			
+			protected function handleRightEdgeTimerEvent(e:TimerEvent):void {
+				right_clickHandler();
+				rightEdgeTimer.delay = rightEdgeTimer.delay > 250 ? rightEdgeTimer.delay - 100 : 250;
+			}
+			protected function handleLeftEdgeTimerEvent(e:TimerEvent):void {
+				left_clickHandler();
+				leftEdgeTimer.delay = leftEdgeTimer.delay > 250 ? leftEdgeTimer.delay - 100 : 250;
+			}
+			protected function handleBottomEdgeTimerEvent(e:TimerEvent):void {
+				bottom_clickHandler();
+			}
+			protected function handleTopEdgeTimerEvent(e:TimerEvent):void {
+				top_clickHandler();
+			}
+			protected function mouseDownHandler(e:MouseEvent):void {
+				trace(e.currentTarget.id);
+				switch(e.currentTarget.id) {
+					case "rightEdge" :
+						right_clickHandler(e);
+						if (!e.shiftKey) {
+							rightEdgeTimer.delay = 850;
+							rightEdgeTimer.start();
+						}
+						break;
+					case "leftEdge" :
+						left_clickHandler(e);
+						if (!e.shiftKey) {
+							leftEdgeTimer.delay = 850;
+							leftEdgeTimer.start();
+						}
+						break;
+					case "bottomEdge" :
+						bottom_clickHandler(e);
+						if (!e.shiftKey) {
+							bottomEdgeTimer.start();
+						}
+						break;
+					case "topEdge" :
+						top_clickHandler(e);
+						if (!e.shiftKey) {
+							topEdgeTimer.start();
+						}
+						break;
+				}
+			}
+			protected function mouseOutorMouseUpHandler(e:MouseEvent):void {
+				switch(e.currentTarget.id) {
+					case "rightEdge" :
+						rightEdgeTimer.stop();
+						rightEdgeTimer.reset();
+						break;
+					case "leftEdge" :
+						leftEdgeTimer.stop();
+						leftEdgeTimer.reset();
+						break;
+					case "bottomEdge" :
+						bottomEdgeTimer.stop();
+						bottomEdgeTimer.reset();
+						break;
+					case "topEdge" :
+						topEdgeTimer.stop();
+						topEdgeTimer.reset();
+						break;
+				}
+			}
+		]]>
+	</fx:Script>
+	<components:TopEdge id="topEdge" mouseDown="mouseDownHandler(event)" mouseUp="mouseOutorMouseUpHandler(event)" mouseOut="mouseOutorMouseUpHandler(event)" />
+	<s:HGroup horizontalCenter="0" width="100%" height="100%">
+		<components:LeftEdge id="leftEdge" mouseDown="mouseDownHandler(event)" mouseUp="mouseOutorMouseUpHandler(event)" mouseOut="mouseOutorMouseUpHandler(event)" />
+		<s:VGroup width="100%" height="100%" gap="0"/>
+		<components:RightEdge id="rightEdge" mouseDown="mouseDownHandler(event)" mouseUp="mouseOutorMouseUpHandler(event)" mouseOut="mouseOutorMouseUpHandler(event)" />	
+	</s:HGroup>
+	<components:BottomEdge id="bottomEdge" mouseDown="mouseDownHandler(event)" mouseUp="mouseOutorMouseUpHandler(event)" mouseOut="mouseOutorMouseUpHandler(event)" />
+</s:VGroup>

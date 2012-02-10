@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="60" height="129"
+		 x="0" y="0"
+		 verticalGap="0" horizontalAlign="left" verticalAlign="top"
+		 verticalScrollPolicy="off" horizontalScrollPolicy="off"
+		 styleName="PanZoom"
+		 alpha="0"
+		 mouseOver="handleMouseOver();"
+		 mouseOut="handleMouseOut();"
+		 creationComplete="init();"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.wheelerstreet.fig.panzoom.ImageViewer;
+			
+			import org.mdid.MediaViewer.events.EdgeEvent;
+			
+			[Bindable]
+			public var imageViewer:ImageViewer;
+			
+			private var thumbIsDown:Boolean = false;
+			private var isExtensionPinned:Boolean;
+			
+			private function init():void {
+				setPinning(false);
+				handleMouseOut();
+			}
+			private function handleMouseOver():void {
+				if (moveOut.isPlaying) moveOut.stop();
+				if (!moveIn.isPlaying) moveIn.play();
+			}
+			private function handleMouseOut():void {
+				if (moveIn.isPlaying) moveIn.stop(); 
+				if (!moveOut.isPlaying && !isExtensionPinned && !thumbIsDown) moveOut.play();
+			}
+			private function setPinning(theTruth:Boolean):void {
+				isExtensionPinned = theTruth;
+				this.extensionPin.styleName = isExtensionPinned ? "SmallPinnedButton" : "SmallPinButton";
+			}
+			protected function ImageSlider_changeHandler(e:Event):void {
+				if (this.thumbIsDown) {
+					imageViewer.setZoom(this.ImageSlider.value);
+				} else {
+					imageViewer.zoomTo(this.ImageSlider.value);
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="moveIn" target="{this}" duration="150" disableLayout="true">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="x" valueTo="0"/>
+				<s:SimpleMotionPath property="alpha" valueTo="1"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="moveOut" target="{this}" duration="150" startDelay="750" disableLayout="true">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="x" valueTo="-30"/>
+				<s:SimpleMotionPath property="alpha" valueTo="0"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	<s:HGroup paddingTop="5" gap="2">
+		<s:VGroup width="30" verticalAlign="middle" horizontalAlign="left" paddingLeft="8" verticalCenter="0" gap="3">
+			<s:HGroup paddingLeft="0">
+				<mx:LinkButton id="zoomIn" styleName="ZoomOutButton" click="{imageViewer.zoom('in', false);}"/>		
+			</s:HGroup>
+			<s:HGroup paddingLeft="1">			
+				<s:VSlider id="ImageSlider"
+						   enabled="true"
+						   minimum="{imageViewer.bitmapScaleFactorMin}" 
+						   maximum="{imageViewer.bitmapScaleFactorMax}" 
+						   value ="{imageViewer.bitmapScaleFactor}"
+						   changeStart="if (!this.thumbIsDown) this.ImageSlider.thumb.alpha = 0;"
+						   change ="ImageSlider_changeHandler(event);"
+						   changeEnd="if (!this.thumbIsDown) this.ImageSlider.thumb.alpha = 1;"
+						   snapInterval=".001"
+						   liveDragging="true"
+						   height="85"
+						   showDataTip="false"
+						   thumbPress="thumbIsDown = true;" 
+						   thumbRelease="thumbIsDown = false;" />
+			</s:HGroup>
+			<s:HGroup paddingLeft="0">
+				<mx:LinkButton id="zoomOut" styleName="ZoomInButton"  click="{imageViewer.zoom('out', false)}"/>
+			</s:HGroup>		
+		</s:VGroup>
+		<s:VGroup id="extendedControls" height="100%" gap="5" paddingLeft="0">
+			<mx:LinkButton id="extensionPin" styleName="SmallPinButton" click="this.setPinning(!this.isExtensionPinned);"/>
+			<mx:LinkButton styleName="Info" click="imageViewer.dispatchEvent(new EdgeEvent(EdgeEvent.TOGGLE_CATALOG_DATA_DISPLAY));"/>
+			<mx:LinkButton id="actualSize" styleName="ActualSize" click="imageViewer.zoomTo(1);"/>
+			<mx:LinkButton id="bestFit" styleName="BestFit" click="imageViewer.zoomToCenterView();"/>
+			<mx:Spacer height="100%"/>
+			<s:VGroup paddingLeft="-5" paddingBottom="0" horizontalAlign="left">
+				<s:Label id="percentLabel" text="{(Math.round(this.ImageSlider.value*100)).toString() + '%'}" color="#E3E3E3" styleName="ZoomPercentCaption"/>		 			
+			</s:VGroup>
+		</s:VGroup>
+	</s:HGroup>
+</mx:VBox>
