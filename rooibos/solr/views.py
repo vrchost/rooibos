@@ -336,6 +336,7 @@ def search(request, id=None, name=None, selected=False, json=False):
         q.pop('v.y', None)
         q.pop('x', None)
         q.pop('y', None)
+        q.pop('csrfmiddlewaretoken', None)
         return HttpResponseRedirect(request.path + '?' + q.urlencode())
 
     # get parameters relevant for search
