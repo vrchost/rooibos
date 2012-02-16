@@ -19,4 +19,7 @@
     {% if record.solr_presentation_ids %}
     <a href="{% url solr-search %}?c=presentations:{{ record.id }}"><img src="{% url static 'images/related.png' %}" alt="See related from {{ record.solr_presentation_ids|length }} presentation{{ record.solr_presentation_ids|length|pluralize }}" title="See related from {{ record.solr_presentation_ids|length }} presentation{{ record.solr_presentation_ids|length|pluralize }}" class="related-icon" /></a>
     {% endif %}
+    {% if record_in_current_presentation %}
+    <img src="{% url static 'images/inuse.png' %}" alt="In presentation" title="In presentation" class="inuse-icon" />
+    {% endif %}
 </div>

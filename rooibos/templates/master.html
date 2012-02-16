@@ -139,9 +139,8 @@
                     {% if user.is_authenticated %}
                     <li><a href="{% url presentation-manage %}">Organize</a>
                         <ul class="menu">
-                            {% recent_presentation request.user as presentation %}
-                            {% if presentation %}
-                            <li><a href="{% url presentation-edit presentation.id, presentation.name %}">Edit {{ presentation.title }}</a></li>
+                            {% if current_presentation %}
+                            <li><a href="{% url presentation-edit current_presentation.id, current_presentation.name %}">Edit {{ current_presentation.title }}</a></li>
                             {% endif %}
                             <li><a href="{% url presentation-manage %}">Your Presentations</a></li>
                             <li><a href="{% url solr-search %}?c=ownedtag:{{ user.id }}-favorite">Your Favorites</a></li>

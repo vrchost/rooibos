@@ -1018,6 +1018,13 @@ html.js-enabled .info-icon {
     border: none !important;
 }
 
+.inuse-icon {
+    position: absolute;
+    bottom: 34px;
+    right: 2px;
+    border: none !important;
+}
+
 #preview-dialog {
     padding: 10px;
     text-align: center;

@@ -11,8 +11,34 @@ from rooibos.util.models import OwnedWrapper
 from rooibos.contrib.tagging.models import Tag, TaggedItem
 from pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
+from rooibos.access.models import AccessControl
 
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
+
+
+def object_acl_to_solr(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    acl = AccessControl.objects.filter(
+        content_type=content_type,
+        object_id=obj.id,
+        ).values_list('user_id', 'usergroup_id', 'read', 'write', 'manage')
+    result = dict(read=[], write=[], manage=[])
+    for user, group, read, write, manage in acl:
+        acct = 'u%d' % user if user else 'g%d' % group if group else 'anon'
+        if read != None:
+            result['read'].append(acct if read else acct.upper())
+        if write != None:
+            result['write'].append(acct if write else acct.upper())
+        if manage != None:
+            result['manage'].append(acct if manage else acct.upper())
+    if not result['read']:
+        result['read'].append('default')
+    if not result['write']:
+        result['write'].append('default')
+    if not result['manage']:
+        result['manage'].append('default')
+    return result
+
 
 class SolrIndex():
 
@@ -176,7 +202,9 @@ class SolrIndex():
         all_parents = [g.collection_id for g in groups]
         parents = [g.collection_id for g in groups if not g.hidden]
         # Combine the direct parents with (great-)grandparents
+        # 'collections' is used for access control, hidden collections deny access
         doc['collections'] = list(reduce(lambda x, y: set(x) | set(y), [self.parent_groups[p] for p in parents], parents))
+        # 'allcollections' is used for collection filtering, can filter by hidden collections
         doc['allcollections'] = list(reduce(lambda x, y: set(x) | set(y), [self.parent_groups[p] for p in all_parents], all_parents))
         doc['presentations'] = record.presentationitem_set.all().distinct().values_list('presentation_id', flat=True)
         if record.owner_id:
@@ -192,6 +220,11 @@ class SolrIndex():
         # Creation and modification dates
         doc['created'] = record.created
         doc['modified'] = record.modified
+        # Access control
+        acl = object_acl_to_solr(record)
+        doc['acl_read'] = acl['read']
+        doc['acl_write'] = acl['write']
+        doc['acl_manage'] = acl['manage']
         return doc
 
     def _clean_string(self, s):

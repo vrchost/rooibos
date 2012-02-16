@@ -11,5 +11,7 @@
 {% if ac.user %}<img src="{% url static 'images/user.png' %}" alt="User" class="user-icon" />
 <a href="{% url access-effective-permissions contenttype.app_label, contenttype.model, object.id, object.name %}?user={{ ac.user.username|urlencode }}">{{ ac.user.username }}</a>
 {% else %}{% if ac.usergroup %}<img src="{% url static 'images/group.png' %}" alt="Group" class="user-icon" /> {{ ac.usergroup.name }}{% else %}Anonymous Users{% endif %}{% endif %}<br />
+{% empty %}
+{{ emptymessage|default:"No permissions set." }}
 {% endfor %}
 </div>

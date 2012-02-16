@@ -73,10 +73,12 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     writable_collections = list(accessible_ids(request.user, Collection, write=True))
     readable_collections = list(accessible_ids(request.user, Collection))
     can_edit = request.user.is_authenticated()
+    can_manage = False
 
     if id and name:
         record = Record.get_or_404(id, request.user)
         can_edit = can_edit and record.editable_by(request.user)
+        can_manage = record.manageable_by(request.user)
     else:
         if request.user.is_authenticated() and (writable_collections or (personal and readable_collections)):
             record = Record()
@@ -299,6 +301,9 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     else:
         upload_form = None
 
+    record_usage = record.presentationitem_set.values('presentation') \
+                    .distinct().count() if can_edit else 0
+
     return render_to_response('data_record.html',
                               {'record': record,
                                'media': media,
@@ -310,11 +315,13 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                                'fv_formset': formset,
                                'c_formset': collectionformset,
                                'can_edit': can_edit,
+                               'can_manage': can_manage,
                                'next': request.GET.get('next'),
                                'collection_items': collection_items,
                                'upload_form': upload_form,
                                'upload_url': ("%s?sidebar&next=%s" % (reverse('storage-media-upload', args=(record.id, record.name)), request.get_full_path()))
                                              if record.id else None,
+                               'record_usage': record_usage,
                                },
                               context_instance=RequestContext(request))
 

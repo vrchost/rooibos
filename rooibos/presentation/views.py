@@ -389,3 +389,15 @@ def duplicate(request, id, name):
     dup = duplicate_presentation(presentation, request.user)
     return HttpResponseRedirect(reverse('presentation-edit',
                                         args=(dup.id, dup.name)))
+
+
+@login_required
+def record_usage(request, id, name):
+    record = Record.get_or_404(id, request.user)
+    presentations = Presentation.objects.filter(items__record=record).distinct().order_by('title')
+
+    return render_to_response('presentation_record_usage.html',
+                       {'record': record,
+                        'presentations': presentations,
+                        },
+                       context_instance=RequestContext(request))

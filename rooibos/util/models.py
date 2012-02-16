@@ -9,8 +9,11 @@ class OwnedWrapperManager(models.Manager):
     Allows retrieval of a wrapper object by specifying
     """
     def get_for_object(self, user, object=None, type=None, object_id=None):
-        obj, created = self.get_or_create(user=user, object_id=object and object.id or object_id,
-                                  content_type=object and OwnedWrapper.t(object.__class__) or type)
+        obj, created = self.get_or_create(
+            user=user,
+            object_id=object and object.id or object_id,
+            content_type=object and OwnedWrapper.t(object.__class__)
+                                or int(type))
         return obj
 
 
@@ -24,9 +27,9 @@ class OwnedWrapper(models.Model):
     object = generic.GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User)
     taggeditem = generic.GenericRelation('tagging.TaggedItem')
-    
+
     objects = OwnedWrapperManager()
-    
+
     class Meta:
         unique_together = ('content_type', 'object_id', 'user')
 

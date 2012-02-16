@@ -17,11 +17,12 @@ def effective_permissions_form(context, object):
 
 
 @register.inclusion_tag('access_permissions_display.html', takes_context=True)
-def permissions_display(context, object):
+def permissions_display(context, object, emptymessage=None):
     permissions = get_accesscontrols_for_object(object)
     return {'object': object,
             'contenttype': ContentType.objects.get_for_model(object.__class__),
             'permissions': permissions,
+            'emptymessage': emptymessage,
             'request': context['request'],
             }
 

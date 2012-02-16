@@ -2,6 +2,7 @@
 {% load ui %}
 {% load viewers %}
 {% load data %}
+{% load access_control %}
 
 {% block javascript %}
 {{ block.super }}
@@ -117,6 +118,17 @@ $(document).ready(function() {
 </div>
 {% endif %}
 
+{% if can_edit and record.id and not fv_formset %}
+<div class="facet active-facet" id="data_record_usage">
+    <div class="facet-header">Usage</div>
+    <div class="facet-body">
+        <a href="{% url presentation-record-usage record.id, record.name %}">
+            Used in {{ record_usage|default:"no" }} presentation{{ record_usage|pluralize }}
+        </a>
+    </div>
+</div>
+{% endif %}
+
 {% if record.id and not fv_formset %}
 {% if request.user.is_authenticated %}
 <div class="facet active-facet" id="data_record_your_tags">
@@ -152,7 +164,7 @@ $(document).ready(function() {
 <div class="facet active-facet" id="data_record_parent">
     <div class="facet-header">Parent record</div>
     <div class="facet-body">
-        {% record record "True" "thumb" "True" %}
+        {% record record.parent "True" "thumb" "True" %}
     </div>
 </div>
 {% endif %}
@@ -162,7 +174,7 @@ $(document).ready(function() {
     <div class="facet-header">Child records</div>
     <div class="facet-body" style="max-height: 400px; overflow: auto;">
         {% for child in record.record_set.all %}
-        {% record record "True" "thumb" "True" %}
+        {% record child "True" "thumb" "True" %}
         {% endfor %}
     </div>
 </div>
@@ -219,6 +231,16 @@ Please save the record before uploading media.
 {% endif %}
     </div>
 </div>
+{% endif %}
+
+
+{% if can_manage %}
+  <div class="facet active-facet" id="data_record_sidebar_permissions">
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url record %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-body">
+        {% permissions_display record "Inherited from collection" %}
+    </div>
+  </div>
 {% endif %}
 
 {% endblock %}

@@ -12,6 +12,7 @@ from rooibos.presentation.models import Presentation
 from rooibos.util.models import OwnedWrapper
 from rooibos.access import filter_by_access
 from rooibos.userprofile.views import load_settings, store_settings
+from rooibos.ui.functions import fetch_current_presentation, store_current_presentation
 from base64 import b32encode, b64encode
 import os
 import glob
@@ -20,12 +21,16 @@ register = template.Library()
 
 @register.inclusion_tag('ui_record.html', takes_context=True)
 def record(context, record, selectable=False, viewmode="thumb", notitle=False):
+    cpr = context['current_presentation_records']
+    str(cpr)
+
     return {'record': record,
             'notitle': notitle,
             'selectable': selectable,
             'selected': record.id in context['request'].session.get('selected_records', ()),
             'viewmode': viewmode,
             'request': context['request'],
+            'record_in_current_presentation': record.id in cpr,
             }
 
 @register.simple_tag
@@ -105,19 +110,13 @@ def tag(context, tag, object=None, removable=False, styles=None):
 
 # Keep track of most recently edited presentation
 
-RECENT_PRESENTATION = 'ui_recent_presentation'
-
 class RecentPresentationNode(template.Node):
     def __init__(self, user, var_name):
         self.user = user
         self.var_name = var_name
     def render(self, context):
         user = self.user.resolve(context)
-        values = load_settings(user, RECENT_PRESENTATION)
-        presentation = None
-        if values.has_key(RECENT_PRESENTATION):
-            presentation = filter_by_access(user, Presentation, manage=True).filter(id=values[RECENT_PRESENTATION][0])
-        context[self.var_name] = presentation[0] if presentation else None
+        context[self.var_name] = fetch_current_presentation(user)
         return ''
 
 @register.tag
@@ -134,7 +133,7 @@ def recent_presentation(parser, token):
 
 @register.simple_tag
 def store_recent_presentation(user, presentation):
-    store_settings(user, RECENT_PRESENTATION, presentation.id)
+    store_current_presentation(user, presentation)
     return ''
 
 

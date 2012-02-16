@@ -266,6 +266,11 @@
 
    <field name="spell" type="textSpell" indexed="true" stored="true" multiValued="true"/>
 
+   <!-- Record-level access control fields -->
+   <field name="acl_read" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="acl_write" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="acl_manage" type="string" indexed="true" stored="true" multiValued="true" />
+
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
         will be used if the name matches any of the patterns.
         RESTRICTION: the glob-like pattern in the name attribute must have
