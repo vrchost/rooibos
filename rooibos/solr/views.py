@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from . import SolrIndex
 from pysolr import SolrError
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
 from rooibos.data.models import Field, Collection, FieldValue, Record
@@ -242,7 +242,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords, selecte
         query = 'id:(%s) AND %s' % (' '.join(map(str, selected or [-1])), query)
 
     if not user.is_superuser:
-        collections = ' '.join(map(str, accessible_ids(user, Collection)))
+        collections = ' '.join(map(str, filter_by_access(user, Collection).values_list('id', flat=True)))
         c = []
         if collections:
             # access through readable collection when no record ACL set
@@ -282,7 +282,7 @@ def run_search(user,
                remove=None,
                produce_facets=False):
 
-    available_storage = accessible_ids(user, Storage)
+    available_storage = list(filter_by_access(user, Storage).values_list('id', flat=True))
     exclude_facets = ['identifier']
     fields = Field.objects.filter(standard__prefix='dc').exclude(name__in=exclude_facets)
 

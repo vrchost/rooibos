@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, standardfield_ids
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
-from rooibos.access import accessible_ids
+from rooibos.access import filter_by_access
 
 
 class Presentation(models.Model):
@@ -84,15 +84,14 @@ class Presentation(models.Model):
                                                Q(is_superuser=True))
         q = Q(owner__in=valid_publishers) & Q(hidden=False)
         if owner and not owner.is_anonymous():
-            return q | Q(id__in=accessible_ids(owner, Presentation, manage=True))
+            return q | Q(id__in=filter_by_access(owner, Presentation, manage=True))
         else:
             return q
 
     @staticmethod
     def get_by_id_for_request(id, request):
-        p = Presentation.objects.filter(Presentation.published_Q(request.user),
-                                        id=id,
-                                        id__in=accessible_ids(request.user, Presentation))
+        p = (filter_by_access(request.user, Presentation)
+             .filter(Presentation.published_Q(request.user), id=id))
         return p[0] if p and p[0].verify_password(request) else None
 
     class Meta:

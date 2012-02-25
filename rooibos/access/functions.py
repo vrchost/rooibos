@@ -126,16 +126,6 @@ def filter_by_access(user, queryset, read=True, write=False, manage=False):
     return queryset.filter(build_query(read=read), build_query(write=write), build_query(manage=manage)).distinct()
 
 
-def accessible_ids(user, queryset, read=True, write=False, manage=False):
-    queryset = _get_queryset(queryset)
-    key = 'accessible_ids-%d-%s-%d%d%d' % (user.id if user and user.id else 0,
-                                           md5.new(str(queryset.query)).hexdigest(),
-                                           read, write, manage)
-    def get_ids():
-        return list(filter_by_access(user, queryset, read, write, manage).values_list('id', flat=True))
-    return get_cached_value(key, get_ids, model_dependencies=[queryset.model, AccessControl])
-
-
 def sync_access(from_instance, to_instance):
     from_model_type = ContentType.objects.get_for_model(from_instance)
     to_model_type = ContentType.objects.get_for_model(to_instance)

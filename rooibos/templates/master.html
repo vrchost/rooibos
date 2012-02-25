@@ -139,7 +139,7 @@
                     {% if user.is_authenticated %}
                     <li><a href="{% url presentation-manage %}">Organize</a>
                         <ul class="menu">
-                            {% if current_presentation %}
+                            {% if current_presentation.id %}
                             <li><a href="{% url presentation-edit current_presentation.id, current_presentation.name %}">Edit {{ current_presentation.title }}</a></li>
                             {% endif %}
                             <li><a href="{% url presentation-manage %}">Your Presentations</a></li>

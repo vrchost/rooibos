@@ -104,6 +104,34 @@ def render_audio_waveform_by_mimetype(audiofile, mimetype):
                                  format['left'], format['top'], format['height'], format['width'],
                                  format['max_only'])
 
+
+def render_pdf(pdffile):
+    try:
+        import gfx
+    except ImportError:
+        return None
+    doc = gfx.open("pdf", pdffile)
+    img = gfx.ImageList()
+    img.setparameter("antialise", "1") # turn on antialising
+    page1 = doc.getPage(1)
+    img.startpage(page1.width, page1.height)
+    page1.render(img)
+    img.endpage()
+
+    handle, filename = tempfile.mkstemp('.pdf')
+    os.close(handle)
+    try:
+        img.save(filename)
+        file = open(filename, 'rb')
+        result = StringIO(file.read())
+        file.close()
+        return result
+    except:
+        return None
+    finally:
+        os.remove(filename)
+
+
 def get_image(media):
     if media.mimetype.startswith('image/'):
         return media.load_file()
@@ -119,4 +147,6 @@ def get_image(media):
         return capture_video_frame(media.get_absolute_file_path(), offset=offset)
     if media.mimetype.startswith('audio/'):
         return render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
+    if media.mimetype == 'application/pdf':
+        return render_pdf(media.get_absolute_file_path())
     return None

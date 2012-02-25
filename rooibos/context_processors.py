@@ -44,7 +44,14 @@ def selected_records(request):
 def current_presentation(request):
 
     presentation = SimpleLazyObject(lambda: fetch_current_presentation(request.user))
-    presentation_records = IterableLazyObject(lambda: list(presentation.items.values_list('record_id', flat=True).distinct()))
+
+    def get_presentation_records():
+        try:
+            return list(presentation.items.values_list('record_id', flat=True).distinct())
+        except AttributeError:
+            return []
+
+    presentation_records = IterableLazyObject(get_presentation_records)
 
     return {
         'current_presentation': presentation,
