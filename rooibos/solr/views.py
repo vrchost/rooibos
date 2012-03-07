@@ -650,7 +650,7 @@ def fieldvalue_autocomplete(request):
     if not collections:
         raise Http404()
     query = request.GET.get('q', '').lower()
-    if len(query) >= 2:
+    if len(query) >= 2 and len(query) <= 32:
         limit = min(int(request.GET.get('limit', '10')), 100)
         field = request.GET.get('field')
         q = field and Q(field__id=field) or Q()

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 import uuid
+import logging
 
 
 class Viewer(object):
@@ -49,11 +50,14 @@ class Viewer(object):
 _registered_viewers = dict()
 
 def discover_viewers():
-    if not _registered_viewers:
+    if not _registered_viewers.has_key("__REGISTRATION_COMPLETED__"):
+        _registered_viewers["__REGISTRATION_COMPLETED__"] = lambda obj, request: None
         for app in settings.INSTALLED_APPS:
             try:
+                #logging.debug("Checking for viewers in %s.viewers" % app)
                 __import__(app + ".viewers")
-            except ImportError:
+            except ImportError, ex:
+                #logging.error("Failed to import viewers: %s" % ex)
                 pass
 
 
@@ -65,6 +69,7 @@ def get_registered_viewers():
 def register_viewer(name, cls):
     def register(func):
         _registered_viewers[name] = func
+        logging.debug("Successfully registered viewer %s" % name)
         setattr(cls, 'name', name)
         return func
     return register
