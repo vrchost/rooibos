@@ -35,6 +35,40 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
     finally:
         os.remove(filename)
 
+def _which(program):
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    return None
+
+def _pdfthumbnail(infile):
+    handle, filename = tempfile.mkstemp('.pdf')
+    os.close(handle)
+    try:
+        cmd = 'python "%s" "%s" "%s"' % (
+            os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
+            infile,
+            filename,
+        )
+        proc = Popen(cmd, executable=_which('python.exe'), stdout=PIPE, stderr=PIPE)
+        (output, errors) = proc.communicate()
+        file = open(filename, 'rb')
+        result = StringIO(file.read())
+        file.close()
+        return result, output, errors
+    except:
+        return None, None, None
+    finally:
+        os.remove(filename)
+
 
 def identify(file):
     try:
@@ -106,30 +140,8 @@ def render_audio_waveform_by_mimetype(audiofile, mimetype):
 
 
 def render_pdf(pdffile):
-    try:
-        import gfx
-    except ImportError:
-        return None
-    doc = gfx.open("pdf", pdffile)
-    img = gfx.ImageList()
-    img.setparameter("antialise", "1") # turn on antialising
-    page1 = doc.getPage(1)
-    img.startpage(page1.width, page1.height)
-    page1.render(img)
-    img.endpage()
-
-    handle, filename = tempfile.mkstemp('.pdf')
-    os.close(handle)
-    try:
-        img.save(filename)
-        file = open(filename, 'rb')
-        result = StringIO(file.read())
-        file.close()
-        return result
-    except:
-        return None
-    finally:
-        os.remove(filename)
+    image, output, errors = _pdfthumbnail(pdffile)
+    return image
 
 
 def get_image(media):

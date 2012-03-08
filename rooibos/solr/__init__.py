@@ -212,6 +212,10 @@ class SolrIndex():
         for m in media:
             doc.setdefault('mimetype', []).append('s%s-%s' % (m.storage_id, m.mimetype))
             doc.setdefault('resolution', []).append('s%s-%s' % (m.storage_id, self._determine_resolution_label(m.width, m.height)))
+            try:
+                doc.setdefault('filecontent', []).append(m.extract_text())
+            except:
+                pass
         # Index tags
         for ownedwrapper in OwnedWrapper.objects.select_related('user').filter(content_type=self._record_type, object_id=record.id):
             for tag in ownedwrapper.taggeditem.select_related('tag').all().values_list('tag__name', flat=True):

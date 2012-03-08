@@ -36,10 +36,9 @@ class Command(BaseCommand):
         pb = ProgressBar(collection.records.count())
         for count, record in enumerate(collection.records.all()):
 
-            get_thumbnail_for_record(record)
-            get_thumbnail_for_record(record, crop_to_square=True)
+            get_thumbnail_for_record(record, admin)
+            get_thumbnail_for_record(record, admin, crop_to_square=True)
 
             pb.update(count)
 
         pb.done()
-

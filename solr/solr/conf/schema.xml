@@ -243,6 +243,7 @@
 
    <field name="mimetype" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="resolution" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="filecontent" type="text" indexed="true" stored="false" multiValued="true" />
 
    <field name="popularity" type="sint" indexed="true" stored="true" default="0"/>
 
@@ -318,6 +319,7 @@
   is added to the index.  It's used either to index the same field differently,
   or to add multiple fields to the same field for easier/faster searching.  -->
   <copyField source="*_t" dest="text"/>
+  <copyField source="filecontent" dest="text"/>
   <!-- <copyField source="*_t" dest="spell"/> -->
 
 </schema>
