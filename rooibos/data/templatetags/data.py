@@ -3,6 +3,8 @@ from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.template.loader import get_template
 from django.template import Context, Variable
+from rooibos.data.forms import get_collection_visibility_prefs_form
+from rooibos.data.functions import get_collection_visibility_preferences
 
 register = template.Library()
 
@@ -53,3 +55,16 @@ def fieldvalue(record, field):
         if v.field.full_name == field:
             return v.value
     return ''
+
+
+@register.inclusion_tag('data_collection_visibility_preferences.html',
+                        takes_context=True)
+def collection_visibility_preferences(context):
+    user = context.get('user')
+    mode, ids = get_collection_visibility_preferences(user)
+    cform = get_collection_visibility_prefs_form(user)
+    form = cform(initial=dict(show_or_hide=mode, collections=ids))
+    return {
+        'form': form,
+        'request': context['request'],
+    }

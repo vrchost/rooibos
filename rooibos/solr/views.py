@@ -16,6 +16,8 @@ from rooibos.access import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
 from rooibos.data.models import Field, Collection, FieldValue, Record
+from rooibos.data.functions import apply_collection_visibility_preferences, \
+    get_collection_visibility_preferences
 from rooibos.storage.models import Storage
 from rooibos.ui import update_record_selection, clean_record_selection_vars
 from rooibos.federatedsearch.views import sidebar_api_raw
@@ -265,6 +267,13 @@ def _generate_query(search_facets, user, collection, criteria, keywords, selecte
         else:
             query = 'id:"-1"'
 
+    mode, ids = get_collection_visibility_preferences(user)
+    if ids:
+        query += ' AND %sallcollections:(%s)' % (
+                '-' if mode == 'show' else '',
+                ' '.join(map(str, ids)),
+            )
+
     return query
 
 
@@ -459,12 +468,18 @@ def search(request, id=None, name=None, selected=False, json=False):
         v = search_facets[f].federated_search_query(o)
         return v if not q else '%s %s' % (q, v)
 
+
+    mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
                           collection,
                           criteria,
                           keywords,
                           selected,
-                          remove)
+                          remove,
+                          mode,
+                          str(ids),
+                          )
+    print hash
     facets = cache.get('search_facets_html_%s' % hash)
 
     sort = sort.startswith('random') and 'random' or sort.split()[0]
@@ -560,12 +575,16 @@ def search_facets(request, id=None, name=None, selected=False):
                            },
                           context_instance=RequestContext(request))
 
+    mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
                           collection,
                           criteria,
                           keywords,
                           selected,
-                          remove)
+                          remove,
+                          mode,
+                          str(ids),
+                          )
 
     cache.set('search_facets_html_%s' % hash, html, 300)
 
@@ -586,8 +605,9 @@ def search_json(request, id=None, name=None, selected=False):
 
 
 def browse(request, id=None, name=None):
-    collections = filter_by_access(request.user, Collection) \
-        .annotate(num_records=Count('records')).filter(num_records__gt=0).order_by('title')
+    collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
+    collections = collections.annotate(num_records=Count('records')).filter(num_records__gt=0).order_by('title')
     if not collections:
         raise Http404()
     if request.GET.has_key('c'):
@@ -636,7 +656,9 @@ def browse(request, id=None, name=None):
 
 def overview(request):
 
-    collections = filter_by_access(request.user, Collection).order_by('title').annotate(num_records=Count('records'))
+    collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
+    collections = collections.order_by('title').annotate(num_records=Count('records'))
 
     return render_to_response('overview.html',
                               {'collections': collections,},
@@ -666,6 +688,7 @@ def fieldvalue_autocomplete(request):
 def search_form(request):
 
     collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
     if not collections:
         raise Http404()
 

@@ -343,7 +343,15 @@ if logging_output_enabled:
     logpath = os.path.join(settings.SCRATCH_DIR, 'logs')
     if not os.path.exists(logpath):
         os.makedirs(logpath)
+    # Can't do sys.argv since it does not exist when running under PyISAPIe
+    cmdline = getattr(sys, 'argv', [])
+    if len(cmdline) > 1:
+        basename = 'rooibos-%s' % '-'.join(re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:])
+    else:
+        basename = 'rooibos'
     from logging.handlers import TimedRotatingFileHandler
-    filehandler = TimedRotatingFileHandler(os.path.join(logpath, '%s.log' % getattr(settings, 'LOGFILENAME', 'rooibos')), 'midnight', 1, 14)
-    filehandler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s [%(pathname)s:%(funcName)s:%(lineno)d]"))
+    filehandler = TimedRotatingFileHandler(os.path.join(logpath, '%s.log' %
+        getattr(settings, 'LOGFILENAME', basename)), 'midnight', 1, 14)
+    filehandler.setFormatter(logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s [%(pathname)s:%(funcName)s:%(lineno)d]"))
     logging.root.addHandler(filehandler)

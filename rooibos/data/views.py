@@ -17,8 +17,11 @@ from django.template.loader import render_to_string
 from django.utils import simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from django.views.decorators.http import require_POST
 from models import *
-from forms import FieldSetChoiceField
+from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
+from functions import get_collection_visibility_preferences, \
+    set_collection_visibility_preferences, apply_collection_visibility_preferences
 from rooibos.access import filter_by_access, check_access
 from rooibos.presentation.models import Presentation
 from rooibos.storage.models import Media, Storage
@@ -29,23 +32,6 @@ from spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
-
-
-def collections(request):
-    collections = filter_by_access(request.user, Collection)
-    return render_to_response('data_groups.html',
-                              {'groups': collections, },
-                              context_instance=RequestContext(request))
-
-#def collection_raw(request, id, name):
-#    collection = get_object_or_404(filter_by_access(request.user, Collection), id=id)
-##    viewers = map(lambda v: v().generate(collection), get_viewers('collection', 'link'))
-#    return render_to_response('data_group.html',
-#                              {'collection': collection,
-##                               'viewers': viewers,
-#                               },
-#                              context_instance=RequestContext(request))
-
 
 
 @login_required
@@ -70,8 +56,9 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
            edit=False, customize=False, personal=False, copy=False,
            copyid=None, copyname=None):
 
-    writable_collections = list(filter_by_access(request.user, Collection, write=True).values_list('id', flat=True))
-    readable_collections = list(filter_by_access(request.user, Collection).values_list('id', flat=True))
+    collections = apply_collection_visibility_preferences(request.user, Collection.objects.all())
+    writable_collections = list(filter_by_access(request.user, collections, write=True).values_list('id', flat=True))
+    readable_collections = list(filter_by_access(request.user, collections).values_list('id', flat=True))
     can_edit = request.user.is_authenticated()
     can_manage = False
 
@@ -640,3 +627,18 @@ def manage_collection(request, id=None, name=None):
                            'can_delete': collection.id and (request.user.is_superuser or collection.owner == request.user),
                           },
                           context_instance=RequestContext(request))
+
+
+@require_POST
+@login_required
+def save_collection_visibility_preferences(request):
+    form = get_collection_visibility_prefs_form(request.user)(request.POST)
+
+    if form.is_valid():
+        if set_collection_visibility_preferences(request.user,
+                                              form.cleaned_data['show_or_hide'],
+                                              form.cleaned_data['collections']):
+            request.user.message_set.create(message="Collection visibility preferences saved.")
+
+    next = request.GET.get('next', reverse('main'))
+    return HttpResponseRedirect(next)
