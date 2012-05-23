@@ -115,10 +115,7 @@
             <div id="header">
                 <a href="{% url main %}" id="logo"></a>
                 <ul style="float: right;">
-                    <li><div id="basket-header"
-                    style="background: url({% url static "images/basket.png" %})
-                    no-repeat; font-size: 0.6em; width: 32px; height: 22px; text-align: center; padding-top: 10px;"
-                              >{% include "ui_basket_header.html" %}</div>
+                    <li><div id="basket-header">{% include "ui_basket_header.html" %}</div>
                         <ul class="menu">
                             <li><a id="basket-toggle" href="#">Hide</a></li>
                             <li><a href="{% url solr-selected %}">Explore</a></li>

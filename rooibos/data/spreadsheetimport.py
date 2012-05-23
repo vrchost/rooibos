@@ -53,7 +53,7 @@ class SpreadsheetImport(object):
         try:
             value = unicode(value, 'utf8')
         except UnicodeDecodeError:
-            print "split error"
+            #print "split error"
             self.decode_error = True
             value = ''
         return map(lambda s: s.strip(), value.split(self.separator)) if (self.separator and split) else [value.strip()]

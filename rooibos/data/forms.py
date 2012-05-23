@@ -41,6 +41,7 @@ def get_collection_visibility_prefs_form(user):
                                         )
         collections = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple,
                                         choices=collection_choices,
+                                        required=False,
                                        )
 
     return CollectionVisibilityPreferencesForm

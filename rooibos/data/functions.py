@@ -23,7 +23,6 @@ def set_collection_visibility_preferences(user, mode, ids):
 
 def apply_collection_visibility_preferences(user, queryset):
     mode, ids = get_collection_visibility_preferences(user)
-    print mode, ids
     if mode == 'show':
         return queryset.exclude(id__in=ids)
     else:

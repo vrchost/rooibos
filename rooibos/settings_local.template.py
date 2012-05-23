@@ -101,9 +101,11 @@ MIDDLEWARE_CLASSES = (
 
 LDAP_AUTH = (
     {
+        # LDAP Example
         'uri': 'ldap://ldap.example.edu',
         'base': 'ou=People,o=example',
         'cn': 'cn',
+        'dn': 'dn',
         'version': 2,
         'scope': 1,
         'options': {'OPT_X_TLS_TRY': 1},
@@ -111,7 +113,29 @@ LDAP_AUTH = (
         'firstname': 'givenname',
         'lastname': 'sn',
         'email': 'mail',
+        'bind_user': '',
+        'bind_password': '',
     },
+    {
+        # Active Directory Example
+        'uri': 'ldap://ad.example.edu',
+        'base': 'OU=users,DC=ad,DC=example,DC=edu',
+        'cn': 'sAMAccountName',
+        'dn': 'distinguishedName',
+        'version': 3,
+        'scope': 2, # ldap.SCOPE_SUBTREE
+        'options': {
+            'OPT_X_TLS_TRY': 1,
+            'OPT_REFERRALS': 0,
+            },
+        'attributes': ('sn', 'mail', 'givenName', 'eduPersonAffiliation'),
+        'firstname': 'givenName',
+        'lastname': 'sn',
+        'email': 'mail',
+        'bind_user': 'CN=LDAP Bind user,OU=users,DC=ad,DC=jmu,DC=edu',
+        'bind_password': 'abc123',
+    },
+
 )
 
 IMAP_AUTH = (

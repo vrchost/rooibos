@@ -326,6 +326,16 @@ html.js-enabled #content {
     margin-left: 2px;
 }
 
+#basket-header {
+    background: url({% url static "images/basket.png" %}) no-repeat;
+    font-size: 0.6em;
+    width: 34px;
+    height: 22px;
+    text-align: center;
+    padding-top: 14px;
+    color: {{ colors.header_background }};
+}
+
 #basket-content {
     background-color: {{ colors.basket_background }};
     height: 60px;
