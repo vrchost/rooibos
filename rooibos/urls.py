@@ -8,6 +8,7 @@ from django.http import HttpResponseServerError
 from django.template import loader, RequestContext
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
+from rooibos.legacy.views import legacy_viewer
 
 
 admin.autodiscover()
@@ -41,6 +42,9 @@ urls = [
     url(r'^logout/$', logout, {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
 #    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
+
+    # Legacy URL for presentation viewer in earlier version
+    url(r'^viewers/view/(?P<record>\d+)/.+/$', legacy_viewer),
 
     (r'^ui/', include('rooibos.ui.urls')),
     (r'^acl/', include('rooibos.access.urls')),

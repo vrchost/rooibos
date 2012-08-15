@@ -100,11 +100,11 @@ class Record(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
-    parent = models.ForeignKey('self', null=True)
-    source = models.CharField(max_length=1024, null=True)
-    manager = models.CharField(max_length=50, null=True)
-    next_update = models.DateTimeField(null=True)
-    owner = models.ForeignKey(User, null=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
+    source = models.CharField(max_length=1024, null=True, blank=True)
+    manager = models.CharField(max_length=50, null=True, blank=True)
+    next_update = models.DateTimeField(null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=True)
 
 
     @staticmethod

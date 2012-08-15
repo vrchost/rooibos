@@ -540,10 +540,36 @@ html.basket-open #basket-content {
 .resultlist-list .record img {
     border: hidden;
     vertical-align: baseline;
+}
+
+.resultlist-list .record img.thumbnail {
     height: 20px;
     max-width: 30px;
     margin-right: 5px;
 }
+
+.resultlist-list .record img.related-icon {
+    right: 18px;
+    bottom: 2px;
+}
+
+
+.resultlist-metadata .record {
+    float: none;
+    border: none;
+    border-bottom: 1px {{ colors.borders }} solid;
+    padding: 2px;
+    background-color: transparent;
+    width: auto;
+    margin: 0;
+    height: auto;
+}
+
+.resultlist-metadata .record .metadata {
+    padding-left: 105px;
+    width: 765px;
+}
+
 
 .tag {
     background-color: {{ colors.tag }};

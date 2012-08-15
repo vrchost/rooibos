@@ -22,6 +22,9 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 import Image
 import re
 import math
+import zipfile
+import os
+from StringIO import StringIO
 
 
 def _get_presentation(obj, request, objid):
@@ -296,3 +299,48 @@ class PrintViewViewer(Viewer):
 def printviewviewer(obj, request, objid=None):
     presentation = _get_presentation(obj, request, objid)
     return PrintViewViewer(presentation, request.user) if presentation else None
+
+
+
+class PackageFilesViewer(Viewer):
+
+    title = "Package Files"
+    weight = 25
+
+    def view(self, request):
+
+        def filename(title):
+            return re.sub('[^A-Za-z0-9_. ]+', '-', title)[:32]
+
+        def write(output, image, index, title, prefix=None):
+            if image:
+                output.write(image, ('%s%s %s%s' % (
+                    os.path.join(prefix, '') if prefix else '',
+                    str(index + 1).zfill(4),
+                    filename(title),
+                    os.path.splitext(image)[1])
+                  ).encode('ascii', 'replace'))
+
+        presentation = self.obj
+        passwords = request.session.get('passwords', dict())
+        response = HttpResponse(mimetype='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=%s.zip' % filename(presentation.title)
+        items = presentation.items.filter(hidden=False)
+        memory = StringIO()
+        output = zipfile.ZipFile(memory, 'w')
+
+        for index, item in enumerate(items):
+            write(output, get_image_for_record(item.record, self.user, passwords=passwords),
+                  index, item.record.title)
+            write(output, get_image_for_record(item.record, self.user, 100, 100, passwords),
+                  index, item.record.title, 'thumb')
+
+        output.close()
+        response.write(memory.getvalue())
+        return response
+
+
+@register_viewer('packagefilesviewer', PackageFilesViewer)
+def packagefilesviewer(obj, request, objid=None):
+    presentation = _get_presentation(obj, request, objid)
+    return PackageFilesViewer(presentation, request.user) if presentation else None

@@ -18,6 +18,8 @@ $(document).ready(function() {
 
 <h1>Browse collections</h1>
 
+{% if collections %}
+
 <table id="browse-forms">
 <tr>
     <td><label for="c">Collection:</label></td>
@@ -69,4 +71,12 @@ Jump to:
 <div style="clear: both;"></div>
 
 {% paginate %}
+
+{% else %}
+
+    <div>No collections are available for browsing.</div>
+
+{% endif %}
+
+
 {% endblock %}

@@ -56,6 +56,10 @@
 
 <h1>Jobs</h1>
 
+<form action="{{ request.get_full_path }}" method="POST">{% csrf_token %}
+    <input type="submit" name="testjob" value="Run Test Job" />
+</form>
+
 {% paginate %}
 
 {% if jobs %}

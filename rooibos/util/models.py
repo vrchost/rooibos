@@ -9,11 +9,15 @@ class OwnedWrapperManager(models.Manager):
     Allows retrieval of a wrapper object by specifying
     """
     def get_for_object(self, user, object=None, type=None, object_id=None):
+        try:
+            type = int(type)
+        except TypeError:
+            pass
+
         obj, created = self.get_or_create(
             user=user,
             object_id=object and object.id or object_id,
-            content_type=object and OwnedWrapper.t(object.__class__)
-                                or int(type))
+            content_type=object and OwnedWrapper.t(object.__class__) or type)
         return obj
 
 

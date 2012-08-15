@@ -3,6 +3,7 @@ from threading import Thread
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from rooibos.workers.registration import create_worker
+from rooibos.workers.models import JobInfo
 from gearman.server import GearmanServer
 from optparse import make_option
 import rooibos.contrib.djangologging.middleware # does not get loaded otherwise
@@ -41,6 +42,10 @@ class Command(BaseCommand):
 
         if server:
             Server(verbosity).start()
+
+            # Restart incomplete jobs
+            for job in JobInfo.objects.filter(completed=False):
+                job.run()
 
         worker = create_worker()
         if verbosity > 0:

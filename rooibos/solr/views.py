@@ -608,8 +608,12 @@ def browse(request, id=None, name=None):
     collections = filter_by_access(request.user, Collection)
     collections = apply_collection_visibility_preferences(request.user, collections)
     collections = collections.annotate(num_records=Count('records')).filter(num_records__gt=0).order_by('title')
+
     if not collections:
-        raise Http404()
+        return render_to_response('browse.html',
+                              {},
+                              context_instance=RequestContext(request))
+
     if request.GET.has_key('c'):
         collection = get_object_or_404(collections, name=request.GET['c'])
         return HttpResponseRedirect(reverse('solr-browse-collection',

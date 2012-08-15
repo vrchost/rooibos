@@ -109,17 +109,17 @@ class SolrIndex():
             if not record_ids:
                 break
             # convert to plain list, because Django's value lists will add a LIMIT clause when used
-            # in an __in query, which causes MySQL to break
-            record_ids = list(record_ids)
-            media_dict = self._preload_related(Media, record_ids)
-            fieldvalue_dict = self._preload_related(FieldValue, record_ids, related=2)
-            groups_dict = self._preload_related(CollectionItem, record_ids)
-            count += len(record_ids)
+            # in an __in query, which causes MySQL to break.  (ph): also, made an explicit separate value for this
+            record_id_list = list(record_ids)
+            media_dict = self._preload_related(Media, record_id_list)
+            fieldvalue_dict = self._preload_related(FieldValue, record_id_list, related=2)
+            groups_dict = self._preload_related(CollectionItem, record_id_list)
+            count += len(record_id_list)
 
             def process_data(groups, fieldvalues, media):
                 def process():
                     docs = []
-                    for record in Record.objects.filter(id__in=record_ids):
+                    for record in Record.objects.filter(id__in=record_id_list):
                         docs += [self._record_to_solr(record, core_fields, groups.get(record.id, []),
                                                       fieldvalues.get(record.id, []), media.get(record.id, []))]
                     conn.add(docs)
