@@ -4,10 +4,14 @@ from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from django.core.files.temp import NamedTemporaryFile
+from django.core.servers.basehttp import FileWrapper
+from django.template import Context, Template
 from rooibos.access import get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.storage import get_image_for_record
 from rooibos.data.models import Record, Collection
+from rooibos.api.views import presentation_detail
 from models import Presentation
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes
@@ -321,13 +325,25 @@ class PackageFilesViewer(Viewer):
                     os.path.splitext(image)[1])
                   ).encode('ascii', 'replace'))
 
+        def metadata_file(tempfile, record):
+            t = Template("{% load data %}{% metadata record %}")
+            c = Context({'record': record, 'request': request})
+            tempfile.write(t.render(c))
+            tempfile.flush()
+            return tempfile.name
+
         presentation = self.obj
         passwords = request.session.get('passwords', dict())
-        response = HttpResponse(mimetype='application/zip')
-        response['Content-Disposition'] = 'attachment; filename=%s.zip' % filename(presentation.title)
         items = presentation.items.filter(hidden=False)
-        memory = StringIO()
-        output = zipfile.ZipFile(memory, 'w')
+
+        tempfile = NamedTemporaryFile(suffix='.zip')
+        output = zipfile.ZipFile(tempfile, 'w')
+
+        tempjsonfile = NamedTemporaryFile(suffix='.json')
+        metadata = presentation_detail(request, presentation.id)
+        tempjsonfile.write(metadata.content)
+        tempjsonfile.flush()
+        output.write(tempjsonfile.name, os.path.join('metadata', 'metadata.json'))
 
         for index, item in enumerate(items):
             write(output, get_image_for_record(item.record, self.user, passwords=passwords),
@@ -335,8 +351,18 @@ class PackageFilesViewer(Viewer):
             write(output, get_image_for_record(item.record, self.user, 100, 100, passwords),
                   index, item.record.title, 'thumb')
 
+            tempmetadatafile = NamedTemporaryFile(suffix='.html')
+            write(output, metadata_file(tempmetadatafile, item.record),
+                  index, item.record.title, 'metadata')
+
         output.close()
-        response.write(memory.getvalue())
+        tempfile.flush()
+        tempfile.seek(0)
+
+        wrapper = FileWrapper(tempfile)
+        response = HttpResponse(wrapper, mimetype='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=%s.zip' % filename(presentation.title)
+        response['Content-Length'] = os.path.getsize(tempfile.name)
         return response
 
 
