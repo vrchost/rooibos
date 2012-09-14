@@ -1,4 +1,5 @@
-{% for viewer, viewer_url in viewers %}
-    {% if viewer_url %}<a href="{{ viewer_url }}{% if next %}?next={{ next|urlencode }}{% endif %}" target="_blank"{% if forloop.counter < 2 %} class="item-action-important"{% endif %}>{% endif %}
-    {{ viewer.title }}{% if viewer_url %}</a>{% endif %}{% if not forloop.last %}{{ separator }}{% endif %}
+{% for viewer in viewers %}
+    <a href="{{ viewer.url }}{% if next %}?next={{ next|urlencode }}{% endif %}"
+    {% if viewer.weight >= 100 %}class="item-action-important"{% endif %}>
+    {{ viewer.title }}</a>{% if not forloop.last %}{{ separator }}{% endif %}
 {% endfor %}

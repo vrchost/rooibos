@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
 from models import Media, Storage, TrustedSubnet, ProxyUrl
-from rooibos.access import accessible_ids, filter_by_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object, check_access
+from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object, check_access
 from rooibos.contrib.ipaddr import IP
 from rooibos.data.models import Collection, Record, Field, FieldValue, CollectionItem, standardfield
 from rooibos.storage import get_media_for_record, get_image_for_record, get_thumbnail_for_record, match_up_media, analyze_media, analyze_records, find_record_by_identifier
@@ -305,7 +305,7 @@ def import_files(request):
 
     available_storage = get_list_or_404(filter_by_access(request.user, Storage, write=True).order_by('title'))
     available_collections = get_list_or_404(filter_by_access(request.user, Collection))
-    writable_collection_ids = accessible_ids(request.user, Collection, write=True)
+    writable_collection_ids = list(filter_by_access(request.user, Collection, write=True).values_list('id', flat=True))
 
     storage_choices = choices = [make_storage_select_choice(s, request.user) for s in available_storage]
 

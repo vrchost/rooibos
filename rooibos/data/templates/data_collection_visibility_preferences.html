@@ -1,0 +1,21 @@
+<div style="clear: left; margin-top: 50px;">
+
+<h2>Collection Visibility</h2>
+
+<form action="{% url data-save-collection-visibility-preferences %}?next={{ request.get_full_path|urlencode }}" method="post" class="vertical">{% csrf_token %}
+
+    <div class="vertical">
+        {{ form.show_or_hide.label }}<br />{{ form.show_or_hide }}
+    </div>
+
+    <div class="row multi-checkbox-list">
+        {{ form.collections }}
+    </div>
+
+    <div class="row">
+        <input type="submit" value="Save Visibility Options" />
+    </div>
+
+</form>
+
+</div>

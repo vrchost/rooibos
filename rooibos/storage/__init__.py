@@ -8,7 +8,7 @@ import re
 from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth.models import User
-from rooibos.access import accessible_ids, get_effective_permissions_and_restrictions
+from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions
 from rooibos.data.models import Collection, Record, standardfield, standardfield_ids
 from models import Media, Storage
 
@@ -51,7 +51,7 @@ def get_media_for_record(record, user=None, passwords={}):
         )
         access_q = Q(
             # Must have access to presentation
-            id__in=accessible_ids(user, Presentation),
+            id__in=filter_by_access(user, Presentation),
             # and presentation must not be archived
             hidden=False
         )
@@ -65,8 +65,15 @@ def get_media_for_record(record, user=None, passwords={}):
 
     return Media.objects.filter(
         record__id=record_id,
-        storage__id__in=accessible_ids(user, Storage),
+        storage__id__in=filter_by_access(user, Storage),
         )
+
+
+try:
+    import gfx
+    PDF_SUPPORT = True
+except ImportError:
+    PDF_SUPPORT = False
 
 
 def get_image_for_record(record, user=None, width=100000, height=100000, passwords={}, crop_to_square=False):
@@ -75,6 +82,8 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
     if settings.FFMPEG_EXECUTABLE:
         # also support video and audio
         q = q | Q(mimetype__startswith='video/') | Q(mimetype__startswith='audio/')
+    if PDF_SUPPORT:
+        q = q | Q(mimetype='application/pdf')
 
     media = media.select_related('storage').filter(q)
 
@@ -125,6 +134,8 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
                         image = image.crop((0, (h - w) / 2, w, (h - w) / 2 + w))
                 image.thumbnail((width, height), Image.ANTIALIAS)
                 output = StringIO.StringIO()
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
                 image.save(output, 'JPEG', quality=85, optimize=True)
                 return output.getvalue(), image.size
             except Exception, e:

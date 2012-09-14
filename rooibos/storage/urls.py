@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from pseudostreaming import retrieve_pseudostream
 from views import *
+#from viewers import mediaplayer_script
 
 urlpatterns = patterns('',
     url(r'^get/(?P<recordid>\d+)/(?P<record>[-\w]+)/(?P<mediaid>\d+)/(?P<media>[-\w]+)/$', retrieve, name='storage-retrieve'),
@@ -19,4 +20,5 @@ urlpatterns = patterns('',
     url(r'^match-up-files/$', match_up_files, name='storage-match-up-files'),
     url(r'^analyze/(?P<id>\d+)/(?P<name>[-\w]+)/$', analyze, name='storage-analyze'),
     url(r'^records-without-media/$', find_records_without_media, name='storage-find-records-without-media'),
+    #url(r'^mediaplayer-script/$', mediaplayer_script, name='storage-mediaplayer-script'),
 )

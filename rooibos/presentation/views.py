@@ -17,7 +17,7 @@ from rooibos.contrib.tagging.models import Tag, TaggedItem
 from rooibos.contrib.tagging.forms import TagField
 from rooibos.contrib.tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 from rooibos.util import json_view
 from rooibos.storage.models import ProxyUrl
 from rooibos.data.models import FieldSet, Record
@@ -86,8 +86,8 @@ def add_selected_items(request, presentation):
 @login_required
 def edit(request, id, name):
 
-    presentation = get_object_or_404(Presentation.objects.filter(
-        id=id, id__in=accessible_ids(request.user, Presentation, write=True, manage=True)))
+    presentation = get_object_or_404(filter_by_access(
+        request.user, Presentation, write=True, manage=True).filter(id=id))
     existing_tags = [t.name for t in Tag.objects.usage_for_model(
         OwnedWrapper, filters=dict(user=request.user, content_type=OwnedWrapper.t(Presentation)))]
     tags = Tag.objects.get_for_object(
@@ -291,8 +291,8 @@ def browse(request, manage=False):
         # check for clicks on "add selected items" buttons
         for button in filter(lambda k: k.startswith('add-selected-items-'), request.POST.keys()):
             id = int(button[len('add-selected-items-'):])
-            presentation = get_object_or_404(Presentation.objects.filter(
-                id=id, id__in=accessible_ids(request.user, Presentation, write=True, manage=True)))
+            presentation = get_object_or_404(
+                filter_by_access(request.user, Presentation, write=True, manage=True).filter(id=id))
             add_selected_items(request, presentation)
             return HttpResponseRedirect(reverse('presentation-edit', args=(presentation.id, presentation.name)))
 
@@ -351,9 +351,9 @@ def browse(request, manage=False):
 
 def password(request, id, name):
 
-    presentation = get_object_or_404(Presentation.objects.filter(Presentation.published_Q(request.user),
-                                id=id,
-                                id__in=accessible_ids(request.user, Presentation)))
+    presentation = get_object_or_404(
+        filter_by_access(request.user, Presentation).filter(
+        Presentation.published_Q(request.user), id=id))
 
     class PasswordForm(forms.Form):
         password = forms.CharField(widget=forms.PasswordInput)
@@ -384,8 +384,21 @@ def password(request, id, name):
 @require_POST
 @login_required
 def duplicate(request, id, name):
-    presentation = get_object_or_404(Presentation.objects.filter(
-        id=id, id__in=accessible_ids(request.user, Presentation, write=True, manage=True)))
+    presentation = get_object_or_404(
+        filter_by_access(request.user, Presentation, write=True, manage=True).
+        filter(id=id))
     dup = duplicate_presentation(presentation, request.user)
     return HttpResponseRedirect(reverse('presentation-edit',
                                         args=(dup.id, dup.name)))
+
+
+@login_required
+def record_usage(request, id, name):
+    record = Record.get_or_404(id, request.user)
+    presentations = Presentation.objects.filter(items__record=record).distinct().order_by('title')
+
+    return render_to_response('presentation_record_usage.html',
+                       {'record': record,
+                        'presentations': presentations,
+                        },
+                       context_instance=RequestContext(request))

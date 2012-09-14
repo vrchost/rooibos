@@ -326,6 +326,16 @@ html.js-enabled #content {
     margin-left: 2px;
 }
 
+#basket-header {
+    background: url({% url static "images/basket.png" %}) no-repeat;
+    font-size: 0.6em;
+    width: 34px;
+    height: 22px;
+    text-align: center;
+    padding-top: 14px;
+    color: {{ colors.header_background }};
+}
+
 #basket-content {
     background-color: {{ colors.basket_background }};
     height: 60px;
@@ -530,10 +540,36 @@ html.basket-open #basket-content {
 .resultlist-list .record img {
     border: hidden;
     vertical-align: baseline;
+}
+
+.resultlist-list .record img.thumbnail {
     height: 20px;
     max-width: 30px;
     margin-right: 5px;
 }
+
+.resultlist-list .record img.related-icon {
+    right: 18px;
+    bottom: 2px;
+}
+
+
+.resultlist-metadata .record {
+    float: none;
+    border: none;
+    border-bottom: 1px {{ colors.borders }} solid;
+    padding: 2px;
+    background-color: transparent;
+    width: auto;
+    margin: 0;
+    height: auto;
+}
+
+.resultlist-metadata .record .metadata {
+    padding-left: 105px;
+    width: 765px;
+}
+
 
 .tag {
     background-color: {{ colors.tag }};
@@ -1014,6 +1050,13 @@ html.js-enabled .info-icon {
 .related-icon {
     position: absolute;
     bottom: 18px;
+    right: 2px;
+    border: none !important;
+}
+
+.inuse-icon {
+    position: absolute;
+    bottom: 34px;
     right: 2px;
     border: none !important;
 }

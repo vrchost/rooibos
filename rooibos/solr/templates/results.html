@@ -18,14 +18,19 @@
     var img = new Image();
     img.src = '{% url static 'images/loading.gif' %}';
 
-    function selectAllOnPage() {
+    function selectAllOnPage(s) {
         ids = Array();
-        $(".record-select").each(function (i) { ids[i] = this.value; }).val(ids);
-        recordSelection(ids, true);
+        s = typeof s === 'boolean' ? s : true; // default to select (vs deselect)
+        $(".record-select").each(function (i) { ids[i] = this.value; }).val(s ? ids : []);
+        recordSelection(ids, s);
+    }
+    function deselectAllOnPage() {
+      selectAllOnPage(false);
     }
 
     $(document).ready(function() {
         $("#submit_record_selections").replaceWith($("<input type='button' value='Select all on page'>").click(selectAllOnPage));
+        $("#deselect_all_on_page").show().append($("<input type='button' value='Deselect all on page'>").click(deselectAllOnPage));
 
         $("#sort_dropdown, #viewmode_dropdown").change(function() { $("#explore-form").submit(); })
         $("#sort_go_button").hide();
@@ -203,6 +208,7 @@
     <select name="v" id="viewmode_dropdown">
         <option value="thumb"{% ifequal viewmode "thumb" %} selected="selected"{% endifequal %}>Thumbnails</option>
         <option value="list"{% ifequal viewmode "list" %} selected="selected"{% endifequal %}>List</option>
+        <option value="metadata"{% ifequal viewmode "metadata" %} selected="selected"{% endifequal %}>Metadata</option>
     </select>
     Sort by:
     <select name="s" id="sort_dropdown">
@@ -220,6 +226,7 @@
   </div>
 </li>
 <li><input id="submit_record_selections" type="submit" name="action" value="Select" /></li>
+<li style="display: none;" id="deselect_all_on_page"></li>
 {% endif %}
 
 {% endif %}

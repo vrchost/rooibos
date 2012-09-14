@@ -35,6 +35,40 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
     finally:
         os.remove(filename)
 
+def _which(program):
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    return None
+
+def _pdfthumbnail(infile):
+    handle, filename = tempfile.mkstemp('.pdf')
+    os.close(handle)
+    try:
+        cmd = 'python "%s" "%s" "%s"' % (
+            os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
+            infile,
+            filename,
+        )
+        proc = Popen(cmd, executable=_which('python.exe'), stdout=PIPE, stderr=PIPE)
+        (output, errors) = proc.communicate()
+        file = open(filename, 'rb')
+        result = StringIO(file.read())
+        file.close()
+        return result, output, errors
+    except:
+        return None, None, None
+    finally:
+        os.remove(filename)
+
 
 def identify(file):
     try:
@@ -104,6 +138,12 @@ def render_audio_waveform_by_mimetype(audiofile, mimetype):
                                  format['left'], format['top'], format['height'], format['width'],
                                  format['max_only'])
 
+
+def render_pdf(pdffile):
+    image, output, errors = _pdfthumbnail(pdffile)
+    return image
+
+
 def get_image(media):
     if media.mimetype.startswith('image/'):
         return media.load_file()
@@ -119,4 +159,6 @@ def get_image(media):
         return capture_video_frame(media.get_absolute_file_path(), offset=offset)
     if media.mimetype.startswith('audio/'):
         return render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
+    if media.mimetype == 'application/pdf':
+        return render_pdf(media.get_absolute_file_path())
     return None

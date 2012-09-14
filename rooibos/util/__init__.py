@@ -5,6 +5,7 @@ from django.utils import simplejson
 from django.core.mail import mail_admins
 from django.utils.translation import ugettext as _
 from django.utils.decorators import wraps
+from django.utils.functional import SimpleLazyObject
 import sys
 import mimetypes
 import logging
@@ -165,3 +166,11 @@ def calculate_hash(*args):
     for arg in args:
         hash.update(repr(arg))
     return hash.hexdigest()
+
+
+
+class IterableLazyObject(SimpleLazyObject):
+
+    def __iter__(self):
+        if self._wrapped is None: self._setup()
+        return self._wrapped.__iter__()

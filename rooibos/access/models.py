@@ -8,7 +8,7 @@ from rooibos.contrib.ipaddr import IP
 
 class AccessControl(models.Model):
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User, null=True, blank=True)
     usergroup = models.ForeignKey(Group, null=True, blank=True)

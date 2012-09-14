@@ -8,6 +8,7 @@ from django.http import HttpResponseServerError
 from django.template import loader, RequestContext
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
+from rooibos.legacy.views import legacy_viewer
 
 
 admin.autodiscover()
@@ -42,6 +43,9 @@ urls = [
 #    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
 
+    # Legacy URL for presentation viewer in earlier version
+    url(r'^viewers/view/(?P<record>\d+)/.+/$', legacy_viewer),
+
     (r'^ui/', include('rooibos.ui.urls')),
     (r'^acl/', include('rooibos.access.urls')),
     (r'^explore/', include('rooibos.solr.urls')),
@@ -60,6 +64,10 @@ urls = [
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
+    (r'^megazine/', include('rooibos.megazine.urls')),
+    (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
+    (r'^pptexport/', include('rooibos.pptexport.urls')),
+    (r'^audiotextsync/', include('rooibos.audiotextsync.urls')),
 
     url(r'^favicon.ico$', serve, {'document_root': settings.STATIC_DIR, 'path': 'images/favicon.ico'}),
     url(r'^robots.txt$', serve, {'document_root': settings.STATIC_DIR, 'path': 'robots.txt'}),

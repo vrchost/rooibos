@@ -12,6 +12,8 @@ from rooibos.util import unique_slug
 from rooibos.data.models import Record
 from rooibos.access import sync_access, get_effective_permissions_and_restrictions, check_access
 import multimedia
+from functions import extractTextFromPdfStream
+
 
 class Storage(models.Model):
     title = models.CharField(max_length=100)
@@ -223,7 +225,13 @@ class Media(models.Model):
     def editable_by(self, user):
         return self.record.editable_by(user) and check_access(user, self.storage, write=True)
 
-
+    def extract_text(self):
+        if self.mimetype == 'text/plain':
+            return self.load_file().read()
+        elif self.mimetype == 'application/pdf':
+            return extractTextFromPdfStream(self.load_file())
+        else:
+            return ''
 
 
 class TrustedSubnet(models.Model):

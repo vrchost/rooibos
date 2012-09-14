@@ -12,10 +12,12 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from . import SolrIndex
 from pysolr import SolrError
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
 from rooibos.data.models import Field, Collection, FieldValue, Record
+from rooibos.data.functions import apply_collection_visibility_preferences, \
+    get_collection_visibility_preferences
 from rooibos.storage.models import Storage
 from rooibos.ui import update_record_selection, clean_record_selection_vars
 from rooibos.federatedsearch.views import sidebar_api_raw
@@ -242,14 +244,35 @@ def _generate_query(search_facets, user, collection, criteria, keywords, selecte
         query = 'id:(%s) AND %s' % (' '.join(map(str, selected or [-1])), query)
 
     if not user.is_superuser:
-        collections = ' '.join(map(str, accessible_ids(user, Collection)))
+        collections = ' '.join(map(str, filter_by_access(user, Collection).values_list('id', flat=True)))
         c = []
-        if collections: c.append('collections:(%s)' % collections)
-        if user.id: c.append('owner:%s' % user.id)
+        if collections:
+            # access through readable collection when no record ACL set
+            c.append('collections:(%s) AND acl_read:default' % collections)
+        if user.id:
+            # access through ownership
+            c.append('owner:%s' % user.id)
+            # access through record ACL
+            groups = ' '.join(
+                'g%d' % id for id in user.groups.values_list('id', flat=True)
+                )
+            if groups:
+                groups = '((%s) AND NOT (%s)) OR ' % (groups, groups.upper())
+            c.append('acl_read:((%su%d) AND NOT U%d)' % (groups, user.id, user.id))
+        else:
+            # access through record ACL
+            c.append('acl_read:anon')
         if c:
-            query = '(%s) AND %s' % (' OR '.join(c), query)
+            query = '((%s)) AND %s' % (') OR ('.join(c), query)
         else:
             query = 'id:"-1"'
+
+    mode, ids = get_collection_visibility_preferences(user)
+    if ids:
+        query += ' AND %sallcollections:(%s)' % (
+                '-' if mode == 'show' else '',
+                ' '.join(map(str, ids)),
+            )
 
     return query
 
@@ -268,7 +291,7 @@ def run_search(user,
                remove=None,
                produce_facets=False):
 
-    available_storage = accessible_ids(user, Storage)
+    available_storage = list(filter_by_access(user, Storage).values_list('id', flat=True))
     exclude_facets = ['identifier']
     fields = Field.objects.filter(standard__prefix='dc').exclude(name__in=exclude_facets)
 
@@ -444,12 +467,18 @@ def search(request, id=None, name=None, selected=False, json=False):
         v = search_facets[f].federated_search_query(o)
         return v if not q else '%s %s' % (q, v)
 
+
+    mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
                           collection,
                           criteria,
                           keywords,
                           selected,
-                          remove)
+                          remove,
+                          mode,
+                          str(ids),
+                          )
+    print hash
     facets = cache.get('search_facets_html_%s' % hash)
 
     sort = sort.startswith('random') and 'random' or sort.split()[0]
@@ -545,12 +574,16 @@ def search_facets(request, id=None, name=None, selected=False):
                            },
                           context_instance=RequestContext(request))
 
+    mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
                           collection,
                           criteria,
                           keywords,
                           selected,
-                          remove)
+                          remove,
+                          mode,
+                          str(ids),
+                          )
 
     cache.set('search_facets_html_%s' % hash, html, 300)
 
@@ -571,10 +604,15 @@ def search_json(request, id=None, name=None, selected=False):
 
 
 def browse(request, id=None, name=None):
-    collections = filter_by_access(request.user, Collection) \
-        .annotate(num_records=Count('records')).filter(num_records__gt=0).order_by('title')
+    collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
+    collections = collections.annotate(num_records=Count('records')).filter(num_records__gt=0).order_by('title')
+
     if not collections:
-        raise Http404()
+        return render_to_response('browse.html',
+                              {},
+                              context_instance=RequestContext(request))
+
     if request.GET.has_key('c'):
         collection = get_object_or_404(collections, name=request.GET['c'])
         return HttpResponseRedirect(reverse('solr-browse-collection',
@@ -621,7 +659,9 @@ def browse(request, id=None, name=None):
 
 def overview(request):
 
-    collections = filter_by_access(request.user, Collection).order_by('title').annotate(num_records=Count('records'))
+    collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
+    collections = collections.order_by('title').annotate(num_records=Count('records'))
 
     return render_to_response('overview.html',
                               {'collections': collections,},
@@ -635,7 +675,7 @@ def fieldvalue_autocomplete(request):
     if not collections:
         raise Http404()
     query = request.GET.get('q', '').lower()
-    if len(query) >= 2:
+    if len(query) >= 2 and len(query) <= 32:
         limit = min(int(request.GET.get('limit', '10')), 100)
         field = request.GET.get('field')
         q = field and Q(field__id=field) or Q()
@@ -651,6 +691,7 @@ def fieldvalue_autocomplete(request):
 def search_form(request):
 
     collections = filter_by_access(request.user, Collection)
+    collections = apply_collection_visibility_preferences(request.user, collections)
     if not collections:
         raise Http404()
 

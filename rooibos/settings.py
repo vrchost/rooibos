@@ -50,6 +50,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "rooibos.context_processors.settings",
     "rooibos.context_processors.selected_records",
+    "rooibos.context_processors.current_presentation",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -72,6 +73,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
+    'rooibos.access.middleware.AccessOnStart',
     'rooibos.middleware.HistoryMiddleware',
 )
 
@@ -110,7 +112,11 @@ INSTALLED_APPS = (
     'rooibos.workers',
     'rooibos.userprofile',
     'rooibos.mediaviewer',
+    'rooibos.megazine',
     'rooibos.groupmanager',
+    'rooibos.pdfviewer',
+    'rooibos.pptexport',
+    'rooibos.audiotextsync',
     'pagination',
     'impersonate',
     'compressor',

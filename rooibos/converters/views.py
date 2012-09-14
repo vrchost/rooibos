@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
 from django.template import RequestContext
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 from rooibos.data.models import Collection, CollectionItem, Record, FieldSet, Field
 from rooibos.solr import SolrIndex
 from rooibos.solr.models import SolrIndexUpdates
@@ -92,13 +92,11 @@ def powerpoint(request):
                 outfile.write(chunk)
             outfile.close()
             presentation = convert_ppt(request.user,
-                                       form.cleaned_data['title'],
-                                       Collection.objects.get(id=form.cleaned_data['collection'],
-                                                              id__in=accessible_ids(request.user, Collection, write=True)),
-                                       Storage.objects.get(id=form.cleaned_data['storage'],
-                                                           id__in=accessible_ids(request.user, Storage, write=True)),
-                                       tempdir,
-                                       filename)
+                form.cleaned_data['title'],
+                filter_by_access(request.user, Collection, write=True).get(id=form.cleaned_data['collection']),
+                filter_by_access(request.user, Storage, write=True).get(id=form.cleaned_data['storage']),
+                tempdir,
+                filename)
             shutil.rmtree(tempdir)
             if not presentation:
                 request.user.message_set.create(message="An error occurred while importing the presentation.")
