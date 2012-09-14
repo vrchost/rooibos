@@ -21,6 +21,7 @@ package org.mdid.MediaViewer.views.mediators
 	import mx.binding.utils.BindingUtils;
 	import mx.controls.LinkButton;
 	import mx.events.CloseEvent;
+	import mx.events.FlexEvent;
 	import mx.events.FlexNativeMenuEvent;
 	import mx.events.ResizeEvent;
 	import mx.managers.PopUpManager;
@@ -73,13 +74,7 @@ package org.mdid.MediaViewer.views.mediators
 		}
 		override public function onRegister():void {
 			whichPane = (view.id.toLocaleLowerCase() == "imageholder") ? SlideshowCursor.FIRST_PANE : SlideshowCursor.SECOND_PANE;
-			if (slideShow.getCurrentImageCacheStatus(windowName, whichPane) == Caching.IN_CACHE) {
-				view.setCurrentState("imageincache");
-				view.imageViewer.imageURL = slideShow.getCurrentImageURL(windowName, whichPane);
-			} else {
-				view.setCurrentState("imagenotcached");
-				view.bitmap.source = slideShow.getCurrentImage(windowName, whichPane);
-			}
+			trace("register: " + whichPane);
 			//view.theWindowName = (this.windowName == "theMainWindow") ? "mainview" : "secondWindow";
 			catalogWindowPopup = new CatalogWindow();
 			catWindowIsPopped = false;
@@ -109,9 +104,19 @@ package org.mdid.MediaViewer.views.mediators
 			eventMap.mapListener(view.rightClickMenu, FlexNativeMenuEvent.ITEM_CLICK, handleRightMenuClick);
 			eventMap.mapListener(view, RightClickMenuEvent.IMAGE_IS_HIDDEN, handleRightClickMenuEvent);
 			eventMap.mapListener(view, RightClickMenuEvent.IMAGE_IS_VISIBLE, handleRightClickMenuEvent);
+			if (whichPane == SlideshowCursor.SECOND_PANE) {
+				moduleDispatcher.dispatchEvent(new ControlBarEvent(ControlBarEvent.SECOND_PANE_IS_REGISTERED, windowName, whichPane));
+			}
+			if (slideShow.getCurrentImageCacheStatus(windowName, whichPane) == Caching.IN_CACHE) {
+				view.setCurrentState("imageincache");
+				view.imageViewer.imageURL = slideShow.getCurrentImageURL(windowName, whichPane);
+			} else {
+				view.setCurrentState("imagenotcached");
+				view.bitmap.source = slideShow.getCurrentImage(windowName, whichPane);
+			}
 		}
 		private function handleSmoothBitmapChangeEvent(e:Event):void {
-			trace(e.currentTarget);
+			//trace(e.currentTarget);
 		}
 		private function handleRightClickMenuEvent(e:RightClickMenuEvent):void {
 			if (e.type == RightClickMenuEvent.IMAGE_IS_VISIBLE || e.type == RightClickMenuEvent.IMAGE_IS_HIDDEN) {
@@ -249,6 +254,7 @@ package org.mdid.MediaViewer.views.mediators
 			}
 		}
 		private function gotoSlide(navType:String, newPos:int = -1):void {
+			trace("gotoSlide: " + navType);
 			var slide:Object = slideShow.navigateTo(windowName, whichPane, navType, newPos);
 			if (slide == null) return;
 			if (slide is String) {
@@ -288,7 +294,6 @@ package org.mdid.MediaViewer.views.mediators
 			}
 		}
 		private function handleItemDownloadFailed(e:CacheEvent):void {
-			trace("itemdownloadfailed");
 			if (e.slideid == slideShow.getCurrentImageID(windowName, whichPane)) {
 				if (view.currentState != "imagenotcached") {
 					view.setCurrentState("imagenotcached");

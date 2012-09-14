@@ -3,7 +3,7 @@
 	<id>DesktopMediaViewer</id>
 	<filename>DesktopMediaViewer</filename>
 	<name>Desktop MediaViewer</name>
-	<versionNumber>1.02.1</versionNumber>
+	<versionNumber>1.02.5</versionNumber>
 	<description>You are installing the MDID MediaViewer on your computer. The MediaViewer requires a live Internet connection. After you install and run the MediaViewer, you will be prompted to log into your MDID. If successful, you will see a list of your slideshows.</description>
 	<copyright>James Madison University</copyright>
 	<initialWindow>

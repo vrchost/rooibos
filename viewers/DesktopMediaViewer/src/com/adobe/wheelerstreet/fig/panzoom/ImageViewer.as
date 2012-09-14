@@ -127,7 +127,6 @@ package com.adobe.wheelerstreet.fig.panzoom
 			return _smoothBitmap;
 		}
 		public function set smoothBitmap(value:Boolean):void {
-			trace(value);
 			if (value == _smoothBitmap) return;
 			_smoothBitmap = value;
 			invalidateDisplayList();	
@@ -298,7 +297,6 @@ package com.adobe.wheelerstreet.fig.panzoom
 		private var _animateX:AnimateProperty = new AnimateProperty();
 		private var _animateY:AnimateProperty = new AnimateProperty();
 		public function moveToCenter(e:TweenEvent = null):void {
-			trace("movetocenter");
 			if (_animateX.isPlaying || _animateY.isPlaying) return;
 			if (e != null) e.currentTarget.removeEventListener(TweenEvent.TWEEN_END, moveToCenter);
 			_animateX = new AnimateProperty(_contentRectangle);

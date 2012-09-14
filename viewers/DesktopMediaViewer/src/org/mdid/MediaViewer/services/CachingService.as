@@ -79,6 +79,10 @@ package org.mdid.MediaViewer.services
 			return _thumbFilePaths;
 		}
 		
+		public function get isThumbCachingComplete():Boolean {
+			return thumbQueue.length < 1;
+		}
+		
 		public function getImagePath(id:String):String {
 			var val:String = (loginModel.isLoggedIn && imageDict != null && imageDict[id].status != null && imageDict[id].status == Caching.IN_CACHE) ? getUserStorageDir().nativePath + File.separator + id : "";
 			if (val.length > 0 && flash.system.Capabilities.os.indexOf("Mac OS") > -1) val = "file://" + val;

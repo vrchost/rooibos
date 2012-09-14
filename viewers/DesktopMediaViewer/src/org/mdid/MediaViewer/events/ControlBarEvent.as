@@ -16,6 +16,7 @@ package org.mdid.MediaViewer.events
 		public static const LEFT_EDGE_BLOCK: String = "theLeftEdgeBlock";
 		public static const RIGHT_EDGE_BLOCK: String = "theRightEdgeBlock";
 		public static const TOGGLE_WINDOW_ORDER: String = "toggleWindowOrderEvent";
+		public static const SECOND_PANE_IS_REGISTERED: String = "secondPaneIsRegisteredEvent";
 		
 		private var _targetWindow:String;
 		private var _targetPane:String;

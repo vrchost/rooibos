@@ -101,10 +101,26 @@ package org.mdid.MediaViewer.views.mediators
 			NativeApplication.nativeApplication.idleThreshold = this.IDLETIME;
 			flash.net.URLRequestDefaults.idleTimeout = 1000 * 60 * 2; //two minutes
 			if (!Capabilities.isDebugger) {
-				var versionLoader:URLLoader = new URLLoader();
-				versionLoader.addEventListener(Event.COMPLETE, versionLoaderCompleteHandler);
-				versionLoader.load(new URLRequest(baseURL + "static/dmvinstaller/latestversion.txt"));
-				NativeApplication.nativeApplication.addEventListener(BrowserInvokeEvent.BROWSER_INVOKE, browserInvokeHandler);
+				var isUpdateNotificationDisabled:Boolean = false;
+				trace(isUpdateNotificationDisabled);
+				//first, check to see if "Upgrade is available" notification has been disabled locally
+				var updatePrefsFile:File;
+				updatePrefsFile = File.applicationStorageDirectory;
+				updatePrefsFile = updatePrefsFile.resolvePath("update_prefs.xml");
+				if (updatePrefsFile.exists) {
+					var stream:FileStream = new FileStream();
+					var updatePrefsXML:XML;
+					stream.open(updatePrefsFile, FileMode.READ);
+					updatePrefsXML = XML(stream.readUTFBytes(stream.bytesAvailable));
+					stream.close();
+					isUpdateNotificationDisabled = (updatePrefsXML.disableUpdateIsAvailableNotification.toLowerCase() == "true");
+				}
+				if (!isUpdateNotificationDisabled) {
+					var versionLoader:URLLoader = new URLLoader();
+					versionLoader.addEventListener(Event.COMPLETE, versionLoaderCompleteHandler);
+					versionLoader.load(new URLRequest(baseURL + "static/dmvinstaller/latestversion.txt"));
+					NativeApplication.nativeApplication.addEventListener(BrowserInvokeEvent.BROWSER_INVOKE, browserInvokeHandler);
+				}
 			}
 			var descriptor:XML = NativeApplication.nativeApplication.applicationDescriptor;
 			var air:Namespace = descriptor.namespaceDeclarations()[0];
@@ -334,6 +350,7 @@ package org.mdid.MediaViewer.views.mediators
 				if (this.loginwindowPopup != null) handleCloseLoginWindowPopup();
 				if (this.slideshowlistPopup != null) handleCloseSlideshowlistPopup();
 				dispatch(new LoginEvent(LoginEvent.LOGOUT, this.loginModel.user, "Your session has expired due to lack of activity within last 30 minutes."));
+				Mouse.show();
 			} else if (this.isLoggedIn) {
 				dispatch(new LoginEvent(LoginEvent.KEEP_SESSION_ALIVE));
 			}
