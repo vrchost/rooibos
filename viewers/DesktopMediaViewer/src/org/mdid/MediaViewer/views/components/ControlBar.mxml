@@ -136,6 +136,7 @@
 				}
 			}
 			protected function resizeScrubBarHandler(e:ResizeEvent = null):void {
+				trace("resize scrubbar");
 				capacityWidth = this.width - this.leftGroup.width - this.rightGroup.width - this.firstVRule.width - this.secondVRule.width - 20;
 				if (numSlides < 1) return;
 				divisionWidth = (capacityWidth / numSlides);

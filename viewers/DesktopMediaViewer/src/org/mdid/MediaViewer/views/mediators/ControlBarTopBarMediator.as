@@ -104,7 +104,8 @@ package org.mdid.MediaViewer.views.mediators
 			addModuleListener(RightClickMenuEvent.UNSPLIT_DISPLAY, handleDisplaySplitEvent);
 			addModuleListener(RightClickMenuEvent.SPLIT_DISPLAY_HORIZONTALLY, handleDisplaySplitEvent);
 			addModuleListener(RightClickMenuEvent.SPLIT_DISPLAY_VERTICALLY, handleDisplaySplitEvent);
-			addModuleListener(RightClickMenuEvent.TOGGLE_FULLSCREEN, handleFullScreenToggle)
+			addModuleListener(RightClickMenuEvent.TOGGLE_FULLSCREEN, handleFullScreenToggle);
+			addModuleListener(ControlBarEvent.SECOND_PANE_IS_REGISTERED, stateChangeToDoublePane);
 			eventMap.mapListener(view.appmenu.closebutton, MouseEvent.CLICK, handleToggleAppMenu);
 			eventMap.mapListener(view.rollDownAppMenu, EffectEvent.EFFECT_END, handleRollDownAppMenuEffectEnd);
 			eventMap.mapListener(view.controlbar.playTimer, TimerEvent.TIMER, handlePlayNextSlide);
@@ -335,17 +336,31 @@ package org.mdid.MediaViewer.views.mediators
 		}
 		
 		private var addedElement:IVisualElement;
+		private var cfItemWidth:int = 0;
+		private var cfDataProviderUpdateRequired:Boolean = true;
 		private function handleSliderPressEvent(e:SliderEvent):void {
-			this.coverFlowList.dataProvider = slideShow.cacheService.thumbFilePaths;	
-			coverFlowList.x = 0;
-			coverFlowList.y = view.controlbar.y - 160;
-			coverFlowList.width = view.controlbar.width;
-			coverFlowList.height = 165;
-			coverFlowList.cf.selectedIndex = e.value - 1;
+			if (this.coverFlowList.dataProvider == null) {
+				this.coverFlowList.dataProvider = slideShow.cacheService.thumbFilePaths;
+				coverFlowList.x = 0;
+				coverFlowList.height = 165 + 5;
+				cfItemWidth = 110 + coverFlowList.hLayout.gap;
+				cfDataProviderUpdateRequired = !slideShow.cacheService.isThumbCachingComplete;
+			} else if (cfDataProviderUpdateRequired) {
+				cfDataProviderUpdateRequired = !slideShow.cacheService.isThumbCachingComplete;
+				this.coverFlowList.dataProvider = null;
+				this.coverFlowList.dataProvider = slideShow.cacheService.thumbFilePaths;
+			}
+			coverFlowList.y = view.controlbar.y - 155;
 			addedElement = view.addElement(coverFlowList);
+			coverFlowList.maxWidth = coverFlowList.dataProvider.length * cfItemWidth;
+			coverFlowList.scroller.maxWidth = coverFlowList.maxWidth;
+			coverFlowList.width = coverFlowList.maxWidth;
+			coverFlowList.selectedIndex = e.value - 1;
+			coverFlowList.x = (view.width / 2) - (coverFlowList.selectedIndex * cfItemWidth) - 55;
 		}
 		private function handleSliderChangeEvent(e:SliderEvent):void {
-			coverFlowList.cf.selectedIndex = e.value - 1;
+			coverFlowList.selectedIndex = e.value - 1;
+			coverFlowList.x = (view.width / 2) - (coverFlowList.selectedIndex * cfItemWidth) - 55;
 		}
 		private function handleSliderReleaseEvent(e:SliderEvent):void {
 			if (this.coverFlowList != null && addedElement != null) {
@@ -453,7 +468,7 @@ package org.mdid.MediaViewer.views.mediators
 				moduleDispatcher.dispatchEvent(new ControlBarEvent(ControlBarEvent.HIDE_CATALOGDATA_WINDOW, windowName, view.controlbar.paneUnderControl));
 				haveDispatchedControlBarEvent = view.controlbar.dispatchEvent(new ControlBarEvent(splitType, windowName, view.controlbar.paneUnderControl));
 				eventMap.mapListener(view.doublepane, DividerEvent.DIVIDER_DRAG, handleCenterViewsInDoublePane);
-				eventMap.mapListener(view.doublepane, FlexEvent.CREATION_COMPLETE, stateChangeToDoublePane);
+				//eventMap.mapListener(view.doublepane.imageHolder2, FlexEvent.CREATION_COMPLETE, stateChangeToDoublePane);
 				updateTopBarStatus("doublePane");
 			}
 			if (targetButton == view.controlbar.singlescreen) {
@@ -479,7 +494,6 @@ package org.mdid.MediaViewer.views.mediators
 			view.controlbar.isInPairwiseMode = false;
 			view.controlbar.paneControl.enabled = view.controlbar.pairwiseLinker.enabled;
 			view.controlbar.pairwiseLinker.styleName = "PairwiseLinked";
-			trace("parewise");
 		}
 		private function updatePaneEdgeControls(whichPane:String):void {
 			var e:SlideshowCursorChangeEvent = new SlideshowCursorChangeEvent(SlideshowCursorChangeEvent.POSITION_CHANGED);
@@ -490,6 +504,7 @@ package org.mdid.MediaViewer.views.mediators
 			moduleDispatcher.dispatchEvent(e);
 		}
 		private function initializeSecondPaneImage():void {
+			trace("initialize");
 			var navEvent:NavigationEvent = new NavigationEvent(NavigationEvent.GOTO_X);
 			var firstPaneCursor:int = slideShow.getCurrentPosition(windowName, SlideshowCursor.FIRST_PANE);
 			navEvent.targetPosition = firstPaneCursor < slideShow.numSlides - 1 ? firstPaneCursor + 1 : firstPaneCursor;
@@ -591,8 +606,7 @@ package org.mdid.MediaViewer.views.mediators
 		}
 		private function handleProgressBarClickEvent(e:MouseEvent):void {
 			if (view.controlbar.capacitySurface.hitTestPoint(e.stageX, e.stageY, false)) {
-				var xOffset:int = e.localX - view.controlbar.capacitySurface.x;
-				var targetSlideIdx:int = Math.floor(xOffset/view.controlbar.divisionWidth);
+				var targetSlideIdx:int = Math.floor(e.localX/view.controlbar.divisionWidth);
 				if (targetSlideIdx != view.controlbar.scrubBar.value-1) {
 					var navType:String = NavigationEvent.GOTO_X;
 					dispatchNavigationEvent(navType, view.controlbar.paneUnderControl, targetSlideIdx);
@@ -607,7 +621,6 @@ package org.mdid.MediaViewer.views.mediators
 					if (indices.length == 1) {
 						view.controlbar.adjustProgressBar(indices[0], 1);
 					} else if (indices.length > 1 && view.controlbar.progressArray[indices[1]] < 1) {
-						//trace(e.slideid + ":" + e.percentDownloaded);
 						for(var i:int=0; i < indices.length; i++) {
 							view.controlbar.adjustProgressBar(indices[i], 1);
 						}
@@ -657,6 +670,7 @@ package org.mdid.MediaViewer.views.mediators
 			dispatchNavigationEvent(navType, view.controlbar.paneUnderControl, targetPos);
 		}
 		private function dispatchNavigationEvent(navType:String, whichPane:String, targetPosition:int = -1):void {
+			trace("navEvent: " + navType);
 			var navEvent:NavigationEvent = new NavigationEvent(navType);
 			navEvent.targetPosition = targetPosition;
 			navEvent.targetWindow = windowName;
@@ -690,11 +704,6 @@ package org.mdid.MediaViewer.views.mediators
 				if (!view.controlbar.last.enabled && view.controlbar.isPlaying) view.controlbar.stopSlideshow();
 				view.controlbar.play.enabled = !view.controlbar.isPlaying && view.controlbar.last.enabled;
 				view.controlbar.scrubBar.value = e.newPosition + 1;
-				if (this.coverFlowList.dataProvider == null) {
-					this.coverFlowList.dataProvider = slideShow.cacheService.thumbFilePaths;
-					coverFlowList.cf.selectedIndex = 0;
-				} 
-				coverFlowList.cf.selectedIndex = view.controlbar.scrubBar.value - 1;
 			}
 			var menu:XML;
 			if (view.currentState == "singlePane") {

@@ -3,8 +3,6 @@ package org.mdid.MediaViewer.controllers
 	import org.mdid.MediaViewer.events.LoginEvent;
 	import org.robotlegs.base.ContextEvent;
 	import org.robotlegs.mvcs.Command;
-
-	//import org.robotlegs.demos.imagegallery.remote.services.IGalleryImageService;
 	
 	public class StartupCommand extends Command
 	{

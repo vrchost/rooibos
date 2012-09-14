@@ -14,3 +14,4 @@ rooibos/static/flowplayer/flowplayer.commercial*
 bin-debug/
 unused_bin/
 .metadata/
+bin-release-temp/

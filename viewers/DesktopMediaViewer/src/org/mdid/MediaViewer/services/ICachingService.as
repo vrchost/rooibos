@@ -20,5 +20,6 @@ package org.mdid.MediaViewer.services
 		function preCacheImages(slides:ArrayCollection):void;
 		function preCacheImageThumbnails(slides:ArrayCollection):void;
 		function get thumbFilePaths():ArrayList;
+		function get isThumbCachingComplete():Boolean;
 	}
 }

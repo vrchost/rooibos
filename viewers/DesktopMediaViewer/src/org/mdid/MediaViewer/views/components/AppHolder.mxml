@@ -120,6 +120,7 @@
 				if (!moveOutFromTop.isPlaying) moveOutFromTop.play();
 			}
 			public function handleResize(e:Event=null):void {
+				trace("handleResize: " + this.stage.stageHeight);
 				this.appmenu.width = this.topbar.width = this.controlbar.width = this.stage.stageWidth;
 				this.appmenu.y = this.stage.stageHeight - this.appmenu.height - this.controlbar.height;
 				this.controlbar.y = this.stage.stageHeight - ((this.controlbar.pinbutton.styleName == "PinButton") ? 0 : this.controlbar.height);
