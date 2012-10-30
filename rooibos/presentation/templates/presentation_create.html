@@ -4,21 +4,31 @@
 
 <h1>Create new presentation</h1>
 
-<form action="{% url presentation-create %}?next={{ next }}" method="POST" class="vertical">
-    
+<form action="{% url presentation-create %}?next={{ next }}" method="POST" class="vertical">{% csrf_token %}
+
 {{ form.title.label_tag }}
 {{ form.title }}
 {{ form.title.errors }}
 
-{{ form.tags.label_tag }}
-{{ form.tags }}
-{{ form.tags.errors }}
+
+<label>Tags</label>
+<div class="custom-input">
+{% with existing_tags as actionbar_tags %}
+{% include 'ui_tag_editor.html' %}
+{% endwith %}
+</div>
+
 
 {% if selected %}
     {{ form.add_selected.label_tag }}
     {{ form.add_selected }}
     {{ form.add_selected.errors }}
 {% endif %}
+
+{{ form.auth_access.label_tag }}
+{{ form.auth_access }}
+{{ form.auth_access.errors }}
+
 
 <div class="row">
     <input type="submit" value="Create" />

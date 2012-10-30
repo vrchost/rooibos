@@ -7,8 +7,8 @@ from django.core.servers.basehttp import FileWrapper
 from urllib2 import urlopen, HTTPError
 from localfs import LocalFileSystemStorageSystem
 from models import Media, Storage
-from rooibos.access import accessible_ids
 from rooibos.data.models import Collection
+from rooibos.storage import get_media_for_record
 
 
 class PseudoStreamingStorageSystem(LocalFileSystemStorageSystem):
@@ -32,10 +32,7 @@ class PseudoStreamingStorageSystem(LocalFileSystemStorageSystem):
 
 def retrieve_pseudostream(request, recordid, record, mediaid, media):
 
-    mediaobj = get_object_or_404(Media.objects.filter(id=mediaid,
-                                 record__id=recordid,
-                                 record__collection__id__in=accessible_ids(request.user, Collection),
-                                 storage__id__in=accessible_ids(request.user, Storage)).distinct())
+    mediaobj = get_media_for_record(recordid, request.user).get(id=mediaid)
 
     q = dict()
     start = request.GET.get('start', '')

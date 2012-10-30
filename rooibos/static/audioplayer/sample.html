@@ -1,0 +1,40 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+
+<head>
+		<title>Audio Player Extended for MDID Oral Histories Project</title>
+		<script type="text/javascript" language="javascript" src="audio-player-noswfobject-mdid.js"></script>
+</head>
+<body>
+<object type="application/x-shockwave-flash" data="player.swf" id="ap1" height="24" width="390">
+<param name="movie" value="player_unmodified.swf">
+<param name="FlashVars" value="loader=98BDC6&playerID=ap1&animation=no&soundFile=sample.mp3&titles=title 1">
+<param name="quality" value="high">
+<param name="menu" value="false">
+<param name="wmode" value="transparent">
+</object> 
+<p>
+<a href="javascript:AudioPlayer.moveHeadPosition('ap1', .5*AudioPlayer.getCurrentTrackDuration('ap1'))">Move playhead to 50%</a>
+</p>
+<p>
+<a href="javascript:alert(AudioPlayer.getHeadPosition('ap1'))">Popup head position</a>
+</p>
+<p>
+<a href="javascript:AudioPlayer.playCurrentTrack('ap1')">Play current track</a>
+</p>
+<p>
+<a href="javascript:AudioPlayer.pauseCurrentTrack('ap1')">Pause current track</a>
+</p>
+<p>
+<a href="javascript:alert(AudioPlayer.getCurrentTrackDuration('ap1'))">Popup current duration in ms</a>
+</p>
+<p>
+<a href="javascript:alert(AudioPlayer.getCurrentTrackStatus('ap1'))">Popup current track status</a>
+</p>
+<p>
+<a href="http://wpaudioplayer.com/standalone">Link to documentation</a>
+</p>
+<p>
+<a href="http://files.cit.jmu.edu/heggkj/audiotest/audiotest.zip">Files Archive</a>
+</p>
+</body>
+</html>

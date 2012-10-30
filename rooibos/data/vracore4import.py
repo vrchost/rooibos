@@ -1,4 +1,3 @@
-from django.db.models import Q
 from models import Collection, Field, FieldValue, FieldSet, Record, CollectionItem
 from xml.dom import minidom, Node
 from decimal import Decimal

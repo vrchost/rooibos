@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:filters="flash.filters.*"
+				   xmlns="http://www.degrafa.com/2007"
+				   xmlns:rx="com.rictus.reflector.*"
+				   styleName="AppBar"
+				   height="45"
+				   borderVisible="false"
+				   creationComplete="init();"
+				   >
+	<s:layout>
+		<s:HorizontalLayout 
+			horizontalAlign="center" 
+			verticalAlign="top"
+			gap="0"
+			paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="4"
+			/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.controls.FlexibleSliderThumb;
+			
+			import mx.events.ResizeEvent;
+			
+			import org.mdid.MediaViewer.models.vo.SlideshowCursor;
+					
+			[Bindable] public var numSlides:int = 0;
+			[Bindable] public var progressArray:Array;
+			[Bindable] public var capacityWidth:int = 10;
+			[Bindable] public var capacityHeight:int = 14;
+			[Bindable] public var divisionWidth:Number = 0;
+			[Bindable] public var isPlaying:Boolean = false;
+			[Bindable] private var isSliderThumbPressed:Boolean = false;
+			//[Bindable] private var lastScrubBarValue:int = 0;
+			public var delayInSeconds:int;
+			public var paneUnderControl:String = SlideshowCursor.FIRST_PANE;
+			public var isInPairwiseMode:Boolean = false;
+			
+			[Bindable] public var delayValues:Array = new Array(["1s",1],["2s",2],["3s",3],["4s",4],["5s",5],["6s",6],["7s",7],["8s",8],
+				["9s",9],["10s",10],["11s",11],["12s",12],["13s",13],["14s",14],["15s",15],["20s",20],["25s",25],["30s",30],
+				["45s",45],["1m 0s",60],["1m 15s",75],["1m 30s",90],["1m 45s",105],["2m 0s",120],["2m 15s",135],["2m 30s",150],["2m 45s",165],
+				["3m 0s",180],["3m 15s",195],["3m 30s",210],["3m 45s",225],["4m 0s",240],["4m 15s",255],["4m 30s",270],["4m 45s",285],
+				["5m",300],["6m",360],["7m",420],["8m",480],["9m",540],["10m",600],["11m",660],["12m",720],["13m",780],["14m",840],["15m",900],
+				["16m",960],["17m",1020],["18m",1080],["19m",1140],["20m",1200],["25m",1800],["30m",1800],["35m",2100],["40m",2400],["45m",2700],
+				["50m",3000],["55m",3300],["1h 0m",3600],["1h 15m",4500],["1h 30m",5400],["1h 45m",6300],["2h 0m",7200]);
+			//,["2h 15m",8100],["2h 30m",9000],["2h 45m",9900],["3h 0m",10800],["3h 15m",11700],["3h 30m",12600],["3h 45m",13500],["4h 0m",14400],["4h 15m",15300],
+			//["4h 30m",16200],["4h 45m",17100],["5h",18000],["6h",21600],["7h",25200],["8h",28800],["9h",32400],["10h",36000],
+			//["11h",39600],["12h",43200]);
+			
+			[Bindable] private var delayValuesLength:int = 0;
+			private var delayTimer:Timer = new Timer(150, 0);
+			private var currentDirection:String;
+			
+			public var playTimer:Timer = new Timer(1000, 0);
+			
+			private function init():void {
+				delayTimer.addEventListener(TimerEvent.TIMER, handleDelayTimerEvent);
+				this.addEventListener(ResizeEvent.RESIZE, resizeScrubBarHandler);
+				resizeScrubBarHandler();
+				delayValuesLength = delayValues.length;
+			}
+			private function formatDelayLabel(theValue:int):String {
+				return delayValues[theValue][0];
+			}
+			public function setTimeUntilNext(theSeconds:int):void {
+				var secs:String = (theSeconds %60).toString();
+				var mins:String = (Math.floor(theSeconds/60)).toString();
+				countDown.text = "Next in: " + mins + "m " + secs + "s";			
+			}
+			public function initSecondWindowControls(curPosition:int, numPositions:int):void {
+				//initProgressBar(numPositions);
+				dualmonitors.enabled = true;
+				//dualmonitors.alpha = .65;
+				singleHsplit.enabled = true;
+				singleVsplit.enabled = true;
+				singlescreen.enabled = false;
+				blankscreen.enabled = true;
+				previous.enabled = (curPosition > 0);
+				first.enabled = previous.enabled;
+				next.enabled = (curPosition < numPositions - 1);
+				last.enabled = next.enabled;
+				play.enabled = !isPlaying && last.enabled;
+				scrubBar.value = curPosition + 1;
+			}
+			public function initProgressBar(theNumSlides:int, theProgress:Array=null):void {
+				this.numSlides = theNumSlides;
+				if (theNumSlides < 1) {
+					divisionWidth = 0;
+					this.scrubBar.value = 0;
+					this.scrubBar.visible = false;
+					this.theReflection.invalidateDisplayList();
+					return;	
+				}
+				this.progressArray = new Array(this.numSlides);
+				for (var i:int = 0; i < progressArray.length; i++) {
+					progressArray[i] = (theProgress == null || theProgress[i] == null || isNaN(theProgress[i])) ? 0 : theProgress[i];
+				}
+				this.adjustProgressHeight.modifier = progressArray;
+				resizeScrubBarHandler();
+				this.scrubBar.visible = true;
+			}
+			public function adjustProgressBar(idx:int, progress:Number):void {
+				if (progress < 0 || progress > 1) return;
+				var newVal:int = Math.floor(progress * capacityHeight);
+				if (newVal == progressArray[idx]) return;
+				progressArray[idx] = newVal;
+				this.dummyRect.width -= 1; //Need these two lines to refresh capacitySurface
+				this.dummyRect.width += 1;
+			}
+			private function adjustDelayStepper(direction:String):void {
+				var targetVal:int = (direction == "increase") ? this.delay.value + 1 : this.delay.value - 1;
+				if (targetVal >= this.delay.minimum && targetVal <= this.delay.maximum) {
+					this.delay.value = targetVal;
+				} else {
+					delayTimer.reset();
+				}
+			}
+			private function handleDelayTimerEvent(e:TimerEvent):void {
+				if (!this.isPlaying) {
+					adjustDelayStepper(currentDirection);
+					if (delayTimer.delay > 30) delayTimer.delay -= 10;
+				}
+			}
+			private function  handleDelayTimer(e:MouseEvent):void {
+				currentDirection = (e.currentTarget.id == "uparrow") ? "increase" : "decrease";
+				if (e.type == MouseEvent.MOUSE_DOWN) {
+					delayTimer.delay = 150;
+					delayTimer.start();
+				} else {
+					if (delayTimer.currentCount < 1) {
+						adjustDelayStepper(currentDirection);
+					}
+					delayTimer.reset();
+				}
+			}
+			protected function resizeScrubBarHandler(e:ResizeEvent = null):void {
+				trace("resize scrubbar");
+				capacityWidth = this.width - this.leftGroup.width - this.rightGroup.width - this.firstVRule.width - this.secondVRule.width - 20;
+				if (numSlides < 1) return;
+				divisionWidth = (capacityWidth / numSlides);
+				this.scrubBar.width = this.scrubBar.width = capacityWidth + 19 - divisionWidth;
+				if (divisionWidth < 4) {
+					this.verticalLinesWhite.stroke = null;
+					this.verticalLinesDark.stroke = null;
+				} else {
+					this.verticalLinesWhite.stroke = this.whiteStroke;
+					if (divisionWidth < 8) {
+						this.verticalLinesDark.stroke = null;
+					} else {
+						this.verticalLinesDark.stroke = this.darkStroke;
+					}
+				}
+				this.dummyRect.width -= 1; //Need these two lines to refresh capacitySurface
+				this.dummyRect.width += 1;
+			}
+			public function startSlideshow():void {
+				delayInSeconds = delayValues[this.delay.value][1];
+				setTimeUntilNext(delayInSeconds)
+				isPlaying = true;
+				playTimer.reset();
+				playTimer.repeatCount = delayInSeconds;
+				playTimer.start();
+			}
+			public function stopSlideshow():void {
+				isPlaying = false;
+				playTimer.stop();
+				playTimer.reset();
+				this.play.enabled = this.last.enabled;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:HGroup id="leftGroup" horizontalAlign="left" verticalAlign="middle" gap="2">
+		<mx:LinkButton id="first" styleName="First" paddingTop="0" enabled="false" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="previous" styleName="Previous" paddingTop="0" enabled="false" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="play" includeInLayout="{!isPlaying}" visible="{!isPlaying}" styleName="Play" paddingTop="0" enabled="false" click="startSlideshow();" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="pause" includeInLayout="{isPlaying}" visible="{isPlaying}" enabled="true" styleName="Pause" paddingTop="0" click="stopSlideshow();" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="next" styleName="Next" paddingTop="0" enabled="false"/>
+		<mx:LinkButton id="last" styleName="Last" paddingTop="0" enabled="false" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:Spacer width="4"/>
+		<s:VGroup verticalAlign="middle" gap="0" horizontalAlign="center" width="20" height="26" paddingTop="4">
+			<mx:LinkButton id="uparrow" enabled="{!isPlaying}" useHandCursor="{!isPlaying}" styleName="UpArrow" width="20" height="13" mouseDown="handleDelayTimer(event)" mouseUp="handleDelayTimer(event)" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+			<mx:LinkButton id="downarrow" enabled="{!isPlaying}" useHandCursor="{!isPlaying}" styleName="DownArrow" width="20" height="13" mouseDown="handleDelayTimer(event)" mouseUp="handleDelayTimer(event)" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		</s:VGroup>
+		<s:VGroup verticalAlign="middle" gap="3" horizontalAlign="left" paddingTop="5" paddingLeft="5">
+			<s:Label id="countDown" includeInLayout="{isPlaying}" visible="{isPlaying}" styleName="DelayCaption" tabEnabled="false" tabFocusEnabled="false"/>
+			<s:Label text="DELAY: {formatDelayLabel(delay.value)}" includeInLayout="{!isPlaying}" visible="{!isPlaying}" styleName="DelayCaption" tabEnabled="false" tabFocusEnabled="false"/>
+			<s:HSlider id="delay" styleName="lightBlue" width="88" minimum="4" enabled="{!isPlaying}" value="14" maximum="{delayValuesLength-1}" snapInterval="1"  showDataTip="false" liveDragging="true" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		</s:VGroup>
+	</s:HGroup>
+	<s:VGroup id="firstVRule" height="33" verticalAlign="middle" paddingLeft="5" paddingRight="0">
+		<mx:VRule height="100%" alpha=".25" styleName="AppBarVerticalRule"/>
+	</s:VGroup>
+	<s:VGroup id="surfaceHolder" horizontalAlign="center" verticalAlign="middle" gap="-5" width="100%" paddingTop="1">
+		<!-- Masked Surface and Filter for the Capacity Indicator -->
+		<Surface includeInLayout="true"
+				 id="capacitySurface"
+				 horizontalCenter="0"
+				 verticalCenter="0"
+				 width="{capacityWidth}"
+				 height="{capacityHeight + 5}"
+				 mask="{roundMask}">
+			<GeometryGroup id="roundMask">
+				<RoundedRectangleComplex
+					width="{capacityWidth}"
+					height="{capacityHeight}"
+					bottomLeftRadius="4"
+					bottomRightRadius="4"
+					topLeftRadius="4"
+					topRightRadius="4"
+					fill="{lightGray}"/>
+			</GeometryGroup>	    
+			<!-- Graphics and Paint for the inner bars and background -->
+			<GeometryGroup id="progressBarGroup">
+				<GeometryComposition id="progressBarComp">
+					<fills>
+						<SolidFill
+							id="lightBlue"
+							color="#62ABCD"
+							alpha="1"/>
+						<SolidFill
+							id="salmonColor"
+							color="#B98282"
+							alpha="1"/>
+						<SolidFill
+							id="lightGray"
+							alpha=".55"
+							color="#667766"/>
+						<SolidFill
+							id="lightGreen"
+							alpha=".5"
+							color="#667966"/>
+						<LinearGradientFill id="highlight" angle="90">
+							<GradientStop
+								color="#FFFFFF"
+								alpha=".3"/>
+							<GradientStop
+								color="#FFFFFF"
+								alpha=".05"/>
+						</LinearGradientFill>
+						<LinearGradientFill id="inset" angle="90">
+							<GradientStop
+								color="#222222"
+								alpha=".3"
+								ratio="0"
+								ratioUnit="pixels"/>
+							<GradientStop
+								color="#CCCCCC"
+								alpha=".4"
+								ratio="16"
+								ratioUnit="pixels"/>
+						</LinearGradientFill>
+					</fills>
+					<strokes>
+						<SolidStroke
+							id="whiteStroke"
+							color="#CCCCCC"
+							weight="1"
+							alpha=".25"/>
+						<SolidStroke
+							id="darkStroke"
+							color="#000000"
+							weight="1"
+							alpha=".35"/>
+						<SolidStroke
+							id="orangeStroke"
+							color="#994400"
+							weight="2"/>
+					</strokes>
+					<RegularRectangle id="insetRect"
+									  width="{capacityWidth}"
+									  height="{capacityHeight}"
+									  fill="{inset}"/>	            
+					<RegularRectangle id="dummyRect" 
+									  width="0"
+									  height="0"/>
+					<GeometryRepeater id="myRepeater" count="{numSlides}">
+						<VerticalLine id="verticalLinesDark"
+									  x="0"
+									  y="0"
+									  y1="{capacityHeight}"
+									  stroke="{darkStroke}"/>
+						<VerticalLine id="verticalLinesWhite"
+									  x="1"
+									  y="0"
+									  y1="{capacityHeight}"
+									  stroke="{whiteStroke}"/>
+						<RegularRectangle id="oneRect"
+										  x="1"
+										  width="{divisionWidth}"
+										  height="0"
+										  fill="{lightGreen}"/>
+						<modifiers>
+							<PropertyModifier id="adjustProgressHeight" targets="{[oneRect]}" property="height" modifierOperator="none" />
+							<PropertyModifier targets="{[verticalLinesDark, verticalLinesWhite, oneRect]}" property="x" modifier="{divisionWidth}" modifierOperator="add" />
+						</modifiers>
+					</GeometryRepeater>
+					<RegularRectangle id="secondRect"
+									  
+									  width="{this.scrubBar.value * divisionWidth}"
+									  alpha=".5"
+									  height="{capacityHeight}"
+									  fill="{lightBlue}"/>    
+					<RegularRectangle id="firstRect"
+									  y="1"
+									  width="{this.scrubBar.value * divisionWidth}"
+									  alpha=".3"
+									  height="{capacityHeight/2}"
+									  fill="{lightBlue}"/>
+					<RoundedRectangleComplex
+						id="highlightRect"
+						bottomLeftRadius="10"
+						bottomRightRadius="10"
+						width="{capacityWidth}"
+						height="{capacityHeight/2}"
+						fill="{highlight}"/>
+				</GeometryComposition>				
+			</GeometryGroup>
+			<filters>
+				<filters:GlowFilter
+					color="#001100"
+					alpha=".1"
+					blurX="4"
+					blurY="4"
+					inner="true"
+					quality="6"/>
+			</filters>
+		</Surface>
+		<!-- The Reflection -->
+		<rx:Reflector
+			id="theReflection"
+			target="{capacitySurface}"
+			alpha=".7"
+			falloff=".7"
+			blurAmount=".2"/>
+		<Surface visible="{isSliderThumbPressed}"
+				 includeInLayout="false"
+				 x="{this.capacitySurface.x + 1}"
+				 y="2"
+				 width="100%"
+				 height="2"
+				 >
+			<strokes>
+				<SolidStroke
+					id="whiterStroke"
+					color="#EFEFEF"
+					weight="2"
+					joints="round"
+					alpha=".75"/>
+			</strokes>
+			<GeometryGroup>
+				<HorizontalLine x="{((scrubBar.value - 1) * divisionWidth)+1}" x1="{(scrubBar.value * divisionWidth)-3}" stroke="{whiterStroke}"/>
+			</GeometryGroup>
+		</Surface>
+		<mx:HSlider id="scrubBar" visible="false" styleName="ScrubBarSliderBlue" width="0" thumbRelease="isSliderThumbPressed=false;" thumbPress="isSliderThumbPressed=true;" allowTrackClick="false" liveDragging="true" sliderThumbClass="{FlexibleSliderThumb}" showDataTip="false"  height="16" minimum="1" maximum="{numSlides}" snapInterval="1" change="this.theReflection.refresh();"  focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>		
+	</s:VGroup>
+	<s:VGroup id="secondVRule" height="33" verticalAlign="middle" paddingLeft="0" paddingRight="5">
+		<mx:VRule height="100%" alpha=".25" styleName="AppBarVerticalRule"/>
+	</s:VGroup>
+	<s:HGroup id="rightGroup" horizontalAlign="left" verticalAlign="middle" gap="4" paddingRight="3">
+		<mx:LinkButton id="paneControl" enabled="false" styleName="YinYang" paddingTop="0" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="pairwiseLinker"  enabled="false" styleName="PairwiseLinked" paddingTop="0" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<s:VGroup height="33" verticalAlign="middle" paddingLeft="3" paddingRight="3">
+			<mx:VRule height="100%" alpha=".25" styleName="AppBarVerticalRule"/>
+		</s:VGroup>
+		<mx:LinkButton id="singleHsplit" enabled="false" styleName="ScreenSingleHSplit" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="singleVsplit" enabled="false" styleName="ScreenSingleVSplit" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="singlescreen" enabled="false" styleName="ScreenSingle" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="blankscreen" enabled="false" styleName="ScreenBlank" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="dualmonitors" enabled="false" styleName="DualMonitors" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>			
+		<s:VGroup height="33" verticalAlign="middle" paddingLeft="3" paddingRight="3">
+			<mx:VRule height="100%" alpha=".25" styleName="AppBarVerticalRule"/>
+		</s:VGroup>
+		<mx:LinkButton id="menubutton" styleName="MenuButton" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="pinbutton" styleName="PinnedButton" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>		
+	</s:HGroup>
+</s:BorderContainer>

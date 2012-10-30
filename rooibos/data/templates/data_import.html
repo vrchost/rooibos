@@ -9,7 +9,7 @@ want to upload.<br />
 You will be able to configure the import after the file has
 been uploaded and analyzed.<br /><br />
 
-<form method="post" action="." enctype="multipart/form-data">
+<form method="post" action="." enctype="multipart/form-data">{% csrf_token %}
     {{ form.file.label }}: {{ form.file }}{% if form.file.errors %} {{ form.file.errors }}{% else %}<br />{% endif %}
     {% if utf8_error %}
     <strong>The uploaded file does not appear to be a UTF8 encoded file.  Please convert the file and try again.</strong>

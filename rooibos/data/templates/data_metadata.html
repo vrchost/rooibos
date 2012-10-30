@@ -1,3 +1,4 @@
+{% load humanize %}
 <div class='metadata'>
 {% for value in values %}
     <div class='metadata-{% if value.subitem %}sub{% endif %}item'>
@@ -9,4 +10,19 @@
         </div>
     </div>
 {% endfor %}
+
+{% if record.created %}
+    <div class='metadata-item'>
+        <div class='label'>Record created:</div>
+        <div class='value'>{{ record.created|naturalday }}</div>
+    </div>
+{% endif %}
+
+{% if record.modified %}
+    <div class='metadata-item'>
+        <div class='label'>Last modified:</div>
+        <div class='value'>{{ record.modified|naturalday }}</div>
+    </div>
+{% endif %}
+
 </div>

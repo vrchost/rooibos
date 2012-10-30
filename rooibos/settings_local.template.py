@@ -2,19 +2,34 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 #LOGGING_OUTPUT_ENABLED = True
 
+# Needed to enable compression JS and CSS files
+COMPRESS = True
+MEDIA_URL = '/static/'
+MEDIA_ROOT = 'd:/mdid/rooibos/static/'
+
+
 ADMINS = (
 #    ('Your name', 'your@email.example'),
 )
 
 MANAGERS = ADMINS
 
-#DATABASE_ENGINE = 'sqlite3'
+# Settings for MySQL
 DATABASE_ENGINE = 'mysql'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_OPTIONS = {
     'use_unicode': True,
     'charset': 'utf8',
 }
 
+# Settings for Microsoft SQL Server (use the appropriate driver setting)
+#DATABASE_ENGINE = 'sql_server.pyodbc'
+#DATABASE_OPTIONS= {
+#    'driver': 'SQL Native Client',             # FOR SQL SERVER 2005
+#    'driver': 'SQL Server Native Client 10.0', # FOR SQL SERVER 2008
+#    'MARS_Connection': True,
+#}
+
+# Settings for all database systems
 DATABASE_NAME = 'rooibos'             # Or path to database file if using sqlite3.
 DATABASE_USER = 'rooibos'             # Not used with sqlite3.
 DATABASE_PASSWORD = 'rooibos'         # Not used with sqlite3.
@@ -88,9 +103,11 @@ MIDDLEWARE_CLASSES = (
 
 LDAP_AUTH = (
     {
+        # LDAP Example
         'uri': 'ldap://ldap.example.edu',
         'base': 'ou=People,o=example',
         'cn': 'cn',
+        'dn': 'dn',
         'version': 2,
         'scope': 1,
         'options': {'OPT_X_TLS_TRY': 1},
@@ -98,7 +115,29 @@ LDAP_AUTH = (
         'firstname': 'givenname',
         'lastname': 'sn',
         'email': 'mail',
+        'bind_user': '',
+        'bind_password': '',
     },
+    {
+        # Active Directory Example
+        'uri': 'ldap://ad.example.edu',
+        'base': 'OU=users,DC=ad,DC=example,DC=edu',
+        'cn': 'sAMAccountName',
+        'dn': 'distinguishedName',
+        'version': 3,
+        'scope': 2, # ldap.SCOPE_SUBTREE
+        'options': {
+            'OPT_X_TLS_TRY': 1,
+            'OPT_REFERRALS': 0,
+            },
+        'attributes': ('sn', 'mail', 'givenName', 'eduPersonAffiliation'),
+        'firstname': 'givenName',
+        'lastname': 'sn',
+        'email': 'mail',
+        'bind_user': 'CN=LDAP Bind user,OU=users,DC=ad,DC=jmu,DC=edu',
+        'bind_password': 'abc123',
+    },
+
 )
 
 IMAP_AUTH = (
@@ -126,6 +165,33 @@ SSL_PORT = None  # ':443'
 # Theme colors for use in CSS
 PRIMARY_COLOR = "rgb(152, 189, 198)"
 SECONDARY_COLOR = "rgb(118, 147, 154)"
+
+WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your University"
+
+CUSTOM_TRACKER_HTML = ""
+
+EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS')
+
+# The Megazine viewer is using a third party component that has commercial
+# licensing requirements.  To enable the component you need to enter your
+# license key, which is available for free for educational institutions.
+# See static/megazine/COPYING.
+MEGAZINE_PUBLIC_KEY = ""
+
+# To use a commercial licensed flowplayer, enter your flowplayer key here
+# and add the flowplayer.commercial-3.x.x.swf file to the
+# rooibos/static/flowplayer directory
+FLOWPLAYER_KEY = ""
+
+# MDID uses some Yahoo APIs that require an application key
+# You can get one at https://developer.apps.yahoo.com/dashboard/createKey.html
+YAHOO_APPLICATION_ID = ""
+
+
+# By default, video delivery links are created as symbolic links. Some streaming
+# servers (e.g. Wowza) don't deliver those, so hard links are required.
+HARD_VIDEO_DELIVERY_LINKS = False
+
 
 additional_settings = [
 #    'apps.jmutube.settings_local',

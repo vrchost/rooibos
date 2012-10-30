@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_SETTINGS">Einstellungen</langstring>
+	<langstring name="LNG_SETTINGS_ACCEPT">Einstellungen speichern</langstring>
+	<langstring name="LNG_SHADOWS">Schatten</langstring>
+	<langstring name="LNG_SHADOWS_LONG">Schaltet die Verwendung von Schatten- und Glanzeffekten von Seiten beim Blättern an oder aus. Leichte Auswirkung auf die Geschwindigkeit.</langstring>
+	<langstring name="LNG_REFLECTION">Spiegelung</langstring>
+	<langstring name="LNG_REFLECTION_LONG">Schaltet die Spiegelung der Seiten unterhalb des Buches an oder aus. Starke Auswirkung auf die Geschwindigkeit.</langstring>
+	<langstring name="LNG_LIQUIDSCALING">Liquid scaling</langstring>
+	<langstring name="LNG_LIQUIDSCALING_LONG">Legt fest, ob die Buchgröße automatisch der Fenstergröße angepasst werden soll, wenn dieses vergrößert oder verkleinert wird.</langstring>
+	<langstring name="LNG_AUTOMOVE">Auto. Bewegen</langstring>
+	<langstring name="LNG_AUTOMOVE_LONG">Legt fest, ob das Buch automatisch bewegt wird wenn die Maus bewegt wird, sofern das Buch größer ist als die Fläche die zur Verfügung steht es anzuzeigen.  Wenn deaktiviert ist es möglich das Buch zu bewegen indem man die linke Maustaste gedrückt hält und die Maus dann bewegt.</langstring>
+</lang>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<application xmlns="http://ns.adobe.com/air/application/2.6">
+	<id>DesktopMediaViewer</id>
+	<filename>DesktopMediaViewer</filename>
+	<name>Desktop MediaViewer</name>
+	<versionNumber>1.02.5</versionNumber>
+	<description>You are installing the MDID MediaViewer on your computer. The MediaViewer requires a live Internet connection. After you install and run the MediaViewer, you will be prompted to log into your MDID. If successful, you will see a list of your slideshows.</description>
+	<copyright>James Madison University</copyright>
+	<initialWindow>
+		<content>[This value will be overwritten by Flash Builder in the output app.xml]</content>
+		<title>MDID Desktop MediaViewer</title>
+		<systemChrome>standard</systemChrome>
+		<transparent>false</transparent>
+		<minimizable>true</minimizable>
+		<maximizable>true</maximizable>
+		<resizable>true</resizable>
+		<width>700</width>
+		<height>500</height>
+		<minSize>750 580</minSize>
+	</initialWindow>
+	<supportedProfiles>extendedDesktop desktop</supportedProfiles>
+	<icon>
+		<image16x16>assets/app_icons/mv_icon_16.png</image16x16>
+		<image32x32>assets/app_icons/mv_icon_32.png</image32x32>
+		<image48x48>assets/app_icons/mv_icon_48.png</image48x48>
+		<image128x128>assets/app_icons/mv_icon_128.png</image128x128>
+	</icon>
+	<allowBrowserInvocation>true</allowBrowserInvocation>
+</application>

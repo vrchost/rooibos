@@ -1,6 +1,19 @@
 {% extends "master.html" %}
 {% load pagination_tags %}
 
+{% block stylesheets %}
+{{ block.super }}
+<style type="text/css">
+td.limitwidth {
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+td.limitwidth + td.limitwidth {
+    padding-left: 10px;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 
@@ -21,18 +34,20 @@
         <th>Title</th>
         <th>System</th>
         <th>Base</th>
-        <th>Derivatives for</th>
+        <th>URL Base</th>
+        <th>Delivery Base</th>
+        <th></th>
     </tr>
 
 {% for storage in storages %}
-{% with storage.master as master %}
-<tr class="{% cycle "" "altrow" %}"{% if master %} style="color: gray;"{% endif %}>
+<tr class="{% cycle "" "altrow" %}">
     <td><a href="{% url storage-manage-storage storage.id, storage.name %}">{{ storage.title }}</a></td>
     <td>{{ storage.system }}</td>
-    <td>{{ storage.base }}</td>
-    <td>{% if master %}<a href="{% url storage-manage-storage master.id, master.name %}">{{ master.title }}</a>{% endif %}</td>
+    <td class="limitwidth" title="{{ storage.base|default:"" }}">{{ storage.base|default:"" }}</td>
+    <td class="limitwidth" title="{{ storage.urlbase|default:"" }}">{{ storage.urlbase|default:"" }}</td>
+    <td class="limitwidth" title="{{ storage.deliverybase|default:"" }}">{{ storage.deliverybase|default:"" }}</td>
+    <td>{% if storage.analysis_available %}<a href="{% url storage-analyze storage.id, storage.name %}">Analyze</a>{% endif %}</td>
 </tr>
-{% endwith %}
 {% endfor %}
 
 </table>

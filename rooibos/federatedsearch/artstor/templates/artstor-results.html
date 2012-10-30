@@ -1,0 +1,117 @@
+{% extends "master.html" %}
+{% load ui %}
+{% load help %}
+{% load humanize %}
+{% load solr %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+
+    function remoteRecordSelection(ids, checked) {
+        var method = ids == 0 ? 'GET' : 'POST';
+        if (ids.constructor != Array) ids = [ids];
+        ajaxManager.add({
+            type: method,
+            url: '{% url nasa-nix-select %}',
+            data: {'id': JSON.stringify(ids), 'checked': checked},
+            dataType: 'json',
+            success: function(r) {
+                $("#basket-thumbs").html(r.basket);
+                $("#basket-tab").html(r.header);
+                basket_scroll_arrows();
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#submit_record_selections").hide();
+        $(".remote-record-select").click(function() { remoteRecordSelection($(this).attr('value'), $(this).attr('checked')); });
+    });
+
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url solr-search %}?kw={{ query|urlencode }}", "title": "Back to Explore"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+  <div class="facet active-facet" id="results_sidebar_keywords">
+    <div class="facet-header">Keywords</div>
+    <div class="facet-body">
+        <form method="GET" action=".">
+        <input type="text" id="keywords" name="q" value="{{ query }}"/><input type="image" class="image" src="{% url static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
+        </form>
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{% block content-top %}
+<h1>ARTstor</h1>
+{% endblock %}
+
+
+{% block content %}
+
+{% if failure %}
+
+ARTstor could not perform the desired search, probably because it is not specific
+enough.  Please add additional keywords and try again.
+
+{% else %}
+
+<form method="POST" action=".">{% csrf_token %}
+<input type="hidden" name="q" value="{{ query }}" />
+
+<div style="float: left;">
+    Your query found {{ results.hits|intcomma }} hit{{ results.hits|pluralize }}.
+</div>
+
+{% if results.records %}
+
+{% if pages %}
+<div style="text-align: center;">
+    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
+    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
+    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+</div>
+{% endif %}
+
+Due to licensing restrictions, records are not available for immediate inclusion into
+slideshows.
+
+<div id="resultlist" class="resultlist-thumb">
+{% for r in results.records %}
+<div class="record">
+    <a href="{{ r.record_url }}" target="af"><img class="thumbnail" src="{{ r.thumb_url }}" alt="{{ r.title }}" /></a>
+    <div class="record-title"><a href="{{ r.record_url }}" target="af">{{ r.title }}</a></div>
+</div>
+{% endfor %}
+</div>
+
+{% if pages %}
+<div style="text-align: center; clear: left;">
+    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
+    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
+    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+</div>
+{% endif %}
+
+<iframe name="af" style="height: 5px;"></iframe>
+{% endif %}
+
+</form>
+
+{% endif %}
+
+{% endblock %}

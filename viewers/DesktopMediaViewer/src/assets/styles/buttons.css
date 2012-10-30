@@ -1,0 +1,310 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+mx|LinkButton.Returnto {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Return_to");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Return_to");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Return_to");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Return_to_over");
+}
+mx|LinkButton.First {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="First");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="First");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="First_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="First_over");
+}
+mx|LinkButton.FirstP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="FirstP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="FirstP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="FirstP2_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="FirstP2_over");
+}
+mx|LinkButton.Previous {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Previous");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Previous");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Previous_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Previous_over");
+}
+mx|LinkButton.PreviousP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="PreviousP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="PreviousP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="PreviousP2_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="PreviousP2_over");
+}
+mx|LinkButton.Play {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Play");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Play");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Play_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Play_over");
+}
+mx|LinkButton.PlayP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="PlayP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="PlayP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="PlayP2_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="PlayP2_over");
+}
+mx|LinkButton.Pause {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Stop");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Stop");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Stop");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Stop_over");
+}
+mx|LinkButton.PauseP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="StopP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="StopP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="StopP2");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="StopP2_over");
+}
+mx|LinkButton.Next {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Next");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Next");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Next_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Next_over");
+}
+mx|LinkButton.NextP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="NextP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="NextP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="NextP2_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="NextP2_over");
+}
+mx|LinkButton.Last {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Last");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Last");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Last_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Last_over");
+}
+mx|LinkButton.LastP2 {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="LastP2");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="LastP2");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="LastP2_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="LastP2_over");
+}
+mx|LinkButton.Exit {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Exit");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Exit");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Exit");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Exit_over");
+}
+mx|LinkButton.Fullscreen {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Fullscreen");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Fullscreen");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Fullscreen");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Fullscreen_over");
+}
+mx|LinkButton.ExitFullscreen {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="ExitFullscreen");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="ExitFullscreen");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="ExitFullscreen");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="ExitFullscreen_over");
+}
+mx|LinkButton.Minimize {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Minimize");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Minimize");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Minimize");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Minimize_over");
+}
+mx|LinkButton.MenuButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Menu");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Menu");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Menu_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Menu_over");
+}
+mx|LinkButton.CloseMenuButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="CloseButton");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="CloseButton");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="CloseButton");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="CloseButton_over");
+}
+mx|LinkButton.ThumbView {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="ThumbView");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="ThumbView");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="ThumbView");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="ThumbView_over");
+}
+mx|LinkButton.DualMonitors {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="DualMonitor");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="DualMonitor");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="DualMonitor_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="DualMonitor_over");
+}
+mx|LinkButton.PairwiseLinked {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_linked");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_linked");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_linked_over");
+}
+mx|LinkButton.PairwiseUnlinked {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_unlinked");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_unlinked");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Pairwise_unlinked_over");
+}
+mx|LinkButton.YinYang {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYang");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYang");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYang_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYang_over");
+}
+mx|LinkButton.YinYangFlipped {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYangSecondary");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYangSecondary");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYang_disabled");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="YinYangSecondary_over");
+}
+mx|LinkButton.ScreenMore {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_More");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_More");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_More");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_More_over");
+}
+mx|LinkButton.ScreenReveal {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_over");
+}
+mx|LinkButton.ScreenBlankLeftOnly {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Left_Only");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Left_Only");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Left_Only");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Left_Only_over");
+}
+mx|LinkButton.ScreenBlankRightOnly {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Right_Only");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Right_Only");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Right_Only");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Right_Only_over");
+}
+mx|LinkButton.ScreenBlankTopOnly {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Top_Only");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Top_Only");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Top_Only");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Top_Only_over");
+}
+mx|LinkButton.ScreenBlankBottomOnly {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Bottom_Only");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Bottom_Only");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Bottom_Only");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Blank_Bottom_Only_over");
+}
+mx|LinkButton.ScreenBlank {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Reveal");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Reveal");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Reveal");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Reveal_over");
+}
+mx|LinkButton.ScreenSingle {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_over");
+}
+mx|LinkButton.ScreenSingleHSplit {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_HSplit");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_HSplit");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_HSplit");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_HSplit_over");
+}
+mx|LinkButton.ScreenSingleVSplit {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_VSplit");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_VSplit");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_VSplit");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Screen_Single_VSplit_over");
+}
+mx|LinkButton.PinButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Pin");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Pin");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Pin");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Pin_over");
+}
+mx|LinkButton.PinnedButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Pinned");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Pinned");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Pinned");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Pinned_over");
+}
+mx|LinkButton.SmallPinButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPin");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPin");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPin");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPin_over");
+}
+mx|LinkButton.SmallPinnedButton {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPinned");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPinned");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPinned");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="SmallPinned_over");
+}
+mx|LinkButton.ActualSize {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="ActualSize");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="ActualSize");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="ActualSize");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="ActualSize_over");
+}
+mx|LinkButton.BestFit {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="BestFit");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="BestFit");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="BestFit");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="BestFit_over");
+}
+mx|LinkButton.Info {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="Info");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="Info");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="Info");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="Info_over");
+}
+mx|LinkButton.HideTitle {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="HideTitle");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="HideTitle");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="HideTitle");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="HideTitle_over");
+}
+mx|LinkButton.ShowTitle {
+	upSkin: Embed(source="/assets/skins/skin.swf", symbol="ShowTitle");
+	downSkin: Embed(source="/assets/skins/skin.swf", symbol="ShowTitle");
+	disabledSkin: Embed(source="/assets/skins/skin.swf", symbol="ShowTitle");
+	overSkin: Embed(source="/assets/skins/skin.swf", symbol="ShowTitle_over");
+}
+mx|LinkButton.OpenSlideshow, mx|LinkButton.Preferences, mx|LinkButton.Login {;
+	font-size: 10;
+	color: #FFFFFF;
+	rollOverColor: #75ADCD;
+	paddingTop: 4;
+	paddingLeft: 2;
+	paddingRight: 2;
+	paddingBottom: 2;
+	cornerRadius: 0;
+	verticalGap: 0;
+}
+mx|LinkButton.OpenSlideshow {
+	icon: Embed(source="/assets/skins/skin.swf", symbol="OpenSlideshow");
+}
+mx|LinkButton.Preferences {
+	icon: Embed(source="/assets/skins/skin.swf", symbol="Preferences");
+}
+mx|LinkButton.Login {
+	icon: Embed(source="/assets/skins/skin.swf", symbol="LoginButton");
+}
+mx|LinkButton.UpArrow {
+	upSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperUpArrow_upSkin");
+	downSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperUpArrow_downSkin");
+	disabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperUpArrow_disabledSkin");
+	overSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperUpArrow_overSkin");
+}
+mx|LinkButton.DownArrow {
+	upSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperDownArrow_upSkin");
+	downSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperDownArrow_downSkin");
+	disabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperDownArrow_disabledSkin");
+	overSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="NumericStepperDownArrow_overSkin");
+}
+mx|LinkButton.ZoomInButton {
+	disabledSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="MinusButton_Disabled");
+	downSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="MinusButton_Down");
+	overSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="MinusButton_Over");
+	upSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="MinusButton_Up");
+}	
+mx|LinkButton.ZoomOutButton {		
+	disabledSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="PlusButton_Disabled");
+	downSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="PlusButton_Down");
+	overSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="PlusButton_Over");
+	upSkin: Embed(source="/assets/icons/demoIcons.swf",symbol="PlusButton_Up");
+}

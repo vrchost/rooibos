@@ -1,0 +1,41 @@
+{% extends "master.html" %}
+{% load ui %}
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#delete-items").click(function() {
+          return confirm("This will delete all items you have permission to delete.\n\nThis action cannot be undone!");
+        });
+    });
+</script>
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Delete Selected Items</h1>
+
+{% if items %}
+
+<div>The following items will be deleted.  This action cannot be undone!</div>
+
+<div style="margin: 20px 0;">
+    {% for record in items %}
+    <a href="{{ record.get_absolute_url }}"><img id="delete-record-id-{{ record.id }}" class="thumbnail record-anchor" src="{{ record.get_thumbnail_url }}?square" alt="{{ record.title }}" /></a>
+    {% endfor %}
+</div>
+
+<form action="" method="post">{% csrf_token %}
+    <input type="submit" value="Delete Items" id="delete-items" />
+</form>
+
+{% else %}
+
+<div>You have not selected any items you have permission to delete</div>
+
+{% endif %}
+
+
+{% endblock %}

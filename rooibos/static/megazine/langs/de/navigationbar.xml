@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_FIRST_PAGE">Erste Seite</langstring>
+	<langstring name="LNG_LAST_PAGE">Letzte Seite</langstring>
+	<langstring name="LNG_PREV_PAGE">Vorherige Seite</langstring>
+	<langstring name="LNG_NEXT_PAGE">Nächste Seite</langstring>
+	<langstring name="LNG_GOTO_PAGE">Gehe zu Seite $1</langstring>
+	<langstring name="LNG_GOTO_DIALOG_TIP">Bitte geben Sie die Zahl der Seite ein zu der Sie springen möchten und drücken Sie dann die Enter-Taste.</langstring>
+	<langstring name="LNG_FULLSCREEN">Vollbildmodus aktivieren (im Vollbildmodus kann es sein, dass keine Tastenkürzel funktionieren)</langstring>
+	<langstring name="LNG_RESTORE">Vollbildmodus verlassen</langstring>
+	<langstring name="LNG_MUTE">Stummschalten</langstring>
+	<langstring name="LNG_UNMUTE">Stummschaltung aufheben</langstring>
+	<langstring name="LNG_ZOOM_IN">Vergrößern</langstring>
+	<langstring name="LNG_ZOOM_OUT">Verkleinern</langstring>
+	<langstring name="LNG_ROTATE_RIGHT">Buch im Uhrzeigersinn drehen</langstring>
+	<langstring name="LNG_ROTATE_LEFT">Buch gegen den Uhrzeigersinn drehen</langstring>
+</lang>

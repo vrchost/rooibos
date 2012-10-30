@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_BOOKMARK_DELETE">Dieses Lesezeichen löschen</langstring>
+	<langstring name="LNG_BOOKMARK_ADD">Lesezeichen hinzufügen</langstring>
+	<langstring name="LNG_BOOKMARK_OK">OK</langstring>
+	<langstring name="LNG_BOOKMARK_CANCEL">Abbrechen</langstring>
+	<langstring name="LNG_BOOKMARK_DEFAULT_TITLE">Seite $1</langstring>
+</lang>

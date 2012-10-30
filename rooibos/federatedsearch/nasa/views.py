@@ -11,19 +11,20 @@ from rooibos.data.models import Record
 
 @login_required
 def search(request):
-    
+
     query = request.GET.get('q', '') or request.POST.get('q', '')
     n = NasaImageExchange()
     results = n.search(query) if query else None
 
-    # Map URLs to IDs and find out which ones are already selected
-    urls = [r['record_url'] for r in results]
-    ids = dict(Record.objects.filter(source__in=urls, manager='nasaimageexchange').values_list('source', 'id'))
-    selected = request.session.get('selected_records', ())
-    
-    for r in results:
-        r['id'] = ids.get(r['record_url'])
-        r['selected'] = r['id'] in selected
+    if results:
+        # Map URLs to IDs and find out which ones are already selected
+        urls = [r['record_url'] for r in results]
+        ids = dict(Record.objects.filter(source__in=urls, manager='nasaimageexchange').values_list('source', 'id'))
+        selected = request.session.get('selected_records', ())
+
+        for r in results:
+            r['id'] = ids.get(r['record_url'])
+            r['selected'] = r['id'] in selected
 
     return render_to_response('nasa-nix-results.html',
                           {'query': query,
@@ -40,7 +41,7 @@ def nix_select_record(request):
     if request.method == "POST":
         nix = NasaImageExchange()
         urls = simplejson.loads(request.POST.get('id', '[]'))
-        
+
         # find records that already have been created for the given URLs
         ids = dict(Record.objects.filter(source__in=urls, manager='nasaimageexchange').values_list('source', 'id'))
         result = []
@@ -55,5 +56,5 @@ def nix_select_record(request):
         r = request.POST.copy()
         r['id'] = simplejson.dumps(result)
         request.POST = r
-        
+
     return select_record(request)

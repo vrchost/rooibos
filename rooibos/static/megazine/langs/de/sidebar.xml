@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_SIDEBAR_CLOSE">Seitenleiste schließen</langstring>
+	<langstring name="LNG_SIDEBAR_OPEN">Seitenleiste öffnen</langstring>
+</lang>

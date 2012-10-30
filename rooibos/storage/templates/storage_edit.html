@@ -20,8 +20,12 @@
 {% var as related_pages %}
 {"pages": [
     {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url storage-manage %}", "title": "Storage Management"},
-    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"}
+    {"url": "{% url storage-manage %}", "title": "Storage Management"}
+    {% if storage.id %},
+    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"},
+    {"url": "{% url storage-analyze storage.id, storage.name %}", "title": "Analyze"},
+    {"url": "{% url storage-find-records-without-media %}?storage={{ storage.id }}", "title": "Find Empty Records"}
+    {% endif %}
 ]}
 {% endvar %}
 
@@ -38,31 +42,13 @@
     </div>
   </div>
 
-{% if storage.derivative %}
-  <div class="facet active-facet" id="storage_sidebar_derivative">
-    <div class="facet-header">Derivative Storage</div>
-    <div class="facet-body">
-        <a href="{% url storage-manage-storage storage.derivative.id, storage.derivative.name %}">{{ storage.derivative.title }}</a>
-    </div>
-  </div>
-{% endif %}
-
-{% if storage.master %}
-  <div class="facet active-facet" id="storage_sidebar_master">
-    <div class="facet-header">Master Storage</div>
-    <div class="facet-body">
-        <a href="{% url storage-manage-storage storage.master.id, storage.master.name %}">{{ storage.master.title }}</a>
-    </div>
-  </div>
-{% endif %}
-
   <div class="facet active-facet" id="storage_sidebar_permissions">
     <div class="facet-header">Permissions <a href="{% permissions_modify_url storage %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
     <div class="facet-body">
         {% permissions_display storage %}
     </div>
   </div>
-  
+
   <div class="facet active-facet" id="storage_sidebar_effective_permissions">
     <div class="facet-header">Effective Permissions</div>
     <div class="facet-body">
@@ -74,7 +60,7 @@
   <div class="facet active-facet" id="storage_sidebar_delete">
     <div class="facet-header">Delete Storage</div>
     <div class="facet-body">
-        <form action="." method="POST">
+        <form action="." method="POST">{% csrf_token %}
         <input type="submit" value="Delete" name="delete-storage" id="delete-storage" />
         </form>
     </div>
@@ -93,8 +79,8 @@
 
 <h2>{{ storage.title }}</h2>
 
-<form action="." method="POST">
-    
+<form action="." method="POST">{% csrf_token %}
+
 <table>
     {{ form }}
     <tr>

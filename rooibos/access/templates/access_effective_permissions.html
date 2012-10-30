@@ -40,17 +40,27 @@
     <li>Read: {{ acl.0|yesno:"Allowed,Denied,Unspecified" }}</li>
     <li>Write: {{ acl.1|yesno:"Allowed,Denied,Unspecified" }}</li>
     <li>Manage: {{ acl.2|yesno:"Allowed,Denied,Unspecified" }}</li>
+    <li>Restrictions: {% if acl.3 %}
+      <ul>{% for k, v in acl.3.iteritems %}
+        <li>{{ k }}: {{ v }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      None
+      {% endif %}
+    </li>
 </ul>
 
 <h3>Group membership</h3>
 
 {{ acluser }} is currently a member of the following groups:
 <ul>
-{% for group in user.groups.all %}
+{% for group in acluser.groups.all %}
 <li>{{ group.name }}</li>
 {% empty %}
-<li>No group memberships found.</li>
+<li>No explicit group memberships found.</li>
 {% endfor %}
+<li>Authenticated Users (always assumed)</li>
 </ul>
 
 <h3>Administrator status</h3>

@@ -13,8 +13,9 @@ from django.conf import settings
 from rooibos.data.models import *
 from rooibos.storage.models import Media, ProxyUrl, Storage, TrustedSubnet
 from localfs import LocalFileSystemStorageSystem
-from rooibos.storage import get_thumbnail_for_record, get_image_for_record, match_up_media
+from rooibos.storage import get_thumbnail_for_record, get_media_for_record, get_image_for_record, match_up_media, analyze_records, analyze_media
 from rooibos.access.models import AccessControl
+from rooibos.access import get_effective_permissions
 from rooibos.presentation.models import Presentation, PresentationItem
 from sqlite3 import OperationalError
 
@@ -73,8 +74,9 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record)
-        self.assertTrue(thumbnail.width == 100)
-        self.assertTrue(thumbnail.height < 100)
+        width, height = Image.open(thumbnail).size
+        self.assertTrue(width == 100)
+        self.assertTrue(height < 100)
 
         media.delete()
 
@@ -87,8 +89,9 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record, crop_to_square=True)
-        self.assertTrue(thumbnail.width == 100)
-        self.assertTrue(thumbnail.height == 100)
+        width, height = Image.open(thumbnail).size
+        self.assertTrue(width == 100)
+        self.assertTrue(height == 100)
 
         media.delete()
 
@@ -112,11 +115,11 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         result1 = get_image_for_record(self.record, width=400, height=400, user=user1)
         result2 = get_image_for_record(self.record, width=400, height=400, user=user2)
 
-        self.assertEqual(400, result1.width)
-        self.assertEqual(200, result2.width)
+        self.assertEqual(400, Image.open(result1).size[0])
+        self.assertEqual(200, Image.open(result2).size[0])
 
         result3 = get_image_for_record(self.record, width=400, height=400, user=user2)
-        self.assertEqual(result2.id, result3.id)
+        self.assertEqual(result2, result3)
 
         media.delete()
 
@@ -152,7 +155,7 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
         # now user2 should get the image
         result = get_image_for_record(self.record, width=400, height=400, user=user2)
-        self.assertEqual(400, result.width)
+        self.assertEqual(400, Image.open(result).size[0])
 
         # limit user2 image size
         user2_storage_acl.restrictions = dict(width=200, height=200)
@@ -160,7 +163,7 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
         # we should now get a smaller image
         result = get_image_for_record(self.record, width=400, height=400, user=user2)
-        self.assertEqual(200, result.width)
+        self.assertEqual(200, Image.open(result).size[0])
 
         # password protect the presentation
         presentation.password='secret'
@@ -173,34 +176,7 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         # with presentation password, image should be returned
         result = get_image_for_record(self.record, width=400, height=400, user=user2,
                                       passwords={presentation.id: 'secret'})
-        self.assertEqual(200, result.width)
-
-
-    def testDerivativeStorageRaceCondition(self):
-
-        s = Storage.objects.create(title='Test', system='local')
-        derivatives = dict()
-        errors = dict()
-
-        class GetDerivativeStorageThread(Thread):
-            def run(self):
-                try:
-                    d = s.get_derivative_storage()
-                    derivatives.setdefault(d, None)
-                except OperationalError, e:
-                    if e.message == 'database is locked':
-                        pass
-                    elif e.message.startswith('no such table'):
-                        errors.setdefault('Cannot run this test with in-memory sqlite database', None)
-                    else:
-                        raise e
-
-        threads = [GetDerivativeStorageThread() for i in range(10)]
-        map(Thread.start, threads)
-        map(Thread.join, threads)
-
-        self.assertEqual({}, errors)
-        self.assertEqual(1, len(derivatives.keys()))
+        self.assertEqual(200, Image.open(result).size[0])
 
 
     def testDeliveryUrl(self):
@@ -336,8 +312,9 @@ class OnlineStorageSystemTestCase(unittest.TestCase):
         url = "file:///" + os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif').replace('\\', '/')
         media = Media.objects.create(record=self.record, storage=self.storage, url=url, mimetype='image/tiff')
         thumbnail = get_thumbnail_for_record(self.record)
-        self.assertTrue(thumbnail.width == 100)
-        self.assertTrue(thumbnail.height < 100)
+        width, height = Image.open(thumbnail).size
+        self.assertTrue(width == 100)
+        self.assertTrue(height < 100)
 
         media.delete()
 
@@ -408,7 +385,8 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         self.assertEqual(401, response.status_code)
 
         # with basic auth
-        response = c.get(self.media.get_absolute_url(), HTTP_AUTHORIZATION='basic %s' % 'protectedtest:test'.encode('base64').strip())
+        response = c.get(self.media.get_absolute_url(),
+                         HTTP_AUTHORIZATION='basic %s' % 'protectedtest:test'.encode('base64').strip())
         self.assertEqual(200, response.status_code)
         self.assertEqual('hello world', response.content)
 
@@ -416,7 +394,6 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertEqual('hello world', response.content)
-
 
 
 class AutoConnectMediaTestCase(unittest.TestCase):
@@ -473,3 +450,151 @@ class AutoConnectMediaTestCase(unittest.TestCase):
         record, file_url = match
         self.assertEqual(r2, record)
         self.assertEqual('id_2.txt', file_url)
+
+
+class AnalyzeTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+        os.mkdir(os.path.join(self.tempdir, 'sub'))
+        self.collection = Collection.objects.create(title='AnalyzeTest')
+        self.storage = Storage.objects.create(title='AnalyzeTest', system='local', base=self.tempdir)
+        self.other_storage = Storage.objects.create(title='OtherAnalyzeTest', system='local', base=self.tempdir)
+        self.records = []
+        self.create_file('id_1')
+        self.create_file('id_2')
+        self.create_file(os.path.join('sub', 'id_99'))
+        self.create_record('id_1', 'id_1')
+        self.create_record('id_missing', 'id_missing')
+        self.create_record('id_no_media', None)
+        self.create_record('id_missing_other', 'id_missing_other', self.other_storage)
+
+    def tearDown(self):
+        for record in self.records:
+            record.delete()
+        self.storage.delete()
+        self.collection.delete()
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+
+    def create_record(self, id, media, storage=None):
+        record = Record.objects.create(name='id')
+        CollectionItem.objects.create(collection=self.collection, record=record)
+        FieldValue.objects.create(record=record, field=standardfield('identifier'), value=id)
+        FieldValue.objects.create(record=record, field=standardfield('title'), value=id)
+        self.records.append(record)
+        if media:
+            record.media_set.create(storage=storage or self.storage, url='%s.txt' % media)
+        return record
+
+    def create_file(self, id):
+        file = open(os.path.join(self.tempdir, '%s.txt' % id), 'w')
+        file.write('test')
+        file.close()
+
+    def testAnalyzeCollection(self):
+
+        empty = analyze_records(self.collection, self.storage)
+
+        self.assertEqual(2, len(empty))
+        titles = sorted(e.title for e in empty)
+        self.assertEqual('id_missing_other', titles[0])
+        self.assertEqual('id_no_media', titles[1])
+
+    def testAnalyzeMedia(self):
+
+        broken, extra = analyze_media(self.storage)
+
+        self.assertEqual(1, len(broken))
+        self.assertEqual('id_missing.txt', broken[0].url)
+
+        self.assertEqual(2, len(extra))
+        extra = sorted(extra)
+        self.assertEqual('id_2.txt', extra[0])
+        self.assertEqual(os.path.join('sub', 'id_99.txt'), extra[1])
+
+
+
+class GetMediaForRecordTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+        self.collection = Collection.objects.create(title='GetMediaTest')
+        self.storage = Storage.objects.create(title='GetMediaTest', name='getmediatest', system='local', base=self.tempdir)
+        self.record = Record.objects.create(name='monalisa')
+        self.record.media_set.create(name='getmediatest', url='getmediatest', storage=self.storage)
+        CollectionItem.objects.create(collection=self.collection, record=self.record)
+        self.user = User.objects.create(username='getmediatest1')
+        self.owner_can_read = User.objects.create(username='getmediatest2')
+        self.owner_cant_read = User.objects.create(username='getmediatest3')
+        AccessControl.objects.create(user=self.owner_can_read, content_object=self.collection, read=True)
+        self.record_standalone = Record.objects.create(name='no_collection', owner=self.owner_can_read)
+        self.record_standalone.media_set.create(name='getmediatest', url='getmediatest', storage=self.storage)
+        self.presentation_ok = Presentation.objects.create(title='GetMediaTest1', owner=self.owner_can_read)
+        self.presentation_ok.items.create(record=self.record, order=1)
+        self.presentation_hidden = Presentation.objects.create(title='GetMediaTest5', owner=self.owner_can_read, hidden=True)
+        self.presentation_hidden.items.create(record=self.record, order=1)
+        self.presentation_broken = Presentation.objects.create(title='GetMediaTest2', owner=self.owner_cant_read)
+        self.presentation_broken.items.create(record=self.record, order=1)
+        self.presentation_password = Presentation.objects.create(title='GetMediaTest3', owner=self.owner_can_read, password='test')
+        self.presentation_password.items.create(record=self.record, order=1)
+        self.presentation_no_record = Presentation.objects.create(title='GetMediaTest4', owner=self.owner_can_read)
+        self.presentation_standalone_record = Presentation.objects.create(title='GetMediaTest6', owner=self.owner_can_read)
+        self.presentation_standalone_record.items.create(record=self.record_standalone, order=1)
+        AccessControl.objects.create(user=self.user, content_object=self.storage, read=True)
+
+    def tearDown(self):
+        self.presentation_ok.delete()
+        self.presentation_broken.delete()
+        self.presentation_standalone_record.delete()
+        self.user.delete()
+        self.owner_can_read.delete()
+        self.owner_cant_read.delete()
+        self.record.delete()
+        self.record_standalone.delete()
+        self.storage.delete()
+        self.collection.delete()
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+
+    def test_direct_access(self):
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.collection, read=True)
+        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.filter(user=self.user).delete()
+
+    def test_simple_presentation_access(self):
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_broken, read=True)
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_ok, read=True)
+        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.filter(user=self.user).delete()
+
+    def test_password_access(self):
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_password, read=True)
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        passwords = dict(((self.presentation_password.id, 'test'),))
+        self.assertEqual(1, get_media_for_record(self.record, user=self.user, passwords=passwords).count())
+        AccessControl.objects.filter(user=self.user).delete()
+
+    def test_presentation_must_contain_record(self):
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_no_record, read=True)
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.filter(user=self.user).delete()
+
+    def test_hidden_presentation_access(self):
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_hidden, read=True)
+        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        self.presentation_hidden.hidden = False
+        self.presentation_hidden.save()
+        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        AccessControl.objects.filter(user=self.user).delete()
+        self.presentation_hidden.hidden = True
+        self.presentation_hidden.save()
+
+    def test_standalone_record_access(self):
+        self.assertEqual(0, get_media_for_record(self.record_standalone, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_standalone_record, read=True)
+        self.assertEqual(1, get_media_for_record(self.record_standalone, user=self.user).count())

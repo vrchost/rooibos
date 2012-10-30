@@ -8,37 +8,44 @@ RequestContext.
 """
 
 from django.conf import settings
-from django.utils.functional import lazy, memoize, SimpleLazyObject
+from django.middleware.csrf import get_token
+from django.utils.functional import lazy
 
 def auth(request):
     """
-    Returns context variables required by apps that use Django's authentication
-    system.
+    DEPRECATED. This context processor is the old location, and has been moved
+    to `django.contrib.auth.context_processors`.
 
-    If there is no 'user' attribute in the request, uses AnonymousUser (from
-    django.contrib.auth).
+    This function still exists for backwards-compatibility; it will be removed
+    in Django 1.4.
     """
-    # If we access request.user, request.session is accessed, which results in
-    # 'Vary: Cookie' being sent in every request that uses this context
-    # processor, which can easily be every request on a site if
-    # TEMPLATE_CONTEXT_PROCESSORS has this context processor added.  This kills
-    # the ability to cache.  So, we carefully ensure these attributes are lazy.
-    # We don't use django.utils.functional.lazy() for User, because that
-    # requires knowing the class of the object we want to proxy, which could
-    # break with custom auth backends.  LazyObject is a less complete but more
-    # flexible solution that is a good enough wrapper for 'User'.
-    def get_user():
-        if hasattr(request, 'user'):
-            return request.user
-        else:
-            from django.contrib.auth.models import AnonymousUser
-            return AnonymousUser()
+    import warnings
+    warnings.warn(
+        "The context processor at `django.core.context_processors.auth` is " \
+        "deprecated; use the path `django.contrib.auth.context_processors.auth` " \
+        "instead.",
+        PendingDeprecationWarning
+    )
+    from django.contrib.auth.context_processors import auth as auth_context_processor
+    return auth_context_processor(request)
 
-    return {
-        'user': SimpleLazyObject(get_user),
-        'messages': lazy(memoize(lambda: get_user().get_and_delete_messages(), {}, 0), list)(),
-        'perms':  lazy(lambda: PermWrapper(get_user()), PermWrapper)(),
-    }
+def csrf(request):
+    """
+    Context processor that provides a CSRF token, or the string 'NOTPROVIDED' if
+    it has not been provided by either a view decorator or the middleware
+    """
+    def _get_val():
+        token = get_token(request)
+        if token is None:
+            # In order to be able to provide debugging info in the
+            # case of misconfiguration, we use a sentinel value
+            # instead of returning an empty dict.
+            return 'NOTPROVIDED'
+        else:
+            return token
+    _get_val = lazy(_get_val, str)
+
+    return {'csrf_token': _get_val() }
 
 def debug(request):
     "Returns context variables helpful for debugging."

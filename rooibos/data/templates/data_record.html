@@ -2,6 +2,7 @@
 {% load ui %}
 {% load viewers %}
 {% load data %}
+{% load access_control %}
 
 {% block javascript %}
 {{ block.super }}
@@ -44,8 +45,26 @@
                 formatResult: function(row, pos, num) { return decodeURIComponent(row); },
                 });
             });
+        $("form.delete-record-form").submit(function() {
+            return confirm("Are you sure you want to delete this record?");
+        });
+        $("form.delete-media-form").submit(function() {
+            return confirm("Are you sure you want to delete this media?");
+        });
     });
 </script>
+
+{% if record.id %}
+{% include "storage_upload_sidebar_js.html" %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#upload-control').bind('uploadSuccess', function(event, file, serverData){
+        $("#record-id-{{ record.id }}").attr("src", "{{ record.get_thumbnail_url }}?" + new Date().getTime().toString());
+    });
+});
+</script>
+{% endif %}
+
 {% endblock %}
 
 
@@ -55,8 +74,8 @@
 {% if record.id %}
 <div class="facet active-facet" id="data_record_thumbnail">
     <div class="facet-header">Thumbnail</div>
-    <div class="facet-body" style="text-align: center;">
-        <img src="{{ record.get_thumbnail_url }}" alt="{{ record.title|default:"Untitled" }}" />
+    <div class="facet-body">
+        {% record record "True" "thumb" "True" %}
     </div>
 </div>
 {% endif %}
@@ -74,8 +93,10 @@
 <div class="facet active-facet" id="data_record_editing">
     <div class="facet-header">Editing</div>
     <div class="facet-body">
+        <div>
 {% if can_edit and record.id and not fv_formset %}
         <a href="{% url data-record-edit record.id record.name %}">Edit Record</a><br />
+        <a href="{% url data-record-copy record.id record.name %}">Duplicate Record</a><br />
 {% endif %}
 {% if record.id and not fv_formset %}
         <a href="{% url data-record-edit-customize record.id record.name %}">Customize Record</a><br />
@@ -86,6 +107,24 @@
 {% if record.owner %}{% ifequal record.owner request.user %}
   {% add_tags_form record "suggested" "Suggest" %}
 {% endifequal %}{% endif %}
+{% if can_edit and record.id and not fv_formset %}
+    <form class="delete-record-form" method="post" action="{% url data-record-delete record.id, record.name %}">{% csrf_token %}
+        <input type="submit" name="delete_record" value="Delete Record" />
+    </form>
+{% endif %}
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if can_edit and record.id and not fv_formset %}
+<div class="facet active-facet" id="data_record_usage">
+    <div class="facet-header">Usage</div>
+    <div class="facet-body">
+        <a href="{% url presentation-record-usage record.id, record.name %}">
+            Used in {{ record_usage|default:"no" }} presentation{{ record_usage|pluralize }}
+        </a>
     </div>
 </div>
 {% endif %}
@@ -109,12 +148,14 @@
 <div class="facet active-facet" id="data_record_all_tags">
     <div class="facet-header">All Tags</div>
     <div class="facet-body">
+        <div>
     {% owned_tags_for_object record except request.user as tags %}
     {% for tag in tags %}
         {% tag tag record %}
     {% empty %}
         Not tagged yet.
     {% endfor %}
+        </div>
     </div>
 </div>
 {% endif %}
@@ -123,7 +164,7 @@
 <div class="facet active-facet" id="data_record_parent">
     <div class="facet-header">Parent record</div>
     <div class="facet-body">
-    {% record record.parent 'selectable' %}
+        {% record record.parent "True" "thumb" "True" %}
     </div>
 </div>
 {% endif %}
@@ -133,7 +174,7 @@
     <div class="facet-header">Child records</div>
     <div class="facet-body" style="max-height: 400px; overflow: auto;">
         {% for child in record.record_set.all %}
-            {% record child 'selectable' %}
+        {% record child "True" "thumb" "True" %}
         {% endfor %}
     </div>
 </div>
@@ -155,21 +196,51 @@
     <ul>
     {% for m in media %}
         <li>
+            {% if m.downloadable_in_template %}
             <a href="{{ m.get_absolute_url }}">{{ m.name }}</a>
+            {% else %}
+            {{ m.name }}
+            {% endif %}
             {{ m.mimetype }}
             {% if m.width and m.height %}
                 {{ m.width }}x{{ m.height }}
+            {% endif %}
+            {% if m.editable_in_template %}
+            <form class="delete-media-form" method="POST" action="{% url storage-media-delete m.id, m.name %}?next={{ request.get_full_path }}">{% csrf_token %}
+                <input type="submit" value="Delete Media" />
+            </form>
             {% endif %}
         </li>
     {% endfor %}
     </ul>
     {% endif %}
-    {% if can_edit %}
-        <a href="{% url storage-upload record.id, record.name %}?next={{ request.get_full_path|urlencode }}">Upload media</a>
-    {% endif %}
     </div>
 </div>
 {% endif %}
+{% endif %}
+
+
+{% if upload_form %}
+<div class="facet active-facet" id="data_record_upload_media">
+    <div class="facet-header">Upload Media</div>
+    <div class="facet-body">
+{% if record.id %}
+{% include "storage_upload_sidebar.html" %}
+{% else %}
+Please save the record before uploading media.
+{% endif %}
+    </div>
+</div>
+{% endif %}
+
+
+{% if can_manage %}
+  <div class="facet active-facet" id="data_record_sidebar_permissions">
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url record %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-body">
+        {% permissions_display record "Inherited from collection" %}
+    </div>
+  </div>
 {% endif %}
 
 {% endblock %}
@@ -233,11 +304,43 @@ Display metadata as: {{ fieldsetform.fieldset }}
 </form>
 
 
-<form method="POST" action="">
+<form method="POST" action="">{% csrf_token %}
+
+{% if c_formset %}
+    {{ c_formset.management_form }}
+
+<div id="collection-membership" style="margin-top: 20px;">
+
+    <div id="collection-membership-header">
+        <div>Collection Memberships</div>
+        <div>Member</div>
+        <div>{{ record.owner|yesno:"Shared,Visible" }}</div>
+    </div>
+
+    <div id="collection-membership-rows">
+    {% for form in c_formset.forms %}
+    <div class="{% cycle 'altrow' '' %}">
+        <div>{{ form.id }}{{ form.title }}</div>
+        <div>{{ form.member }}</div>
+        <div>{{ form.shared }}</div>
+        &nbsp;
+    </div>
+    {% endfor %}
+    </div>
+
+</div>
+
+{% endif %}
+
+<div style="clear: left; padding: 20px 0;">
+<input type="submit" value="Save" />
+<input type="submit" name="save_and_continue" value="Save and Continue Editing" />
+</div>
+
+
     {{ fv_formset.management_form }}
     <div style="margin-top: 20px;">
         <div id="fieldvalues">
-            <input type="submit" value="Submit Changes" />
 
     {% for form in fv_formset.forms %}
         <div class="fieldvalue-edit{% cycle '' ' altrow' %}">
@@ -256,7 +359,7 @@ Display metadata as: {{ fieldsetform.fieldset }}
             <div class="fvcol narrow">
                 <span class="row advanced"><label for="{{ form.date_start.html_name }}">Start year:</label> {{ form.date_start }}</span>
                 <span class="row advanced"><label for="{{ form.date_end.html_name }}">End year:</label> {{ form.date_end }}</span>
-                <span class="row advanced"><label for="{{ form.numeric.html_name }}">Numeric:</label> {{ form.numeric_value }}</span>
+                <span class="row advanced"><label for="{{ form.numeric_value.html_name }}">Numeric:</label> {{ form.numeric_value }}</span>
             </div>
             <div class="fvcol narrow">
                 <span class="row advanced"><label for="{{ form.language.html_name }}">Language:</label> {{ form.language }}</span>
@@ -272,36 +375,12 @@ Display metadata as: {{ fieldsetform.fieldset }}
     {% endfor %}
         </div>
 
-    {% if c_formset %}
-    {{ c_formset.management_form }}
-    <br /><br />
-    
-    <h2>Collection Memberships</h2>
-    <table>
-        <tr>
-        <th>Collection</th>
-        <th>Member</th>
-        <th>{% if record.owner %}Shared{% else %}Visible{% endif %}</th>
-        </tr>
-    
-    {% for form in c_formset.forms %}
-    <tr class="{% cycle '' 'altrow' %}">
-        <td>
-            {{ form.id }}
-            {{ form.title }}
-        </td>
-        <td style="text-align: center;">
-            {{ form.member }}
-        </td>
-        <td style="text-align: center;">
-            {{ form.shared }}
-        </td>
-    </tr>
-    {% endfor %}
-    </table>
-    {% endif %}
 
-        <input type="submit" value="Submit Changes" />
+<div style="clear: left; padding: 20px 0;">
+<input type="submit" value="Save" />
+<input type="submit" name="save_and_continue" value="Save and Continue Editing" />
+</div>
+
     </div>
 </form>
 {% endif %}

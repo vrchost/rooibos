@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="en">
+	<langstring name="LNG_SEARCH_TITLE">Search</langstring>
+	<langstring name="LNG_SEARCH_START">Start search</langstring>
+	<langstring name="LNG_SEARCH_RESULT_INFO">Page $1, $2 match(es).</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_CLOSE">Close</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_TITLE">Search results</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_SEARCHING">Searching...</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_SUMMARY">Showing $1 of $2 matches for '$3'.</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_EMPTY">No matches for '$1'.</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_ERROR">An error ocurred while searching.</langstring>
+</lang>

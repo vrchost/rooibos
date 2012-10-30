@@ -7,7 +7,7 @@
 
 <h2>Settings</h2>
 
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
     <table>
         <tr><th>{{ form.collections.label }}:</th>
             <td>{{ form.collections.errors }}
@@ -55,7 +55,7 @@
     {% endfor %}
         </tbody>
     </table>
-    
+
     <input type="submit" name="import_button" value="Import File" />
     <input type="submit" name="preview_button" value="Update Preview" />
 </form>

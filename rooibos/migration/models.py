@@ -11,13 +11,12 @@ class ObjectHistory(models.Model):
     m2m_object_id = models.PositiveIntegerField(null=True)
     m2m_content_object = generic.GenericForeignKey('m2m_content_type', 'm2m_object_id')
     type = models.CharField(max_length=8, null=True, db_index=True)
-    original_id = models.CharField(max_length=256)
+    original_id = models.CharField(max_length=255, db_index=True)
     content_hash = models.CharField(max_length=32)
 
-    
+
 def content_hash(*args):
     hash = hashlib.md5()
     for arg in args:
         hash.update(repr(arg))
     return hash.hexdigest()
-    

@@ -18,18 +18,18 @@ def csvimport(job):
     jobinfo = JobInfo.objects.get(id=job.arg)
 
     try:
-        
+
         arg = simplejson.loads(jobinfo.arg)
-        
+
         if jobinfo.status.startswith == 'Complete':
             # job finished previously
             return
-        
+
         file = os.path.join(_get_scratch_dir(), arg['file'])
         if not os.path.exists(file):
             # import file missing
             jobinfo.complete('Import file missing', 'Import failed')
-            
+
         resultfile = file + '.result'
         if os.path.exists(resultfile):
             # import must have died in progress
@@ -41,28 +41,28 @@ def csvimport(job):
             skip_rows = count + 1
         else:
             skip_rows = 0
-        
-        infile = open(file)
+
+        infile = open(file, 'rU')
         outfile = open(resultfile, 'a', 0)
         outwriter = csv.writer(outfile)
-        
+
         if not skip_rows:
             outwriter.writerow(['Identifier', 'Action'])
 
         class Counter(object):
             def __init__(self):
                 self.counter = 0
-    
+
         def create_handler(event, counter):
             def handler(id):
                 counter.counter += 1
                 jobinfo.update_status('processing row %s' % counter.counter)
                 outwriter.writerow([';'.join(id) if id else '', event])
             return handler
-    
+
         counter = Counter()
         handlers = dict((e, create_handler(e, counter)) for e in SpreadsheetImport.events)
-    
+
         fieldset = FieldSet.objects.filter(id=arg['fieldset']) if arg['fieldset'] else None
 
         imp = SpreadsheetImport(infile,
@@ -83,8 +83,7 @@ def csvimport(job):
                 skip_rows=skip_rows)
 
         jobinfo.complete('Complete', '%s rows processed' % counter.counter)
-        
+
     except Exception, ex:
-        
+
         jobinfo.complete('Failed: %s' % ex, None)
-            

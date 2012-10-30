@@ -7,7 +7,7 @@
 {% var as related_pages %}
 {"pages": [
 {% if user.is_staff %}
-    {"url": "{% url admin "" %}", "title": "Administration"}
+    {"url": "{% url admin:index %}", "title": "Administration"}
 {% endif %}
 ]}
 {% endvar %}

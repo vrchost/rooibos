@@ -15,7 +15,7 @@
  '{{ record.get_absolute_url }}',
  {% with record.collection_set.all.0 as collection %}
  '{{ collection.title|escapejs }}',
- '{% url solr-search-collection collection.id, collection.name %}',
+ '{% if collection %}{% url solr-search-collection collection.id, collection.name %}{% endif %}',
  {% endwith %}
  ]{% if not forloop.last %},{% endif %}
 {% endfor %}
@@ -41,7 +41,7 @@
 
         function autoAdvance() {
             clearInterval(interval);
-            interval = setInterval(function() { index = (index + 1) % 8; nextImage(order[index]); }, 10000);
+            interval = setInterval(function() { index = (index + 1) % order.length; nextImage(order[index]); }, 10000);
         }
 
         $(window).load(function () {
@@ -102,7 +102,7 @@
     <div id="image-preview-reload"><a href=".">Load new images</a></div>
     {% with records.0.collection_set.all.0 as collection %}
     <div class="image-title"><a href="{{ records.0.get_absolute_url }}">{{ records.0.title }}</a></div>
-    <div class="image-subtitle"><a href="{% url solr-search-collection collection.id, collection.name %}">{{ collection.title }}</a></div>
+    <div class="image-subtitle"><a href="{% if collection %}{% url solr-search-collection collection.id, collection.name %}{% endif %}">{{ collection.title }}</a></div>
     {% endwith %}
 
     {% endif %}
@@ -114,7 +114,16 @@
     <div class="column">
     {% if not user.is_authenticated %}
         <h2>Log in</h2>
-        <a href="{% url login %}">Please log in to access all content available to you.</a>
+
+        <form action="{% url login %}" method="post">{% csrf_token %}
+            <table summary="Login">
+            <tr><td>{{ login_form.username.label_tag }}</td><td>{{ login_form.username }}</td></tr>
+            <tr><td>{{ login_form.password.label_tag }}</td><td>{{ login_form.password }}
+                <br /><br /><input type="submit" value="Log in" /></td></tr>
+            </table>
+            <input type="hidden" name="next" value="{% url main %}" />
+        </form>
+
     {% else %}
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}
@@ -123,11 +132,18 @@
     <div class="column announcements">
 
         <h2>Announcements</h2>
+        {% if perms.comments.add_comment %}
+            <div style="margin-bottom: 10px;"><a href="{% url ui-announcement-new %}">Create new announcement</a></div>
+        {% endif %}
 
         {% get_comment_list for flatpages.flatpage 1 as comments %}
-        {% for comment in comments %}
+
+        {% for comment in comments reversed %}
             {{ comment.comment|safe|linebreaks }}
-            <div class="byline">Posted {{ comment.submit_date|naturalday }} by {{ comment.user }}.</div>
+            <div class="byline">Posted {{ comment.submit_date|naturalday }} by {{ comment.user }}.
+            {% if perms.comments.change_comment %}<a href="{% url ui-announcement-edit comment.id %}">Edit</a>{% endif %}
+            {% if perms.comments.delete_comment %}<a href="{% url ui-announcement-delete comment.id %}">Delete</a>{% endif %}
+            </div>
         {% endfor %}
 
     </div>

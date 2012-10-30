@@ -1,6 +1,7 @@
 import sys
 from django.conf import settings
 from gearman import Task, GearmanWorker, GearmanClient
+from gearman.connection import GearmanConnection
 from gearman.task import Taskset
 
 workers = dict()
@@ -38,7 +39,11 @@ def run_worker(worker, arg, **kwargs):
     if client:
         if task.background:
             taskset = Taskset([task])
-            client.do_taskset(taskset)
+            try:
+                client.do_taskset(taskset)
+            except GearmanConnection.ConnectionError:
+                # try again, perhaps server connection was reset
+                client.do_taskset(taskset)
             return task.handle
         else:
             return client.do_task(task)

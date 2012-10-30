@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="en">
+	<langstring name="LNG_FIRST_PAGE">First page</langstring>
+	<langstring name="LNG_LAST_PAGE">Last page</langstring>
+	<langstring name="LNG_PREV_PAGE">Previous page</langstring>
+	<langstring name="LNG_NEXT_PAGE">Next page</langstring>
+	<langstring name="LNG_GOTO_PAGE">Goto page $1</langstring>
+	<langstring name="LNG_GOTO_DIALOG_TIP">Please enter the number of the page to jump to, then press enter.</langstring>
+	<langstring name="LNG_FULLSCREEN">Activate fullscreen mode (keyboard shortcuts might not work in fullscreen mode)</langstring>
+	<langstring name="LNG_RESTORE">Exit fullscreen mode</langstring>
+	<langstring name="LNG_MUTE">Mute</langstring>
+	<langstring name="LNG_UNMUTE">Unmute</langstring>
+	<langstring name="LNG_ZOOM_IN">Zoom in</langstring>
+	<langstring name="LNG_ZOOM_OUT">Zoom out</langstring>
+	<langstring name="LNG_ROTATE_RIGHT">Rotate book clockwise</langstring>
+	<langstring name="LNG_ROTATE_LEFT">Rotate book counterclockwise</langstring>
+</lang>

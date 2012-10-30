@@ -1,9 +1,10 @@
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponseNotAllowed
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from rooibos.data.models import *
+from rooibos.viewers.functions import get_viewer_by_name
 import random
 from datetime import datetime
 
@@ -76,3 +77,9 @@ def imageviewer_getslideshow(request):
                               context_instance=RequestContext(request),
                               mimetype='text/xml')
 
+
+
+# Handler for old presentation view URLs
+def legacy_viewer(request, record):
+    viewer = get_viewer_by_name('presentationviewer')
+    return redirect(viewer(None, request, record).url())

@@ -14,14 +14,14 @@
     Page {{ results.page }} of {{ results.pages }}.
     {% if results.page > 1 %}<a href="javascript:;" onclick="paginate(-1)">Previous</a>{% endif %}
     {% if results.page < results.pages %}<a href="javascript:;"  onclick="paginate(1)">Next</a>{% endif %}
-    
+
     <a href="{% url solr-search %}">Reset</a>
     <input id="submit_flickr_selections" type="submit" name="action" value="Select" />
     <input id="submit_flickr_deselections" type="submit" name="action" value="Deselect" />
 </div>
 
 <div class="horizontal-block">
-    <form action="{% url flickr-photo-search %}" method="post" name="search" id="search">
+    <form action="{% url flickr-photo-search %}" method="post" name="search" id="search">{% csrf_token %}
     	<input id="search_page" name="search_page" type="hidden" value="{{ search_page }}"/>
         Keywords: <input name="search_string" type="text_field" value="{{ search_string }}" />
         <input type="checkbox" class="flickr-select" name="interesting" value="1" {% ifequal sort "interestingness-desc" %} checked="checked" {% endifequal %}> Interesting
@@ -34,7 +34,7 @@
         </select>
     </form>
     {% if user.is_authenticated %}
-	    <form name="flickr-import-photos" action="{% url flickr-import-photos %}" method="post">
+	    <form name="flickr-import-photos" action="{% url flickr-import-photos %}" method="post">{% csrf_token %}
 	        <input type="submit" value="Import Photos" onclick="$('#progressbar-dialog').dialog('open')"/>
 	    </form>
     {% endif %}

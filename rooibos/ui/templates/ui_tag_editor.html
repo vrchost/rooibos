@@ -1,0 +1,13 @@
+{% load ui %}
+
+<input type="hidden" name="all_tags" value='{% for tag in actionbar_tags %}"{{ tag }}" {% endfor %}' />
+
+<div style="max-height: 200px; overflow: auto;">
+{% for tag in actionbar_tags %}
+<input type="checkbox" name="update_tag_{{ tag|base32:"_" }}" value="true"
+  {% if tag in selected_tags %}checked="checked" {% endif %}/><span class="tag">{{ tag }}</span><br />
+{% endfor %}
+</div>
+<br />
+Assign new tags:<br />
+<input type="text" name="new_tags" />

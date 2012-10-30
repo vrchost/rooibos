@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_SEARCH_TITLE">Suche</langstring>
+	<langstring name="LNG_SEARCH_START">Suche starten</langstring>
+	<langstring name="LNG_SEARCH_RESULT_INFO">Seite $1, $2 Treffer.</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_CLOSE">Schließen</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_TITLE">Suchergebnisse</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_SEARCHING">Suche läuft...</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_SUMMARY">Zeige $1 von $2 Treffer(n) für '$3'.</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_EMPTY">Keine Treffer für '$1'.</langstring>
+	<langstring name="LNG_SEARCH_RESULTS_ERROR">Während der Suche trat eine Fehler auf.</langstring>
+</lang>

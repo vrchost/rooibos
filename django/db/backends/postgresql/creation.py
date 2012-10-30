@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.backends.creation import BaseDatabaseCreation
 
 class DatabaseCreation(BaseDatabaseCreation):
@@ -18,6 +17,7 @@ class DatabaseCreation(BaseDatabaseCreation):
         'FilePathField':     'varchar(%(max_length)s)',
         'FloatField':        'double precision',
         'IntegerField':      'integer',
+        'BigIntegerField':   'bigint',
         'IPAddressField':    'inet',
         'NullBooleanField':  'boolean',
         'OneToOneField':     'integer',
@@ -30,9 +30,9 @@ class DatabaseCreation(BaseDatabaseCreation):
     }
 
     def sql_table_creation_suffix(self):
-        assert settings.TEST_DATABASE_COLLATION is None, "PostgreSQL does not support collation setting at database creation time."
-        if settings.TEST_DATABASE_CHARSET:
-            return "WITH ENCODING '%s'" % settings.TEST_DATABASE_CHARSET
+        assert self.connection.settings_dict['TEST_COLLATION'] is None, "PostgreSQL does not support collation setting at database creation time."
+        if self.connection.settings_dict['TEST_CHARSET']:
+            return "WITH ENCODING '%s'" % self.connection.settings_dict['TEST_CHARSET']
         return ''
 
     def sql_indexes_for_field(self, model, f, style):
@@ -63,7 +63,7 @@ class DatabaseCreation(BaseDatabaseCreation):
             # a second index that specifies their operator class, which is
             # needed when performing correct LIKE queries outside the
             # C locale. See #12234.
-            db_type = f.db_type()
+            db_type = f.db_type(connection=self.connection)
             if db_type.startswith('varchar'):
                 output.append(get_index_sql('%s_%s_like' % (db_table, f.column),
                                             ' varchar_pattern_ops'))

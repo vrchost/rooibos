@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<actionScriptProperties analytics="false" mainApplicationPath="DesktopMediaViewer.mxml" projectUUID="03174d3f-3dd5-483c-9ba4-ec3bdbea9b5a" version="10">
+  <compiler additionalCompilerArguments="-locale en_US" autoRSLOrdering="true" copyDependentFiles="true" flexSDK="Flex 4.5.1A" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
+    <compilerSourcePath>
+      <compilerSourcePathEntry kind="1" linkType="1" path="locale/{locale}"/>
+    </compilerSourcePath>
+    <libraryPath defaultLinkType="0">
+      <libraryPathEntry kind="1" linkType="1" path="libs"/>
+      <libraryPathEntry kind="4" path="">
+        <excludedEntries>
+          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/core.swc" useDefaultLinkType="false"/>
+        </excludedEntries>
+      </libraryPathEntry>
+    </libraryPath>
+    <sourceAttachmentPath/>
+  </compiler>
+  <theme themeIsDefault="false" themeIsSDK="true" themeLocation="${SDK_THEMES_DIR}/samples/themes/spark_graphite"/>
+  <applications>
+    <application path="DesktopMediaViewer.mxml">
+      <airExcludes>
+        <airExclude path="flexlib"/>
+        <airExclude path="assets/skins"/>
+        <airExclude path="com"/>
+        <airExclude path="flex"/>
+        <airExclude path="assets/icons"/>
+        <airExclude path="assets/fonts"/>
+      </airExcludes>
+    </application>
+  </applications>
+  <modules/>
+  <buildCSSFiles/>
+  <flashCatalyst validateFlashCatalystCompatibility="false"/>
+  <buildTargets>
+    <buildTarget buildTargetName="default">
+      <airSettings airCertificatePath="C:/Users/heggkj.JMUAD/Documents/mediaviewerCert.p12" airTimestamp="true" anePathSet="true" version="1">
+        <airExcludes>
+          <pathEntry path="assets/skins"/>
+          <pathEntry path="flex"/>
+          <pathEntry path="com"/>
+          <pathEntry path="flexlib"/>
+          <pathEntry path="assets/icons"/>
+          <pathEntry path="assets/fonts"/>
+        </airExcludes>
+        <anePaths/>
+      </airSettings>
+      <actionScriptSettings version="1"/>
+    </buildTarget>
+  </buildTargets>
+</actionScriptProperties>

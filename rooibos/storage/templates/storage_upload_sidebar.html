@@ -1,0 +1,16 @@
+{% load ui %}
+
+{% if upload_form %}
+<form method="post" action="{{ upload_url }}" enctype="multipart/form-data" id="upload-control">
+{{ upload_form.storage.label }} {{ upload_form.storage }}<br />
+<span id="html-upload-control">{{ upload_form.file.label }} {{ upload_form.file }}<br /></span>
+<br />
+<input type="submit" value="Upload Media" id="upload-button" />
+</form>
+
+<div id="upload-queue"></div>
+
+{% if debug %}
+<ol id="log" style="display: none; clear: both; border: thin solid lightgrey; overflow: auto; max-height: 200px; margin-top: 20px;"></ol>
+{% endif %}
+{% endif %}

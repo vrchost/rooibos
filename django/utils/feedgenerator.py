@@ -10,7 +10,11 @@ Sample usage:
 ...     description=u"A group weblog by the sharpest minds in online media/journalism/publishing.",
 ...     language=u"en",
 ... )
->>> feed.add_item(title="Hello", link=u"http://www.holovaty.com/test/", description="Testing.")
+>>> feed.add_item(
+...     title="Hello",
+...     link=u"http://www.holovaty.com/test/",
+...     description="Testing."
+... )
 >>> fp = open('test.rss', 'w')
 >>> feed.write(fp, 'utf-8')
 >>> fp.close()
@@ -52,10 +56,16 @@ def get_tag_uri(url, date):
     See http://diveintomark.org/archives/2004/05/28/howto-atom-id
     """
     url_split = urlparse.urlparse(url)
+
+    # Python 2.4 didn't have named attributes on split results or the hostname.
+    hostname = getattr(url_split, 'hostname', url_split[1].split(':')[0])
+    path = url_split[2]
+    fragment = url_split[5]
+
     d = ''
     if date is not None:
         d = ',%s' % date.strftime('%Y-%m-%d')
-    return u'tag:%s%s:%s/%s' % (url_split.hostname, d, url_split.path, url_split.fragment)
+    return u'tag:%s%s:%s/%s' % (hostname, d, path, fragment)
 
 class SyndicationFeed(object):
     "Base class for all syndication feeds. Subclasses should provide write()"
@@ -65,6 +75,9 @@ class SyndicationFeed(object):
         to_unicode = lambda s: force_unicode(s, strings_only=True)
         if categories:
             categories = [force_unicode(c) for c in categories]
+        if ttl is not None:
+            # Force ints to unicode
+            ttl = force_unicode(ttl)
         self.feed = {
             'title': to_unicode(title),
             'link': iri_to_uri(link),
@@ -95,6 +108,9 @@ class SyndicationFeed(object):
         to_unicode = lambda s: force_unicode(s, strings_only=True)
         if categories:
             categories = [to_unicode(c) for c in categories]
+        if ttl is not None:
+            # Force ints to unicode
+            ttl = force_unicode(ttl)
         item = {
             'title': to_unicode(title),
             'link': iri_to_uri(link),
@@ -190,7 +206,8 @@ class RssFeed(SyndicationFeed):
         handler.endElement(u"rss")
 
     def rss_attributes(self):
-        return {u"version": self._version}
+        return {u"version": self._version,
+                u"xmlns:atom": u"http://www.w3.org/2005/Atom"}
 
     def write_items(self, handler):
         for item in self.items:
@@ -202,6 +219,7 @@ class RssFeed(SyndicationFeed):
         handler.addQuickElement(u"title", self.feed['title'])
         handler.addQuickElement(u"link", self.feed['link'])
         handler.addQuickElement(u"description", self.feed['description'])
+        handler.addQuickElement(u"atom:link", None, {u"rel": u"self", u"href": self.feed['feed_url']})
         if self.feed['language'] is not None:
             handler.addQuickElement(u"language", self.feed['language'])
         for cat in self.feed['categories']:
@@ -239,7 +257,7 @@ class Rss201rev2Feed(RssFeed):
         elif item["author_email"]:
             handler.addQuickElement(u"author", item["author_email"])
         elif item["author_name"]:
-            handler.addQuickElement(u"dc:creator", item["author_name"], {"xmlns:dc": u"http://purl.org/dc/elements/1.1/"})
+            handler.addQuickElement(u"dc:creator", item["author_name"], {u"xmlns:dc": u"http://purl.org/dc/elements/1.1/"})
 
         if item['pubdate'] is not None:
             handler.addQuickElement(u"pubDate", rfc2822_date(item['pubdate']).decode('utf-8'))

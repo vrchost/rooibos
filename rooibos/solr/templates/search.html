@@ -8,7 +8,7 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-    $("#criteria :text").each(function() { 
+    $("#criteria :text").each(function() {
             var f = $('#' + this.id.substring(0, this.id.length - 8) + "field");
             $(this).autocomplete('{% url api-solr-autocomplete %}', {
                 extraParams: {
@@ -30,7 +30,7 @@ $(document).ready(function() {
 
 <h1>Search collections</h1>
 
-<form method="POST" action=".">
+<form method="POST" action=".">{% csrf_token %}
 {{ formset.management_form }}
 
 Collections: <br />

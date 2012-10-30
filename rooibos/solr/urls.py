@@ -3,7 +3,6 @@ from views import *
 
 urlpatterns = patterns('',
     url(r'^explore/$', search, name='solr-search'),
-    url(r'^organize/$', search, kwargs={'organize': True}, name='solr-organize'),
     url(r'^explore/(?P<id>\d+)/(?P<name>[\w-]+)/$', search, name='solr-search-collection'),
     url(r'^explore-facets/$', search_facets, name='solr-search-facets'),
     url(r'^explore-facets/(?P<id>\d+)/(?P<name>[\w-]+)/$', search_facets, name='solr-search-collection-facets'),

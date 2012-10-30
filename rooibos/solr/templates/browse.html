@@ -9,7 +9,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
     $("#browse-forms select").change(function () { this.form.submit(); });
-    $("#browse-forms :submit").remove();    
+    $("#browse-forms :submit").remove();
 });
 </script>
 {% endblock %}
@@ -17,6 +17,8 @@ $(document).ready(function() {
 {% block content %}
 
 <h1>Browse collections</h1>
+
+{% if collections %}
 
 <table id="browse-forms">
 <tr>
@@ -38,7 +40,7 @@ $(document).ready(function() {
         <form method="GET" action=".">
             <select name="f">
 {% for field in fields %}
-<option value="{{ field.name }}"{% ifequal selected_field.id field.id %} selected="selected"{% endifequal %}>{{ field.label }}</option>
+<option value="{{ field.id }}"{% ifequal selected_field.id field.id %} selected="selected"{% endifequal %}>{{ field.label }}</option>
 {% endfor %}
             </select>
             <input type="submit" value="Browse" />
@@ -49,7 +51,7 @@ $(document).ready(function() {
 
 Jump to:
 {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
-<a href="{% url solr-browse-collection selected_collection.id, selected_collection.name %}?f={{ selected_field.name }}&amp;s={{ letter }}">{{ letter }}</a>
+<a href="{% url solr-browse-collection selected_collection.id, selected_collection.name %}?f={{ selected_field.id }}&amp;s={{ letter }}">{{ letter }}</a>
 {% endfor %}
 
 {% autopaginate values 50 %}
@@ -69,4 +71,12 @@ Jump to:
 <div style="clear: both;"></div>
 
 {% paginate %}
+
+{% else %}
+
+    <div>No collections are available for browsing.</div>
+
+{% endif %}
+
+
 {% endblock %}

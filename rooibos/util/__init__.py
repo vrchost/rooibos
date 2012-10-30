@@ -1,14 +1,26 @@
 from django.contrib.sites.models import Site
-from django.db.models import Q
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import simplejson
 from django.core.mail import mail_admins
 from django.utils.translation import ugettext as _
+from django.utils.decorators import wraps
+from django.utils.functional import SimpleLazyObject
 import sys
 import mimetypes
 import logging
+import os
+import hashlib
 
+# Decorator to solve issues with IE/SSL/Flash caching
+def must_revalidate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        response["Cache-Control"] = "bogus"  #"no-cache, must-revalidate, no-store"
+        response["Pragma"] = "bogus"  #"no-cache"
+        return response
+    return wrapper
 
 def json_view(func):
     # http://www.djangosnippets.org/snippets/622/
@@ -48,7 +60,7 @@ def json_view(func):
                         'text': msg}
 
         json = simplejson.dumps(response)
-        return HttpResponse(json, mimetype='application/json')
+        return HttpResponse(json, mimetype='text/plain') # mimetype='application/json')
     return wrap
 
 
@@ -125,26 +137,6 @@ def guess_extension(mimetype):
     return x
 
 
-def cached_property(instance, key, query):
-    value = None
-    if instance.id:
-        key = '-'.join((instance._meta.db_table, str(instance.id), key))
-        value = cache.get(key)
-    if not value:
-        try:
-            value = query()
-        except:
-            pass
-        if instance.id and value:
-            cache.set(key, value)
-    return value
-
-def clear_cached_properties(instance, *keys):
-    if instance.id:
-        for key in keys:
-            cache.delete('-'.join((instance._meta.db_table, str(instance.id), key)))
-
-
 def xfilter(func, iterator):
     """Iterative version of builtin 'filter'."""
     iterator = iter(iterator)
@@ -152,3 +144,33 @@ def xfilter(func, iterator):
         next = iterator.next()
         if func(next):
             yield next
+
+
+def create_link(file, link, hard=False):
+    func = 'link' if hard else 'symlink'
+    if hasattr(os, func):
+        # Linux, use built-in function
+        try:
+            getattr(os, func)(file, link)
+            return True
+        except OSError:
+            return False
+    else:
+        # Windows, use mklink
+        return 0 == os.system("mklink %s \"%s\" \"%s\"" %
+                              ('/H' if hard else '', link, file))
+
+
+def calculate_hash(*args):
+    hash = hashlib.md5()
+    for arg in args:
+        hash.update(repr(arg))
+    return hash.hexdigest()
+
+
+
+class IterableLazyObject(SimpleLazyObject):
+
+    def __iter__(self):
+        if self._wrapped is None: self._setup()
+        return self._wrapped.__iter__()

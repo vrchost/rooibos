@@ -135,7 +135,7 @@ DefaultHeaders = ( \
 #
 # Default: Empty
 #
-from PyISAPIe import VersionFull
-StaticHeaders = ( \
-  "X-Powered-By: PyISAPIe-" + VersionFull,
-)
+#from PyISAPIe import VersionFull
+#StaticHeaders = ( \
+#  "X-Powered-By: PyISAPIe-" + VersionFull,
+#)

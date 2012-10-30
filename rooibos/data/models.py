@@ -7,10 +7,14 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from rooibos.access import accessible_ids
-from rooibos.util import unique_slug, cached_property, clear_cached_properties
+from django.core.exceptions import ObjectDoesNotExist
+from rooibos.access import filter_by_access, check_access
+from rooibos.access.models import AccessControl
+from rooibos.util import unique_slug
+from rooibos.util.caching import get_cached_value, cache_get, cache_get_many, cache_set, cache_set_many
 import logging
 import random
+import types
 
 
 class Collection(models.Model):
@@ -27,7 +31,7 @@ class Collection(models.Model):
 
     class Meta:
         ordering = ['title']
-        
+
     def save(self, **kwargs):
         unique_slug(self, slug_source='title', slug_field='name', check_current_slug=kwargs.get('force_insert'))
         super(Collection, self).save(kwargs)
@@ -85,24 +89,89 @@ class CollectionItem(models.Model):
     def __unicode__(self):
         return "Record %s Collection %s%s" % (self.record_id, self.collection_id, 'hidden' if self.hidden else '')
 
+
+def _records_with_individual_acl_by_ids(ids):
+    return list(AccessControl.objects.filter(
+        content_type=ContentType.objects.get_for_model(Record),
+        object_id__in=ids).values_list('object_id', flat=True))
+
+
 class Record(models.Model):
-    created = models.DateTimeField(default=datetime.now())
+    created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
-    parent = models.ForeignKey('self', null=True)
-    source = models.CharField(max_length=1024, null=True)
-    manager = models.CharField(max_length=50, null=True)
-    next_update = models.DateTimeField(null=True)
-    owner = models.ForeignKey(User, null=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
+    source = models.CharField(max_length=1024, null=True, blank=True)
+    manager = models.CharField(max_length=50, null=True, blank=True)
+    next_update = models.DateTimeField(null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=True)
+
+
+    @staticmethod
+    def filter_by_access(user, *ids):
+        records = Record.objects.distinct()
+
+        ids = map(int, ids)
+
+        if user:
+
+            if user.is_superuser:
+                return records.filter(id__in=ids)
+
+            accessible_records = cache_get_many(
+                ['record-access-%d-%d' % (user.id or 0, id) for id in ids],
+                model_dependencies=[Record, Collection, AccessControl]
+            )
+            accessible_record_ids = map(lambda (k, v): (int(k.rsplit('-', 1)[1]), v), accessible_records.iteritems())
+
+            allowed_ids = [k for k, v in accessible_record_ids if v == 't']
+            denied_ids  = [k for k, v in accessible_record_ids if v == 'f']
+
+            to_check = [id for id in ids if not id in allowed_ids and not id in denied_ids]
+
+            if not to_check:
+                return records.filter(id__in=allowed_ids)
+
+        else:
+            allowed_ids = []
+            to_check = ids
+
+        # check which records have individual ACLs set
+        individual = _records_with_individual_acl_by_ids(to_check)
+        if individual:
+            allowed_ids.extend(filter_by_access(user, Record.objects.filter(id__in=individual)).values_list('id', flat=True))
+            to_check = [id for id in to_check if not id in individual]
+        # check records without individual ACLs
+        if to_check:
+            cq = Q(collectionitem__collection__in=filter_by_access(user, Collection),
+                   collectionitem__hidden=False)
+            mq = Q(collectionitem__collection__in=filter_by_access(user, Collection, write=True),
+                   owner=None)
+            oq = Q(owner=user) if user and not user.is_anonymous() else Q()
+            records = records.filter(cq | mq | oq)
+            checked = records.filter(id__in=to_check).values_list('id', flat=True)
+            allowed_ids.extend(checked)
+
+        if user:
+            cache_update = dict(
+                        ('record-access-%d-%d' % (user.id or 0, id), 't' if id in checked else 'f')
+                         for id in to_check
+                    )
+            cache_set_many(cache_update, model_dependencies=[Record, Collection, AccessControl])
+
+        return records.filter(id__in=allowed_ids)
+
+
+    @staticmethod
+    def filter_one_by_access(user, id):
+        try:
+            return Record.filter_by_access(user, id).get()
+        except ObjectDoesNotExist:
+            return None
 
     @staticmethod
     def get_or_404(id, user):
-        if user.is_superuser:
-            q = Q()
-        else:
-            q = ((Q(owner=user) if user.is_authenticated() else Q(owner=None)) |
-                 Q(collection__id__in=accessible_ids(user, Collection)))
-        return get_object_or_404(Record.objects.filter(q, id=id).distinct())
+        return get_object_or_404(Record.filter_by_access(user, id))
 
     @staticmethod
     def by_fieldvalue(fields, values):
@@ -110,13 +179,13 @@ class Record(models.Model):
             fields = iter(fields)
         except TypeError:
             fields = [fields]
-        if not isinstance(values, (list, tuple)):
+        if not isinstance(values, (list, tuple, types.GeneratorType)):
             values = [values]
-            
+
         index_values = [value[:32] for value in values]
-        
+
         values_q = reduce(lambda q, value: q | Q(fieldvalue__value__iexact=value), values, Q())
-        
+
         return Record.objects.filter(values_q,
                                      fieldvalue__index_value__in=index_values,
                                      fieldvalue__field__in=fields)
@@ -136,7 +205,6 @@ class Record(models.Model):
     def save(self, force_update_name=False, **kwargs):
         unique_slug(self, slug_literal='r-%s' % random.randint(1000000, 9999999),
                     slug_field='name', check_current_slug=kwargs.get('force_insert') or force_update_name)
-        self._clear_cached_items()
         super(Record, self).save(kwargs)
 
     def get_fieldvalues(self, owner=None, context=None, fieldset=None, hidden=False, include_context_owner=False,
@@ -190,24 +258,39 @@ class Record(models.Model):
 
     @property
     def title(self):
-        if not getattr(self, "_cached_title", None):
-            titlefield = Field.objects.get(standard__prefix='dc', name='title')
+        def get_title():
+            titlefields = standardfield_ids('title', equiv=True)
             titles = self.fieldvalue_set.filter(
-                Q(field=titlefield) | Q(field__in=titlefield.get_equivalent_fields()),
+                field__in=titlefields,
                 owner=None,
                 context_type=None,
                 hidden=False)
-            self._cached_title = None if not titles else titles[0].value
-        return self._cached_title
+            return titles[0].value if titles else None
+        return get_cached_value('record-%d-title' % self.id,
+                                get_title,
+                                model_dependencies=[Field, FieldValue],
+                                ) if self.id else None
 
     @property
     def shared(self):
         return bool(self.collectionitem_set.filter(hidden=False).count()) if self.owner else None
 
-    def _clear_cached_items(self):
-        clear_cached_properties(self, 'title', 'thumbnail')
+    def _check_permission_for_user(self, user, **permissions):
+        # checks if user is owner or has ACL access
+        if check_access(user, self, **permissions):
+            return True
+        # if record does not have individual ACL...
+        if len(_records_with_individual_acl_by_ids([self.id])) > 0:
+            return False
+        # ...check collection access
+        return filter_by_access(user, self.collection_set, **permissions).count() > 0
 
-    
+    def editable_by(self, user):
+        return self._check_permission_for_user(user, write=True)
+
+    def manageable_by(self, user):
+        return self._check_permission_for_user(user, manage=True)
+
 
 class MetadataStandard(models.Model):
     title = models.CharField(max_length=100)
@@ -224,11 +307,11 @@ class Vocabulary(models.Model):
     description = models.TextField(null=True, blank=True)
     standard = models.NullBooleanField()
     origin = models.TextField(null=True, blank=True)
-    
+
     class Meta:
         verbose_name_plural = "vocabularies"
 
-    
+
 class VocabularyTerm(models.Model):
     vocabulary = models.ForeignKey(Vocabulary)
     term = models.TextField()
@@ -268,7 +351,7 @@ class Field(models.Model):
         unique_together = ('name', 'standard')
         ordering = ['name']
         order_with_respect_to = 'standard'
-        
+
 
 def get_system_field():
     field, created = Field.objects.get_or_create(name='system-value',
@@ -289,20 +372,20 @@ class FieldSet(models.Model):
 
     def __unicode__(self):
         return self.title
-    
+
     class Meta:
         ordering = ['title']
-        
+
     @staticmethod
     def for_user(user):
         return FieldSet.objects.filter(Q(owner=None) | Q(standard=True) |
-                                        (Q(owner=user) if user.is_authenticated() else Q()))
+                                        (Q(owner=user) if user and user.is_authenticated() else Q()))
 
 
 class FieldSetField(models.Model):
     fieldset = models.ForeignKey(FieldSet)
     field = models.ForeignKey(Field)
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=100, null=True, blank=True)
     order = models.IntegerField(default=0)
     importance = models.SmallIntegerField(default=1)
 
@@ -335,7 +418,7 @@ class FieldValue(models.Model):
     def save(self, **kwargs):
         self.index_value = self.value[:32] if self.value != None else None
         super(FieldValue, self).save(kwargs)
-        
+
     def __unicode__(self):
         return "%s%s%s=%s" % (self.resolved_label, self.refinement and '.', self.refinement, self.value)
 
@@ -345,7 +428,7 @@ class FieldValue(models.Model):
 
     def dump(self, owner=None, collection=None):
         print("%s: %s" % (self.resolved_label, self.value))
-        
+
     class Meta:
         ordering = ['order']
 
@@ -392,3 +475,16 @@ def standardfield(field, standard='dc', equiv=False):
         return Field.objects.filter(Q(id=f.id) | Q(id__in=f.get_equivalent_fields()))
     else:
         return f
+
+
+def standardfield_ids(field, standard='dc', equiv=False):
+    def get_ids():
+        f = Field.objects.get(standard__prefix=standard, name=field)
+        if equiv:
+            ids = Field.objects.filter(Q(id=f.id) | Q(id__in=f.get_equivalent_fields())).values_list('id', flat=True)
+        else:
+            ids = [f.id]
+        return ids
+    return get_cached_value('standardfield_ids-%s-%s-%s' % (field, standard, equiv),
+                            get_ids,
+                            model_dependencies=[Field])

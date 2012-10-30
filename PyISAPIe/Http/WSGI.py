@@ -17,6 +17,7 @@ actually replace headers that have already been *set*.
 """
 from PyISAPIe import Read, Write, Env, Header
 import PyISAPIe
+import logging
 
 # Set these for compatibility with WSGI - no readline[s] yet.
 PyISAPIe.read = Read
@@ -69,7 +70,7 @@ IsapiEnvAuto = [
   #"LOCAL_ADDR",
   #"LOGON_USER",
   #"PATH_TRANSLATED",
-  #"REMOTE_ADDR",
+  "REMOTE_ADDR",
   #"REMOTE_HOST",
   #"REMOTE_PORT",
   #"REMOTE_USER",
@@ -155,14 +156,18 @@ def RunWSGI(Application, Base = "/"):
   Result = Application(Environ, StartResponse)
   
   try:
-    for Data in Result:
-      if Data:
-        Write(Data)
-        
+    if Result.has_header('Content-Length'):
+      Write(''.join(Data for Data in Result if Data))
+    else:
+      for Data in Result:
+        if Data:
+          Write(Data)
+  except Exception, ex:
+    logging.debug("PyISAPIe: Exception on RunWSGI Write: %s" % repr(ex))
+    raise
   finally:
     if hasattr(Result, "close"):
       Result.close()
-
 
 def StartResponse(Status, Headers, ExcInfo = None):
   if ExcInfo:

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="en">
+	<langstring name="LNG_BOOKMARK_DELETE">Delete this bookmark</langstring>
+	<langstring name="LNG_BOOKMARK_ADD">Add bookmark</langstring>
+	<langstring name="LNG_BOOKMARK_OK">OK</langstring>
+	<langstring name="LNG_BOOKMARK_CANCEL">Cancel</langstring>
+	<langstring name="LNG_BOOKMARK_DEFAULT_TITLE">Page $1</langstring>
+</lang>

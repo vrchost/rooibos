@@ -1,0 +1,7 @@
+{% extends "viewers_embed.html" %}
+
+{% block embed-div %}
+<div id="{{ divid }}" style="{% if options.width %}width: {{ options.width }}px;{% endif %} {% if options.height %}height: {{ options.height }}px;{% endif %}">
+    Your browser does not support embedded PDF files, please <a href="{{ viewer.pdf_url }}">download the file instead.</a>
+</div>
+{% endblock %}

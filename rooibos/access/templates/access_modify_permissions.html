@@ -6,7 +6,7 @@
 {% block javascript %}
 {{ block.super }}
 <script type="text/javascript">
-    
+
     $("input[name=ac]").click(function() {
         if (this.checked) {
             var read = $(this).next('span');
@@ -19,7 +19,7 @@
             $("#id_restrictions").val(restrictions.data('title') || "");
         }
     });
-    
+
 </script>
 {% endblock %}
 
@@ -36,7 +36,7 @@
 
 <h1>Modify permissions for {{ object.title }}</h1>
 
-<form method="POST" action=".">
+<form method="POST" action=".">{% csrf_token %}
 {% with "true" as ac_selectable %}
 {% include "access_permissions_display.html" %}
 {% endwith %}
@@ -52,7 +52,7 @@ Set selected and new access controls to:
 <tr>
     <td>Add group:</td>
     <td><input type="text" class="autocomplete-group" name="addgroup" /></td>
-</tr>        
+</tr>
 </table>
 
 

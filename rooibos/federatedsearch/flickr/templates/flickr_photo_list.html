@@ -13,11 +13,11 @@
     {% endfor %}
 </div>
 
-<h1>MDID flickr Portal</h1>	
+<h1>MDID flickr Portal</h1>
 
 {{response}}
 <div class="flickr">
-	<form action="{% url flickr-export-photo-frob %}" method="POST" name="upload_form">
+	<form action="{% url flickr-export-photo-frob %}" method="POST" name="upload_form">{% csrf_token %}
 		<ul>
 			<li><input type="submit" value="Export to Flickr" style="width:120px;" /></li>
 			{% for photo in selected %}
@@ -77,7 +77,7 @@
 <script>
 function updateHidden(checkbox_obj, hiddenfield_obj) {
 	if(checkbox_obj.checked==true) {
-		hiddenfield_obj.value = 1 
+		hiddenfield_obj.value = 1
 	}else {
 		hiddenfield_obj.value = 0
 	}

@@ -21,8 +21,11 @@
 {% var as related_pages %}
 {"pages": [
     {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url data-collections-manage %}", "title": "Collection Management"},
-    {"url": "{% url storage-match-up-files %}?collection={{ collection.id }}", "title": "Match Up Media"}
+    {"url": "{% url data-collections-manage %}", "title": "Collection Management"}
+    {% if collection.id %},
+    {"url": "{% url storage-match-up-files %}?collection={{ collection.id }}", "title": "Match Up Media"},
+    {"url": "{% url storage-find-records-without-media %}?collection={{ collection.id }}", "title": "Find Empty Records"}
+    {% endif %}
 ]}
 {% endvar %}
 
@@ -55,7 +58,7 @@
         {% permissions_display collection %}
     </div>
   </div>
-  
+
   <div class="facet active-facet" id="collection_sidebar_effective_permissions">
     <div class="facet-header">Effective Permissions</div>
     <div class="facet-body">
@@ -67,7 +70,7 @@
   <div class="facet active-facet" id="collection_sidebar_delete">
     <div class="facet-header">Delete Collection</div>
     <div class="facet-body">
-        <form action="." method="POST">
+        <form action="." method="POST">{% csrf_token %}
         <input type="submit" value="Delete" name="delete-collection" id="delete-collection" />
         </form>
     </div>
@@ -85,7 +88,7 @@
 
 <h2>{{ collection.title }}</h2>
 
-<form action="." method="POST" class="vertical">
+<form action="." method="POST" class="vertical">{% csrf_token %}
 
 
 {{ form.title.label_tag }}{{ form.title }}{{ form.title.errors }}
@@ -94,13 +97,13 @@
 {{ form.description.label_tag }}{{ form.description }}{{ form.description.errors }}
 {{ form.agreement.label_tag }}{{ form.agreement }}{{ form.agreement.errors }}
 {{ form.children.label_tag }}<div class="multi-checkbox-list" style="float: left;">{{ form.children }}</div>{{ form.children.errors }}
-    
+
 <div class="row">
     <br />
     <input type="submit" value="{% if collection.id %}Update{% else %}Create{% endif %}" />
     <a href="{% url data-collections-manage %}">Cancel</a>
 </div>
-    
+
 </form>
 
 {% endblock %}

@@ -1,6 +1,6 @@
 {% if request.user.is_authenticated %}
 <div style="margin-top: 10px;">
-<form method="POST" action="{% url ui-add-tags object_type, object_id %}?next={{ request.get_full_path|urlencode }}">
+<form method="POST" action="{% url ui-add-tags object_type, object_id %}?next={{ request.get_full_path|urlencode }}">{% csrf_token %}
     {% if tag %}<input type="hidden" name="tags" value="{{ tag }}" />{% else %}<input type="text" name="tags" />{% endif %}
     <input type="submit" value="{{ label|default:"Add tags" }}" />
 </form>

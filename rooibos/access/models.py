@@ -8,7 +8,7 @@ from rooibos.contrib.ipaddr import IP
 
 class AccessControl(models.Model):
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User, null=True, blank=True)
     usergroup = models.ForeignKey(Group, null=True, blank=True)
@@ -69,11 +69,11 @@ def update_membership_by_ip(user, ip):
 
 class ExtendedGroupManager(models.Manager):
 
-    def get_extra_groups(self, user):
+    def get_extra_groups(self, user, assume_authenticated=False):
         # retrieve membership in special groups such as everyone and authenticated users
         # membership for those types of groups is not stored explicitly
         q = Q(type=EVERYBODY_GROUP)
-        if user.is_authenticated():
+        if assume_authenticated or user.is_authenticated():
             q = q | Q(type=AUTHENTICATED_GROUP)
         return self.filter(q)
 

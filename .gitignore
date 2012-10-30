@@ -1,7 +1,7 @@
 *.pyc
 *.pyo
 rooibos/settings_local.py
-solr/logs/
+solr/logs/*.log
 solr/solr/data/
 apps/
 scratch/
@@ -10,3 +10,11 @@ solr/wrapper.*
 solr/wrapper-license.conf
 config.xml
 CACHE
+rooibos/static/flowplayer/flowplayer.commercial*
+bin-debug/
+unused_bin/
+.metadata/
+Thumbs.db
+rooibos/static/cache/*
+2*M.mysql
+bin-release-temp/

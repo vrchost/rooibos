@@ -23,7 +23,8 @@ USE_I18N = False
 
 USE_ETAGS = False
 
-SESSION_SAVE_EVERY_REQUEST = True
+# When set to True, may cause problems with basket functionality
+SESSION_SAVE_EVERY_REQUEST = False
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -49,16 +50,18 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "rooibos.context_processors.settings",
     "rooibos.context_processors.selected_records",
+    "rooibos.context_processors.current_presentation",
 )
 
 MIDDLEWARE_CLASSES = (
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
+#    'rooibos.profile_middleware.ProfileMiddleware',
     'rooibos.sslredirect.SSLRedirect',
     'rooibos.ui.middleware.PageTitles',
     'django.middleware.common.CommonMiddleware',
     'rooibos.util.stats_middleware.StatsMiddleware',
-    'django.contrib.csrf.middleware.CsrfMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -69,6 +72,9 @@ MIDDLEWARE_CLASSES = (
     'djangologging.middleware.SuppressLoggingOnAjaxRequestsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
+    'rooibos.storage.middleware.StorageOnStart',
+    'rooibos.access.middleware.AccessOnStart',
+    'rooibos.middleware.HistoryMiddleware',
 )
 
 ROOT_URLCONF = 'rooibos.urls'
@@ -105,6 +111,12 @@ INSTALLED_APPS = (
     'rooibos.contrib.tagging',
     'rooibos.workers',
     'rooibos.userprofile',
+    'rooibos.mediaviewer',
+    'rooibos.megazine',
+    'rooibos.groupmanager',
+    'rooibos.pdfviewer',
+    'rooibos.pptexport',
+    'rooibos.audiotextsync',
     'pagination',
     'impersonate',
     'compressor',

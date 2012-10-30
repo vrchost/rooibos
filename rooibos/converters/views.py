@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
 from django.template import RequestContext
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 from rooibos.data.models import Collection, CollectionItem, Record, FieldSet, Field
 from rooibos.solr import SolrIndex
 from rooibos.solr.models import SolrIndexUpdates
@@ -49,22 +49,22 @@ def convert_ppt(owner, title, collection, storage, tempdir, filename):
         record.fieldvalue_set.create(field=dc['source'], value=title, order=2)
         record.fieldvalue_set.create(field=dc['creator'], value=owner.get_full_name(), order=3)
         CollectionItem.objects.create(record=record, collection=collection)
-        
+
         name = 'ppt-import-%s-%s-%s.jpg' % (owner.username, presentation.name, counter + 1)
         file = open(os.path.join(tempdir, image), 'rb')
         media = Media.objects.create(name=name, record=record, storage=storage, mimetype='image/jpeg')
         media.save_file(name=name, content=file)
         file.close()
-        
+
         PresentationItem.objects.create(presentation=presentation, record=record, order=counter)
-        
+
     return presentation
 
 
 @login_required
 def powerpoint(request):
-    
-    available_storage = get_list_or_404(filter_by_access(request.user, Storage.objects.filter(master=None), write=True).order_by('title').values_list('id', 'title'))
+
+    available_storage = get_list_or_404(filter_by_access(request.user, Storage, write=True).order_by('title').values_list('id', 'title'))
     available_collections = get_list_or_404(filter_by_access(request.user, Collection, write=True).order_by('title').values_list('id', 'title'))
 
     class UploadFileForm(forms.Form):
@@ -72,15 +72,15 @@ def powerpoint(request):
         storage = forms.ChoiceField(choices=available_storage)
         collection = forms.ChoiceField(choices=available_collections)
         file = forms.FileField()
-        
+
         def clean_file(self):
             file = self.cleaned_data['file']
             if not file.content_type in ('application/vnd.ms-powerpoint',
                                          'application/vnd.openxmlformats-officedocument.presentationml.presentation'):
                 raise forms.ValidationError("The selected file does not appear to be a PowerPoint file")
             return file
-        
-    
+
+
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -92,13 +92,11 @@ def powerpoint(request):
                 outfile.write(chunk)
             outfile.close()
             presentation = convert_ppt(request.user,
-                                       form.cleaned_data['title'],
-                                       Collection.objects.get(id=form.cleaned_data['collection'],
-                                                              id__in=accessible_ids(request.user, Collection, write=True)),                                       
-                                       Storage.objects.get(id=form.cleaned_data['storage'],
-                                                           id__in=accessible_ids(request.user, Storage.objects.filter(master=None), write=True)),
-                                       tempdir,
-                                       filename)
+                form.cleaned_data['title'],
+                filter_by_access(request.user, Collection, write=True).get(id=form.cleaned_data['collection']),
+                filter_by_access(request.user, Storage, write=True).get(id=form.cleaned_data['storage']),
+                tempdir,
+                filename)
             shutil.rmtree(tempdir)
             if not presentation:
                 request.user.message_set.create(message="An error occurred while importing the presentation.")

@@ -1,33 +1,27 @@
-import subprocess
+from subprocess import Popen, PIPE
 
-from django.conf import settings
-
+from compressor.conf import settings
 from compressor.filters import FilterBase, FilterError
+from compressor.utils import cmd_split
 
-BINARY = getattr(settings, 'COMPRESS_CLOSURE_COMPILER_BINARY', 'java -jar compiler.jar')
-ARGUMENTS = getattr(settings, 'COMPRESS_CLOSURE_COMPILER_ARGUMENTS', '')
 
 class ClosureCompilerFilter(FilterBase):
 
     def output(self, **kwargs):
-        arguments = ARGUMENTS
+        arguments = settings.CLOSURE_COMPILER_ARGUMENTS
 
-        command = '%s %s' % (BINARY, arguments)
+        command = '%s %s' % (settings.CLOSURE_COMPILER_BINARY, arguments)
 
-        p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        p.stdin.write(self.content)
-        p.stdin.close()
+        try:
+            p = Popen(cmd_split(command), stdout=PIPE, stdin=PIPE, stderr=PIPE)
+            filtered, err = p.communicate(self.content)
 
-        filtered = p.stdout.read()
-        p.stdout.close()
-
-        err = p.stderr.read()
-        p.stderr.close()
+        except IOError, e:
+            raise FilterError(e)
 
         if p.wait() != 0:
             if not err:
                 err = 'Unable to apply Closure Compiler filter'
-
             raise FilterError(err)
 
         if self.verbose:

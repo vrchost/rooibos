@@ -22,7 +22,7 @@ class OnlineStorageSystem():
 
     def exists(self, url):
         # TODO
-        return False
+        return True
 
     def size(self, url):
         return None

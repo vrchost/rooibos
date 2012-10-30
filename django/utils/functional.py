@@ -60,9 +60,6 @@ def curry(_curried_func, *args, **kwargs):
 # Summary of changes made to the Python 2.5 code below:
 #   * swapped ``partial`` for ``curry`` to maintain backwards-compatibility
 #     in Django.
-#   * Wrapped the ``setattr`` call in ``update_wrapper`` with a try-except
-#     block to make it compatible with Python 2.3, which doesn't allow
-#     assigning to ``__name__``.
 
 # Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007 Python Software Foundation.
 # All Rights Reserved.
@@ -90,10 +87,7 @@ def update_wrapper(wrapper,
        function (defaults to functools.WRAPPER_UPDATES)
     """
     for attr in assigned:
-        try:
-            setattr(wrapper, attr, getattr(wrapped, attr))
-        except TypeError: # Python 2.3 doesn't allow assigning to __name__.
-            pass
+        setattr(wrapper, attr, getattr(wrapped, attr))
     for attr in updated:
         getattr(wrapper, attr).update(getattr(wrapped, attr))
     # Return the wrapper so this can be used as a decorator via curry()
@@ -147,6 +141,7 @@ def lazy(func, *resultclasses):
     the lazy evaluation code is triggered. Results are not memoized; the
     function is evaluated on every access.
     """
+
     class __proxy__(Promise):
         """
         Encapsulate a function call and act as a proxy for methods that are
@@ -161,6 +156,12 @@ def lazy(func, *resultclasses):
             self.__kw = kw
             if self.__dispatch is None:
                 self.__prepare_class__()
+
+        def __reduce__(self):
+            return (
+                _lazy_proxy_unpickle,
+                (self.__func, self.__args, self.__kw) + resultclasses
+            )
 
         def __prepare_class__(cls):
             cls.__dispatch = {}
@@ -240,6 +241,9 @@ def lazy(func, *resultclasses):
 
     return wraps(func)(__wrapper__)
 
+def _lazy_proxy_unpickle(func, args, kwargs, *resultclasses):
+    return lazy(func, *resultclasses)(*args, **kwargs)
+
 def allow_lazy(func, *resultclasses):
     """
     A decorator that allows a function to be called with one or more lazy
@@ -270,9 +274,6 @@ class LazyObject(object):
     def __getattr__(self, name):
         if self._wrapped is None:
             self._setup()
-        if name == "__members__":
-            # Used to implement dir(obj)
-            return self._wrapped.get_all_members()
         return getattr(self._wrapped, name)
 
     def __setattr__(self, name, value):
@@ -297,6 +298,13 @@ class LazyObject(object):
         """
         raise NotImplementedError
 
+    # introspection support:
+    __members__ = property(lambda self: self.__dir__())
+
+    def __dir__(self):
+        if self._wrapped is None:
+            self._setup()
+        return  dir(self._wrapped)
 
 class SimpleLazyObject(LazyObject):
     """

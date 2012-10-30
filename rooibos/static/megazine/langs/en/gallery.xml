@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="en">
+	<langstring name="LNG_GALLERY_ZOOM_IN">Zoom in</langstring>
+	<langstring name="LNG_GALLERY_ZOOM_OUT">Zoom out</langstring>
+	<langstring name="LNG_GALLERY_OPEN">Open gallery</langstring>
+	<langstring name="LNG_GALLERY_EXIT">Exit gallery</langstring>
+	<langstring name="LNG_GALLERY_NEXT">Next image</langstring>
+	<langstring name="LNG_GALLERY_PREV">Previous image</langstring>
+	<langstring name="LNG_GALLERY_FIRST">First image</langstring>
+	<langstring name="LNG_GALLERY_LAST">Last image</langstring>
+	<langstring name="LNG_GALLERY_ROTATE_RIGHT">Rotate image clockwise</langstring>
+	<langstring name="LNG_GALLERY_ROTATE_LEFT">Rotate image counterclockwise</langstring>
+</lang>

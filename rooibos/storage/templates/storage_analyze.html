@@ -1,0 +1,61 @@
+{% extends "master.html" %}
+{% load humanize %}
+{% load access_control %}
+{% load ui %}
+
+
+{% block sidebar %}
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url ui-management %}", "title": "Management"},
+    {"url": "{% url storage-manage %}", "title": "Storage Management"},
+    {"url": "{% url storage-manage-storage storage.id, storage.name %}", "title": "Edit Storage"},
+    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"},
+    {"url": "{% url storage-find-records-without-media %}?storage={{ storage.id }}", "title": "Find Empty Records"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+{% if storage.id %}
+
+  <div class="facet active-facet" id="storage_sidebar_statistics">
+    <div class="facet-header">Statistics</div>
+    <div class="facet-body">
+        {% with storage.media_set.count as c %}
+        {{ c|intcomma }} media entr{{ c|pluralize:"y,ies" }}
+        {% endwith %}
+    </div>
+  </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Analyze Storage</h1>
+
+<h2>{{ storage.title }}</h2>
+
+<div>All file paths relative to {{ storage.base }}.</div>
+
+<div style="float: left; margin-right: 20px; margin-top: 20px;">
+    <h3>{{ broken|length|intcomma }} missing file{{ broken|length|pluralize }}</h3>
+    <div style="overflow: auto; max-height: 600px; width: 400px; white-space: nowrap; font-size: smaller;">
+    {% for b in broken %}{{ b.url }}<br />{% empty %}None{% endfor %}
+    </div>
+</div>
+
+<div style="float: left; margin-right: 20px; margin-top: 20px;">
+    <h3>{{ extra|length|intcomma }} extra file{{ extra|length|pluralize }}</h3>
+    <div style="overflow: auto; max-height: 600px; width: 400px; white-space: nowrap; font-size: smaller;">
+    {% for e in extra %}{{ e }}<br />{% empty %}None{% endfor %}
+    </div>
+</div>
+
+<div style="clear: left;">
+</div>
+
+{% endblock %}

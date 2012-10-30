@@ -1,4 +1,4 @@
-# translation of djangojs.po to Italian
+# translation of djangojs.po to Italiano
 # Italian translation for the django-admin JS files
 # Copyright (C) 2006 the Lawrence Journal-World
 # This file is distributed under the same license as the Django package.
@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: django\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-12-26 15:49+0100\n"
-"PO-Revision-Date: 2009-12-26 16:09+0100\n"
+"POT-Creation-Date: 2009-12-26 16:15+0100\n"
+"PO-Revision-Date: 2009-12-26 16:50+0100\n"
 "Last-Translator: Nicola Larosa <nico@tekNico.net>\n"
 "Language-Team: Italian <django-it@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,8 @@ msgstr "Aggiungi"
 msgid "Remove"
 msgstr "Elimina"
 
-#: contrib/admin/media/js/SelectFilter2.js:53, perl-format
+#: contrib/admin/media/js/SelectFilter2.js:53
+#, perl-format
 msgid "Chosen %s"
 msgstr "%s scelti"
 
@@ -57,6 +58,10 @@ msgstr ""
 #: contrib/admin/media/js/calendar.js:25
 msgid "S M T W T F S"
 msgstr "D L M M G V S"
+
+#: contrib/admin/media/js/calendar.js:26
+msgid "FIRST_DAY_OF_WEEK"
+msgstr "1"
 
 #: contrib/admin/media/js/dateparse.js:33
 msgid "Sunday Monday Tuesday Wednesday Thursday Friday Saturday"
@@ -117,4 +122,3 @@ msgstr "Ieri"
 #: contrib/admin/media/js/admin/DateTimeShortcuts.js:179
 msgid "Tomorrow"
 msgstr "Domani"
-

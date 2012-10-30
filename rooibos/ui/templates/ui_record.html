@@ -1,10 +1,17 @@
-<div class="record record-anchor" id="record-id-{{ record.id }}">
-    <a href="{{ record.get_absolute_url }}"><img class="thumbnail" src="{{ record.get_thumbnail_url }}" alt="{{ record.title }}" /></a>
+{% load data %}
+<div class="record{% if notitle %} notitle{% endif %}">
+    <a href="{{ record.get_absolute_url }}"><img class="thumbnail record-anchor" id="record-id-{{ record.id }}" src="{{ record.get_thumbnail_url }}" alt="{{ record.title }}" /></a>
+    {% if not notitle %}
     <div class="record-title"><a href="{{ record.get_absolute_url }}">{{ record.title }}</a></div>
+      {% if viewmode == "metadata" %}
+          {% metadata record %}
+      {% endif %}
+    {% endif %}
     {% if selectable %}
     <input type="checkbox" class="record-select" name="r" value="{{ record.id }}"{% if selected %} checked="checked"{% endif %} />
     {% if selected %}<input type="hidden" name="sr" value="{{ record.id }}" />{% endif %}
     {% endif %}
+    <img src="{% url static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" id="info-record-id-{{ record.id }}" />
     {% if record.owner %}
     <img src="{% url static 'images/user_grey.png' %}" alt="User" class="owner-icon {% ifnotequal request.user record.owner %}other-{% endifnotequal %}user-icon" title="{{ record.owner.get_full_name }}" />
     {% if record.shared %}
@@ -12,5 +19,11 @@
     {% else %}
     <img src="{% url static 'images/locked.png' %}" alt="Not shared" title="Not shared" class="shared-icon" />
     {% endif %}
+    {% endif %}
+    {% if record.solr_presentation_ids %}
+    <a href="{% url solr-search %}?c=presentations:{{ record.id }}"><img src="{% url static 'images/related.png' %}" alt="See related from {{ record.solr_presentation_ids|length }} presentation{{ record.solr_presentation_ids|length|pluralize }}" title="See related from {{ record.solr_presentation_ids|length }} presentation{{ record.solr_presentation_ids|length|pluralize }}" class="related-icon" /></a>
+    {% endif %}
+    {% if record_in_current_presentation %}
+    <img src="{% url static 'images/inuse.png' %}" alt="In presentation" title="In presentation" class="inuse-icon" />
     {% endif %}
 </div>

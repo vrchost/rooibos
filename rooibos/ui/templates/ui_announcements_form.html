@@ -1,0 +1,47 @@
+{% extends "master.html" %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+    $(document).ready(function() {
+        var d = $(":text[name=submit_date]");
+        var now = new Date();
+        if (d.val() == '') d.val(now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate());
+    });
+</script>
+{% endblock %}
+
+
+
+{% block content %}
+
+<h1>Edit Announcement</h1>
+
+{% if perms.comments.add_comment or perms.comment.change_comment %}
+
+<form action="" method="POST">{% csrf_token %}
+
+Announcement:<br />
+{{ form.comment }} {{ form.comment.errors }}
+
+<br />
+Date: {{ form.submit_date }} {{ form.submit_date.errors }}
+<br />
+<input type="hidden" name="content_type" value="{{ flatpage_content_type }}" />
+<input type="hidden" name="object_pk" value="1" />
+<input type="hidden" name="user" value="{{ request.user.id }}" />
+<input type="hidden" name="site" value="{{ site }}" />
+<input type="hidden" name="is_public" value="checked" />
+
+<input type="submit" value="Save" /> <a href="{% url main %}">Cancel</a>
+
+</form>
+
+{% else %}
+
+You do not have access to this function.
+
+{% endif %}
+
+{% endblock %}

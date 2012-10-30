@@ -1,11 +1,36 @@
 {% extends "master.html" %}
 {% load ui %}
 {% load impersonate_tags %}
+{% load data %}
 
 {% block content %}
 
 <h1>Options</h1>
 
+{% if request|can_realuser_impersonate_others %}
+<h2>Impersonation</h2>
 {% impersonation_form %}
+{% endif %}
+
+
+<form action="." method="POST">{% csrf_token %}
+
+<h2 style="margin-top: 20px;">User Interface Options</h2>
+
+<div class="vertical">
+
+{{ ui_form }}
+
+<div class="row">
+    <input type="submit" value="Save Options" />
+</div>
+
+</div>
+
+</form>
+
+
+{% collection_visibility_preferences %}
+
 
 {% endblock %}

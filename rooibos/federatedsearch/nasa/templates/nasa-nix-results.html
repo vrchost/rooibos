@@ -24,17 +24,24 @@
             }
         });
     }
-    
+
     $(document).ready(function() {
         $("#submit_record_selections").hide();
         $(".remote-record-select").click(function() { remoteRecordSelection($(this).attr('value'), $(this).attr('checked')); });
     });
-    
+
 </script>
 {% endblock %}
 
 
 {% block sidebar %}
+
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url solr-search %}?kw={{ query|urlencode }}", "title": "Back to Explore"}
+]}
+{% endvar %}
+
 {{ block.super }}
 
   <div class="facet active-facet" id="results_sidebar_keywords">
@@ -55,7 +62,7 @@
 
 
 {% block content %}
-<form method="POST" action=".">
+<form method="POST" action=".">{% csrf_token %}
 <input type="hidden" name="q" value="{{ query }}" />
 <div>
     Your query found {{ hits|intcomma }} hit{{ hits|pluralize }}.

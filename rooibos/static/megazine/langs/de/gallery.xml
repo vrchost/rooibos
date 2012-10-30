@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_GALLERY_ZOOM_IN">Vergrößern</langstring>
+	<langstring name="LNG_GALLERY_ZOOM_OUT">Verkleinern</langstring>
+	<langstring name="LNG_GALLERY_OPEN">Galeriemodus öffnen</langstring>
+	<langstring name="LNG_GALLERY_EXIT">Galeriemodus verlassen</langstring>
+	<langstring name="LNG_GALLERY_NEXT">Nächstes Bild</langstring>
+	<langstring name="LNG_GALLERY_PREV">Voriges Bild</langstring>
+	<langstring name="LNG_GALLERY_FIRST">Erstes Bild</langstring>
+	<langstring name="LNG_GALLERY_LAST">Letztes Bild</langstring>
+	<langstring name="LNG_GALLERY_ROTATE_RIGHT">Bild im Uhrzeigersinn drehen</langstring>
+	<langstring name="LNG_GALLERY_ROTATE_LEFT">Bild gegen den Uhrzeigersinn drehen</langstring>
+</lang>

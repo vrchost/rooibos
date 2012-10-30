@@ -1,25 +1,28 @@
+from __future__ import with_statement
 from datetime import datetime, timedelta
 from django import forms
 from django.conf import settings
-from django.contrib.auth import login, authenticate
+from rooibos.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.contrib.csrf.middleware import csrf_exempt
 from django.core.urlresolvers import resolve, reverse
 from django.forms.util import ErrorList
-from django.db.models import Count, Q
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseNotAllowed, HttpResponseServerError, HttpResponseForbidden
 from django.shortcuts import _get_queryset, get_object_or_404, get_list_or_404, render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils import simplejson
 from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.contenttypes.models import ContentType
+from django.template.defaultfilters import filesizeformat
 from models import Media, Storage, TrustedSubnet, ProxyUrl
-from rooibos.access import accessible_ids, accessible_ids_list, filter_by_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object
+from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object, check_access
 from rooibos.contrib.ipaddr import IP
 from rooibos.data.models import Collection, Record, Field, FieldValue, CollectionItem, standardfield
-from rooibos.storage import get_image_for_record, get_thumbnail_for_record, match_up_media
+from rooibos.storage import get_media_for_record, get_image_for_record, get_thumbnail_for_record, match_up_media, analyze_media, analyze_records, find_record_by_identifier
 from rooibos.util import json_view
+from rooibos.statistics.models import Activity
 import logging
 import os
 import uuid
@@ -30,8 +33,6 @@ import mimetypes
 
 
 def add_content_length(func):
-    # Disable to make it work with latest PyISAPIe
-    return func
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
         if type(response) == HttpResponse:
@@ -43,29 +44,22 @@ def add_content_length(func):
 @add_content_length
 @cache_control(private=True, max_age=3600)
 def retrieve(request, recordid, record, mediaid, media):
-
     # check if media exists
-    mediaobj = get_object_or_404(Media.objects.filter(id=mediaid, record__id=recordid))
+    mediaobj = get_media_for_record(recordid, request.user).filter(id=mediaid)
 
-    # check permissions
-    try:
-        mediaobj = Media.objects.get(id=mediaid,
-                                 record__id=recordid,
-                                 record__collection__id__in=accessible_ids(request.user, Collection),
-                                 storage__id__in=accessible_ids(request.user, Storage))
-    except Media.DoesNotExist:
+    # check download status
+    if not mediaobj or not mediaobj[0].is_downloadable_by(request.user):
         return HttpResponseForbidden()
-
-    r, w, m, restrictions = get_effective_permissions_and_restrictions(request.user, mediaobj.storage)
-    # if size restrictions exist, no direct download of a media file is allowed
-    if restrictions and (restrictions.has_key('width') or restrictions.has_key('height')):
-        raise Http404()
+    mediaobj = mediaobj[0]
 
     try:
         content = mediaobj.load_file()
     except IOError:
         raise Http404()
 
+    Activity.objects.create(event='media-download',
+                            request=request,
+                            content_object=mediaobj)
     if content:
         return HttpResponse(content=content, mimetype=str(mediaobj.mimetype))
     else:
@@ -76,40 +70,74 @@ def retrieve(request, recordid, record, mediaid, media):
 @cache_control(private=True, max_age=3600)
 def retrieve_image(request, recordid, record, width=None, height=None):
 
-    width = int(width or '100000')
-    height = int(height or '100000')
+    passwords = request.session.get('passwords', dict())
 
-    media = get_image_for_record(recordid, request.user, width, height)
-
-    if not media:
+    path = get_image_for_record(recordid, request.user, int(width or 100000), int(height or 100000), passwords)
+    if not path:
         raise Http404()
 
-    # return resulting image
-    content = media.load_file()
-    if content:
-        return HttpResponse(content=content, mimetype=str(media.mimetype))
+    Activity.objects.create(event='media-download-image',
+                            request=request,
+                            content_object=Record.objects.get(id=recordid),
+                            data=dict(width=width, height=height))
+    try:
+        response = HttpResponse(content=file(path, 'rb').read(), mimetype='image/jpeg')
+        if request.GET.has_key('forcedl'):
+            response["Content-Disposition"] = "attachment; filename=%s.jpg" % record
+        return response
+    except IOError:
+        logging.error("IOError: %s" % path)
+        raise Http404()
+
+
+def make_storage_select_choice(storage, user):
+    limit = storage.get_upload_limit(user)
+    if limit != settings.UPLOAD_LIMIT:
+        slimit = ' (unlimited)' if limit == 0 else ' (max %s)' % filesizeformat(limit * 1024)
     else:
-        return HttpResponseServerError()
+        slimit = ''
+    return ('%s,%s' % (storage.id, limit),
+            '%s%s' % (storage.title, slimit))
 
 
-@login_required
-def media_upload(request, recordid, record):
-    available_storage = get_list_or_404(filter_by_access(request.user, Storage.objects.filter(master=None), write=True
-                                         ).values_list('name','title'))
-    record = Record.get_or_404(id, request.user)
+def media_upload_form(request):
+    available_storage = filter_by_access(request.user, Storage, write=True).order_by('title')
+    if not available_storage:
+        return None
+
+    choices = [make_storage_select_choice(s, request.user) for s in available_storage]
 
     class UploadFileForm(forms.Form):
-        storage = forms.ChoiceField(choices=available_storage)
+        storage = forms.ChoiceField(choices=choices)
         file = forms.FileField()
 
+    return UploadFileForm
+
+
+@csrf_exempt
+@login_required
+def media_upload(request, recordid, record):
+    record = Record.get_or_404(recordid, request.user)
+    if not record.editable_by(request.user):
+        raise Http404()
+
     if request.method == 'POST':
+
+        UploadFileForm = media_upload_form(request)
+        if not UploadFileForm:
+            raise Http404()
 
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
 
-            storage = Storage.objects.get(name=form.cleaned_data['storage'])
+            storage = Storage.objects.get(id=form.cleaned_data['storage'].split(',')[0])
             file = request.FILES['file']
             mimetype = mimetypes.guess_type(file.name)[0] or file.content_type
+
+            limit = storage.get_upload_limit(request.user)
+            if limit > 0 and file.size > limit * 1024:
+                request.user.message_set.create(message="The uploaded file is too large.")
+                return HttpResponseRedirect(request.GET.get('next', reverse('main')))
 
             media = Media.objects.create(record=record,
                                          name=os.path.splitext(file.name)[0],
@@ -118,33 +146,51 @@ def media_upload(request, recordid, record):
             media.save_file(file.name, file)
 
             if request.POST.get('swfupload') == 'true':
-                return HttpResponse(content='ok', mimetype='text/plain')
+                html = render_to_string('storage_import_file_response.html',
+                                 {'result': 'saved',
+                                  'record': record,
+                                  'sidebar': request.GET.has_key('sidebar'),
+                                  },
+                                 context_instance=RequestContext(request)
+                                 )
+                return HttpResponse(content=simplejson.dumps(dict(status='ok', html=html)),
+                                    mimetype='application/json')
 
-            next = request.GET.get('next')
-            return HttpResponseRedirect(next or '.')
+            return HttpResponseRedirect(request.GET.get('next', reverse('main')))
+        else:
+            # Invalid form submission
+            raise Http404()
     else:
-        form = UploadFileForm()
+        return HttpResponseNotAllowed(['POST'])
 
-    return render_to_response('storage_upload.html',
-                              {'record': record,
-                               'form': form,
-                               },
-                              context_instance=RequestContext(request))
+@login_required
+def media_delete(request, mediaid, medianame):
+    media = get_object_or_404(Media, id=mediaid)
+    if not media.editable_by(request.user):
+        raise Http404()
+    if request.method == 'POST':
+        media.delete()
+        return HttpResponseRedirect(request.GET.get('next', '.'))
+    else:
+        return HttpResponseNotAllowed(['POST'])
 
 
 @add_content_length
 @cache_control(private=True, max_age=3600)
 def record_thumbnail(request, id, name):
-    record = Record.get_or_404(id, request.user)
-    media = get_thumbnail_for_record(record, request.user, crop_to_square=request.GET.has_key('square'))
-    if media:
+    filename = get_thumbnail_for_record(id, request.user, crop_to_square=request.GET.has_key('square'))
+    if filename:
+        Activity.objects.create(event='media-thumbnail',
+                                request=request,
+                                content_type=ContentType.objects.get_for_model(Record),
+                                object_id=id,
+                                #content_object=record,
+                                data=dict(square=int(request.GET.has_key('square'))))
         try:
-            content = media.load_file()
-            if content:
-                return HttpResponse(content=content, mimetype=str(media.mimetype))
-        except IOError, ex:
-            pass
-    return HttpResponseRedirect(reverse('static', args=['images/thumbnail_unavailable.png']))
+            return HttpResponse(content=open(filename, 'rb').read(), mimetype='image/jpeg')
+        except IOError:
+            logging.error("IOError: %s" % filename)
+    return HttpResponseRedirect(reverse('static', args=('images/thumbnail_unavailable.png',)))
 
 
 @json_view
@@ -198,6 +244,9 @@ def manage_storages(request):
 
     storages = filter_by_access(request.user, Storage, manage=True).order_by('title')
 
+    for s in storages:
+        s.analysis_available = hasattr(s, 'get_files')
+
     return render_to_response('storage_manage.html',
                           {'storages': storages,
                            },
@@ -250,21 +299,24 @@ def manage_storage(request, storageid=None, storagename=None):
                           context_instance=RequestContext(request))
 
 
-
 @csrf_exempt
 @login_required
 def import_files(request):
 
-    available_storage = get_list_or_404(filter_by_access(request.user, Storage.objects.filter(master=None), write=True).order_by('title').values_list('id', 'title'))
+    available_storage = get_list_or_404(filter_by_access(request.user, Storage, write=True).order_by('title'))
     available_collections = get_list_or_404(filter_by_access(request.user, Collection))
-    writable_collection_ids = accessible_ids_list(request.user, Collection, write=True)
+    writable_collection_ids = list(filter_by_access(request.user, Collection, write=True).values_list('id', flat=True))
+
+    storage_choices = choices = [make_storage_select_choice(s, request.user) for s in available_storage]
 
     class UploadFileForm(forms.Form):
         collection = forms.ChoiceField(choices=((c.id, '%s%s' % ('*' if c.id in writable_collection_ids else '', c.title)) for c in sorted(available_collections, key=lambda c: c.title)))
-        storage = forms.ChoiceField(choices=available_storage)
+        storage = forms.ChoiceField(choices=storage_choices)
         file = forms.FileField()
         create_records = forms.BooleanField(required=False)
         replace_files = forms.BooleanField(required=False, label='Replace files of same type')
+        multiple_files = forms.BooleanField(required=False,
+                                                   label='Allow multiple files of same type')
         personal_records = forms.BooleanField(required=False)
 
         def clean(self):
@@ -276,7 +328,6 @@ def import_files(request):
                 if not int(cleaned_data['collection']) in writable_collection_ids:
                     self._errors['collection'] = ErrorList(["Can only add personal records to selected collection"])
                     del cleaned_data['collection']
-                    return cleaned_data
             return cleaned_data
 
 
@@ -287,67 +338,80 @@ def import_files(request):
 
             create_records = form.cleaned_data['create_records']
             replace_files = form.cleaned_data['replace_files']
+            multiple_files = form.cleaned_data['multiple_files']
             personal_records = form.cleaned_data['personal_records']
 
             collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), write=True if not personal_records else None))
-            storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), write=True))
+            storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage'].split(',')[0]), write=True))
             file = request.FILES['file']
-
-            mimetype = mimetypes.guess_type(file.name)[0] or file.content_type
-
-            owner = request.user if personal_records else None
-            id = os.path.splitext(file.name)[0]
-
-            # find record by identifier
-            titlefield = standardfield('title')
-            idfield = standardfield('identifier')
-            idfields = standardfield('identifier', equiv=True)
-
-            # Match identifiers that are either full file name (with extension) or just base name match
-            records = Record.by_fieldvalue(idfields, (id, file.name)).filter(collection=collection, owner=owner)
-            result = "File skipped."
             record = None
 
-            if len(records) == 1:
-                # Matching record found
-                record = records[0]
-                media = record.media_set.filter(storage=storage, mimetype=mimetype)
-                if len(media) == 0:
-                    # No media yet
-                    media = Media.objects.create(record=record,
-                                                 name=id,
-                                                 storage=storage,
-                                                 mimetype=mimetype)
-                    media.save_file(file.name, file)
-                    result = "File added (Identifier '%s')." % id
-                elif replace_files:
-                    # Replace existing media
-                    media = media[0]
-                    media.delete_file()
-                    media.save_file(file.name, file)
-                    result = "File replaced (Identifier '%s')." % id
-                else:
-                    result = "File skipped, media files already attached."
-            elif len(records) == 0:
-                # No matching record found
-                if create_records:
-                    # Create a record
-                    record = Record.objects.create(name=id, owner=owner)
-                    CollectionItem.objects.create(collection=collection, record=record)
-                    FieldValue.objects.create(record=record, field=idfield, value=id, order=0)
-                    FieldValue.objects.create(record=record, field=titlefield, value=id, order=1)
-                    media = Media.objects.create(record=record,
-                                                 name=id,
-                                                 storage=storage,
-                                                 mimetype=mimetype)
-                    media.save_file(file.name, file)
-                    result = "File added to new record (Identifier '%s')." % id
-                else:
-                    result = "File skipped, no matching record found (Identifier '%s')." % id
+            limit = storage.get_upload_limit(request.user)
+            if limit > 0 and file.size > limit * 1024:
+                result = "The uploaded file is too large (%d>%d)." % (file.size, limit * 1024)
             else:
-                result = "File skipped, multiple matching records found (Identifier '%s')." % id
-                # Multiple matching records found
-                pass
+
+                mimetype = mimetypes.guess_type(file.name)[0] or file.content_type
+
+                owner = request.user if personal_records else None
+                id = os.path.splitext(file.name)[0]
+
+                # find record by identifier
+                titlefield = standardfield('title')
+                idfield = standardfield('identifier')
+
+                # Match identifiers that are either full file name (with extension) or just base name match
+                records = find_record_by_identifier((id, file.name,), collection,
+                    owner=owner, ignore_suffix=multiple_files)
+                result = "File skipped."
+
+                if len(records) == 1:
+                    # Matching record found
+                    record = records[0]
+                    media = record.media_set.filter(storage=storage, mimetype=mimetype)
+                    media_same_id = media.filter(name=id)
+                    if len(media) == 0 or (len(media_same_id) == 0 and multiple_files):
+                        # No media yet
+                        media = Media.objects.create(record=record,
+                                                     name=id,
+                                                     storage=storage,
+                                                     mimetype=mimetype)
+                        media.save_file(file.name, file)
+                        result = "File added (Identifier '%s')." % id
+                    elif len(media_same_id) > 0 and multiple_files:
+                        # Replace existing media with same name and mimetype
+                        media = media_same_id[0]
+                        media.delete_file()
+                        media.save_file(file.name, file)
+                        result = "File replaced (Identifier '%s')." % id
+                    elif replace_files:
+                        # Replace existing media with same mimetype
+                        media = media[0]
+                        media.delete_file()
+                        media.save_file(file.name, file)
+                        result = "File replaced (Identifier '%s')." % id
+                    else:
+                        result = "File skipped, media files already attached."
+                elif len(records) == 0:
+                    # No matching record found
+                    if create_records:
+                        # Create a record
+                        record = Record.objects.create(name=id, owner=owner)
+                        CollectionItem.objects.create(collection=collection, record=record)
+                        FieldValue.objects.create(record=record, field=idfield, value=id, order=0)
+                        FieldValue.objects.create(record=record, field=titlefield, value=id, order=1)
+                        media = Media.objects.create(record=record,
+                                                     name=id,
+                                                     storage=storage,
+                                                     mimetype=mimetype)
+                        media.save_file(file.name, file)
+                        result = "File added to new record (Identifier '%s')." % id
+                    else:
+                        result = "File skipped, no matching record found (Identifier '%s')." % id
+                else:
+                    result = "File skipped, multiple matching records found (Identifier '%s')." % id
+                    # Multiple matching records found
+                    pass
 
             if request.POST.get('swfupload') == 'true':
                 html = render_to_string('storage_import_file_response.html',
@@ -376,14 +440,14 @@ def import_files(request):
         form = UploadFileForm()
 
     return render_to_response('storage_import_files.html',
-                              {'form': form,
+                              {'upload_form': form,
                                },
                               context_instance=RequestContext(request))
 
 
 @login_required
 def match_up_files(request):
-    available_storage = get_list_or_404(filter_by_access(request.user, Storage.objects.filter(master=None), manage=True).order_by('title').values_list('id', 'title'))
+    available_storage = get_list_or_404(filter_by_access(request.user, Storage, manage=True).order_by('title').values_list('id', 'title'))
     available_collections = get_list_or_404(filter_by_access(request.user, Collection, manage=True))
 
     class MatchUpForm(forms.Form):
@@ -421,5 +485,55 @@ def match_up_files(request):
 
     return render_to_response('storage_match_up_files.html',
                               {'form': form,
+                               },
+                              context_instance=RequestContext(request))
+
+
+@login_required
+def analyze(request, id, name):
+    storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=id), manage=True))
+    broken, extra = analyze_media(storage)
+    return render_to_response('storage_analyze.html',
+                          {'storage': storage,
+                           'broken': broken,
+                           'extra': extra,
+                           },
+                          context_instance=RequestContext(request))
+
+
+@login_required
+def find_records_without_media(request):
+    available_storage = get_list_or_404(filter_by_access(request.user, Storage, manage=True).order_by('title').values_list('id', 'title'))
+    available_collections = get_list_or_404(filter_by_access(request.user, Collection, manage=True))
+
+    class SelectionForm(forms.Form):
+        collection = forms.ChoiceField(choices=((c.id, c.title) for c in sorted(available_collections, key=lambda c: c.title)))
+        storage = forms.ChoiceField(choices=available_storage)
+
+    identifiers = records = []
+    analyzed = False
+
+    if request.method == 'POST':
+
+        form = SelectionForm(request.POST)
+        if form.is_valid():
+
+            collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), manage=True))
+            storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), manage=True))
+
+            records = analyze_records(collection, storage)
+            analyzed = True
+
+            identifiers = FieldValue.objects.filter(field__in=standardfield('identifier', equiv=True),
+                                                    record__in=records).order_by('value').values_list('value', flat=True)
+
+    else:
+        form = SelectionForm(request.GET)
+
+    return render_to_response('storage_find_records_without_media.html',
+                              {'form': form,
+                               'identifiers': identifiers,
+                               'records': records,
+                               'analyzed': analyzed,
                                },
                               context_instance=RequestContext(request))

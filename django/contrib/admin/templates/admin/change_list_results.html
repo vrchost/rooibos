@@ -1,5 +1,10 @@
+{% if result_hidden_fields %}
+<div class="hiddenfields"> {# DIV for HTML validation #}
+{% for item in result_hidden_fields %}{{ item }}{% endfor %}
+</div>
+{% endif %}
 {% if results %}
-<table cellspacing="0">
+<table cellspacing="0" id="result_list">
 <thead>
 <tr>
 {% for header in result_headers %}<th{{ header.class_attrib }}>

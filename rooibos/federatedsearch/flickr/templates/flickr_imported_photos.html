@@ -6,7 +6,7 @@
 {% block content %}
 
 <div class="horizontal-block">
-    <form action="{% url flickr-photo-search %}" method="post">
+    <form action="{% url flickr-photo-search %}" method="post">{% csrf_token %}
         Keywords: <input name="search_string" type="text_field" value="{{ search_string }}" />
         <input type="submit" value="Go" />
         View:

@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import get_template
 from django.template import Context, Variable, Template
 from django.contrib.contenttypes.models import ContentType
-from rooibos.access import get_accesscontrols_for_object
+from rooibos.access import get_accesscontrols_for_object, filter_by_access
 
 register = template.Library()
 
@@ -17,11 +17,12 @@ def effective_permissions_form(context, object):
 
 
 @register.inclusion_tag('access_permissions_display.html', takes_context=True)
-def permissions_display(context, object):
+def permissions_display(context, object, emptymessage=None):
     permissions = get_accesscontrols_for_object(object)
     return {'object': object,
             'contenttype': ContentType.objects.get_for_model(object.__class__),
             'permissions': permissions,
+            'emptymessage': emptymessage,
             'request': context['request'],
             }
 
@@ -44,3 +45,14 @@ def permissions_modify_url(parser, token):
     except ValueError:
         raise template.TemplateSyntaxError, "%r tag requires a single argument" % token.contents.split()[0]
     return PermissionsModifyUrlNode(object)
+
+
+@register.filter
+def accessible_objects(user, args):
+    app_model, access = args.split(',')
+    app, model = app_model.split('.')
+    read = 'r' in access
+    write = 'w' in access
+    manage = 'm' in access
+    return filter_by_access(user, ContentType.objects.get(app_label=app, model=model).model_class(),
+                            read, write, manage)

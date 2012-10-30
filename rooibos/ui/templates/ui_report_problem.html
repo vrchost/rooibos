@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+{% load humanize %}
+
+
+{% block content %}
+
+<h1>Report a Problem</h1>
+
+<div style="width: 500px;">
+    If you have received an error screen or think you have discovered a problem with a feature,
+    please send an email including information on how to recreate the issue to
+
+{% if ADMINS %}
+the administrator{{ ADMINS|pluralize }}:
+
+<ul style="margin-top: 20px;">
+    {% for admin in ADMINS %}
+    <li><a href="mailto:{{ admin.1 }}">{{ admin.0 }} ({{ admin.1 }})</li>
+    {% endfor %}
+</ul>
+
+{% else %}
+
+your MDID administrator.
+
+{% endif %}
+
+</div>
+
+{% endblock %}

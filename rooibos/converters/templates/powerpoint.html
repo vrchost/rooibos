@@ -7,7 +7,7 @@
 
 Please select a PowerPoint file to import and the destinations for records and images.<br /><br />
 
-<form action="." method="POST" enctype="multipart/form-data">
+<form action="." method="POST" enctype="multipart/form-data">{% csrf_token %}
 
 <table>
     <tr>
@@ -40,9 +40,9 @@ Please select a PowerPoint file to import and the destinations for records and i
 	<td>
 	    <input type="submit" value="Import" />
 	</td>
-    </tr>    
+    </tr>
 </table>
-    
+
 </form>
 
 {% endblock %}

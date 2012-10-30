@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   skinClass="flex.utils.spark.resize.ResizableDraggableTitleWindowSkin"
+			   creationComplete="init();"
+			   mouseUp="mouseUpHandler(event)"
+			   mouseDown="mouseDownHandler(event)"
+			   tabFocusEnabled="false"
+			   width="235" height="225" minWidth="235" minHeight="225"
+			   >
+	<fx:Script>
+		<![CDATA[
+			import flashx.textLayout.formats.TextLayoutFormat;
+			
+			import flex.utils.spark.resize.ResizableDraggableTitleWindowSkin;
+			
+			import mx.core.UIComponent;
+			import mx.effects.Resize;
+			import mx.events.FlexEvent;
+			import mx.managers.DragManager;
+			
+			import spark.primitives.Rect;
+			
+			protected var theSkin:ResizableDraggableTitleWindowSkin;
+			
+			public var catalogWindowContainer:ImageHolder;
+			
+			protected function init():void {
+				theSkin = (this.skin as ResizableDraggableTitleWindowSkin);
+				theSkin.resizeManager.constrainToHostContainerBounds = true;
+				theSkin.resizeManager.hostComponentContainer = this.catalogWindowContainer as UIComponent;
+				theSkin.moveManager.constrainToHostContainerBounds = false;
+				theSkin.moveManager.hostComponentContainer = this.catalogWindowContainer as UIComponent;
+			}
+			protected function stageMouseUpHandler(e:MouseEvent):void {
+				stage.removeEventListener(MouseEvent.MOUSE_UP, stageMouseUpHandler);
+				clipToContainer();
+			}
+			protected function mouseDownHandler(e:MouseEvent):void {
+				stage.addEventListener(MouseEvent.MOUSE_UP, stageMouseUpHandler);
+			}
+			protected function mouseUpHandler(e:Event):void {
+				stage.removeEventListener(MouseEvent.MOUSE_UP, stageMouseUpHandler);
+				clipToContainer();
+			}			
+			public function clipToContainer():void {
+				var globalCoordinates:Point = catalogWindowContainer.localToGlobal(new Point(catalogWindowContainer.x, catalogWindowContainer.y));
+				var bounds:Rectangle = new Rectangle(globalCoordinates.x, globalCoordinates.y, this.catalogWindowContainer.width, this.catalogWindowContainer.height);
+				if (this.x + this.width > bounds.right) this.x = bounds.right - this.width;
+				if (this.x < bounds.left) this.x = bounds.left;
+				if (this.y + this.height > bounds.bottom) this.y = bounds.bottom - this.height;
+				if (this.y < bounds.top) this.y = bounds.top;
+			}
+			public function positionAtTopLeft():void {
+				var globalCoordinates:Point = catalogWindowContainer.localToGlobal(new Point(catalogWindowContainer.x, catalogWindowContainer.y));
+				this.x = globalCoordinates.x + 60;
+				this.y = globalCoordinates.y;			
+			}			
+			public function fitToContainer():void {
+				clipToContainer()
+				if (this.width > this.catalogWindowContainer.width) this.width = this.catalogWindowContainer.width;
+				if (this.height > this.catalogWindowContainer.height) this.height = this.catalogWindowContainer.height;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		.myWhiteOnBlack {
+			font-family: mySparkFont;
+			color: #FFFFFF;
+			content-background-color: #000000;
+			content-background-alpha: 1;
+			padding-left: 30px;
+			padding-right: 2px;
+			padding-top: 5px;
+			paragraph-space-after: 3px;
+			text-indent: -25px;
+		}
+		.myBlackOnWhite {
+			font-family: mySparkFont;
+			color: #000000;
+			content-background-color: #FFFFFF;
+			content-background-alpha: 1;
+			padding-left: 30px;
+			padding-right: 2px;
+			padding-top: 5px;
+			paragraph-space-after: 3px;
+			text-indent: -25px;
+		}
+	</fx:Style>  
+	
+	<s:VGroup width="100%" height="100%" gap="5">
+		<s:TextArea id="dataHolder" styleName="myWhiteOnBlack" fontSize="{this.fontsizer.selected ? 14 : 12}" editable="false" selectable="true" verticalScrollPolicy="auto" horizontalScrollPolicy="off" width="100%" height="100%" verticalAlign="top" focusEnabled="false"/>
+		<mx:ControlBar width="100%" paddingBottom="2" paddingLeft="5" paddingRight="5" paddingTop="-3">
+			<s:HGroup contentBackgroundAlpha="1">
+				<s:CheckBox id="fontsizer" label="Larger font"/>
+				<s:CheckBox id="blackonwhite" label="Black text on white" change="this.dataHolder.styleName = (this.blackonwhite.selected) ? 'myBlackOnWhite' : 'myWhiteOnBlack'"/>
+			</s:HGroup>
+		</mx:ControlBar>
+	</s:VGroup>
+	
+</s:TitleWindow>

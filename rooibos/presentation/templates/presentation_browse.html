@@ -5,8 +5,21 @@
 {% load viewers %}
 
 
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+
+  $(document).ready(function() {
+    $("#delete").click(function() {
+      return confirm("Are you sure you want to delete the selected presentations?");
+    })
+  });
+
+</script>
+{% endblock %}
+
 {% block raw-content %}
-<form action="{{ request.get_full_url }}" method="POST">
+<form action="{{ request.get_full_path }}" method="POST">{% csrf_token %}
 {{ block.super }}
 </form>
 {% endblock %}
@@ -16,38 +29,30 @@
 {{ block.super }}
 
 {% if presentations %}
-
-  <div class="facet active-facet" id="presentations_sidebar_update_tags">
-    <div class="facet-header">Update Tags</div>
-    <div class="facet-body">Add or remove tags on selected presentations<br />
-        {{ form.tags.label_tag }}
-        {{ form.tags }}
-        {{ form.tags.errors }}
-        
-        {{ form.mode.label_tag }}
-        {{ form.mode }}
-        {{ form.mode.errors }}
-        <input type="submit" value="Update" name="update_tags" />
-    </div>
-  </div>
-    
   <div class="facet active-facet" id="presentations_sidebar_keywords">
     <div class="facet-header">Keywords</div>
     <div class="facet-body">
+        <input type="hidden" name="okw" value="{{ keywords }}"/>
         <input type="text" id="keywords" name="kw" value="{{ keywords }}"/><input type="image" class="image" src="{% url static 'images/med_go_button.png' %}" value="Go" name="keywords_go" />
     </div>
   </div>
-
 {% endif %}
 
 {% var as refine %}
 { "url": "{{ request.path }}?{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}" }
 {% endvar %}
-  
-{% if active_presenter and not manage %}
+
+{% if active_presenter %}
   <div class="facet active-facet">
-    <div class="facet-header"><a href="{% url presentation-browse %}?kw={{ keywords|urlencode }}&amp;t={{ active_tags|join:"||"|urlencode }}" title="Remove this criteria"><img src="{% url static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-close" /></a>Presenter</div>
+    <div class="facet-header"><a href="{{ request.path }}?kw={{ keywords|urlencode }}&amp;t={{ active_tags|join:"||"|urlencode }}&amp;ut={{ untagged }}" title="Remove this criteria"><img src="{% url static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-close" /></a>Presenter</div>
     <div class="facet-body">{% if active_presenter.last_name %}{{ active_presenter.last_name }}, {{ active_presenter.first_name }}{% else %}{{ active_presenter.username }}{% endif %}</div>
+  </div>
+{% endif %}
+
+{% if request.user.is_authenticated and untagged %}
+  <div class="facet active-facet">
+    <div class="facet-header"><a href="{{ refine.url }}ut=" title="Remove this criteria"><img src="{% url static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-close" /></a>Untagged</div>
+    <div class="facet-body">Showing only presentations you have not tagged</div>
   </div>
 {% endif %}
 
@@ -62,9 +67,14 @@
   <div class="facet" id="presentations_sidebar_presenters">
     <div class="facet-header">Presenters</div>
     <div class="facet-body">
+      {% if request.user %}
+      <div class="facet-line">
+        <a href="{{ refine.url }}ut={{ untagged }}&presenter={{ request.user.username|urlencode }}">{% if request.user.last_name %}{{ request.user.last_name }}, {{ request.user.first_name }}{% else %}{{ request.user.username }}{% endif %}</a>
+      </div>
+      {% endif %}
     {% for presenter in presenters %}
-        <div class="facet-line">            
-            <a href="{{ refine.url }}presenter={{ presenter.username|urlencode }}">{% if presenter.last_name %}{{ presenter.last_name }}, {{ presenter.first_name }}{% else %}{{ presenter.username }}{% endif %}</a>
+        <div class="facet-line">
+            <a href="{{ refine.url }}ut={{ untagged }}&presenter={{ presenter.username|urlencode }}">{% if presenter.last_name %}{{ presenter.last_name }}, {{ presenter.first_name }}{% else %}{{ presenter.username }}{% endif %}</a>
             &nbsp;<span class="facet-freq">{{ presenter.presentations|intcomma  }}</span>
         </div>
     {% endfor %}
@@ -78,7 +88,7 @@
     <div class="facet-header">Tags</div>
     <div class="facet-body">
     {% for tag in tags %}
-        <div class="facet-line">            
+        <div class="facet-line">
             <a href="{{ refine.url }}t={{ tag|urlencode }}">{{ tag }}</a>
             {% if tag.count %}&nbsp;<span class="facet-freq">{{ tag.count|intcomma  }}</span>{% endif %}
         </div>
@@ -93,7 +103,7 @@
     <div class="facet-header">Your Tags</div>
     <div class="facet-body">
     {% for tag in usertags %}
-        <div class="facet-line">            
+        <div class="facet-line">
             <a href="{{ refine.url }}t={{ tag|urlencode }}">{{ tag }}</a>
             {% if tag.count %}&nbsp;<span class="facet-freq">{{ tag.count|intcomma  }}</span>{% endif %}
         </div>
@@ -103,28 +113,65 @@
   </div>
 {% endif %}
 
+{% if request.user.is_authenticated and not untagged %}
+  <div class="facet" id="presentations_sidebar_untagged">
+    <div class="facet-header">Untagged</div>
+    <div class="facet-body"><a href="{{ refine.url }}ut=1">Show only presentations you have not tagged</a></div>
+  </div>
+{% endif %}
+
 <div style="text-align: center; margin-top: 20px;">
-    <a href="{{ request.path }}">Reset Search</a>
+    <a href="{{ request.path }}?kw=">Reset Search</a>
 </div>
 
 {% endblock %}
 
 
-{% block content %}
 
-{% autopaginate presentations 25 %}
+{% block content-top %}
+
+{% autopaginate presentations 50 %}
 
 <h1>{{ manage|yesno:"Manage,Browse" }} Presentations</h1>
 
+
+<ul class="actionbar">
+
 {% if manage %}
-<a href="{% url presentation-create %}?next={% url presentation-manage %}">Create new presentation</a><br /><br />
+<li><a href="{% url presentation-create %}?next={% url presentation-manage %}">Create new presentation</a></li>
 {% endif %}
 
-{% paginate %}
+{% with usertags as actionbar_tags %}
+{% include 'ui_actionbar_tag_dropdown.html' %}
+{% endwith %}
+
+{% if manage %}
+{% if perms.presentation.publish_presentations %}
+<li><input type="submit" name="hide" value="Hide" /></li>
+<li><input type="submit" name="unhide" value="Show" /></li>
+{% endif %}
+<li><input type="submit" id="delete" name="delete" value="Delete" /></li>
+{% endif %}
+
+
+<li class="pagination">&nbsp;{% paginate %}</li>
+
+</ul>
+
+<br style="clear: left;" />
+
+
+{% endblock %}
+
+
+
+{% block content %}
+
+{% autopaginate presentations 50 %}
 
 {% if presentations %}
 
-<table summary="List of Presentations" class="list">
+<table summary="List of Presentations" class="itemactions wide-table" cellspacing="0"><!-- need cellspacing for IE7 -->
     <tr>
         <th></th>
         <th>Title</th>
@@ -134,18 +181,16 @@
         {% endif %}
         <th>Created</th>
         <th>Modified</th>
-        {% else %}
-        <th>Presenter</th>
         {% endif %}
+        <th>Presenter</th>
         <th>Tags</th>
         <th>Items</th>
-        <th></th>
         <th></th>
     </tr>
 {% for presentation in presentations %}
     {% owned_tags_for_object presentation for request.user as ptags %}
     {% owned_tags_for_object presentation for presentation.owner as otags %}
-    <tr class="{% cycle "" "altrow" %}">
+    <tr>
         <td><input type="checkbox" name="h" value="{{ presentation.id }}" /></td>
         <td>
             {% if manage %}
@@ -158,11 +203,10 @@
         {% if perms.presentation.publish_presentations %}
         <td>{{ presentation.hidden|yesno:"hidden,-" }}</td>
         {% endif %}
-        <td>{{ presentation.created|naturalday:"M j, Y" }}</td>
-        <td>{{ presentation.modified|naturalday:"M j, Y" }}</td>
-        {% else %}
-        <td>{% if presentation.owner.last_name %}{{ presentation.owner.last_name }}, {{ presentation.owner.first_name }}{% else %}{{ presentation.owner.username }}{% endif %}</td>
+        <td>{{ presentation.created|naturalday }}</td>
+        <td>{{ presentation.modified|naturalday }}</td>
         {% endif %}
+        <td>{% if presentation.owner == request.user %}-{% else %}{% if presentation.owner.last_name %}{{ presentation.owner.last_name }}, {{ presentation.owner.first_name }}{% else %}{{ presentation.owner.username }}{% endif %}{% endif %}</td>
         <td>{% for ptag in ptags %}
                 {% tag ptag presentation "True" %}
             {% endfor %}
@@ -171,22 +215,29 @@
                 {% tag otag presentation 0 'secondary' %}
             {% endfor %}
             {% endif %}
+            {% if not ptags and not otags %}&nbsp;{% endif %}
         </td>
-        <td>{% with presentation.hidden_item_count as h %}
-          {{ presentation.visible_item_count }}{% if h %}&nbsp;(+{{h}}){% endif %}
-          {% endwith %}
-        </td>
-        <td>{% if presentation.password %}
+        <td>
+          {{ presentation.visible_item_count }}
+          {% if manage %}
+          {% with presentation.hidden_item_count as h %}{% if h %}&nbsp;(+{{h}}){% endif %}{% endwith %}
+          {% endif %}
+
+          {% if presentation.password %}
                 {% if presentation.unlocked %}
                 <img src="{% url static "images/unlocked.png" %}" />
                 {% else %}
                 <img src="{% url static "images/locked.png" %}" />
                 {% endif %}
-            {% endif %} 
+            {% endif %}
         </td>
-        <td>
-            {% if not presentation.password or presentation.unlocked %}
-            {% list_viewers presentation request.get_full_path %}
+        <td class="item-actions">
+            {% if manage %}
+            <a href="{% url presentation-edit presentation.id, presentation.name %}" class="nocopylink item-action-important">Edit</a>
+            <input type="submit" name="add-selected-items-{{ presentation.id }}" value="Add selected items" class=" item-action-important" />
+            {% endif %}
+            {% if not presentation.password or presentation.unlocked or presentation.owner == request.user %}
+            {% list_viewers presentation request.get_full_path ' ' %}
             {% else %}
             <a href="{% url presentation-password presentation.id, presentation.name %}?next={{ request.get_full_path|urlencode }}">Unlock</a>
             {% endif %}
@@ -196,15 +247,6 @@
 </table>
 
 {% paginate %}
-
-{% if manage %}
-<label>With selected</label>
-{% if perms.presentation.publish_presentations %}
-<input type="submit" name="hide" value="Hide" />
-<input type="submit" name="unhide" value="Show" />
-{% endif %}
-<input type="submit" id="delete" name="delete" value="Delete" />
-{% endif %}
 
 {% else %}
 No presentations available.

@@ -1,0 +1,77 @@
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#html-upload-control").hide();
+	$("#{{ upload_form.storage.auto_id }}").change(function() {
+		update_form_parameters($('#upload-control'));
+	});
+    $('#upload-control').swfupload({
+		upload_url: "{{ upload_url|default:request.get_full_path }}",
+//		file_size_limit : "{{ UPLOAD_LIMIT|default:"512000" }}",
+		file_types : "*.*",
+		file_types_description : "All Files",
+		file_upload_limit : "0",
+        file_post_name: "{{ upload_form.file.name }}",
+		flash_url : "{% url static "swfupload/Flash/swfupload.swf" %}",
+		button_image_url : '{% url static "images/upload_button.png" %}',
+		button_width : 140,
+		button_height : 26,
+		button_placeholder : $('#upload-button')[0],
+		debug: false,
+		post_params : {swfupload : "true"}
+	})
+		.bind('swfuploadLoaded', function(event){
+			update_form_parameters($(this));
+			$('#log').append('<li>Loaded<'+'/li>');
+		})
+		.bind('fileQueued', function(event, file){
+			$('#log').append('<li>File queued - '+file.name+'<'+'/li>');
+			var div = $("<div id='upload-queue-" + file.id + "' class='file'>Uploading " + file.name + "<"+"/div>");
+			$('#upload-queue').append(div);
+			// start the upload since it's queued
+			$(this).swfupload('startUpload');
+		})
+		.bind('fileQueueError', function(event, file, errorCode, message){
+			$('#log').append('<li>File queue error - '+message+'<'+'/li>');
+			var div = $("<div class='upload-failed'>" + file.name + " cannot be uploaded (" + message + ")<"+"/div>");
+			$('#upload-queue').append(div);
+		})
+		.bind('fileDialogStart', function(event){
+			$('#log').append('<li>File dialog start<'+'/li>');
+		})
+		.bind('fileDialogComplete', function(event, numFilesSelected, numFilesQueued){
+			$('#log').append('<li>File dialog complete<'+'/li>');
+		})
+		.bind('uploadStart', function(event, file){
+			update_form_parameters($(this));
+			$('#upload-control').find('select,input').attr('disabled', 'disabled');
+			$('#upload-progress').remove();
+			$('#upload-queue-' + file.id).after($("<div id='upload-progress'><div><"+"/div><"+"/div>"));
+			$('#log').append('<li>Upload start - '+file.name+'<'+'/li>');
+		})
+		.bind('uploadProgress', function(event, file, bytesLoaded){
+			$('#log').append('<li>Upload progress - '+bytesLoaded+'<'+'/li>');
+			if (file.size > 0) {
+				var w = parseInt(150 * bytesLoaded / file.size);
+				$('#upload-progress').css('width', w + 'px')
+									 .css('padding-right', (150 + 2 - w) + 'px');
+			}
+		})
+		.bind('uploadSuccess', function(event, file, serverData){
+			data = JSON.parse(serverData);
+			$('#upload-progress').replaceWith('<div class="upload-complete">' + data.html + '<'+'/div>');
+			$('#log').append('<li>Upload success - '+file.name+'<'+'/li>');
+		})
+		.bind('uploadComplete', function(event, file){
+			$('#log').append('<li>Upload complete - '+file.name+'<'+'/li>');
+			// upload has completed, lets try the next one in the queue
+			$(this).swfupload('startUpload');
+		})
+		.bind('uploadError', function(event, file, errorCode, message){
+			$('#log').append('<li>Upload error - '+message+'<'+'/li>');
+            $('#upload-progress').replaceWith('<div class="upload-failed">Error<'+'/div>');
+		});
+
+});
+
+</script>

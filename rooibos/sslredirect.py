@@ -18,7 +18,7 @@ class SSLRedirect:
             secure = False
 
         if settings.SSL_PORT:
-            if not secure == self._is_secure(request):
+            if secure and not self._is_secure(request):
                 return self._redirect(request, secure)
 
     def _is_secure(self, request):

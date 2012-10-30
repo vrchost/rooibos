@@ -9,6 +9,6 @@
 {% else %}
 {{ result }}
 {% endif %}
-{% if record %}
+{% if record and not sidebar %}
 <a href="{{ record.get_absolute_url }}" target="_blank">View record</a>
 {% endif %}

@@ -16,7 +16,7 @@
 <h1>flickr People</h1>
 
 <div>
-	<form action="{% url flickr-people %}" method="POST">
+	<form action="{% url flickr-people %}" method="POST">{% csrf_token %}
 		{{ form.as_p }}
 		<input type="submit" value="Submit" />
 	</form>

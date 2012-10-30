@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="en">
+	<langstring name="LNG_INDEX">Index</langstring>
+	<langstring name="LNG_INDEX_CLOSE">Close</langstring>
+	<langstring name="LNG_INDEX_INFO">Jump to any page by clicking on it.</langstring>
+	<langstring name="LNG_INDEX_PREV">Previous pages</langstring>
+	<langstring name="LNG_INDEX_NEXT">Next pages</langstring>
+</lang>

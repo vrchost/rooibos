@@ -3,7 +3,8 @@ from rooibos.data.models import Collection, Record, Field
 from rooibos.storage.models import Storage
 from models import update_membership_by_attributes, update_membership_by_ip, AccessControl, ExtendedGroup, \
     ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, IP_BASED_GROUP
-from . import check_access, get_effective_permissions, filter_by_access, get_effective_permissions_and_restrictions
+from . import check_access, get_effective_permissions, filter_by_access, \
+    get_effective_permissions_and_restrictions, add_restriction_precedence
 from django.contrib.auth.models import User, Group, AnonymousUser
 from django.core.exceptions import PermissionDenied
 
@@ -27,7 +28,7 @@ class AccessTestCase(unittest.TestCase):
         self.assertEqual((False, False, True), get_effective_permissions(user, collection))
 
         AccessControl.objects.create(content_object=collection, user=user, read=True, manage=False)
-        self.assertEqual((True, False, False), get_effective_permissions(user, collection))
+        self.assertEqual((True, None, False), get_effective_permissions(user, collection))
 
 
     def testCheckAccess(self):
@@ -146,19 +147,57 @@ class AccessTestCase(unittest.TestCase):
         user.groups.add(usergroup2)
 
         AccessControl.objects.create(usergroup=usergroup1, content_object=storage, read=True,
-                                     restrictions=dict(width=200, height=200))
+                                     restrictions=dict(width=200, height=200, download='no'))
         AccessControl.objects.create(usergroup=usergroup2, content_object=storage, read=True,
-                                     restrictions=dict(width=300, height=300))
+                                     restrictions=dict(width=300, height=300, download='yes'))
 
         (r, w, m, restrictions) = get_effective_permissions_and_restrictions(user, storage)
-        self.assertEqual(200, restrictions.get('width'))
+        self.assertEqual(300, restrictions.get('width'))
+        self.assertEqual('yes', restrictions.get('download'))
 
         AccessControl.objects.create(user=user, content_object=storage, read=True,
-                                     restrictions=dict(width=500, height=500))
+                                     restrictions=dict(width=100, height=100))
 
         (r, w, m, restrictions) = get_effective_permissions_and_restrictions(user, storage)
-        self.assertEqual(500, restrictions.get('width'))
+        self.assertEqual(100, restrictions.get('width'))
+        self.assertFalse(restrictions.has_key('download'))
 
+    def testRestrictionPrecendences(self):
+        user = User.objects.create(username='test-restrprec')
+        usergroup1 = Group.objects.create(name='group-restrprec-1')
+        usergroup2 = Group.objects.create(name='group-restrprec-2')
+        storage = Storage.objects.create(name='test-restrprec')
+        user.groups.add(usergroup1)
+        user.groups.add(usergroup2)
+
+        AccessControl.objects.create(usergroup=usergroup1, content_object=storage, read=True,
+                                     restrictions=dict(test='abc'))
+        AccessControl.objects.create(usergroup=usergroup2, content_object=storage, read=True,
+                                     restrictions=dict(test='xyz'))
+
+        add_restriction_precedence('test', lambda a, b: 'abc' if a == 'abc' or b == 'abc' else 'xyz')
+        (r, w, m, restrictions) = get_effective_permissions_and_restrictions(user, storage)
+        self.assertEqual('abc', restrictions.get('test'))
+
+        add_restriction_precedence('test', lambda a, b: 'xyz' if a == 'xyz' or b == 'xyz' else 'abc')
+        (r, w, m, restrictions) = get_effective_permissions_and_restrictions(user, storage)
+        self.assertEqual('xyz', restrictions.get('test'))
+
+    def testNoRestrictionsSpecified(self):
+        user = User.objects.create(username='test-norestspec')
+        usergroup1 = Group.objects.create(name='group-norestspec-1')
+        usergroup2 = Group.objects.create(name='group-norestspec-2')
+        storage = Storage.objects.create(name='test-norestspec')
+        user.groups.add(usergroup1)
+        user.groups.add(usergroup2)
+
+        AccessControl.objects.create(usergroup=usergroup1, content_object=storage, read=True,
+                                     restrictions=dict(width='800', height='800'))
+        AccessControl.objects.create(usergroup=usergroup2, content_object=storage, read=True)
+
+        (r, w, m, restrictions) = get_effective_permissions_and_restrictions(user, storage)
+        self.assertFalse(restrictions.has_key('height'))
+        self.assertFalse(restrictions.has_key('width'))
 
 class ExtendedGroupTestCase(unittest.TestCase):
 

@@ -1,0 +1,60 @@
+{% extends "master.html" %}
+{% load ui %}
+{% load humanize %}
+
+
+{% block sidebar %}
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url ui-management %}", "title": "Management"},
+    {"url": "{% url storage-manage %}", "title": "Storage Management"},
+	{"url": "{% url data-collections-manage %}", "title": "Collection Management"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+{% endblock %}
+
+{% block content %}
+
+<h1>Find Records without Media</h1>
+
+<div>This feature finds the record identifiers of all records in the selected
+collection that do not have at least one media object from the selected storage attached.</div>
+
+<form method="post" action="{{ request.get_full_path }}">{% csrf_token %}
+<table>
+	<tr>
+		<th>{{ form.collection.label }}
+		</th>
+		<td>{{ form.collection }}
+		</td>
+	</tr>
+	<tr>
+		<th>{{ form.storage.label }}
+		</th>
+		<td>{{ form.storage }}
+		</td>
+	</tr>
+</table>
+<input type="submit" value="Find" /> Note: this may take a long time.
+</form>
+
+{% if analyzed %}
+
+<h3 style="margin-top: 20px;">{{ identifiers|length|intcomma }} Identifier{{ identifiers|length|pluralize }}
+for {{ records|length|intcomma }} Record{{ records|length|pluralize }} without Media</h3>
+
+{% ifnotequal records|length identifiers|length %}
+<div>Note: Not all unique identifiers could be found.  This could be caused by incomplete metadata or
+a missing mapping of a field to the Dublin Core Identifier field.</div>
+{% endifnotequal %}
+
+<div style="overflow: auto; max-height: 600px; width: 600px; white-space: nowrap; font-size: smaller; margin-top: 20px;">
+    {% for id in identifiers %}{{ id }}<br />{% empty %}No identifiers found.{% endfor %}
+</div>
+
+{% endif %}
+
+{% endblock %}

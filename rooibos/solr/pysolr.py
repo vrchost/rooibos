@@ -101,7 +101,7 @@ document 5
 
 # TODO: unicode support is pretty sloppy. define it better.
 
-from rooibos.util.BeautifulSoup import BeautifulSoup
+from BeautifulSoup import BeautifulSoup
 from httplib import HTTPConnection
 from urllib import urlencode
 from urlparse import urlsplit

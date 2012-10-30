@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_PRINT">Drucken</langstring>
+	<langstring name="LNG_PRINT_CLOSE">Schließen</langstring>
+	<langstring name="LNG_PRINT_INFO">Wählen Sie die zu druckenden Seiten aus indem Sie auf sie klicken.</langstring>
+	<langstring name="LNG_PRINT_INFO2">Oder geben Sie die Seitenzahlen direkt ein. Trennen der Zahlen durch Strichpunkt, Bereiche durch 'von-bis' (10-20).</langstring>
+	<langstring name="LNG_PRINT_PREV">Vorige Seiten</langstring>
+	<langstring name="LNG_PRINT_NEXT">Nächste Seiten</langstring>
+	<langstring name="LNG_PRINT_PRINT">Ausgewählte Seiten drucken</langstring>
+	
+	<langstring name="LNG_PRINT_TOO_MANY_PAGES"><![CDATA[<b>Achtung</b><br/>Aus technischen Gründen ist es nicht möglich mehr als <b>$1</b> Seiten auf einmal zu drucken. Bitte reduzieren Sie ihre Auswahl (momentan ausgewählte Seiten: <b>$2</b>).]]></langstring>
+</lang>

@@ -37,11 +37,32 @@ class MergeDict(object):
                 return dict_.getlist(key)
         return []
 
-    def items(self):
-        item_list = []
+    def iteritems(self):
+        seen = set()
         for dict_ in self.dicts:
-            item_list.extend(dict_.items())
-        return item_list
+            for item in dict_.iteritems():
+                k, v = item
+                if k in seen:
+                    continue
+                seen.add(k)
+                yield item
+
+    def iterkeys(self):
+        for k, v in self.iteritems():
+            yield k
+
+    def itervalues(self):
+        for k, v in self.iteritems():
+            yield v
+
+    def items(self):
+        return list(self.iteritems())
+
+    def keys(self):
+        return list(self.iterkeys())
+
+    def values(self):
+        return list(self.itervalues())
 
     def has_key(self, key):
         for dict_ in self.dicts:
@@ -50,6 +71,7 @@ class MergeDict(object):
         return False
 
     __contains__ = has_key
+    __iter__ = iterkeys
 
     def copy(self):
         """Returns a copy of this object."""
@@ -77,9 +99,11 @@ class SortedDict(dict):
             self.keyOrder = data.keys()
         else:
             self.keyOrder = []
+            seen = set()
             for key, value in data:
-                if key not in self.keyOrder:
+                if key not in seen:
                     self.keyOrder.append(key)
+                    seen.add(key)
 
     def __deepcopy__(self, memo):
         return self.__class__([(key, deepcopy(value, memo))
@@ -208,7 +232,7 @@ class MultiValueDict(dict):
         try:
             list_ = super(MultiValueDict, self).__getitem__(key)
         except KeyError:
-            raise MultiValueDictKeyError, "Key %r not found in %r" % (key, self)
+            raise MultiValueDictKeyError("Key %r not found in %r" % (key, self))
         try:
             return list_[-1]
         except IndexError:
@@ -325,7 +349,7 @@ class MultiValueDict(dict):
         Also accepts keyword args.
         """
         if len(args) > 1:
-            raise TypeError, "update expected at most 1 arguments, got %d" % len(args)
+            raise TypeError("update expected at most 1 arguments, got %d" % len(args))
         if args:
             other_dict = args[0]
             if isinstance(other_dict, MultiValueDict):
@@ -336,7 +360,7 @@ class MultiValueDict(dict):
                     for key, value in other_dict.items():
                         self.setlistdefault(key, []).append(value)
                 except TypeError:
-                    raise ValueError, "MultiValueDict.update() takes either a MultiValueDict or dictionary"
+                    raise ValueError("MultiValueDict.update() takes either a MultiValueDict or dictionary")
         for key, value in kwargs.iteritems():
             self.setlistdefault(key, []).append(value)
 
@@ -400,7 +424,7 @@ class ImmutableList(tuple):
         if isinstance(self.warning, Exception):
             raise self.warning
         else:
-            raise AttributeError, self.warning
+            raise AttributeError(self.warning)
 
     # All list mutation functions complain.
     __delitem__  = complain

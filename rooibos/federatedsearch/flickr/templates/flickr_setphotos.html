@@ -16,7 +16,7 @@
 
 <div class="horizontal-block">
     {% if user.is_authenticated %}
-		<form method="POST" action="{% url flickr-import-set %}">
+		<form method="POST" action="{% url flickr-import-set %}">{% csrf_token %}
 			<input type="hidden" name="setid" value="{{ setid }}"/>
 			<input type="submit" value="Import Collection"/>
 		</form>

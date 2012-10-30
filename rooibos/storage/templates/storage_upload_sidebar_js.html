@@ -1,0 +1,16 @@
+{% load ui %}
+
+{% if upload_form %}
+<script type="text/javascript">
+
+function update_form_parameters(control) {
+	control.swfupload('removePostParam', '{{ upload_form.storage.name }}');
+	control.swfupload('addPostParam', '{{ upload_form.storage.name }}', $("#{{ upload_form.storage.auto_id }}").val());
+	var limit = $("#{{ upload_form.storage.auto_id }}").val().split(',')[1];
+	control.swfupload('setFileSizeLimit', limit);
+}
+
+</script>
+
+{% include "storage_upload_js.html" %}
+{% endif %}

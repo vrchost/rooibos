@@ -3,99 +3,30 @@
 
 {% block javascript %}
 {{ block.super }}
-<script type="text/javascript" src="{% url static "swfupload/swfupload.js" %}"></script>
-<script type="text/javascript" src="{% url static "swfupload/plugins/swfupload.cookies.js" %}"></script> 
-<script type="text/javascript" src="{% url static "jquery/jquery.swfupload.js" %}"></script> 
 <script type="text/javascript">
-
-$(document).ready(function() {
-    $("#html-upload-control").hide();
-    $('#upload-control').swfupload({
-		upload_url: "{{ request.get_full_path }}",
-		file_size_limit : "512000",
-		file_types : "*.*",
-		file_types_description : "All Files",
-		file_upload_limit : "0",
-                file_post_name: "{{ form.file.name }}",
-		flash_url : "{% url static "swfupload/Flash/swfupload.swf" %}",
-		button_image_url : '{% url static "images/upload_button.png" %}',
-		button_width : 140,
-		button_height : 26,
-		button_placeholder : $('#upload-button')[0],
-		debug: false,
-		post_params : {swfupload : "true"}
-	})
-		.bind('swfuploadLoaded', function(event){
-			$('#log').append('<li>Loaded<'+'/li>');
-		})
-		.bind('fileQueued', function(event, file){
-			$('#log').append('<li>File queued - '+file.name+'<'+'/li>');
-                        var div = $("<div id='upload-queue-" + file.id + "' class='file'>Uploading " + file.name + "<"+"/div>");
-                        $('#upload-queue').append(div);
-			// start the upload since it's queued
-			$(this).swfupload('startUpload');
-		})
-		.bind('fileQueueError', function(event, file, errorCode, message){
-			$('#log').append('<li>File queue error - '+message+'<'+'/li>');
-		})
-		.bind('fileDialogStart', function(event){
-			$('#log').append('<li>File dialog start<'+'/li>');
-		})
-		.bind('fileDialogComplete', function(event, numFilesSelected, numFilesQueued){
-			$('#log').append('<li>File dialog complete<'+'/li>');
-		})
-		.bind('uploadStart', function(event, file){
-                        $(this).swfupload('removePostParam', '{{ form.collection.name }}');
-			$(this).swfupload('removePostParam', '{{ form.storage.name }}');
-			$(this).swfupload('removePostParam', '{{ form.create_records.name }}');
-			$(this).swfupload('removePostParam', '{{ form.personal_records.name }}');
-			$(this).swfupload('removePostParam', '{{ form.replace_files.name }}');
-                        $(this).swfupload('addPostParam', '{{ form.collection.name }}', $("#{{ form.collection.auto_id }}").val());
-                        $(this).swfupload('addPostParam', '{{ form.storage.name }}', $("#{{ form.storage.auto_id }}").val());
-                        $(this).swfupload('addPostParam', '{{ form.create_records.name }}', $("#{{ form.create_records.auto_id }}").attr("checked") ? "on" : "");
-                        $(this).swfupload('addPostParam', '{{ form.personal_records.name }}', $("#{{ form.personal_records.auto_id }}").attr("checked") ? "on" : "");
-                        $(this).swfupload('addPostParam', '{{ form.replace_files.name }}', $("#{{ form.replace_files.auto_id }}").attr("checked") ? "on" : "");
-                    
-                        $('#upload-progress').remove();
-                        $('#upload-queue-' + file.id).after($("<div id='upload-progress'><div><"+"/div><"+"/div>"));
-                    
-			$('#log').append('<li>Upload start - '+file.name+'<'+'/li>');
-		})
-		.bind('uploadProgress', function(event, file, bytesLoaded){
-			$('#log').append('<li>Upload progress - '+bytesLoaded+'<'+'/li>');
-                        
-                        if (file.size > 0) {
-                            var w = parseInt(200 * bytesLoaded / file.size);
-                            $('#upload-progress').css('width', w + 'px')
-                                                 .css('padding-right', (202 - w) + 'px');
-                        }
-		})
-		.bind('uploadSuccess', function(event, file, serverData){
-			
-			data = JSON.parse(serverData);
-			
-			$('#upload-progress').replaceWith('<div class="upload-complete">' + data.html + '<'+'/div>');
-			
-			$('#log').append('<li>Upload success - '+file.name+'<'+'/li>');
-		})
-		.bind('uploadComplete', function(event, file){
-			$('#log').append('<li>Upload complete - '+file.name+'<'+'/li>');
-                        
-                        
-                        
-			// upload has completed, lets try the next one in the queue
-			$(this).swfupload('startUpload');
-		})
-		.bind('uploadError', function(event, file, errorCode, message){
-			$('#log').append('<li>Upload error - '+message+'<'+'/li>');
-                        
-                        $('#upload-progress').replaceWith('<div class="upload-failed">Error<'+'/div>');
-		});
-
-});
+function update_form_parameters(control) {
+	control.swfupload('removePostParam', '{{ upload_form.collection.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.storage.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.create_records.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.personal_records.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.replace_files.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.multiple_files.name }}');
+	control.swfupload('addPostParam', '{{ upload_form.collection.name }}', $("#{{ upload_form.collection.auto_id }}").val());
+	control.swfupload('addPostParam', '{{ upload_form.storage.name }}', $("#{{ upload_form.storage.auto_id }}").val());
+	control.swfupload('addPostParam', '{{ upload_form.create_records.name }}', $("#{{ upload_form.create_records.auto_id }}").attr("checked") ? "on" : "");
+	control.swfupload('addPostParam', '{{ upload_form.personal_records.name }}', $("#{{ upload_form.personal_records.auto_id }}").attr("checked") ? "on" : "");
+	control.swfupload('addPostParam', '{{ upload_form.replace_files.name }}', $("#{{ upload_form.replace_files.auto_id }}").attr("checked") ? "on" : "");
+	control.swfupload('addPostParam', '{{ upload_form.multiple_files.name }}', $("#{{ upload_form.multiple_files.auto_id }}").attr("checked") ? "on" : "");
+	var limit = $("#{{ upload_form.storage.auto_id }}").val().split(',')[1];
+	control.swfupload('setFileSizeLimit', limit);
+}
 
 </script>
+
+{% include "storage_upload_js.html" %}
+
 {% endblock %}
+
 
 {% block content %}
 
@@ -104,38 +35,46 @@ $(document).ready(function() {
 <form method="post" action="{{ request.get_full_path }}" enctype="multipart/form-data" id="upload-control">
 <table>
 	<tr>
-		<th>{{ form.collection.label }}
+		<th>{{ upload_form.collection.label }}
 		</th>
-		<td>{{ form.collection }}<br />
+		<td>{{ upload_form.collection }}<br />
 	* You may add regular records to this collection
 		</td>
 	</tr>
 	<tr>
-		<th>{{ form.storage.label }}
+		<th>{{ upload_form.storage.label }}
 		</th>
-		<td>{{ form.storage }}
+		<td>{{ upload_form.storage }}
 		</td>
 	</tr>
 	<tr>
-		<th>{{ form.create_records.label }}
+		<th>{{ upload_form.create_records.label }}
 		</th>
-		<td>{{ form.create_records }}
+		<td>{{ upload_form.create_records }}
 		</td>
 	</tr>
 	<tr>
-		<th>{{ form.personal_records.label }}
+		<th>{{ upload_form.personal_records.label }}
 		</th>
-		<td>{{ form.personal_records }}
+		<td>{{ upload_form.personal_records }}
 		</td>
 	</tr>
 	<tr>
-		<th>{{ form.replace_files.label }}
+		<th>{{ upload_form.replace_files.label }}
 		</th>
-		<td>{{ form.replace_files }}
+		<td>{{ upload_form.replace_files }}
+		</td>
+	</tr>
+	<tr>
+		<th>{{ upload_form.multiple_files.label }}
+		</th>
+		<td>{{ upload_form.multiple_files }}<br />
+			Allows attaching more than one file of the same type to a record
+			by adding a suffix to the name, e.g. ABC001_01.jpg, ABC001_02.jpg, ...
 		</td>
 	</tr>
 </table>
-<span id="html-upload-control">{{ form.file.label }} {{ form.file }}<br /></span>
+<span id="html-upload-control">{{ upload_form.file.label }} {{ upload_form.file }}<br /></span>
 <input type="submit" value="Upload Media" id="upload-button" />
 </form>
 

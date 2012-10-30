@@ -2,7 +2,7 @@ import unittest
 from models import Collection, CollectionItem, Record, Field, get_system_field
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
-from rooibos.util import clear_cached_properties
+from rooibos.access.models import AccessControl
 from spreadsheetimport import SpreadsheetImport
 from cStringIO import StringIO
 
@@ -14,9 +14,9 @@ class FieldValueTestCase(unittest.TestCase):
         self.titleField = Field.objects.create(label='Title', name='title')
         self.creatorField = Field.objects.create(label='Creator', name='creator')
         self.locationField = Field.objects.create(label='Location', name='location')
-        self.user = User.objects.create(username='test')
-        self.user2 = User.objects.create(username='test2')
-        self.user3 = User.objects.create(username='test3')
+        self.user = User.objects.create(username='FieldValueTestCase-test')
+        self.user2 = User.objects.create(username='FieldValueTestCase-test2')
+        self.user3 = User.objects.create(username='FieldValueTestCase-test3')
 
     def tearDown(self):
         self.collection.delete()
@@ -167,7 +167,7 @@ class CsvImportTestCase(unittest.TestCase):
         self.titleField = Field.objects.create(label='Title', name='title')
         self.creatorField = Field.objects.create(label='Creator', name='creator')
         self.locationField = Field.objects.create(label='Location', name='location')
-        self.user = User.objects.create(username='test')
+        self.user = User.objects.create(username='CsvImportTestCase-test')
         self.records = []
 
     def tearDown(self):
@@ -564,3 +564,123 @@ T003,Title8"""),
         self.assertTrue(testimport.mapping.has_key('Title'))
         self.assertTrue(testimport.mapping.has_key('Creator'))
         self.assertTrue(testimport.mapping.has_key('Location'))
+
+
+
+class RecordAccessTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.collection = Collection.objects.create(title='Test Collection', name='accesstest')
+        self.collection2 = Collection.objects.create(title='Test Collection', name='accesstest2')
+        self.collectionreader = User.objects.create(username='accesstest-reader')
+        self.collectionwriter = User.objects.create(username='accesstest-writer')
+        self.collectionmanager = User.objects.create(username='accesstest-manager')
+        self.owner = User.objects.create(username='accesstest-owner')
+        self.admin = User.objects.get(username='admin')
+        self.user = User.objects.create(username='accesstest-user')
+        AccessControl.objects.create(content_object=self.collection,
+                                     user=self.collectionreader,
+                                     read=True)
+        AccessControl.objects.create(content_object=self.collection,
+                                     user=self.collectionwriter,
+                                     read=True,
+                                     write=True)
+        AccessControl.objects.create(content_object=self.collection,
+                                     user=self.collectionmanager,
+                                     read=True,
+                                     write=True,
+                                     manage=True)
+        self.records = []
+
+    def tearDown(self):
+        self.collection.delete()
+        self.collection2.delete()
+        self.collectionreader.delete()
+        self.collectionwriter.delete()
+        self.collectionmanager.delete()
+        self.owner.delete()
+        self.user.delete()
+        for record in self.records:
+            record.delete()
+
+    def createRecord(self):
+        record = Record()
+        self.records.append(record)
+        return record
+
+    def checkAccess(self, record, reader, writer, manager, owner, admin, user=False):
+        self.assertEqual(reader, Record.filter_by_access(self.collectionreader, record.id).count() == 1)
+        self.assertEqual(writer, Record.filter_by_access(self.collectionwriter, record.id).count() == 1)
+        self.assertEqual(manager, Record.filter_by_access(self.collectionmanager, record.id).count() == 1)
+        self.assertEqual(owner, Record.filter_by_access(self.owner, record.id).count() == 1)
+        self.assertEqual(admin, Record.filter_by_access(self.admin, record.id).count() == 1)
+        self.assertEqual(user, Record.filter_by_access(self.user, record.id).count() == 1)
+
+    def testPersonalRecordNotInCollection(self):
+        record = self.createRecord()
+        record.owner = self.owner
+        record.save()
+        self.checkAccess(record, False, False, False, True, True)
+
+    def testPersonalRecordInCollectionNotShared(self):
+        record = self.createRecord()
+        record.owner = self.owner
+        record.save()
+        CollectionItem.objects.create(collection=self.collection, record=record, hidden=True)
+        self.checkAccess(record, False, False, False, True, True)
+        # Check to make sure result does not change if record is shared in another collection
+        CollectionItem.objects.create(collection=self.collection2, record=record, hidden=False)
+        self.checkAccess(record, False, False, False, True, True)
+
+    def testPersonalRecordInCollectionShared(self):
+        record = self.createRecord()
+        record.owner = self.owner
+        record.save()
+        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
+        self.checkAccess(record, True, True, True, True, True)
+
+    def testRegularRecordNotInCollection(self):
+        record = self.createRecord()
+        record.save()
+        self.checkAccess(record, False, False, False, False, True)
+
+    def testRegularRecordInCollectionHidden(self):
+        record = self.createRecord()
+        record.save()
+        CollectionItem.objects.create(collection=self.collection, record=record, hidden=True)
+        self.checkAccess(record, False, True, True, False, True)
+        # Check to make sure result does not change if record is not hidden in another collection
+        CollectionItem.objects.create(collection=self.collection2, record=record, hidden=False)
+        self.checkAccess(record, False, True, True, False, True)
+
+    def testRegularRecordInCollectionNotHidden(self):
+        record = self.createRecord()
+        record.save()
+        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
+        self.checkAccess(record, True, True, True, False, True)
+
+
+    def testIndividualRecord(self):
+        record = self.createRecord()
+        record.save()
+        self.checkAccess(record, False, False, False, False, True, user=False)
+        AccessControl.objects.create(content_object=record,
+                                     user=self.user,
+                                     read=True)
+        self.checkAccess(record, False, False, False, False, True, user=True)
+
+    def testIndividualEditableRecord(self):
+        record = self.createRecord()
+        record.save()
+        # check through collection
+        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
+        self.assertFalse(record.editable_by(self.collectionreader))
+        self.assertTrue(record.editable_by(self.collectionwriter))
+        # create ACL
+        AccessControl.objects.create(content_object=record,
+                                     user=self.collectionreader,
+                                     read=True,
+                                     write=True)
+        # check again
+        self.assertTrue(record.editable_by(self.collectionreader))
+        self.assertFalse(record.editable_by(self.collectionwriter))

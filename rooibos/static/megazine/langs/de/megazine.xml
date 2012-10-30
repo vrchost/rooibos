@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_LANGUAGE_NAME">Deutsch</langstring>
+	<langstring name="LNG_LOADING">Lade... $1%</langstring>
+	<langstring name="LNG_BOOKEDGE_PAGENUMBER">Gehe zu Seite $1</langstring>
+</lang>

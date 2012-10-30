@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lang id="de">
+	<langstring name="LNG_ZOOM_OUT">Verkleinern</langstring>
+	<langstring name="LNG_ZOOM_SLIDE">Bewegen um die Vergrößerungsstufe zu verändern</langstring>
+	<langstring name="LNG_ZOOM_IN">Vergrößern</langstring>
+</lang>
