@@ -59,7 +59,7 @@ urls = [
     (r'^api/', include('rooibos.api.urls')),
     (r'^profile/', include('rooibos.userprofile.urls')),
     (r'^federated/', include('rooibos.federatedsearch.urls')),
-    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
+#    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
     (r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),

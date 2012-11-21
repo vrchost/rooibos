@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from threading import Thread
 from models import HitCount
 
-from nasa import NasaImageExchange
+# from nasa import NasaImageExchange
 from artstor import ArtstorSearch
 from flickr import FlickrSearch
 
@@ -22,7 +22,7 @@ import logging
 #}
 
 source_classes = [
-    NasaImageExchange,
+#    NasaImageExchange,
     ArtstorSearch,
     FlickrSearch,
 ]
