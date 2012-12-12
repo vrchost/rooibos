@@ -9,12 +9,13 @@
 {{ block.super }}
 <script type="text/javascript">
 
+/*
     function remoteRecordSelection(ids, checked) {
         var method = ids == 0 ? 'GET' : 'POST';
         if (ids.constructor != Array) ids = [ids];
         ajaxManager.add({
             type: method,
-            url: '{% url nasa-nix-select %}',
+{#            url: '{% url nasa-nix-select %}',#}
             data: {'id': JSON.stringify(ids), 'checked': checked},
             dataType: 'json',
             success: function(r) {
@@ -24,6 +25,7 @@
             }
         });
     }
+*/
 
     $(document).ready(function() {
         $("#submit_record_selections").hide();
