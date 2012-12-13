@@ -75,6 +75,7 @@ class FlashCardViewer(Viewer):
         passwords = request.session.get('passwords', dict())
 
         response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'filename="' + presentation.title + '-flashCards.pdf"'
 
         pagesize = getattr(pagesizes, settings.PDF_PAGESIZE)
         width, height = pagesize
@@ -189,6 +190,8 @@ class PrintViewViewer(Viewer):
 
         response = HttpResponse(mimetype='application/pdf')
 
+
+
         pagesize = getattr(pagesizes, settings.PDF_PAGESIZE)
         width, height = pagesize
 
@@ -200,6 +203,7 @@ class PrintViewViewer(Viewer):
             return Frame(left, inch / 2,
                            width=width / 2 - 0.75 * inch, height = height - inch,
                           leftPadding=0, bottomPadding=0, rightPadding=0, topPadding=0, showBoundary=False)
+
 
         def prepare_first_page(canvas, document):
             p1 = Paragraph(presentation.title, styles['Heading'])
@@ -297,6 +301,8 @@ class PrintViewViewer(Viewer):
         doc.addPageTemplates([first_template, later_template])
         doc.build(content)
 
+        response['Content-Disposition'] = 'filename="' + smart_str(presentation.title) + '.pdf"'
+
         return response
 
 
@@ -324,7 +330,7 @@ class PackageFilesViewer(Viewer):
                     str(index + 1).zfill(4),
                     filename(title),
                     os.path.splitext(image)[1])
-                    ).encode('utf-8', 'replace'))
+                    ).encode('ascii', 'replace'))
 
         def metadata_file(tempfile, record):
             t = Template("{% load data %}{% metadata record %}")
