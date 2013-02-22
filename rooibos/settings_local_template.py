@@ -2,6 +2,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 #LOGGING_OUTPUT_ENABLED = True
 
+INSTANCE_NAME = ''
+
 # Needed to enable compression JS and CSS files
 COMPRESS = True
 MEDIA_URL = '/static/'
@@ -74,7 +76,13 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/'
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+CACHE = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'memcached://127.0.0.1:11211/',
+        'KEY_PREFIX': INSTANCE_NAME,
+    }
+}
 
 INTERNAL_IPS = ('127.0.0.1',)
 
