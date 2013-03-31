@@ -36,7 +36,13 @@ def add_content_length(func):
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
         if type(response) == HttpResponse:
-            response['Content-Length'] = len(response.content)
+            if hasattr(response._container, 'size'):
+                response['Content-Length'] = response._container.size
+            elif isinstance(response._container, file):
+                if os.path.exists(response._container.name):
+                    response['Content-Length'] = os.path.getsize(response._container.name)
+            elif response._is_string:
+                response['Content-Length'] = len(response.content)
         return response
     return _add_header
 
