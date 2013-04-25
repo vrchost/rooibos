@@ -44,6 +44,8 @@ DATABASE_CHARSET = 'utf8'
 CLOUDFILES_USERNAME = ''
 CLOUDFILES_API_KEY = ''
 
+CDN_THUMBNAILS = {}
+
 UPLOAD_LIMIT = 5 * 1024 * 1024
 
 # Local time zone for this installation. Choices can be found here:

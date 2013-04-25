@@ -8,6 +8,7 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 from rooibos.access import filter_by_access, check_access
 from rooibos.access.models import AccessControl
 from rooibos.util import unique_slug
@@ -197,11 +198,22 @@ class Record(models.Model):
     def get_absolute_url(self):
         return reverse('data-record', kwargs={'id': self.id, 'name': self.name})
 
+    def _get_thumbnail_url(self, fmt):
+        cdn_thumbnails = getattr(settings, 'CDN_THUMBNAILS')
+        if cdn_thumbnails:
+            for collection_name in self.collection_set.values_list('name', flat=True):
+                if cdn_thumbnails.has_key(collection_name):
+                    return cdn_thumbnails[collection_name][fmt] % self.identifier
+        url = reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
+        if fmt == 'square':
+            url += '?square'
+        return url
+
     def get_thumbnail_url(self):
-        return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
+        return self._get_thumbnail_url('regular')
 
     def get_square_thumbnail_url(self):
-        return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name}) + '?square'
+        return self._get_thumbnail_url('square')
 
     def get_image_url(self, force_reprocess=False):
         url = reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
