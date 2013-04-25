@@ -94,7 +94,7 @@
         {% with record.title as title %}
     <div class="image-preview-thumb{% if forloop.first %} active-image-preview-thumb{% endif %} record-anchor" id="record-id-{{ record.id }}">
         <a href="{{ record.get_absolute_url }}">
-            <img src="{{ record.get_thumbnail_url }}?square" title="{{ title }}" alt="{{ title }}" />
+            <img src="{{ record.get_square_thumbnail_url }}" title="{{ title }}" alt="{{ title }}" />
         </a>
     </div>
         {% endwith %}

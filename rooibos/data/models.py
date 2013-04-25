@@ -199,6 +199,9 @@ class Record(models.Model):
     def get_thumbnail_url(self):
         return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
 
+    def get_square_thumbnail_url(self):
+        return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name}) + '?square'
+
     def get_image_url(self):
         return reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
 
