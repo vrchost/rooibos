@@ -218,8 +218,8 @@ class MigrateModel(object):
                         else:
                             logging.error("No instance created: %s %s" % (self.model_name, self.key(row)))
                             self.errors += 1
-                    except (IntegrityError, pyodbc.IntegrityError), ex:
-                        logging.error("Integrity error: %s %s" % (self.model_name, self.key(row)))
+                    except (IntegrityError, pyodbc.IntegrityError, ValueError), ex:
+                        logging.error("%s: %s %s" % (type(ex).__name__, self.model_name, self.key(row)))
                         logging.error(ex)
                         self.errors += 1
                     except MergeObjectsException, ex:
