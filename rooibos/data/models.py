@@ -16,6 +16,7 @@ from rooibos.util.caching import get_cached_value, cache_get, cache_get_many, ca
 import logging
 import random
 import types
+import re
 
 
 class Collection(models.Model):
@@ -202,8 +203,10 @@ class Record(models.Model):
         cdn_thumbnails = getattr(settings, 'CDN_THUMBNAILS')
         if cdn_thumbnails:
             for collection_name in self.collection_set.values_list('name', flat=True):
-                if cdn_thumbnails.has_key(collection_name):
-                    return cdn_thumbnails[collection_name][fmt] % self.identifier
+                for key in cdn_thumbnails:
+                    m = re.match(key, collection_name)
+                    if m and m.end() == len(collection_name):
+                        return cdn_thumbnails[key][fmt] % self.identifier
         url = reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
         if fmt == 'square':
             url += '?square'
