@@ -12,7 +12,7 @@ import json
 
 
 class Command(BaseCommand):
-    help = 'Print user profile settings in JSON format'
+    help = 'Imports user profile settings in JSON format from stdin'
 
     option_list = BaseCommand.option_list + (
         make_option('--user', '-u', dest='user',
@@ -33,4 +33,4 @@ class Command(BaseCommand):
 
         for k, v in s.iteritems():
             print "Importing %s" % k
-            store_settings(user, k, v)
+            store_settings(user, k, v[0])
