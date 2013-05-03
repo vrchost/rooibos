@@ -1,1 +1,0 @@
-This file is just here to guarantee the directory exists for Solr to save its log files.
