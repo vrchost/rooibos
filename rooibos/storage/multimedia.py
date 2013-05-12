@@ -145,9 +145,11 @@ def render_pdf(pdffile):
 
 
 def get_image(media):
+    logging.debug('get_image: %s (%s)' % (media.get_absolute_file_path(), media.mimetype))
+    image = None
     if media.mimetype.startswith('image/'):
-        return media.load_file()
-    if media.mimetype.startswith('video/'):
+        image = media.load_file()
+    elif media.mimetype.startswith('video/'):
         # retrieve offset if available
         try:
             offset = int(media.record.fieldvalue_set.filter(
@@ -156,9 +158,43 @@ def get_image(media):
             )[0].value)
         except IndexError, ValueError:
             offset = 5
-        return capture_video_frame(media.get_absolute_file_path(), offset=offset)
-    if media.mimetype.startswith('audio/'):
-        return render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
-    if media.mimetype == 'application/pdf':
-        return render_pdf(media.get_absolute_file_path())
-    return None
+        image = capture_video_frame(media.get_absolute_file_path(), offset=offset)
+    elif media.mimetype.startswith('audio/'):
+        image = render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
+    elif media.mimetype == 'application/pdf':
+        image = render_pdf(media.get_absolute_file_path())
+    return image
+
+
+def overlay_image_with_mimetype_icon(image, mimetype):
+    """
+    Overlays an image with an icon in the lower right corner
+    No scaling of image or overlay icon
+    Image must be a file-like object
+    @returns a file-like object with the new image, or the same object if no
+    overlay was found
+    """
+    path = os.path.join(os.path.dirname(__file__), '..', 'static', 'images', 'overlays')
+    overlay = os.path.join(path, mimetype.replace('/', '_') + ".png")
+    if not os.path.exists(overlay):
+        overlay = os.path.join(path, mimetype.split('/')[0] + ".png")
+    if not os.path.exists(overlay):
+        return image
+
+    if not isinstance(image, Image.Image):
+        original_image = image if img_object else Image.open(image)
+    else:
+        original_image = image
+
+    overlay_image = Image.open(open(overlay, 'rb'))
+    pos = (original_image.size[0] - overlay_image.size[0],
+           original_image.size[1] - overlay_image.size[1])
+    original_image.paste(overlay_image, pos, overlay_image)
+
+    if isinstance(image, Image.Image):
+        return image
+
+    output = StringIO()
+    original_image.save(output, 'JPEG', quality=85, optimize=True)
+    output.seek(0)
+    return output

@@ -122,7 +122,9 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
                 return None, (None, None)
             import ImageFile
             ImageFile.MAXBLOCK = 16 * 1024 * 1024
-            from multimedia import get_image
+            # Import here to avoid circular reference
+            # TODO: need to move all these functions out of __init__.py
+            from multimedia import get_image, overlay_image_with_mimetype_icon
             try:
                 file = get_image(master)
                 image = Image.open(file)
@@ -133,6 +135,7 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
                     elif w < h:
                         image = image.crop((0, (h - w) / 2, w, (h - w) / 2 + w))
                 image.thumbnail((width, height), Image.ANTIALIAS)
+                image = overlay_image_with_mimetype_icon(image, master.mimetype)
                 output = StringIO.StringIO()
                 if image.mode != "RGB":
                     image = image.convert("RGB")
