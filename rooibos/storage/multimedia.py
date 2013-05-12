@@ -27,13 +27,16 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
     os.close(handle)
     try:
         cmd = 'ffmpeg -i "%s" %s -y "%s"' % (infile, parameters, filename)
+        logging.debug('_run_ffmpeg: %s' % cmd)
+        cmd = [p.strip('"') for p in cmd.split()]
         ffmpeg = Popen(cmd, executable=settings.FFMPEG_EXECUTABLE, stdout=PIPE, stderr=PIPE)
         (output, errors) = ffmpeg.communicate()
         file = open(filename, 'rb')
         result = StringIO(file.read())
         file.close()
         return result, output, errors
-    except:
+    except Exception, ex:
+        logging.error("%s: %s" % (cmd, ex))
         return None, None, None
     finally:
         os.remove(filename)
@@ -97,6 +100,7 @@ def identify(file):
 
 
 def capture_video_frame(videofile, offset=5):
+    logging.debug('capture_video_frame: %s (offset %s)' % (videofile, offset))
     params = '-r 1 -ss %s -t 00:00:01 -vframes 1 -f image2' % _seconds_to_timestamp(offset)
     frame, output, errors = _run_ffmpeg(params, videofile, '.jpg')
     return frame
