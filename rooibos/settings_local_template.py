@@ -57,6 +57,7 @@ SECRET_KEY = 'e#!poDuIJ}N,".K=H:T/4z5POb;Gl/N6$6a&,(DRAHUF5c",_p'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 SOLR_URL = 'http://127.0.0.1:8983/solr/'
+SOLR_RECORD_INDEXER = None
 
 SCRATCH_DIR = 'c:/mdid-scratch/'
 AUTO_STORAGE_DIR = 'c:/mdid-collections/'
