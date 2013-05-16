@@ -113,7 +113,7 @@
 {% block sidebar %}
 {{ block.super }}
 
-{% if federated_search_query and user.is_authenticated %}
+{% if federated_sources and federated_search_query and user.is_authenticated %}
   <div class="facet active-facet" id="results_sidebar_external">
     <div class="facet-header">Additional Content</div>
     <div class="facet-body" id="external-results">

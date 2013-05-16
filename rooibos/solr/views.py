@@ -20,7 +20,7 @@ from rooibos.data.functions import apply_collection_visibility_preferences, \
     get_collection_visibility_preferences
 from rooibos.storage.models import Storage
 from rooibos.ui import update_record_selection, clean_record_selection_vars
-from rooibos.federatedsearch.views import sidebar_api_raw
+from rooibos.federatedsearch.views import sidebar_api_raw, available_federated_sources
 import re
 import copy
 import random
@@ -511,6 +511,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                            'sort': sort,
                            'random': random.random(),
                            'viewmode': viewmode,
+                           'federated_sources': bool(available_federated_sources()),
                            'federated_search': federated_search,
                            'federated_search_query': federated_search_query,
                            'pagination_helper': [None] * hits,

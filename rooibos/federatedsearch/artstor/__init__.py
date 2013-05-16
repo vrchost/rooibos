@@ -116,3 +116,7 @@ class ArtstorSearch(FederatedSearch):
         cached.results = simplejson.dumps(result, separators=(',', ':'))
         cached.save()
         return result
+
+    @classmethod
+    def available(cls):
+        return bool(settings.ARTSTOR_GATEWAY)
