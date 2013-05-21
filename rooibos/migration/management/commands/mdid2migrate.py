@@ -1039,18 +1039,20 @@ class Command(BaseCommand):
             return
 
         servertype, connection = self.readConfig(config_files[0])
-        if servertype == "MSSQL":
-            conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
-        elif servertype == "MYSQL":
-            conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
-        elif servertype == "CUSTOM":
-            conn = pyodbc.connect(connection)
-        else:
-            print "Unsupported database type"
-            return
 
-        cursor = conn.cursor()
-        row = cursor.execute("SELECT Version FROM DatabaseVersion").fetchone()
+        def get_cursor():
+            if servertype == "MSSQL":
+                conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
+            elif servertype == "MYSQL":
+                conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
+            elif servertype == "CUSTOM":
+                conn = pyodbc.connect(connection)
+            else:
+                print "Unsupported database type"
+                return None
+            return conn.cursor()
+
+        row = get_cursor().execute("SELECT Version FROM DatabaseVersion").fetchone()
         if not row.Version in ("00006", "00007", "00008"):
             print "Database version is not supported"
             return
@@ -1093,6 +1095,6 @@ class Command(BaseCommand):
             MigrateFieldValues,
         ]
 
-        map(lambda (i, m): m(cursor).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
+        map(lambda (i, m): m(get_cursor()).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
 
         print "You must now run 'manage.py solr reindex' to rebuild the full-text index."
