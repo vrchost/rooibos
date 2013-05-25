@@ -1034,7 +1034,7 @@ class Command(BaseCommand):
 
     def handle(self, *config_files, **options):
 
-        logpath = os.path.join(settings.LOG_DIR, 'logs')
+        logpath = settings.LOG_DIR
         if not os.path.exists(logpath):
             os.makedirs(logpath)
 
