@@ -61,6 +61,7 @@ SOLR_RECORD_INDEXER = None
 
 SCRATCH_DIR = 'c:/mdid-scratch/'
 AUTO_STORAGE_DIR = 'c:/mdid-collections/'
+LOG_DIR = 'c:/mdid-log/'
 
 # File upload size limit in bytes (default 5 MB)
 UPLOAD_LIMIT = 5 * 1024 * 1024
