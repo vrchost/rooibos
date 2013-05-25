@@ -149,14 +149,6 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
         name = '%s-%sx%s%s.jpg' % (m.id, width, height, 'sq' if crop_to_square else '')
         sp = m.storage.get_derivative_storage_path()
         if sp:
-            if not os.path.exists(sp):
-                try:
-                    os.makedirs(sp)
-                except:
-                    # check if directory exists now, if so another process may have created it
-                    if not os.path.exists(sp):
-                        # still does not exist, raise error
-                        raise
             path = os.path.join(sp, name)
 
             if not os.path.exists(path) or os.path.getsize(path) == 0:
