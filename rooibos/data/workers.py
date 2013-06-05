@@ -82,8 +82,12 @@ def csvimport(job):
                 arg['collections'],
                 skip_rows=skip_rows)
 
+        logging.info('csvimport complete: %s' % job)
+
         jobinfo.complete('Complete', '%s rows processed' % counter.counter)
 
     except Exception, ex:
+
+        logging.exception('csvimport failed: %s' % job)
 
         jobinfo.complete('Failed: %s' % ex, None)
