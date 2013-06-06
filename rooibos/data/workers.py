@@ -14,7 +14,7 @@ from views import _get_scratch_dir
 @register_worker('csvimport')
 def csvimport(job):
 
-    logging.info('csvimport started for %s' % job)
+    logging.debug('csvimport started for %s' % job)
     jobinfo = JobInfo.objects.get(id=job.arg)
 
     try:
@@ -23,6 +23,7 @@ def csvimport(job):
 
         if jobinfo.status.startswith == 'Complete':
             # job finished previously
+            logging.debug('csvimport finished previously for %s' % job)
             return
 
         file = os.path.join(_get_scratch_dir(), arg['file'])
@@ -76,6 +77,9 @@ def csvimport(job):
                                 order=arg['order'],
                                 hidden=arg['hidden'],
                                 **handlers)
+
+        logging.debug('csvimport calling run() for %s' % job)
+
         imp.run(arg['update'],
                 arg['add'],
                 arg['test'],

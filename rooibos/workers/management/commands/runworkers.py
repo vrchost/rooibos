@@ -48,6 +48,6 @@ class Command(BaseCommand):
                 job.run()
 
         worker = create_worker()
-        if verbosity > 0:
-            logging.info("Starting workers: " + ', '.join(worker.abilities.keys()))
+        logging.debug("Starting workers: " + ', '.join(worker.abilities.keys()))
         worker.work()
+        logging.debug("Workers finished, exiting")
