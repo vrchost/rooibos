@@ -27,4 +27,5 @@ urlpatterns = patterns('',
     url(r'^import/(?P<file>[\w\d]{32})/$', data_import_file, name='data-import-file'),
 #    (r'^feeds/(?P<url>.*)/$', feed, {'feed_dict': feeds}),
     url(r'^collection-visibility-preferences/save/$', save_collection_visibility_preferences, name='data-save-collection-visibility-preferences'),
+    url(r'^collection/(?P<identifier>\d+)/(?P<name>[-\w]+)/dump/$', collection_dump_view, name='data-collection-dump'),
 )

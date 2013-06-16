@@ -19,18 +19,29 @@ import types
 import re
 
 
+class CollectionManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class Collection(models.Model):
+    objects = CollectionManager()
 
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50, unique=True, blank=True)
-    children = models.ManyToManyField('self', symmetrical=False, blank=True)
+    children = models.ManyToManyField('self', symmetrical=False, blank=True, serialize=False)
     records = models.ManyToManyField('Record', through='CollectionItem')
-    owner = models.ForeignKey(User, null=True, blank=True)
-    hidden = models.BooleanField(default=False)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
+    hidden = models.BooleanField(default=False, serialize=False)
     description = models.TextField(blank=True)
     agreement = models.TextField(blank=True, null=True)
+    password = models.CharField(max_length=32, blank=True, serialize=False)
+    order = models.IntegerField(blank=False, null=False, default=100)
     password = models.CharField(max_length=32, blank=True)
     order = models.IntegerField(blank=False, null=False, default=100)
+
+    def natural_key(self):
+        return (self.name,)
 
     class Meta:
         ordering = ['order', 'title']
@@ -84,10 +95,21 @@ class Collection(models.Model):
         return Record.objects.filter(collection__in=self.all_child_collections + (self,)).distinct()
 
 
+class CollectionItemManager(models.Manager):
+    def get_by_natural_key(self, collection_name, record_name):
+        return self.get(collection__name=collection_name, record__name=record_name)
+
+
 class CollectionItem(models.Model):
+    objects = CollectionItemManager()
+
     collection = models.ForeignKey('Collection')
     record = models.ForeignKey('Record')
     hidden = models.BooleanField(default=False)
+
+    def natural_key(self):
+        return self.collection.natural_key() + self.record.natural_key()
+    natural_key.dependencies = ['data.Collection', 'data.Record']
 
     def __unicode__(self):
         return "Record %s Collection %s%s" % (self.record_id, self.collection_id, 'hidden' if self.hidden else '')
@@ -99,16 +121,25 @@ def _records_with_individual_acl_by_ids(ids):
         object_id__in=ids).values_list('object_id', flat=True))
 
 
+class RecordManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class Record(models.Model):
+    objects = RecordManager()
+
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
     parent = models.ForeignKey('self', null=True, blank=True)
     source = models.CharField(max_length=1024, null=True, blank=True)
     manager = models.CharField(max_length=50, null=True, blank=True)
-    next_update = models.DateTimeField(null=True, blank=True)
-    owner = models.ForeignKey(User, null=True, blank=True)
+    next_update = models.DateTimeField(null=True, blank=True, serialize=False)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
 
+    def natural_key(self):
+        return (self.name,)
 
     @staticmethod
     def filter_by_access(user, *ids):
@@ -225,6 +256,7 @@ class Record(models.Model):
         return url
 
     def save(self, force_update_name=False, **kwargs):
+        # TODO: update this to use something human readable and/or globally unique
         unique_slug(self, slug_literal='r-%s' % random.randint(1000000, 9999999),
                     slug_field='name', check_current_slug=kwargs.get('force_insert') or force_update_name)
         super(Record, self).save(kwargs)
@@ -329,10 +361,20 @@ class Record(models.Model):
         return self._check_permission_for_user(user, manage=True)
 
 
+class MetadataStandardManager(models.Manager):
+    def get_by_natural_key(self, prefix):
+        return self.get(prefix=prefix)
+
+
 class MetadataStandard(models.Model):
+    objects = MetadataStandardManager()
+
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50, unique=True)
     prefix = models.CharField(max_length=16, unique=True)
+
+    def natural_key(self):
+        return (self.prefix,)
 
     def __unicode__(self):
         return self.title
@@ -357,13 +399,25 @@ class VocabularyTerm(models.Model):
         return self.term
 
 
+class FieldManager(models.Manager):
+    def get_by_natural_key(self, standard, name):
+        q = Q(standard__prefix=standard) if standard else Q(standard=None)
+        return self.get(q, name=name)
+
+
 class Field(models.Model):
+    objects = FieldManager()
+
     label = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
-    old_name = models.CharField(max_length=100, null=True, blank=True)
+    old_name = models.CharField(max_length=100, null=True, blank=True, serialize=False)
     standard = models.ForeignKey(MetadataStandard, null=True, blank=True)
     equivalent = models.ManyToManyField("self", null=True, blank=True)
-    vocabulary = models.ForeignKey(Vocabulary, null=True, blank=True)
+    vocabulary = models.ForeignKey(Vocabulary, null=True, blank=True, serialize=False) # TODO: serialize vocabularies
+
+    def natural_key(self):
+        return (self.standard.prefix if self.standard else '', self.name,)
+    natural_key.dependencies = ['data.MetadataStandard']
 
     def save(self, **kwargs):
         unique_slug(self, slug_source='label', slug_field='name', check_current_slug=kwargs.get('force_insert'))
@@ -441,19 +495,19 @@ class FieldValue(models.Model):
     record = models.ForeignKey(Record, editable=False)
     field = models.ForeignKey(Field)
     refinement = models.CharField(max_length=100, null=True, blank=True)
-    owner = models.ForeignKey(User, null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
     label = models.CharField(max_length=100, null=True, blank=True)
     hidden = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
     group = models.IntegerField(null=True, blank=True)
     value = models.TextField()
-    index_value = models.CharField(max_length=32, db_index=True)
+    index_value = models.CharField(max_length=32, db_index=True, serialize=False)
     date_start = models.DecimalField(null=True, blank=True, max_digits=12, decimal_places=0)
     date_end = models.DecimalField(null=True, blank=True, max_digits=12, decimal_places=0)
     numeric_value = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
     language = models.CharField(max_length=5, null=True, blank=True)
-    context_type = models.ForeignKey(ContentType, null=True, blank=True)
-    context_id = models.PositiveIntegerField(null=True, blank=True)
+    context_type = models.ForeignKey(ContentType, null=True, blank=True, serialize=False)
+    context_id = models.PositiveIntegerField(null=True, blank=True, serialize=False)
     context = generic.GenericForeignKey('context_type', 'context_id')
 
     def save(self, **kwargs):
@@ -476,7 +530,6 @@ class FieldValue(models.Model):
 
     class Meta:
         ordering = ['order']
-
 
 class DisplayFieldValue(FieldValue):
     """
