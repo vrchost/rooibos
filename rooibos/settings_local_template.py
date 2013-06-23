@@ -61,6 +61,9 @@ SOLR_URL = 'http://127.0.0.1:8983/solr/'
 SCRATCH_DIR = 'c:/mdid-scratch/'
 AUTO_STORAGE_DIR = 'c:/mdid-collections/'
 
+# File upload size limit in bytes (default 5 MB)
+UPLOAD_LIMIT = 5 * 1024 * 1024
+
 # Legacy setting for ImageViewer 2 support
 SECURE_LOGIN = False
 
