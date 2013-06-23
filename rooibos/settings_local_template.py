@@ -169,11 +169,14 @@ SSL_PORT = None  # ':443'
 PRIMARY_COLOR = "rgb(152, 189, 198)"
 SECONDARY_COLOR = "rgb(118, 147, 154)"
 
+LOGO_URL = None
+COPYRIGHT = None
+
 WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your University"
 
 CUSTOM_TRACKER_HTML = ""
 
-EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS')
+EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS', 'LOGO_URL', 'COPYRIGHT', )
 
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
