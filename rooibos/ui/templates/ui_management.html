@@ -33,6 +33,7 @@
     <li><a href="{% url data-collections-manage %}"><img src="{% url static 'images/icons/bookcase.png' %}" alt="Manage Collections" /> Manage Collections</a></li>
 {% if storage_write and collection_write %}
     <li><a href="{% url storage-import %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Import Media Files" /> Import Media Files</a></li>
+    <li><a href="{% url storage-match-up-files %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Match Up Media" /> Match Up Media</a></li>
 {% endif %}
 {% if collection_write and storage_write %}
     <li><a href="{% url converters-powerpoint %}"><img src="{% url static 'images/icons/kpresenter.png' %}" alt="Import PowerPoint" /> Import PowerPoint</a></li>
