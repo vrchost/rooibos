@@ -1,9 +1,11 @@
 import sys
 from django.conf import settings
+from django.db import connection
 from gearman import Task, GearmanWorker, GearmanClient
 from gearman.connection import GearmanConnection
 from gearman.task import Taskset
 
+import traceback
 import logging
 
 workers = dict()
@@ -13,8 +15,18 @@ client = settings.GEARMAN_SERVERS and GearmanClient(settings.GEARMAN_SERVERS) or
 
 def register_worker(id):
     def register(worker):
-        workers[id] = worker
-        return worker
+
+        def wrapped_worker(*args, **kwargs):
+            logging.debug('Closing DB connection to force reconnect for job %s' % id)
+            connection.close()
+            try:
+                return worker(*args, **kwargs)
+            except:
+                logging.exception(traceback.format_exc())
+                raise
+
+        workers[id] = wrapped_worker
+        return workers[id]
     return register
 
 
