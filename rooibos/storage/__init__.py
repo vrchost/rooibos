@@ -189,15 +189,13 @@ def find_record_by_identifier(identifiers, collection, owner=None,
 def match_up_media(storage, collection):
     broken, files = analyze_media(storage)
     # find records that have an ID matching one of the remaining files
-    results = []
     for file in files:
         # Match identifiers that are either full file name (with extension) or just base name match
         filename = os.path.split(file)[1]
         id = os.path.splitext(filename)[0]
         records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True)
         if len(records) == 1:
-            results.append((records[0], file))
-    return results
+            yield records[0], file
 
 
 def analyze_records(collection, storage):

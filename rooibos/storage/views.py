@@ -23,6 +23,7 @@ from rooibos.data.models import Collection, Record, Field, FieldValue, Collectio
 from rooibos.storage import get_media_for_record, get_image_for_record, get_thumbnail_for_record, match_up_media, analyze_media, analyze_records, find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
+from rooibos.workers.models import JobInfo
 import logging
 import os
 import uuid
@@ -468,24 +469,13 @@ def match_up_files(request):
             collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), manage=True))
             storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), manage=True))
 
-            matches = match_up_media(storage, collection)
+            job = JobInfo.objects.create(owner=request.user,
+                func='storage_match_up_media', arg=simplejson.dumps(dict(
+                collection=collection.id, storage=storage.id)))
+            job.run()
 
-            for record, filename in matches:
-                id = os.path.splitext(os.path.split(filename)[1])[0]
-                mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-                media = Media.objects.create(record=record,
-                                             name=id,
-                                             storage=storage,
-                                             url=filename,
-                                             mimetype=mimetype)
-
-            request.user.message_set.create(message='%s files were matched up with existing records.' % len(matches))
-            return HttpResponseRedirect('%s?collection=%s&storage=%s' % (
-                reverse('storage-match-up-files'),
-                collection.id,
-                storage.id
-                ))
-
+            request.user.message_set.create(message='Match up media job has been submitted.')
+            return HttpResponseRedirect("%s?highlight=%s" % (reverse('workers-jobs'), job.id))
     else:
         form = MatchUpForm(request.GET)
 
