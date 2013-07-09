@@ -1,5 +1,6 @@
 from django.utils import simplejson
-from rooibos.storage.models import Media
+from rooibos.storage.models import Media, Storage
+from rooibos.data.models import Collection
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.storage import match_up_media
@@ -17,8 +18,11 @@ def storage_match_up_media_job(job):
 
     logging.info('Matching up media with arguments %s', arg)
 
+    storage = Storage.objects.get(id=arg['storage'])
+    collection = Collection.objects.get(id=arg['collection'])
+
     count = -1
-    for count, (record, filename) in enumerate(match_up_media(arg['storage'], arg['collection'])):
+    for count, (record, filename) in enumerate(match_up_media(storage, collection)):
         id = os.path.splitext(os.path.split(filename)[1])[0]
         mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
         media = Media.objects.create(record=record,
