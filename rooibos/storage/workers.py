@@ -7,6 +7,7 @@ from rooibos.storage import match_up_media
 import logging
 import mimetypes
 import traceback
+import os
 
 @register_worker('storage_match_up_media')
 def storage_match_up_media_job(job):
