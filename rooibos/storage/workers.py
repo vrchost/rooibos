@@ -22,6 +22,8 @@ def storage_match_up_media_job(job):
     storage = Storage.objects.get(id=arg['storage'])
     collection = Collection.objects.get(id=arg['collection'])
 
+    jobinfo.update_status('Analyzing available files')
+
     count = -1
     for count, (record, filename) in enumerate(match_up_media(storage, collection)):
         id = os.path.splitext(os.path.split(filename)[1])[0]
@@ -31,7 +33,8 @@ def storage_match_up_media_job(job):
                                      storage=storage,
                                      url=filename,
                                      mimetype=mimetype)
-        jobinfo.update_status('Created %s media objects' % (count + 1))
+        if (count % 100 == 0):
+            jobinfo.update_status('Created %s media objects' % (count + 1))
 
     logging.info('storage_match_up_media complete: %s' % job)
     jobinfo.complete('Complete', '%s files were matched up with existing records.' % (count + 1))
