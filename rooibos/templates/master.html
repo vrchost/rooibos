@@ -17,7 +17,7 @@
         var custom_process_facets = false;
     </script>
     <title>MDID{% block title %}{% endblock %}</title>
-    <link rel="shortcut icon" href="{% url static 'images/favicon.ico' %}" />
+    <link rel="shortcut icon" href="{% if FAVICON_URL %}{{ FAVICON_URL }}{% else %}{% url static 'images/favicon.ico' %}{% endif %}" />
 {% block stylesheets %}
 {% compress css %}
     <link href="{% url static 'css/reset.css' %}" rel="stylesheet" type="text/css" media="screen">
