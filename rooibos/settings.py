@@ -75,6 +75,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
     'rooibos.access.middleware.AccessOnStart',
+    'rooibos.data.middleware.DataOnStart',
     'rooibos.middleware.HistoryMiddleware',
 )
 

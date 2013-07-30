@@ -4,7 +4,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
@@ -356,6 +356,7 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
 
 
+@transaction.commit_on_success
 def get_system_field():
     field, created = Field.objects.get_or_create(name='system-value',
                                                  defaults=dict(label='System Value'))
