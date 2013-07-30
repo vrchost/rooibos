@@ -61,6 +61,7 @@ def retrieve(request, recordid, record, mediaid, media):
     try:
         content = mediaobj.load_file()
     except IOError:
+        logging.error("mediaobj.load_file() failed for media.id %s" % mediaid)
         raise Http404()
 
     Activity.objects.create(event='media-download',
@@ -80,6 +81,7 @@ def retrieve_image(request, recordid, record, width=None, height=None):
 
     path = get_image_for_record(recordid, request.user, int(width or 100000), int(height or 100000), passwords)
     if not path:
+        logging.error("get_image_for_record failed for record.id %s" % recordid)
         raise Http404()
 
     Activity.objects.create(event='media-download-image',
