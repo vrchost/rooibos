@@ -252,6 +252,9 @@ MASTER_TEMPLATE = 'master_root.html'
 INSTALLED_APPS = ()
 
 
+FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
+
+
 additional_settings = [
 #    'apps.jmutube.settings_local',
 #    'apps.svohp.settings_local',
