@@ -175,29 +175,24 @@ def get_thumbnail_for_record(record, user=None, crop_to_square=False):
 def find_record_by_identifier(identifiers, collection, owner=None,
         ignore_suffix=False, suffix_regex=r'[-_]\d+$'):
     idfields = standardfield_ids('identifier', equiv=True)
-    records = Record.by_fieldvalue(idfields, identifiers) \
-                    .filter(collection=collection, owner=owner)
-    if not records and ignore_suffix:
-        if not isinstance(identifiers, (list, tuple)):
-            identifiers = [identifiers]
-        identifiers = (re.sub(suffix_regex, '', id) for id in identifiers)
-        records = Record.by_fieldvalue(idfields, identifiers) \
-                        .filter(collection=collection, owner=owner)
+    if not isinstance(identifiers, (list, tuple)):
+        identifiers = [identifiers]
+    if ignore_suffix:
+        identifiers.extend(re.sub(suffix_regex, '', id) for id in identifiers)
+    records = Record.by_fieldvalue(idfields, identifiers).filter(collection=collection, owner=owner)
     return records
 
 
 def match_up_media(storage, collection):
-    broken, files = analyze_media(storage)
+    _broken, files = analyze_media(storage)
     # find records that have an ID matching one of the remaining files
-    results = []
     for file in files:
         # Match identifiers that are either full file name (with extension) or just base name match
         filename = os.path.split(file)[1]
         id = os.path.splitext(filename)[0]
         records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True)
         if len(records) == 1:
-            results.append((records[0], file))
-    return results
+            yield records[0], file
 
 
 def analyze_records(collection, storage):
