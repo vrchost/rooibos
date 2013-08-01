@@ -144,4 +144,8 @@ def collection_load(user, json, **options):
                 logging.debug("Deleting %d fieldvalues" % len(fieldvalues))
                 fieldvalues.delete()
 
+        if obj.object._meta.object_name == 'FieldValue':
+            # need to call custom save method on FieldValue objects
+            obj.object.save()
+
     logging.debug("Collection load complete")
