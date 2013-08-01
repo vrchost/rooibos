@@ -18,3 +18,5 @@ Thumbs.db
 rooibos/static/cache/*
 2*M.mysql
 bin-release-temp/
+.DS_Store
+
