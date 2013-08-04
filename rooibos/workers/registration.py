@@ -8,6 +8,22 @@ from gearman.task import Taskset
 import traceback
 import logging
 
+from django.db import transaction
+
+@transaction.commit_manually
+def flush_transaction():
+    """
+    Flush the current transaction so we don't read stale data
+
+    Use in long running processes to make sure fresh data is read from
+    the database.  This is a problem with MySQL and the default
+    transaction mode.  You can fix it by setting
+    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
+    this function at the appropriate moment
+    """
+    transaction.commit()
+
+
 workers = dict()
 
 client = settings.GEARMAN_SERVERS and GearmanClient(settings.GEARMAN_SERVERS) or None
@@ -17,8 +33,7 @@ def register_worker(id):
     def register(worker):
 
         def wrapped_worker(*args, **kwargs):
-            logging.debug('Closing DB connection to force reconnect for job %s' % id)
-            connection.close()
+            flush_transaction()
             try:
                 return worker(*args, **kwargs)
             except:
@@ -48,6 +63,7 @@ def create_worker():
 
 
 def run_worker(worker, arg, **kwargs):
+    flush_transaction()
     discover_workers()
     logging.debug("Running worker %s with arg %s" % (worker, arg))
     task = Task(worker, arg, **kwargs)
