@@ -177,8 +177,10 @@ def find_record_by_identifier(identifiers, collection, owner=None,
     idfields = standardfield_ids('identifier', equiv=True)
     if not isinstance(identifiers, (list, tuple)):
         identifiers = [identifiers]
+    else:
+        identifiers = list(identifiers)
     if ignore_suffix:
-        identifiers.extend(re.sub(suffix_regex, '', id) for id in identifiers)
+        identifiers.extend([re.sub(suffix_regex, '', id) for id in identifiers])
     records = Record.by_fieldvalue(idfields, identifiers).filter(collection=collection, owner=owner)
     return records
 
