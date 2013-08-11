@@ -11,7 +11,5 @@ class DataOnStart:
 
         get_system_field()
 
-        print "Done!"
-
         # Only need to run once
         raise MiddlewareNotUsed
