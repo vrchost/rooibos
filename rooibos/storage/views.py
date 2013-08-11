@@ -2,7 +2,7 @@ from __future__ import with_statement
 from datetime import datetime, timedelta
 from django import forms
 from django.conf import settings
-from rooibos.auth import login, authenticate
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import resolve, reverse

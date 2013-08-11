@@ -77,6 +77,7 @@ MIDDLEWARE_CLASSES = (
     'rooibos.access.middleware.AccessOnStart',
     'rooibos.data.middleware.DataOnStart',
     'rooibos.middleware.HistoryMiddleware',
+    'rooibos.access.middleware.AnonymousIpGroupMembershipMiddleware',
 )
 
 ROOT_URLCONF = 'rooibos.urls'
