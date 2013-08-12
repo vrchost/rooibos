@@ -24,6 +24,13 @@ class AccessOnStart:
         except:
             pass
 
+        try:
+            # Remove IP based group members
+            for group in ExtendedGroup.objects.filter(type=IP_BASED_GROUP):
+                group.user_set.all().delete()
+        except:
+            pass
+
         # Only need to run once
         raise MiddlewareNotUsed
 
