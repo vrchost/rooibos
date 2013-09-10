@@ -6,7 +6,7 @@ from django.core import serializers
 from django.core.serializers.json import Serializer as JsonSerializer
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
-from django.db import DEFAULT_DB_ALIAS
+from django.db import DEFAULT_DB_ALIAS, reset_queries
 from django.utils.encoding import smart_unicode
 
 import logging
@@ -147,5 +147,7 @@ def collection_load(user, json, **options):
         if obj.object._meta.object_name == 'FieldValue':
             # need to call custom save method on FieldValue objects
             obj.object.save()
+
+        reset_queries()
 
     logging.debug("Collection load complete")
