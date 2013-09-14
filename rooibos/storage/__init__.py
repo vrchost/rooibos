@@ -110,8 +110,11 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
     # check what user size restrictions are
     restrictions = get_effective_permissions_and_restrictions(user, m.storage)[3]
     if restrictions:
-        width = min(width, restrictions.get('width', width))
-        height = min(height, restrictions.get('height', height))
+        try:
+            width = min(width, int(restrictions.get('width', width)))
+            height = min(height, int(restrictions.get('height', height)))
+        except ValueError:
+            logging.exception('Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
     if m.width > width or m.height > height or m.mimetype != 'image/jpeg' or not m.is_local():
