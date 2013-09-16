@@ -109,12 +109,16 @@ OPEN_OFFICE_PATH = 'C:/Program Files/OpenOffice.org 3/program/'
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'rooibos.auth.ldapauth.LdapAuthenticationBackend',
+    'django_cas.backends.CASBackend',
+#    'rooibos.auth.ldapauth.LdapAuthenticationBackend',
 #    'rooibos.auth.mailauth.ImapAuthenticationBackend',
 #    'rooibos.auth.mailauth.PopAuthenticationBackend',
 )
 
-MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware',)
+
+CAS_SERVER_URL = None
+
+MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware', 'django_cas.middleware.CASMiddleware', )
 
 LDAP_AUTH = (
     {
