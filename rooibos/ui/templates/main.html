@@ -113,6 +113,7 @@
 
     <div class="column">
     {% if not user.is_authenticated %}
+        <!--
         {% if SHOW_FRONTPAGE_LOGIN|default:"yes" != "no" %}
         <h2>Log in</h2>
 
@@ -125,6 +126,8 @@
             <input type="hidden" name="next" value="{% url main %}" />
         </form>
         {% endif %}
+        -->
+        <div>Please <a href="{% url login %}">log in using CAS</a></div>
     {% else %}
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}

@@ -38,8 +38,8 @@ urls = [
     url(r'^showcases/', direct_to_template, {'HELP': 'showcases',
                                              'template': 'showcases.html',
                                              'extra_context': {'applications': apps_showcases}}, name='showcases'),
-    url(r'^login/$', login, {'HELP': 'logging-in', 'SSL': True}, name='login'),
-    url(r'^logout/$', logout, {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
+    url(r'^login/$', 'django_cas.views.login', {'HELP': 'logging-in', 'SSL': True}, name='login'),
+    url(r'^logout/$', 'django_cas.views.logout', {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
 #    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
 
