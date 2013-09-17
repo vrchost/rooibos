@@ -109,7 +109,8 @@
             <li><a href="{% url ui-options %}">Options</a></li>
             <li><a href="{% url ui-management %}">Management</a></li>
             {% else %}
-            <li><a href="{% url login %}?next={{ request.get_full_path }}">Log in</a></li>
+            <li><a href="{% url login %}?next={{ request.get_full_path }}">CAS Login</a></li>
+            <li><a href="{% url local-login %}?next={{ request.get_full_path }}">Local Login</a></li>
             {% endif %}
             <li>{% with request.pagehelp|default:"" as help %}{% pagehelp help %}{% endwith %}</li>
             {% if ADMINS %}

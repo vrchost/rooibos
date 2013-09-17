@@ -39,6 +39,7 @@ urls = [
                                              'template': 'showcases.html',
                                              'extra_context': {'applications': apps_showcases}}, name='showcases'),
     url(r'^login/$', 'django_cas.views.login', {'HELP': 'logging-in', 'SSL': True}, name='login'),
+    url(r'^local-login/$', login, {'HELP': 'logging-in', 'SSL': True}, name='local-login'),
     url(r'^logout/$', 'django_cas.views.logout', {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
 #    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
