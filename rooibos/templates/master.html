@@ -16,7 +16,7 @@
         if (basket_open) document.documentElement.className = 'js-enabled basket-open';
         var custom_process_facets = false;
     </script>
-    <title>MDID{% block title %}{% endblock %}</title>
+    <title>{% if TITLE %}{{ TITLE|safe }}{% else %}MDID{% endif %}{% block title %}{% endblock %}</title>
     <link rel="shortcut icon" href="{% if FAVICON_URL %}{{ FAVICON_URL }}{% else %}{% url static 'images/favicon.ico' %}{% endif %}" />
 {% block stylesheets %}
 {% compress css %}
