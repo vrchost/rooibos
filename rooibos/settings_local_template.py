@@ -178,7 +178,6 @@ WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your Univ
 
 CUSTOM_TRACKER_HTML = ""
 
-EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS', 'LOGO_URL', 'FAVICON_URL', 'COPYRIGHT', 'TITLE', )
 
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
