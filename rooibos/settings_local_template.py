@@ -179,6 +179,8 @@ WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your Univ
 CUSTOM_TRACKER_HTML = ""
 
 
+SHOW_FRONTPAGE_LOGIN = 'yes'
+
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
 # license key, which is available for free for educational institutions.
