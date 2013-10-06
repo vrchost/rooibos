@@ -163,6 +163,8 @@ FFMPEG_EXECUTABLE = os.path.join(install_dir, 'dist', 'windows', 'ffmpeg', 'bin'
 
 PDF_PAGESIZE = 'letter'  # 'A4'
 
+SHOW_FRONTPAGE_LOGIN = "yes"
+
 # Settings that should be available in template rendering
 EXPOSE_TO_CONTEXT = (
     'STATIC_DIR',
