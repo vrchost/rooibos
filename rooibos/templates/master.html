@@ -78,7 +78,11 @@
 
 {% block footer %}
             <div id="footer">
-                {{ COPYRIGHT|safe|default:"Copyright 1997-2012 James Madison University" }}
+                {% if COPYRIGHT %}
+                {{ COPYRIGHT|safe }}
+                {% else %}
+                Copyright 1997-2012 James Madison University
+                {% endif %}
             </div>
 {% endblock %}
 
