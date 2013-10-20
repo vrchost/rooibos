@@ -165,6 +165,8 @@ PDF_PAGESIZE = 'letter'  # 'A4'
 
 SHOW_FRONTPAGE_LOGIN = "yes"
 
+MASTER_TEMPLATE = 'master_root.html'
+
 # Settings that should be available in template rendering
 EXPOSE_TO_CONTEXT = (
     'STATIC_DIR',
@@ -177,6 +179,7 @@ EXPOSE_TO_CONTEXT = (
     'COPYRIGHT',
     'TITLE',
     'SHOW_FRONTPAGE_LOGIN',
+    'MASTER_TEMPLATE',
     )
 
 
