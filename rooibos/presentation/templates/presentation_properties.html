@@ -275,6 +275,8 @@
 
 {% block content-top %}
 
+{{ block.super }}
+
 {% store_recent_presentation request.user presentation %}
 
 {% if formset.forms %}
