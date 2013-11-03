@@ -1,0 +1,35 @@
+# install with:  pip install -r requirements.txt
+python-dateutil==2.1
+MySQL-python==1.2.3
+pyodbc==3.0.6
+Django==1.3.7
+django-extensions==0.9
+django-debug-toolbar==0.9.4
+python-ldap==2.4.10
+python-memcached==1.48 
+PIL==1.1.7
+flickrapi==1.4.2
+reportlab==2.5
+Werkzeug==0.8.3
+
+# notes
+#
+#  PIL requires libjpeg in order to process jpegs
+#  if you can't see images or you see a no jpeglib error, try:
+#  >  pip uninstall PIL
+#
+#       unbuntu:        > sudo apt-get install libjpeg8-dev
+#       rhel/centos:    > sudo yum install libjpeg8-dev
+#       mac os x:       > brew install libjpeg8-dev
+#
+#  >  pip install PIL
+#
+# non-python dependencies
+#
+#  git
+#  openjdk-6-jre-headless
+#  python-setuptools
+#  solr
+#  memcached or couchbase  http://www.couchbase.com/download
+#
+#
