@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import Image
+from PIL import Image
 import StringIO
 import logging
 import mimetypes
