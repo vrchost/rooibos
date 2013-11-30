@@ -123,7 +123,7 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
             if not master.file_exists():
                 logging.error('Image derivative failed for media %d, cannot find file "%s"' % (master.id, master.get_absolute_file_path()))
                 return None, (None, None)
-            import ImageFile
+            from PIL import ImageFile
             ImageFile.MAXBLOCK = 16 * 1024 * 1024
             # Import here to avoid circular reference
             # TODO: need to move all these functions out of __init__.py
