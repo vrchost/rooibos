@@ -695,15 +695,13 @@
 
         // pop-up preview
          var media_url = "{% url storage-retrieve-image 0, 0, 640, 480 %}";
-         var thumb_url = "{% url storage-thumbnail 0, 0 %}";
 
          function preview_dialog(a, img, prev, next, position, total) {
              var dialog = $("#preview-dialog");
              dialog.dialog("destroy").empty();
-             var img_src = img.attr('src').substring(thumb_url.indexOf('/0/0/'));
-             var qs_index = img_src.indexOf('?');
-             if (qs_index > 0) img_src = img_src.substring(0, qs_index);
-             var url = media_url.replace(/\/0\/0\//, img_src);
+             var record_id = img.attr('data-record-id');
+             var record_name = img.attr('data-record-name');
+             var url = media_url.replace(/\/0\/0\//, '/' + record_id + '/' + record_name + '/');
              var id = img.attr('id').substring(img.attr('id').lastIndexOf('-') + 1);
              dialog.append($("<img />").attr('src', url));
              var buttons = {
