@@ -28,7 +28,6 @@ class SpreadsheetImport(object):
         self.order = order or dict()
         self.hidden = hidden or dict()
         self.separate_fields = separate_fields or dict()
-        self.name_field = None
         self.owner = owner
         self.collections = collections
         for event in self.events:
@@ -136,7 +135,7 @@ class SpreadsheetImport(object):
             return repr(self.value)
 
 
-    def run(self, update=True, add=True, test=False, update_names=False, target_collections=[], skip_rows=0):
+    def run(self, update=True, add=True, test=False, target_collections=[], skip_rows=0):
         if not self.analyzed:
             self.analyze(preview_rows=1)
 
@@ -184,8 +183,7 @@ class SpreadsheetImport(object):
                 if add:
                     # create new record
                     if not test:
-                        record = Record.objects.create(owner=self.owner,
-                                                       name=row.get(self.name_field, [None])[0] if self.name_field else None)
+                        record = Record.objects.create(owner=self.owner)
                         apply_values(record, row, is_new=True)
                         for collection in target_collections or self.collections:
                             CollectionItem.objects.get_or_create(record=record, collection=collection)
@@ -204,9 +202,6 @@ class SpreadsheetImport(object):
                         if not test:
                             record = fvs[0].record
                             apply_values(record, row)
-                            if update_names:
-                                record.name = row.get(self.name_field, [None])[0] if self.name_field else None
-                                record.save(force_update_name=True)
                             for collection in target_collections or self.collections:
                                 CollectionItem.objects.get_or_create(record=record, collection=collection)
                         self.updated += 1

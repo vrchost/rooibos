@@ -422,6 +422,10 @@ class FieldValue(models.Model):
     def save(self, **kwargs):
         self.index_value = self.value[:32] if self.value != None else None
         super(FieldValue, self).save(kwargs)
+        if self.value and self.field.full_name == 'dc.identifier':
+            # update record slug name
+            self.record.name = self.value
+            self.record.save(force_update_name=True)
 
     def __unicode__(self):
         return "%s%s%s=%s" % (self.resolved_label, self.refinement and '.', self.refinement, self.value)
