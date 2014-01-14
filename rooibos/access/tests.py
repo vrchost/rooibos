@@ -1,7 +1,7 @@
 import unittest
 from rooibos.data.models import Collection, Record, Field
 from rooibos.storage.models import Storage
-from models import update_membership_by_attributes, update_membership_by_ip, AccessControl, ExtendedGroup, \
+from models import update_membership_by_attributes, AccessControl, ExtendedGroup, \
     ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, IP_BASED_GROUP
 from . import check_access, get_effective_permissions, filter_by_access, \
     get_effective_permissions_and_restrictions, add_restriction_precedence
@@ -200,19 +200,6 @@ class AccessTestCase(unittest.TestCase):
         self.assertFalse(restrictions.has_key('width'))
 
 class ExtendedGroupTestCase(unittest.TestCase):
-
-    def testIPBased(self):
-        usergroup = ExtendedGroup.objects.create(name='ipbased-test', type=IP_BASED_GROUP)
-        usergroup.subnet_set.create(subnet='134.126.0.0/255.255.0.0')
-
-        user = User.objects.create(username='ipbased-testuser-1')
-        self.assertFalse(usergroup.id in user.groups.all().values_list('id', flat=True))
-
-        update_membership_by_ip(user, '134.126.1.2')
-        self.assertTrue(usergroup.id in user.groups.all().values_list('id', flat=True))
-
-        update_membership_by_ip(user, '127.0.0.1')
-        self.assertFalse(usergroup.id in user.groups.all().values_list('id', flat=True))
 
     def testAttributeBased(self):
         usergroup = ExtendedGroup.objects.create(name='attrbased-test', type=ATTRIBUTE_BASED_GROUP)
