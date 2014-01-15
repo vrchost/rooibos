@@ -670,20 +670,23 @@ class RecordNameTestCase(unittest.TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(title='Test Collection', name='test')
+        self.dcid = standardfield('identifier')
+        self.idfield = Field.objects.create(label='My Identifier')
+        self.idfield.equivalent.add(self.dcid)
 
     def tearDown(self):
         self.collection.delete()
+        self.idfield.delete()
 
     def testDefaultRecordName(self):
         record = Record.objects.create()
         self.assertTrue(record.name.startswith('r-'))
 
-    def testRecordNameFromTitle(self):
+    def testRecordNameFromIdentifier(self):
         record = Record.objects.create()
         rid = record.id
         self.assertTrue(record.id)
-        idField = standardfield('identifier')
-        fv = FieldValue.objects.create(field=idField,
+        fv = FieldValue.objects.create(field=self.dcid,
                                        record=record,
                                        value='Identifier 205')
 
@@ -695,3 +698,29 @@ class RecordNameTestCase(unittest.TestCase):
 
         record = Record.objects.get(id=rid)
         self.assertEqual('identifier-205', record.name)
+
+    def testRecordNameFromEquivIdentifier(self):
+        record = Record.objects.create()
+        rid = record.id
+        self.assertTrue(record.id)
+        fv = FieldValue.objects.create(field=self.idfield,
+                                       record=record,
+                                       value='Identifier 407')
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)
+
+        # setting field value again should not change name
+        fv.save()
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)
+
+        # make sure setting another field value does not change the id
+
+        FieldValue.objects.create(field=standardfield('title'),
+                                  record=record,
+                                  value='Some title')
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)

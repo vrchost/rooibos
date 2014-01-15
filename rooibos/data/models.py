@@ -422,7 +422,7 @@ class FieldValue(models.Model):
     def save(self, **kwargs):
         self.index_value = self.value[:32] if self.value != None else None
         super(FieldValue, self).save(kwargs)
-        if self.value and self.field.full_name == 'dc.identifier':
+        if self.value and self.field.id in standardfield_ids('identifier', equiv=True):
             # update record slug name
             self.record.name = self.value
             self.record.save(force_update_name=True)
