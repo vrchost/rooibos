@@ -172,12 +172,14 @@ SECONDARY_COLOR = "rgb(118, 147, 154)"
 LOGO_URL = None
 FAVICON_URL = None
 COPYRIGHT = None
+TITLE = None
 
 WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your University"
 
 CUSTOM_TRACKER_HTML = ""
 
-EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS', 'LOGO_URL', 'FAVICON_URL', 'COPYRIGHT', )
+
+SHOW_FRONTPAGE_LOGIN = 'yes'
 
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
@@ -199,6 +201,8 @@ YAHOO_APPLICATION_ID = ""
 # servers (e.g. Wowza) don't deliver those, so hard links are required.
 HARD_VIDEO_DELIVERY_LINKS = False
 
+
+MASTER_TEMPLATE = 'master_root.html'
 
 additional_settings = [
 #    'apps.jmutube.settings_local',

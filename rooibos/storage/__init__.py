@@ -1,5 +1,5 @@
 from __future__ import with_statement
-import Image
+from PIL import Image
 import StringIO
 import logging
 import mimetypes
@@ -110,8 +110,11 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
     # check what user size restrictions are
     restrictions = get_effective_permissions_and_restrictions(user, m.storage)[3]
     if restrictions:
-        width = min(width, restrictions.get('width', width))
-        height = min(height, restrictions.get('height', height))
+        try:
+            width = min(width, int(restrictions.get('width', width)))
+            height = min(height, int(restrictions.get('height', height)))
+        except ValueError:
+            logging.exception('Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
     if m.width > width or m.height > height or m.mimetype != 'image/jpeg' or not m.is_local():
@@ -120,7 +123,7 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
             if not master.file_exists():
                 logging.error('Image derivative failed for media %d, cannot find file "%s"' % (master.id, master.get_absolute_file_path()))
                 return None, (None, None)
-            import ImageFile
+            from PIL import ImageFile
             ImageFile.MAXBLOCK = 16 * 1024 * 1024
             # Import here to avoid circular reference
             # TODO: need to move all these functions out of __init__.py

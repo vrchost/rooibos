@@ -57,6 +57,10 @@ class SearchFacet(object):
     def federated_search_query(self, value):
         return value.replace('|', ' ')
 
+    def fetch_facet_values(self):
+        return True
+
+
 class RecordDateSearchFacet(SearchFacet):
 
     def or_available(self):
@@ -74,6 +78,10 @@ class RecordDateSearchFacet(SearchFacet):
                 )
         else:
             return value
+
+    def fetch_facet_values(self):
+        return False
+
 
 class OwnerSearchFacet(SearchFacet):
 
@@ -310,7 +318,7 @@ def run_search(user,
 
     s = SolrIndex()
 
-    return_facets = search_facets.keys() if produce_facets else []
+    return_facets = [key for key, facet in search_facets.iteritems() if facet.fetch_facet_values()] if produce_facets else []
 
     try:
         (hits, records, facets) = s.search(query, sort=sort, rows=pagesize, start=(page - 1) * pagesize,

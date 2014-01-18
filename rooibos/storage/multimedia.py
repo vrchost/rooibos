@@ -9,7 +9,7 @@ from django.utils import simplejson
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import FieldValue, get_system_field
-import Image
+from PIL import Image
 
 def _seconds_to_timestamp(seconds):
     hours = seconds / 3600

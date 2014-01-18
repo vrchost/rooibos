@@ -1,0 +1,767 @@
+{% load ui %}
+{% load help %}
+{% load analytics %}
+{% load humanize %}
+{% load compress %}
+{% load userprofile %}
+{% load access_control %}
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <script type="text/javascript">
+        document.documentElement.className = 'js-enabled';
+        var profile_settings = {% profile_settings ui %};
+        var basket_open = profile_settings['ui_basket_open'] == 'true';
+        if (basket_open) document.documentElement.className = 'js-enabled basket-open';
+        var custom_process_facets = false;
+    </script>
+    <title>{% if TITLE %}{{ TITLE|safe }}{% else %}MDID{% endif %}{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" href="{% if FAVICON_URL %}{{ FAVICON_URL }}{% else %}{% url static 'images/favicon.ico' %}{% endif %}" />
+{% block stylesheets %}
+{% compress css %}
+    <link href="{% url static 'css/reset.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% url static 'css/typography.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% url static 'jquery/jquery.autocomplete.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% url static 'jquery/jquery-ui-1.8.11.custom.css' %}" rel="stylesheet" type="text/css" media="screen">
+    {% include "master.css" %}
+{% endcompress %}
+<!--[if IE]>
+{% compress css %}
+    {% include "master-ie.css" %}
+{% endcompress %}
+<![endif]-->
+{% endblock %}
+</head>
+
+<body class="ui-reset master">
+
+{% block raw-content %}
+    <div id="content-wrapper">
+        <div id="content">
+
+
+
+
+{% block basket %}
+{% spaceless %}
+<div id="basket-content">
+    <div id="basket-scroll-right"></div>
+    <div id="basket-scroll-left"></div>
+    <div id="basket-thumbs">{% include "ui_basket.html" %}</div>
+</div>
+{% endspaceless %}
+{% endblock %}
+
+<div style="height: 15px;"></div>
+
+
+{% if messages %}
+<div id="messages">
+    {% for message in messages %}
+    <span>{{ message }}</span><br />
+    {% endfor %}
+</div>
+{% endif %}
+
+{% block content-top %}
+{% endblock %}
+
+<div id="sidebar">
+{% block sidebar %}
+{% include "ui_related_pages.html" %}
+{% endblock %}
+</div>
+
+{% block content %}
+{% endblock %}
+
+{% block footer %}
+            <div id="footer">
+                {% if COPYRIGHT %}
+                {{ COPYRIGHT|safe }}
+                {% else %}
+                Copyright 1997-2012 James Madison University
+                {% endif %}
+            </div>
+{% endblock %}
+
+        </div>
+    </div>
+{% endblock %}
+
+<div id="preview-dialog" style="display: none;" class="ui-corner-all"></div>
+
+
+
+{% block header %}
+{% spaceless %}
+    <div id="topmenu">
+        <ul>
+            {% if user.is_authenticated %}
+            <li>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</li>
+            <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
+            <li><a href="{% url ui-options %}">Options</a></li>
+            <li><a href="{% url ui-management %}">Management</a></li>
+            {% else %}
+            <li><a href="{% url login %}?next={{ request.get_full_path }}">Log in</a></li>
+            {% endif %}
+            <li>{% with request.pagehelp|default:"" as help %}{% pagehelp help %}{% endwith %}</li>
+            {% if ADMINS %}
+            <li><a href="{% url ui-report-problem %}">Report a Problem</a></li>
+            {% endif %}
+        </ul>
+        <span id="javascriptwarning">You have JavaScript disabled.  MDID works better with JavaScript enabled.</span>
+    </div>
+
+    <div id="header-bar">
+        <div class="spacer">
+            <div id="header">
+                <a href="{% url main %}" id="logo"></a>
+                <ul style="float: right;">
+                    <li><div id="basket-header">{% include "ui_basket_header.html" %}</div>
+                        <ul class="menu">
+                            <li><a id="basket-toggle" href="#">Hide</a></li>
+                            <li><a href="{% url solr-selected %}">Explore</a></li>
+                            <li><a href="{% url ui-clear-selected %}?next={{ request.get_full_path|urlencode }}">Clear</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <ul>
+                    <li><a href="{% url solr-search %}">Discover</a>
+                        <ul class="menu">
+                            <li><a href="{% url solr-search %}">Explore</a></li>
+                            <li><a href="{% url solr-searchform %}">Advanced Search</a></li>
+                            <li><a href="{% url solr-browse %}">Browse</a></li>
+                            <li><a href="{% url solr-overview %}">Overview</a></li>
+                        </ul>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url presentation-manage %}">Organize</a>
+                        <ul class="menu">
+                            {% if current_presentation.id %}
+                            <li><a href="{% url presentation-edit current_presentation.id, current_presentation.name %}">Edit {{ current_presentation.title }}</a></li>
+                            {% endif %}
+                            <li><a href="{% url presentation-manage %}">Your Presentations</a></li>
+                            <li><a href="{% url solr-search %}?c=ownedtag:{{ user.id }}-favorite">Your Favorites</a></li>
+                            <li><a href="{% url solr-search %}?c=owner:{{ user.id }}">Your Content</a></li>
+                            {% if user|accessible_objects:"data.Collection,r"|length %}
+                            <li><a href="{% url data-record-new-personal %}">Create Item</a></li>
+                            {% endif %}
+                            {% if user|accessible_objects:"data.Collection,rw"|length %}
+                            <li><a href="{% url data-record-new %}">Create Collection Item</a></li>
+                            {% endif %}
+                            <li><a href="{% url presentation-create %}">Create Presentation</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    <li><a href="{% url presentation-browse %}">Experience</a>
+                        <ul class="menu">
+                            <li><a href="{% url presentation-browse %}">Browse Presentations</a></li>
+                            <li><a href="{% url showcases %}">Showcases</a></li>
+                            {% if user.is_authenticated %}
+                            <li><a href="{% url mediaviewer-install %}">MediaViewer</a></li>
+                            {% endif %}
+                            <li><a href="{% url about %}">About</a></li>
+                        </ul>
+                    </li>
+                    <li class="search" style="padding-right: 20px;"><span>Search</span>
+                        <form method="GET" action="{% url solr-search %}">
+                            <input id="quicksearch" name="kw" type="text" title="Search" /><input type="image" src="{% url static 'images/go.png' %}" id="search-go" />
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endspaceless %}
+{% endblock %}
+
+<!--
+<div id="related-images-bar" style="display: none;">
+    <div id="related-images-bar-toggle">
+        <div id="related-images-bar-hide" style="float: right;"></div>
+        <span id="related-images-bar-hint"></span>
+        <span id="related-images-bar-all" style="margin-left: 20px; "></span>
+    </div>
+    <div id="related-images-bar-content"></div>
+</div>
+<div id="related-images-bar-placeholder" style="visibility: hidden;"></div>
+-->
+
+{% analytics %}
+
+{% if debug %}<!--
+{{ sql_queries|length }} queries:
+{% for q in sql_queries %}
+{{ q.sql }} ({{ q.time }})
+{% endfor %}
+-->
+<div id="stats"><!-- STATS: Total: %(totTime).2fs <br/>Python: %(pyTime).2fs <br/>DB: %(dbTime).2fs <br/>Queries: %(queries)d --></div>
+{% endif %}
+
+{% block javascript %}
+{% compress js %}
+    <script type="text/javascript" src="{% url static 'jquery/jquery-1.4.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery-ui-1.8.11.custom.min.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.cookie.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.hoverIntent.minified.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.ajaxmanager.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.autocomplete.pack.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.scrollTo-1.4.2-min.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.multicheckbox.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'swfupload/swfupload.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'swfupload/plugins/swfupload.cookies.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/jquery.swfupload.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'jquery/qtip/jquery.qtip-1.0.0-rc3.min.js' %}"></script>
+    <script type="text/javascript">
+        var ajaxManager = $.manageAjax.create('defaultQueue', { queue: true });
+        var ajaxInteractionManager = $.manageAjax.create('interactionQueue', { queue: true });
+    </script>
+    <script type="text/javascript" src="{% url static 'scripts/ui-scripts.js' %}"></script>
+    <script type="text/javascript" src="{% url static 'scripts/json2.js' %}"></script>
+    <!--<script type="text/javascript" src="{% url static 'scripts/related-images-bar.js' %}"></script>-->
+    <!--<script type="text/javascript" src="/jsi18n/"></script>-->
+
+    <script type="text/javascript">
+        function basket_imgs_first_row_top() {
+            return ($("#basket-thumbs img:visible:first").position() || Object({top: 0})).top;
+        }
+
+        function basket_scroll_arrows() {
+            $("#basket-scroll-left").css("visibility", ($("#basket-thumbs img:hidden:first").length > 0) ? "visible" : "hidden");
+            var first_row_top = basket_imgs_first_row_top();
+            $("#basket-scroll-right").css("visibility",  ($("#basket-thumbs img").filter(function() { return ($(this).position().top > first_row_top); }).length > 0) ? "visible" : "hidden");
+        }
+
+        function recordSelection(ids, checked) {
+            var method = ids == 0 ? 'GET' : 'POST';
+            if (ids.constructor != Array) ids = [ids];
+            ids = $.map(ids, function(e) { return parseInt(e); });
+            ajaxInteractionManager.add({
+                type: method,
+                url: '{% url ui-api-select-record %}',
+                data: {'id': JSON.stringify(ids), 'checked': checked},
+                dataType: 'json',
+                success: function(r) {
+                    var basket_thumbs = $("#basket-thumbs");
+                    basket_thumbs.html(r.basket);
+                    add_metadata_popup(basket_thumbs);
+                    $("#basket-header").html(r.header);
+                    // set up scroll arrows after a delay to give Safari time to load thumbnails first
+                    setTimeout(basket_scroll_arrows, 1000);
+                    $("#basket-thumbs").trigger('update');
+                }
+            });
+        }
+
+        function bindSelectRecordCheckboxes() {
+            $(".record-select").click(function() { recordSelection($(this).attr('value'), $(this).attr('checked')); });
+        }
+
+
+        function add_metadata_popup(context) {
+            $(".metadata-anchor[id*=record-id-]", context).not(".no-metadata-popup").each(function() {
+                var anchor = $(this);
+                var id = anchor.attr("id");
+                id = id.substring(id.lastIndexOf('-') + 1);
+                anchor.qtip({
+                    content: {
+                        url: '{% url data-record-preview 0 %}'.replace('/0/', '/' + id + '/')
+                    },
+                    show: {
+                        delay: 1000,
+                        solo: true
+                    },
+                    hide: {
+                        delay: 250,
+                        fixed: true
+                    },
+                    position: {
+                        corner: {
+                            tooltip: 'bottomLeft',
+                            target: 'topRight'
+                        },
+                        adjust: {
+                            screen: true
+                        }
+                    },
+                    style: {
+                        border: {
+                            radius: 4
+                        },
+                        fontSize: 'smaller',
+                        tip: true,
+                        name: 'cream',
+                        width: 380
+                    }
+                });
+            });
+        }
+
+        add_metadata_popup();
+
+
+        function store_profile_setting(key, value) {
+            ajaxInteractionManager.add({
+                type: 'POST',
+                url: '{% url userprofile-store %}',
+                data: {'key': key, 'value': value},
+                dataType: 'json'
+            });
+        }
+
+        function process_facets() {
+            var freqs = Object();
+            function sortByFreq(a, b) {
+                var fa = freqs[a.id];
+                var fb = freqs[b.id];
+                return ((fa > fb) ? -1 : ((fa < fb) ? 1 : 0));
+            }
+            $(".facet .facet-body .facet-line").each(function(i, facetline) {
+                var f = $(facetline).contents().eq(2).text().replace(/,/, "");
+                freqs[facetline.id] = f ? parseInt(f) : 0;
+            }).hover(
+                function() { $(this).find(".facet-exclude").css('visibility', 'visible'); },
+                function() { $(this).find(".facet-exclude").css('visibility', 'hidden'); }
+            );
+
+            $(".facet .facet-body").each(function(i, facet) {
+                var terms = $.makeArray($(".facet-line", facet)).sort(sortByFreq).slice(10);
+                if (terms.length)
+                {
+                    $(terms).hide();
+                    $(".facet-more", facet).click(function() { $(this).hide(); $(terms).show(); return false; }).show();
+                }
+            });
+
+            $(".facet-header.collapsed").next().hide();
+
+            $(".facet-header").each(function() {
+                var id = $(this).parent().attr('id');
+                if (id) {
+                    var s = profile_settings['ui_' + id];
+                    if (s == "true")
+                        $(this).next().show();
+                    else if (s == "false")
+                        $(this).next().hide();
+                }
+            }).click(function() {
+                var id = $(this).parent().attr('id');
+                if (id) store_profile_setting('ui_' + id, $(this).next().is(':hidden'));
+                $(this).next().toggle('fast');
+                return false;
+            }).css('cursor', 'pointer').children().click(function(event) { event.stopPropagation(); /* to keep links in facet header working */});
+
+            $(".facet .facet-body .facet-line .facet-exclude").css('visibility', 'hidden');
+        };
+
+        function addCopyLinkIcon(item) {
+            if (!item.attr('href') || item.hasClass('nocopylink')) return;
+            var host = window.location.href.substring(0, window.location.href.length - window.location.pathname.length - window.location.search.length);
+            var url = host + item.attr('href').replace(/\?.+/, '');
+            var link = $("<img class='item-action-link' src='{% url static 'images/link.png' %}' />");
+            link.qtip({
+                content: "Copy and paste this URL to link to this item:<br /><input type='text' style='width: 285px;' readonly='readonly' value='" + url + "' />",
+                show: {
+                    delay: 0,
+                    solo: true,
+                    when: {
+                        event: 'click'
+                    }
+                },
+                hide: {
+                    delay: 250,
+                    fixed: true,
+                    when: {
+                        event: 'unfocus'
+                    }
+                },
+                position: {
+                    corner: {
+                        tooltip: 'bottomLeft',
+                        target: 'topRight'
+                    },
+                    adjust: {
+                        screen: true
+                    }
+                },
+                style: {
+                    border: {
+                        radius: 4
+                    },
+                    fontSize: 'smaller',
+                    tip: false,
+                    name: 'cream',
+                    width: 320
+                }
+            });
+            link.insertAfter(item);
+        }
+
+        function keepAtTop(element, not_past) {
+            if (!keepAtTop.elements) keepAtTop.elements = Array();
+            keepAtTop.elements.push(
+                element.css("position", "relative").css("top", "0").css('z-index',
+                100 - keepAtTop.elements.length).css("left", "0"));
+            var placeholder = $("<div>").css("height", element.outerHeight(true)).insertBefore(element).hide();
+            keepAtTop.$window = $(window).scroll(function() {
+                if (element.is(":hidden")) return;
+                var not_past_bottom = not_past ? not_past.offset().top + not_past.height() : Number.MAX_VALUE;
+                var offset = 0;
+                $.each(keepAtTop.elements, function(i, e) {
+                    if (e != element) offset += e.is(":visible") ? e.height() : 0;
+                    else return false;
+                });
+                if (element.css("position") != "fixed") {
+                    var top = element.offset().top;
+                    // check to see if element is now too far up
+                    if (top < keepAtTop.$window.scrollTop() + offset &&
+                        keepAtTop.$window.scrollTop() + offset + element.height() < not_past_bottom) {
+                        element.css("position", "fixed").css("top", offset + "px").css("width", "100%");
+                        placeholder.show();
+                    }
+                } else {
+                    var top = placeholder.offset().top;
+                    // check if element can go back into its normal position
+                    if (top >= keepAtTop.$window.scrollTop() + offset ||
+                        element.offset().top + element.height() >= not_past_bottom) {
+                        element.css("position", "relative").css("top", "0").css("width", "auto");
+                        placeholder.hide();
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            var timeouts = Object();
+            var resetwidth = function() { $(this).width($(this).parent().width() + 50); };
+            $("#header ul.menu").each(resetwidth).hide();
+            $("#header>ul>li:has(ul)").mouseenter(function() {
+                clearTimeout(timeouts[$(this)]);
+                $("#header>ul>li").not($(this)).removeClass("selected").children("ul").stop().attr("style", "").hide().each(resetwidth);
+                if (!($(this).hasClass("selected"))) $(this).addClass("selected").children("ul").slideDown(200);
+            }).mouseleave(function() {
+                var lthis = $(this);
+                timeouts[lthis] = setTimeout(function() { lthis.removeClass("selected").children("ul").hide(); }, 1000);
+            });
+            $("#header .search span").mouseenter(function() {
+                $("#header .search span,#header .search form").toggle();
+            });
+
+            $("#quicksearch").hint();
+
+            function hideBasket(immediate) {
+                if (basket_open) return;
+                $("#basket-toggle").text("Show");
+                if (immediate)
+                    $("#basket-content").hide();
+                else
+                    $("#basket-content").slideUp();
+            }
+            function showBasket() {
+                $("#basket-toggle").text("Hide");
+                $("#basket-content").slideDown();
+                basket_scroll_arrows();
+            }
+
+            $("#basket-toggle").click(function(e) {
+                e.preventDefault();
+                basket_open = !basket_open;
+                store_profile_setting('ui_basket_open', basket_open);
+                if (basket_open) showBasket(); else hideBasket();
+            });
+
+            if (!basket_open) {
+                hideBasket(true);
+            }
+            $("#basket-scroll-right").click(function() {
+                var first_row_top = basket_imgs_first_row_top();
+                if ($("#basket-thumbs img:visible").filter(function() { return ($(this).position().top > first_row_top); }).length > 0) {
+                    var last = 0;
+                    $("#basket-thumbs img:visible").filter(function() { return ($(this).position().top <= first_row_top); }).each(
+                        function(i) { $(this).delay(20 * i).hide(0); last = i; });
+                    setTimeout(basket_scroll_arrows, (last + 1) * 20);
+                }
+            });
+            $("#basket-scroll-left").click(function() {
+                var first_row_top = basket_imgs_first_row_top();
+                if ($("#basket-thumbs img:hidden").length > 0) {
+                    var first = $("#basket-thumbs img:visible:first");
+                    function scroll_left() {
+                        if (first.position().top <= first_row_top && $("#basket-thumbs img:hidden:last").show().length == 1)
+                            setTimeout(scroll_left, 20);
+                        else
+                            basket_scroll_arrows();
+                    }
+                    scroll_left();
+                }
+            });
+
+            $("#basket-thumbs img").live('mouseover', function(event) {
+                var $this = $(this);
+                $("#basket-unselect").remove();
+                var b = $("<input type='checkbox' id='basket-unselect' checked='checked' style='position: absolute; z-index: 1000;'>");
+                b.appendTo($("#basket-thumbs")).offset($this.offset()).click(function() {
+                    var id = $($this).attr("id");
+                    id = id.substring(id.lastIndexOf('-') + 1);
+                    recordSelection(id, false);
+                });
+            });
+            $("#basket-thumbs").bind('mouseleave', function(event) {
+                $("#basket-unselect").remove();
+            });
+
+            basket_scroll_arrows();
+
+            bindSelectRecordCheckboxes();
+
+            // drag and drop records to basket
+
+            $("#basket-content").droppable({
+                accept: "#content-wrapper .record-anchor[id*=record-id-]",
+                activeClass: "dragging",
+                hoverClass: "hovering",
+                drop: function(event, ui) {
+                    var id = ui.draggable.attr("id");
+                    id = id.substring(id.lastIndexOf('-') + 1);
+                    recordSelection(id, true);
+                    ui.draggable.parents(".record").find("input.record-select").attr('checked', true);
+                },
+                activate: function(event, ui) {
+                    ui.helper.css('z-index', '10001');
+                }
+            });
+
+            keepAtTop($("#basket-content"));
+
+
+            $("#content-wrapper .record-anchor[id^=record-id-]").draggable({
+                containment: 'window',
+                helper: 'clone',
+                appendTo: 'body',
+                scroll: false
+            });
+
+            // end basket features
+
+            if (!custom_process_facets) process_facets();
+            $(".autocomplete-user").autocomplete('{% url api-autocomplete-user %}', {});
+            $(".autocomplete-group").autocomplete('{% url api-autocomplete-group %}', {});
+            $(".impersonation-autocomplete").autocomplete('{% url impersonation-autocomplete-user %}', {});
+
+            setTimeout(function() { $("#messages").css('visibility', 'hidden'); }, 8000);
+
+            // convert list of actions to row drop-down menu
+            $("table.itemactions tr+tr").each(function() {
+                var r = $(this);
+                var c = $("<td class='item-actions-menu'><img src='{% url static 'images/down_arrow.png' %}' /><" + "/td>");
+                var u = $("<ul><" + "/ul>");
+                $("td.item-actions a, td.item-actions input", r).each(function() {
+                    var item = $(this);
+                    if (!item.hasClass('item-action-important')) {
+                        var li = $("<li><" + "/li>").append(item);
+                        u.append(li);
+                    }
+                    addCopyLinkIcon(item);
+                });
+                if (!u.children().length) u.append($("<li>No actions available<" + "/li>"));
+                r.append(c.append($("<div><" + "/div>").append(u)));
+            });
+
+            $(document).click(function() {
+                $("table.itemactions tr.actionrow-open").removeClass('actionrow-open');
+            });
+
+            $("table.itemactions tr+tr a, table.itemactions tr+tr input").click(function(event) {
+                event.stopPropagation();
+            });
+
+            $("table.itemactions tr+tr").mouseenter(function() {
+              $("table.itemactions tr.actionrow-selected").removeClass("actionrow-selected");
+              $(this).addClass("actionrow-selected");
+            }).click(function() {
+                var r = $(this);
+                if (r.hasClass('actionrow-open')) return;
+
+                $("table.itemactions tr.actionrow-open").removeClass('actionrow-open');
+
+                r.addClass('actionrow-open');
+                var menu = $("td.item-actions-menu div", r)
+                var o = {
+                  left: r.offset().left + r.width() - menu.width() - 1,
+                  top: r.offset().top + r.height() - 1
+                  };
+                // apply offset twice, first time around does not always work on Chrome
+                menu.offset(o);
+                menu.offset(o);
+                return false;
+            });
+
+
+            // actionbar functions
+
+              $(document).click(function() {
+                $("ul.actionbar li div.dropdown").hide();
+              });
+              $("ul.actionbar li div.dropdown").click(function(event) {
+                event.stopPropagation();
+              }).each(function() {
+                var d = $(".dropdown-anchor", $(this).parent());
+                d.click(function() {
+                    var r = $(this).parent();
+                    var menu = $("div.dropdown", r);
+                    if (menu.is(":visible")) {
+                      menu.hide();
+                    } else {
+                      // hide all other menus
+                      $("ul.actionbar li div.dropdown").hide();
+                      var o = {
+                        left: r.offset().left - 1,
+                        top: r.offset().top + 28
+                      };
+                      // apply offset twice, first time around does not always work on Chrome
+                      menu.show();
+                      menu.offset(o);
+                      menu.offset(o);
+                      menu.trigger('actionbar-dropdown-open');
+                    }
+                    return false;
+                  });
+              }).css("cursor", "default");
+
+              $("ul.actionbar li div.tags-dropdown").bind('actionbar-dropdown-open', function() {
+                var menu = $(this);
+                var tags = {};
+                var rows = 0;
+                // get selected rows and count different tags
+                $("input:checkbox:checked[name=h]").each(function() {
+                  var row = $(this).parent().parent();
+                  $("span.tag span.t", row).each(function() {
+                    var t = $(this).text();
+                    tags[t] = (tags[t] || 0) + 1;
+                  });
+                  rows++;
+                });
+                if (rows) $("input:checkbox", menu).each(function() {
+                  var t = $(this).next().text();
+                  var c = $("<input type='checkbox' value='true' />");
+                  c.attr('name', $(this).attr('name'));
+                  if (tags[t]) {
+                    if (tags[t] == rows) {
+                      c.attr('checked', 'checked');
+                    } else {
+                      c.multicheckbox({'mixed': true});
+                    }
+                  } else {
+                    c.attr('checked', '');
+                  }
+                  $(this).replaceWith(c);
+                });
+              });
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function()
+        {
+            $('div.permission-list span[title]').each(function() {
+                $(this).data('title', $(this).attr('title')).qtip({
+                    content: $(this).attr('title').replace('\n', '<br />'),
+                    position: {
+                        corner: {
+                            tooltip: 'bottomLeft',
+                            target: 'topRight'
+                        },
+                        adjust: {
+                            screen: true
+                        }
+                    },
+                    style: {
+                        border: {
+                            radius: 4
+                        },
+                        fontSize: 'smaller',
+                        tip: true,
+                        name: 'cream'
+                    }
+                }).attr('title', '');
+            });
+        });
+    </script>
+
+    <script type="text/javascript">
+
+        // pop-up preview
+         var media_url = "{% url storage-retrieve-image 0, 0, 640, 480 %}";
+
+         function preview_dialog(a, img, prev, next, position, total) {
+             var dialog = $("#preview-dialog");
+             dialog.dialog("destroy").empty();
+             var record_id = img.attr('data-record-id');
+             var record_name = img.attr('data-record-name');
+             var url = media_url.replace(/\/0\/0\//, '/' + record_id + '/' + record_name + '/');
+             var id = img.attr('id').substring(img.attr('id').lastIndexOf('-') + 1);
+             dialog.append($("<img />").attr('src', url));
+             var buttons = {
+                     "Close": function() {
+                         $(this).dialog("close");
+                     },
+                     "Go to Record": function() {
+                         window.open(a.attr('href'), 'record_view');
+                     },
+                     "Select": function() {
+                         recordSelection(id, true);
+                     }
+                 };
+             if (prev && prev().length) buttons['Previous'] = function() { prev().click(); };
+             if (position && total) buttons[position + '/' + total] = function() {};
+             if (next && next().length) buttons['Next'] = function() { next().click(); };
+             dialog.dialog({
+                 buttons: buttons,
+                 draggable: false,
+                 height: 600,
+                 modal: true,
+                 resizable: false,
+                 title: img.attr('alt'),
+                 width: 700
+             });
+
+             var info = $('<img src="{% url static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" />');
+             info.attr('id', 'preview-record-id-' + id);
+             add_metadata_popup(dialog.append(info));
+         }
+
+        $(document).ready(function()
+        {
+            $("div.record a img.record-anchor").parent("a").click(function(e) {
+                var a = $(this);
+                var img = $("img.record-anchor", a);
+                preview_dialog(a, img);
+                e.preventDefault();
+            });
+
+            $("#basket-thumbs").bind('update', function() {
+                $("#basket-thumbs a img.record-anchor").parent("a").click(function(e) {
+                    var a = $(this);
+                    var img = $("img.record-anchor", a);
+                    var prev = function() { return a.prev() };
+                    var next = function() { return a.next() };
+                    preview_dialog(a, img, prev, next);
+                    e.preventDefault();
+                });
+            }).trigger('update');
+        });
+
+    </script>
+
+{% endcompress %}
+
+{% endblock %}
+
+{{ CUSTOM_TRACKER_HTML|safe }}
+
+</body>
+
+</html>

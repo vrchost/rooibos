@@ -163,6 +163,26 @@ FFMPEG_EXECUTABLE = os.path.join(install_dir, 'dist', 'windows', 'ffmpeg', 'bin'
 
 PDF_PAGESIZE = 'letter'  # 'A4'
 
+SHOW_FRONTPAGE_LOGIN = "yes"
+
+MASTER_TEMPLATE = 'master_root.html'
+
+# Settings that should be available in template rendering
+EXPOSE_TO_CONTEXT = (
+    'STATIC_DIR',
+    'PRIMARY_COLOR',
+    'SECONDARY_COLOR',
+    'CUSTOM_TRACKER_HTML',
+    'ADMINS',
+    'LOGO_URL',
+    'FAVICON_URL',
+    'COPYRIGHT',
+    'TITLE',
+    'SHOW_FRONTPAGE_LOGIN',
+    'MASTER_TEMPLATE',
+    )
+
+
 additional_settings = [
     'settings_local',
 ]

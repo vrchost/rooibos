@@ -24,7 +24,7 @@ from reportlab.platypus import flowables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-import Image
+from PIL import Image
 import re
 import math
 import zipfile

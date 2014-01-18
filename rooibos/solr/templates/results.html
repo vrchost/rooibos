@@ -160,8 +160,8 @@
 
 {% if not has_last_modified_criteria %}
 <div class="facet" id="results_sidebar_last_modified">
-  <div class="facet-header">Last modified</div>
-  <div class="facet-body">
+  <div class="facet-header collapsed">Last modified</div>
+  <div class="facet-body" style="display: none;">
     <a href="{{ limit_url }}c=modified:[NOW-1DAY TO *]" rel="nofollow">Within last 1 day</a><br />
     <a href="{{ limit_url }}c=modified:[NOW-2DAYS TO *]" rel="nofollow">Within last 2 days</a><br />
     <a href="{{ limit_url }}c=modified:[NOW-7DAYS TO *]" rel="nofollow">Within last 7 days</a><br />
@@ -172,8 +172,8 @@
 
 {% if not has_record_created_criteria %}
 <div class="facet" id="results_sidebar_record_created">
-  <div class="facet-header">Record created</div>
-  <div class="facet-body">
+  <div class="facet-header collapsed">Record created</div>
+  <div class="facet-body" style="display: none;">
     <a href="{{ limit_url }}c=created:[NOW-1DAY TO *]" rel="nofollow">Within last 1 day</a><br />
     <a href="{{ limit_url }}c=created:[NOW-2DAYS TO *]" rel="nofollow">Within last 2 days</a><br />
     <a href="{{ limit_url }}c=created:[NOW-7DAYS TO *]" rel="nofollow">Within last 7 days</a><br />
@@ -191,6 +191,8 @@
 
 
 {% block content-top %}
+
+{{ block.super }}
 
 <form method="POST" action="{{ form_url }}" id="explore-form">{% csrf_token %}
 {% for f,v in hiddenfields %}

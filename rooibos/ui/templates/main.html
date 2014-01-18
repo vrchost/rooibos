@@ -113,6 +113,7 @@
 
     <div class="column">
     {% if not user.is_authenticated %}
+        {% if SHOW_FRONTPAGE_LOGIN|default:"yes" != "no" %}
         <h2>Log in</h2>
 
         <form action="{% url login %}" method="post">{% csrf_token %}
@@ -123,7 +124,7 @@
             </table>
             <input type="hidden" name="next" value="{% url main %}" />
         </form>
-
+        {% endif %}
     {% else %}
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}

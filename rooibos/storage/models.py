@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 import random
-import Image
+from PIL import Image
 import os
 import uuid
 from rooibos.contrib.ipaddr import IP
