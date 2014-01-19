@@ -192,13 +192,9 @@
 
 {% block content-top %}
 
-<<<<<<< HEAD
-<form method="GET" action="{{ form_url }}" id="explore-form">{% csrf_token %}
-=======
 {{ block.super }}
 
 <form method="POST" action="{{ form_url }}" id="explore-form">{% csrf_token %}
->>>>>>> d16d736956e8d76f4a081d9d3560d0655a3878cd
 {% for f,v in hiddenfields %}
 <input type="hidden" name="{{ f }}" value="{{ v }}" />
 {% endfor %}
