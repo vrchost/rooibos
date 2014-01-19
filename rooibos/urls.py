@@ -8,6 +8,7 @@ from django.http import HttpResponseServerError
 from django.template import loader, RequestContext
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
+from rooibos.legacy.views import legacy_viewer
 
 
 admin.autodiscover()
@@ -28,10 +29,11 @@ handler500 = getattr(settings, 'HANDLER500', handler500_with_context)
 
 def raise_exception():
     raise Exception()
-    
+
 
 urls = [
-    url(r'^$', main, {'HELP': 'frontpage'}, name='main'),
+    # main page needs SSL because of embedded login form, otherwise CSRF fails
+    url(r'^$', main, {'HELP': 'frontpage', 'SSL': True}, name='main'),
     url(r'^about/', direct_to_template, {'template': 'about.html'}, name='about'),
     url(r'^showcases/', direct_to_template, {'HELP': 'showcases',
                                              'template': 'showcases.html',
@@ -40,6 +42,9 @@ urls = [
     url(r'^logout/$', logout, {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
 #    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
+
+    # Legacy URL for presentation viewer in earlier version
+    url(r'^viewers/view/(?P<record>\d+)/.+/$', legacy_viewer),
 
     (r'^ui/', include('rooibos.ui.urls')),
     (r'^acl/', include('rooibos.access.urls')),
@@ -54,16 +59,20 @@ urls = [
     (r'^api/', include('rooibos.api.urls')),
     (r'^profile/', include('rooibos.userprofile.urls')),
     (r'^federated/', include('rooibos.federatedsearch.urls')),
-    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
+#    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
     (r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
+    (r'^megazine/', include('rooibos.megazine.urls')),
+    (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
+    (r'^pptexport/', include('rooibos.pptexport.urls')),
+    (r'^audiotextsync/', include('rooibos.audiotextsync.urls')),
 
     url(r'^favicon.ico$', serve, {'document_root': settings.STATIC_DIR, 'path': 'images/favicon.ico'}),
     url(r'^robots.txt$', serve, {'document_root': settings.STATIC_DIR, 'path': 'robots.txt'}),
     url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_DIR}, name='static'),
-    
+
     url(r'^exception/$', raise_exception),
     ]
 

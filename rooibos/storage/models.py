@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 import random
-import Image
+from PIL import Image
 import os
 import uuid
 from rooibos.contrib.ipaddr import IP
@@ -12,6 +12,8 @@ from rooibos.util import unique_slug
 from rooibos.data.models import Record
 from rooibos.access import sync_access, get_effective_permissions_and_restrictions, check_access
 import multimedia
+from functions import extractTextFromPdfStream
+
 
 class Storage(models.Model):
     title = models.CharField(max_length=100)
@@ -93,7 +95,16 @@ class Storage(models.Model):
         return storage and storage.size(name) or None
 
     def get_derivative_storage_path(self):
-        return os.path.join(settings.SCRATCH_DIR, self.name)
+        sp = os.path.join(settings.SCRATCH_DIR, self.name)
+        if not os.path.exists(sp):
+            try:
+                os.makedirs(sp)
+            except:
+                # check if directory exists now, if so another process may have created it
+                if not os.path.exists(sp):
+                    # still does not exist, raise error
+                    raise
+        return sp
 
     def is_local(self):
         return self.storage_system and self.storage_system.is_local()
@@ -101,6 +112,17 @@ class Storage(models.Model):
     def get_files(self):
         storage = self.storage_system
         return storage.get_files() if storage and hasattr(storage, 'get_files') else []
+
+    def get_upload_limit(self, user):
+        if user.is_superuser:
+            return 0
+        r, w, m, restrictions = get_effective_permissions_and_restrictions(user, self)
+        if restrictions:
+            try:
+                return int(restrictions['uploadlimit'])
+            except (ValueError, KeyError):
+                pass
+        return settings.UPLOAD_LIMIT
 
 
 class Media(models.Model):
@@ -212,7 +234,13 @@ class Media(models.Model):
     def editable_by(self, user):
         return self.record.editable_by(user) and check_access(user, self.storage, write=True)
 
-
+    def extract_text(self):
+        if self.mimetype == 'text/plain':
+            return self.load_file().read()
+        elif self.mimetype == 'application/pdf':
+            return extractTextFromPdfStream(self.load_file())
+        else:
+            return ''
 
 
 class TrustedSubnet(models.Model):

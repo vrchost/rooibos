@@ -24,7 +24,7 @@
        1.1: multiValued attribute introduced, false by default -->
 
   <types>
-    <!-- The StrField type is not analyzed, but indexed/stored verbatim.  
+    <!-- The StrField type is not analyzed, but indexed/stored verbatim.
        - StrField and TextField support an optional compressThreshold which
        limits compression (if enabled in the derived fields) to values which
        exceed a certain size (in characters).
@@ -53,7 +53,7 @@
 
     <!-- The format for this date field is of the form 1995-12-31T23:59:59Z, and
          is a more restricted form of the canonical representation of dateTime
-         http://www.w3.org/TR/xmlschema-2/#dateTime    
+         http://www.w3.org/TR/xmlschema-2/#dateTime
          The trailing "Z" designates UTC time and is mandatory.
          Optional fractional seconds are allowed: 1995-12-31T23:59:59.999Z
          All other components are mandatory.
@@ -68,7 +68,7 @@
                NOW/DAY+6MONTHS+3DAYS
                   ... 6 months and 3 days in the future from the start of
                       the current day
-                      
+
          Consult the DateField javadocs for more information.
       -->
     <fieldType name="date" class="solr.DateField" sortMissingLast="true" omitNorms="true"/>
@@ -149,7 +149,7 @@
    <fieldType name="textFacet" class="solr.TextField" positionIncrementGap="100" >
       <analyzer>
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(^[0-9-]+$)" replacement="" replace="all" /> 
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(^[0-9-]+$)" replacement="" replace="all" />
         <filter class="solr.LengthFilterFactory" min="2" max="100" />
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
@@ -175,13 +175,13 @@
         <filter class="solr.TrimFilterFactory" />
         <!-- The PatternReplaceFilter gives you the flexibility to use
              Java Regular expression to replace any sequence of characters
-             matching a pattern with an arbitrary replacement string, 
+             matching a pattern with an arbitrary replacement string,
              which may include back refrences to portions of the orriginal
              string matched by the pattern.
-             
+
              See the Java Regular Expression documentation for more
              infomation on pattern and replacement string syntax.
-             
+
              http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/package-summary.html
           -->
         <filter class="solr.PatternReplaceFilterFactory"
@@ -190,18 +190,18 @@
       </analyzer>
     </fieldType>
 
-    <!-- since fields of this type are by default not stored or indexed, any data added to 
-         them will be ignored outright 
-     --> 
-    <fieldtype name="ignored" stored="false" indexed="false" class="solr.StrField" /> 
+    <!-- since fields of this type are by default not stored or indexed, any data added to
+         them will be ignored outright
+     -->
+    <fieldtype name="ignored" stored="false" indexed="false" class="solr.StrField" />
 
     <!-- The "RandomSortField" is not used to store or search any
          data.  You can declare fields of this type it in your schema
-         to generate psuedo-random orderings of your docs for sorting 
-         purposes.  The ordering is generated based on the field name 
+         to generate psuedo-random orderings of your docs for sorting
+         purposes.  The ordering is generated based on the field name
          and the version of the index, As long as the index version
          remains unchanged, and the same field name is reused,
-         the ordering of the docs will be consistent.  
+         the ordering of the docs will be consistent.
          If you want differend psuedo-random orderings of documents,
          for the same version of the index, use a dynamicField and
          change the name
@@ -226,21 +226,24 @@
        boosting for the field, and saves some memory).  Only full-text
        fields or fields that need an index-time boost need norms.
      termVectors: [false] set to true to store the term vector for a given field.
-       When using MoreLikeThis, fields used for similarity should be stored for 
+       When using MoreLikeThis, fields used for similarity should be stored for
        best performance.
    -->
 
-   <field name="id" type="string" indexed="true" stored="true" required="true" /> 
-   
+   <field name="id" type="string" indexed="true" stored="true" required="true" />
+
    <!-- list of collection identifiers in which the record exists and is not hidden -->
    <field name="collections" type="long" indexed="true" stored="true" multiValued="true" />
    <!-- list of collection identifiers in which the record exists -->
    <field name="allcollections" type="long" indexed="true" stored="true" multiValued="true" />
-   
+   <!-- list of presentation identifiers in which the record exists -->
+   <field name="presentations" type="long" indexed="true" stored="true" multiValued="true" />
+
    <field name="owner" type="long" indexed="true" stored="true" multiValued="false" />
-   
+
    <field name="mimetype" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="resolution" type="string" indexed="true" stored="true" multiValued="true" />   
+   <field name="resolution" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="filecontent" type="text" indexed="true" stored="false" multiValued="true" />
 
    <field name="popularity" type="sint" indexed="true" stored="true" default="0"/>
 
@@ -250,7 +253,7 @@
         containing all of the text in each document
      -->
    <field name="word" type="string" indexed="true" stored="true"/>
-   
+
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
    <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
@@ -261,9 +264,14 @@
    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
    <field name="created" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
    <field name="modified" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
-   
+
    <field name="spell" type="textSpell" indexed="true" stored="true" multiValued="true"/>
-   
+
+   <!-- Record-level access control fields -->
+   <field name="acl_read" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="acl_write" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="acl_manage" type="string" indexed="true" stored="true" multiValued="true" />
+
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
         will be used if the name matches any of the patterns.
         RESTRICTION: the glob-like pattern in the name attribute must have
@@ -286,17 +294,17 @@
    <field name="ownedtag"  type="string"  indexed="true"  stored="false" multiValued="true"/>
    <copyField source="tag" dest="text"/>
 
-   <!-- uncomment the following to ignore any fields that don't already match an existing 
-        field name or dynamic field, rather than reporting them as an error. 
-        alternately, change the type="ignored" to some other type e.g. "text" if you want 
-        unknown fields indexed and/or stored by default --> 
+   <!-- uncomment the following to ignore any fields that don't already match an existing
+        field name or dynamic field, rather than reporting them as an error.
+        alternately, change the type="ignored" to some other type e.g. "text" if you want
+        unknown fields indexed and/or stored by default -->
    <!--dynamicField name="*" type="ignored" /-->
-   
+
    <dynamicField name="random_*" type="random" indexed="true" stored="false" />
  </fields>
 
 
- <!-- Field to use to determine and enforce document uniqueness. 
+ <!-- Field to use to determine and enforce document uniqueness.
       Unless this field is marked with required="false", it will be a required field
    -->
  <uniqueKey>id</uniqueKey>
@@ -311,6 +319,7 @@
   is added to the index.  It's used either to index the same field differently,
   or to add multiple fields to the same field for easier/faster searching.  -->
   <copyField source="*_t" dest="text"/>
+  <copyField source="filecontent" dest="text"/>
   <!-- <copyField source="*_t" dest="spell"/> -->
 
 </schema>

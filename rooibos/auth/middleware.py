@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
-from rooibos.auth import login, authenticate
+from django.contrib.auth import login, authenticate
 
 def basic_challenge(realm = None):
     if realm is None:
@@ -34,7 +34,9 @@ class BasicAuthenticationMiddleware:
                 request.session['unsafe_logout'] = True
 
     def process_response(self, request, response):
-        if type(response) == HttpResponseForbidden and not request.user.is_authenticated():
+        if (type(response) == HttpResponseForbidden
+            and not request.user.is_authenticated()
+            and "CSRF verification failed." not in response.content):
             return basic_challenge()
         else:
             return response

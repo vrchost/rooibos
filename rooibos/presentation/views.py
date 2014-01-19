@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
@@ -12,18 +12,21 @@ from django.db.models import Q
 from django.db import backend
 from django.contrib.auth.models import Permission
 from django import forms
+from django.views.decorators.http import require_POST
 from rooibos.contrib.tagging.models import Tag, TaggedItem
 from rooibos.contrib.tagging.forms import TagField
 from rooibos.contrib.tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper
-from rooibos.access import filter_by_access, accessible_ids
+from rooibos.access import filter_by_access
 from rooibos.util import json_view
 from rooibos.storage.models import ProxyUrl
 from rooibos.data.models import FieldSet, Record
 from rooibos.data.forms import FieldSetChoiceField
 from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, AccessControl
+from rooibos.userprofile.views import load_settings, store_settings
 from models import Presentation, PresentationItem
+from functions import duplicate_presentation
 import logging
 import base64
 
@@ -83,8 +86,8 @@ def add_selected_items(request, presentation):
 @login_required
 def edit(request, id, name):
 
-    presentation = get_object_or_404(Presentation.objects.filter(
-        id=id, id__in=accessible_ids(request.user, Presentation, write=True, manage=True)))
+    presentation = get_object_or_404(filter_by_access(
+        request.user, Presentation, write=True, manage=True).filter(id=id))
     existing_tags = [t.name for t in Tag.objects.usage_for_model(
         OwnedWrapper, filters=dict(user=request.user, content_type=OwnedWrapper.t(Presentation)))]
     tags = Tag.objects.get_for_object(
@@ -167,6 +170,7 @@ def edit(request, id, name):
         form = PropertiesForm(initial={'title': presentation.title,
                                'hidden': presentation.hidden,
                                'description': presentation.description,
+                               'password': presentation.password,
                                'hidden': presentation.hidden,
                                'fieldset': presentation.fieldset.id if presentation.fieldset else None,
                                'hide_default_data': presentation.hide_default_data,
@@ -194,8 +198,20 @@ def browse(request, manage=False):
     if manage and not request.user.is_authenticated():
         raise Http404()
 
+    if request.user.is_authenticated() and not request.GET.items():
+        # retrieve past settings
+        qs = load_settings(request.user, filter='presentation_browse_querystring')
+        if qs.has_key('presentation_browse_querystring'):
+            return HttpResponseRedirect('%s?%s' % (
+                reverse('presentation-manage' if manage else 'presentation-browse'),
+                qs['presentation_browse_querystring'][0],
+                ))
+
     presenter = request.GET.get('presenter')
     tags = filter(None, request.GET.getlist('t'))
+    untagged = 1 if request.GET.get('ut') else 0
+    if untagged:
+        tags = []
     remove_tag = request.GET.get('rt')
     if remove_tag and remove_tag in tags:
         tags.remove(remove_tag)
@@ -204,6 +220,10 @@ def browse(request, manage=False):
     get.setlist('t', tags)
     if get.has_key('rt'):
         del get['rt']
+    if untagged:
+        get['ut'] = '1'
+    elif get.has_key('ut'):
+        del get['ut']
 
     if request.user.is_authenticated():
         existing_tags = Tag.objects.usage_for_model(OwnedWrapper,
@@ -211,7 +231,12 @@ def browse(request, manage=False):
     else:
         existing_tags = ()
 
-    if tags:
+
+    if untagged and request.user.is_authenticated():
+        qs = TaggedItem.objects.filter(content_type=OwnedWrapper.t(OwnedWrapper)).values('object_id').distinct()
+        qs = OwnedWrapper.objects.filter(user=request.user, content_type=OwnedWrapper.t(Presentation), id__in=qs).values('object_id')
+        q = ~Q(id__in=qs)
+    elif tags:
         qs = OwnedWrapper.objects.filter(content_type=OwnedWrapper.t(Presentation))
         # get list of matching IDs for each individual tag, since tags may be attached by different owners
         ids = [list(TaggedItem.objects.get_by_model(qs, '"%s"' % tag).values_list('object_id', flat=True)) for tag in tags]
@@ -234,12 +259,12 @@ def browse(request, manage=False):
 
     if manage:
         qv = Q()
-        qid = Q(id__in=accessible_ids(request.user, Presentation, write=True, manage=True))
+        presentations = filter_by_access(request.user, Presentation, write=True, manage=True)
     else:
         qv = Presentation.published_Q()
-        qid = Q(id__in=accessible_ids(request.user, Presentation))
+        presentations = filter_by_access(request.user, Presentation)
 
-    presentations = Presentation.objects.select_related('owner').filter(q, qp, qk, qv, qid).order_by('title')
+    presentations = presentations.select_related('owner').filter(q, qp, qk, qv).order_by('title')
 
     if request.method == "POST":
 
@@ -254,7 +279,10 @@ def browse(request, manage=False):
             ids = map(int, request.POST.getlist('h'))
             Presentation.objects.filter(owner=request.user, id__in=ids).delete()
 
-        get['kw'] = request.POST.get('kw') or keywords
+        get['kw'] = request.POST.get('kw')
+        if get['kw'] != request.POST.get('okw') and get.has_key('page'):
+            # user entered keywords, reset page counter
+            del get['page']
 
         if request.POST.get('update_tags'):
             ids = map(int, request.POST.getlist('h'))
@@ -263,8 +291,8 @@ def browse(request, manage=False):
         # check for clicks on "add selected items" buttons
         for button in filter(lambda k: k.startswith('add-selected-items-'), request.POST.keys()):
             id = int(button[len('add-selected-items-'):])
-            presentation = get_object_or_404(Presentation.objects.filter(
-                id=id, id__in=accessible_ids(request.user, Presentation, write=True, manage=True)))
+            presentation = get_object_or_404(
+                filter_by_access(request.user, Presentation, write=True, manage=True).filter(id=id))
             add_selected_items(request, presentation)
             return HttpResponseRedirect(reverse('presentation-edit', args=(presentation.id, presentation.name)))
 
@@ -303,9 +331,15 @@ def browse(request, manage=False):
     presenters = User.objects.filter(presentation__in=presentations) \
                      .annotate(presentations=Count('presentation')).order_by('last_name', 'first_name')
 
+    if request.user.is_authenticated() and presentations:
+        # save current settings
+        querystring = request.GET.urlencode()
+        store_settings(request.user, 'presentation_browse_querystring', querystring)
+
     return render_to_response('presentation_browse.html',
                           {'manage': manage,
                            'tags': tags if len(tags) > 0 else None,
+                           'untagged': untagged,
                            'usertags': usertags if len(usertags) > 0 else None,
                            'active_tags': active_tags,
                            'active_presenter': presenter,
@@ -317,9 +351,9 @@ def browse(request, manage=False):
 
 def password(request, id, name):
 
-    presentation = get_object_or_404(Presentation.objects.filter(Presentation.published_Q(request.user),
-                                id=id,
-                                id__in=accessible_ids(request.user, Presentation)))
+    presentation = get_object_or_404(
+        filter_by_access(request.user, Presentation).filter(
+        Presentation.published_Q(request.user), id=id))
 
     class PasswordForm(forms.Form):
         password = forms.CharField(widget=forms.PasswordInput)
@@ -334,6 +368,7 @@ def password(request, id, name):
         form = PasswordForm(request.POST)
         if form.is_valid():
             request.session.setdefault('passwords', dict())[presentation.id] = form.cleaned_data.get('password')
+            request.session.modified = True
             return HttpResponseRedirect(request.GET.get('next', reverse('presentation-browse')))
     else:
         form = PasswordForm()
@@ -344,3 +379,26 @@ def password(request, id, name):
                            'next': request.GET.get('next', reverse('presentation-browse')),
                            },
                           context_instance=RequestContext(request))
+
+
+@require_POST
+@login_required
+def duplicate(request, id, name):
+    presentation = get_object_or_404(
+        filter_by_access(request.user, Presentation, write=True, manage=True).
+        filter(id=id))
+    dup = duplicate_presentation(presentation, request.user)
+    return HttpResponseRedirect(reverse('presentation-edit',
+                                        args=(dup.id, dup.name)))
+
+
+@login_required
+def record_usage(request, id, name):
+    record = Record.get_or_404(id, request.user)
+    presentations = Presentation.objects.filter(items__record=record).distinct().order_by('title')
+
+    return render_to_response('presentation_record_usage.html',
+                       {'record': record,
+                        'presentations': presentations,
+                        },
+                       context_instance=RequestContext(request))

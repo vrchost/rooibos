@@ -53,19 +53,22 @@ class SpreadsheetImport(object):
         try:
             value = unicode(value, 'utf8')
         except UnicodeDecodeError:
-            print "split error"
+            #print "split error"
             self.decode_error = True
             value = ''
         return map(lambda s: s.strip(), value.split(self.separator)) if (self.separator and split) else [value.strip()]
 
     def _split_values(self, row):
-        return dict((key, self._split_value(val, self.separate_fields.get(key))) for key, val in row.iteritems())
+        return dict((key, self._split_value(val, self.separate_fields.get(key)))
+            for key, val in row.iteritems()
+            if key)
 
     def _get_reader(self):
         self.csv_file.seek(0)
         start = 3 if (self.csv_file.read(3) == "\xef\xbb\xbf") else 0  # skip BOM in some UTF-8 files
         self.csv_file.seek(start)
         dialect = csv.Sniffer().sniff(self.csv_file.read(65536))
+        dialect.delimiter = ','
         dialect.doublequote = True
         self.csv_file.seek(start)
         return csv.DictReader(self.csv_file, dialect=dialect)

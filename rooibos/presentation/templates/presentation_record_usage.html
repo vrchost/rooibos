@@ -1,0 +1,82 @@
+{% extends "master.html" %}
+{% load ui %}
+{% load humanize %}
+{% load pagination_tags %}
+
+
+{% block sidebar %}
+{{ block.super }}
+<div class="facet active-facet" id="data_record_thumbnail">
+    <div class="facet-header">Record</div>
+    <div class="facet-body">
+        <a href="{{ record.get_absolute_url }}">Go to record</a><br />
+    </div>
+</div>
+
+<div class="facet active-facet" id="data_record_thumbnail">
+    <div class="facet-header">Thumbnail</div>
+    <div class="facet-body">
+        {% record record "True" "thumb" "True" %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block content %}
+
+{% autopaginate presentations 50 %}
+
+<h1>{{ presentations|length }} Presentation{{ presentations|pluralize }}
+    using "{{ record.title }}"</h1>
+
+{% paginate %}
+
+
+
+{% if presentations %}
+
+<table summary="List of Presentations" class="wide-table" cellspacing="0"><!-- need cellspacing for IE7 -->
+    <tr>
+        <th>Title</th>
+        <th>Hidden</th>
+        <th>Created</th>
+        <th>Modified</th>
+        <th>Presenter</th>
+        <th>Tags</th>
+        <th>Items</th>
+    </tr>
+{% for presentation in presentations %}
+    {% owned_tags_for_object presentation for request.user as ptags %}
+    {% owned_tags_for_object presentation for presentation.owner as otags %}
+    <tr>
+        <td>
+            {{ presentation.title }}
+        </td>
+        <td>{{ presentation.hidden|yesno:"hidden,-" }}</td>
+        <td>{{ presentation.created|naturalday }}</td>
+        <td>{{ presentation.modified|naturalday }}</td>
+        <td>{% if presentation.owner.last_name %}{{ presentation.owner.last_name }}, {{ presentation.owner.first_name }}{% else %}{{ presentation.owner.username }}{% endif %}</td>
+        <td>{% for ptag in ptags %}
+                {% tag ptag presentation "True" %}
+            {% endfor %}
+            {% for otag in otags %}
+                {% tag otag presentation 0 'secondary' %}
+            {% endfor %}
+            {% if not ptags and not otags %}&nbsp;{% endif %}
+        </td>
+        <td>
+          {{ presentation.visible_item_count }}
+          {% with presentation.hidden_item_count as h %}{% if h %}&nbsp;(+{{h}}){% endif %}{% endwith %}
+        </td>
+    </tr>
+{% endfor %}
+</table>
+
+{% paginate %}
+
+{% else %}
+No presentations are using this record.
+{% endif %}
+
+
+{% endblock %}

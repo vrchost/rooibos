@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="03174d3f-3dd5-483c-9ba4-ec3bdbea9b5a" projectUUID="03174d3f-3dd5-483c-9ba4-ec3bdbea9b5a" sdkVersion="4.1.0" uuid="87230baa-d115-4abf-9673-0fe951ef73e1" version="4">
+  <projects/>
+  <src>
+    <linked isMain="false" location="locale/{locale}" path="locale/{locale}" position="0" uuid="87230baa-d115-4abf-9673-0fe951ef73e1"/>
+  </src>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="87230baa-d115-4abf-9673-0fe951ef73e1"/>
+    <linked location="C:/Users/heggkj.JMUAD/Documents/Mviewer/DesktopMediaViewer/libs" path="/libs" position="1" uuid="87230baa-d115-4abf-9673-0fe951ef73e1"/>
+  </swc>
+  <misc/>
+  <theme/>
+</fxpProperties>

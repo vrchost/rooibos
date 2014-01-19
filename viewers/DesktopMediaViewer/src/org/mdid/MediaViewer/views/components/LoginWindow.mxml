@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   title="@Resource(bundle='Login', key='title')"
+			   title.notloggedin="@Resource(bundle='Login', key='title')" xmlns:validators="com.nbilyk.flex.validators.*"
+			   creationComplete="init()"
+			   >
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.air.preferences.Preference;
+			import com.adobe.air.preferences.PreferenceChangeEvent;
+			import com.adobe.utils.StringUtil;
+			
+			import mx.events.StateChangeEvent;
+			import mx.events.ValidationResultEvent;
+			import mx.managers.PopUpManager;
+			
+			import org.mdid.MediaViewer.events.LoginEvent;
+			import org.mdid.MediaViewer.events.SlideshowsEvent;
+			import org.mdid.MediaViewer.models.vo.User;
+			
+			import spark.events.TextOperationEvent;
+			
+			[Embed(source='/assets/skins/skin.swf', symbol='BusyBlocks')]
+			[Bindable]
+			private var busyAnimation:Class;
+			
+			private var vResult:ValidationResultEvent;
+			public var prefs:Preference;
+			
+			private function init():void {
+				this.addEventListener(KeyboardEvent.KEY_UP, handleKeyboardInput);
+				this.addEventListener(StateChangeEvent.CURRENT_STATE_CHANGE, handleStateChangedEvent);
+				this.usernameField.text = Capabilities.isDebugger ? "heggkj" : "";
+			}
+			private function handleKeyboardInput(e:KeyboardEvent):void {
+				if (e.keyCode != 13) return;
+				var focusedObject:InteractiveObject = this.getFocus();
+				if (focusedObject is Button) focusedObject.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+			}
+			
+			private function loginbutton_clickHandler(e:MouseEvent=null):void {
+				vResult = this.nameValidator.validate();
+				if (vResult.type == ValidationResultEvent.INVALID) return;
+				vResult = this.passwordValidator.validate();
+				if (vResult.type == ValidationResultEvent.INVALID) return;
+				this.currentState = "loggingin";
+				if (!prefs.isLatestDataLoaded) prefs.load();
+				var url:String = prefs.getValue("mdid_url");
+				this.urlinput.text = StringUtil.trim(this.urlinput.text);
+				if (url != this.urlinput.text) {
+					this.prefs.setValue("mdid_url", this.urlinput.text);
+					this.prefs.save();					
+				}
+				var user:User = new User();
+				user.username = this.usernameField.text;
+				user.password = this.passwordField.text;
+				this.passwordField.text = "";
+				dispatchEvent(new LoginEvent(LoginEvent.LOGIN_USER, user));
+			}
+			protected function savebutton_clickHandler(event:MouseEvent=null):void {
+				this.urlinput.text = StringUtil.trim(this.urlinput.text);
+				vResult = this.myURLValidator.validate(this.urlinput.text);
+				this.currentState = "feedbackline";
+				if (vResult.results == null) {
+					if (!prefs.isLatestDataLoaded) prefs.load();
+					this.prefs.setValue("mdid_url", this.urlinput.text);
+					this.prefs.save();
+					this.loginButton.enabled = true;
+					this.savebutton.enabled = false;
+					this.updateMessage.text = "SUCCESS! URL has been saved.";
+				} else {
+					var temp:String = this.urlinput.text;
+					if (temp.substr(0,4).toLowerCase() != "http" && temp.indexOf("//") < 0 && temp.substr(0,1) != "/" && temp.substr(0,1) != ":") {
+						temp = "http://" + temp;
+						var vResult2:ValidationResultEvent = this.myURLValidator.validate(temp);
+						if (vResult2.results == null) {
+							this.urlinput.text = temp;
+							if (!prefs.isLatestDataLoaded) prefs.load();
+							this.prefs.setValue("mdid_url", this.urlinput.text);
+							this.prefs.save();
+							this.loginButton.enabled = true;
+							this.savebutton.enabled = false;
+							this.updateMessage.text = "SUCCESS! URL has been saved.";
+						} else {
+							this.loginButton.enabled = false;
+							this.updateMessage.text = vResult.results[0].errorMessage;	
+						}
+					} else {
+						this.loginButton.enabled = false;
+						this.updateMessage.text = vResult.results[0].errorMessage;
+					}
+				}
+			}
+			protected function urlinput_changeHandler():void {
+				savebutton.enabled=true;
+				if (this.currentState == "feedbackline") {
+					this.updateMessage.text = "";
+				}
+			}
+			
+			protected function selectionslideshowbutton_clickHandler(event:MouseEvent=null):void {
+				dispatchEvent(new SlideshowsEvent(SlideshowsEvent.SELECT_SLIDESHOW));
+				this.closeButton_clickHandler(event);
+			}
+			
+			protected function logoutbutton_clickHandler(event:MouseEvent):void {
+				dispatchEvent(new LoginEvent(LoginEvent.LOGOUT));
+				this.passwordField.text = "";
+				this.currentState = "notloggedin";
+			}
+			protected function handleStateChangedEvent(e:StateChangeEvent):void {
+				this.closeButton.visible = (this.currentState == "loggingin" || this.currentState == "retrievingslideshows") ? false : true;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<mx:StringValidator id="nameValidator" source="{usernameField}" property="text" required="true" requiredFieldError="User name is required." />
+		<mx:Validator id="passwordValidator" source="{passwordField}" property="text" required="true" requiredFieldError="Password is required." />
+		<validators:URLValidator id="myURLValidator" required="true" requiredFieldError="MDID URL is required." invalidUrlError="Not a valid URL. Please try again."/>
+	</fx:Declarations>
+	<s:layout>
+		<s:VerticalLayout gap="4" horizontalAlign="center" paddingBottom="7" paddingLeft="10" paddingRight="10" paddingTop="5"/>
+	</s:layout>
+	<s:states>
+		<s:State name="notloggedin"/>
+		<s:State name="loggedin"/>
+		<s:State name="loginfailed"/>
+		<s:State name="loggingin"/>
+		<s:State name="feedbackline"/>
+		<s:State name="retrievingslideshows"/>
+		<s:State name="retrievingslideshowsfailed"/>
+	</s:states>
+	<s:VGroup includeIn="notloggedin, feedbackline" creationComplete="this.closeButton.visible=true;">		
+		<mx:Form id="loginForm">
+			<mx:FormItem label="@Resource(bundle='Login', key='usernameLabel')">
+				<s:TextInput text="" id="usernameField"/>
+			</mx:FormItem>
+			<mx:FormItem label="@Resource(bundle='Login', key='passwordLabel')">
+				<s:TextInput text="" id="passwordField" displayAsPassword="true" enter="loginbutton_clickHandler()"/>
+			</mx:FormItem>
+			<mx:FormItem paddingTop="5">
+				<s:Button id="loginButton" label="@Resource(bundle='Login', key='buttonLabel')"
+						  click="loginbutton_clickHandler(event)"  />
+			</mx:FormItem>
+		</mx:Form>
+		<s:VGroup horizontalAlign="left" gap="6">
+			<s:Label text="MDID URL"/>
+			<s:HGroup verticalAlign="bottom" gap="4">
+				<s:TextInput id="urlinput" width="220" change="urlinput_changeHandler()" enter="savebutton_clickHandler()"/>
+				<s:Button id="savebutton" label="@Resource(bundle='Login', key='updateButtonLabel')" enabled="false" click="savebutton_clickHandler(event)" />
+			</s:HGroup>
+		</s:VGroup>
+	</s:VGroup>
+	<s:HGroup includeIn="feedbackline" horizontalAlign="left" width="100%" paddingTop="4">
+		<s:Label id="updateMessage" textAlign="center" maxWidth="250"/>
+	</s:HGroup>
+	<s:VGroup horizontalAlign="center" includeIn="loggedin" gap="15" paddingTop="10" paddingBottom="8">
+		<s:Label  text="You are logged into MDID. When you click the Logout button below, the current slideshow (if there is one) will be removed." textAlign="center" maxWidth="250"/>
+		<s:HGroup gap="4">
+			<s:Button id="loggedinCloseButton" label="Close Window" click="closeButton_clickHandler(event)" creationComplete="this.loggedinCloseButton.setFocus()"/>
+			<s:Button id="logoutbutton" label="Logout" click="logoutbutton_clickHandler(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+	<s:VGroup includeIn="loginfailed" gap="15" paddingTop="10" paddingBottom="8" horizontalAlign="center">
+		<s:Label text="ERROR: Unable to log you into MDID." textAlign="center" maxWidth="250"/>
+		<s:HGroup gap="10">
+			<s:Button label="Close Window" click="this.closeButton_clickHandler(event)" includeInLayout="false"/>
+			<s:Button id="tryagainbutton" label="Try Again" click="this.currentState='notloggedin';" creationComplete="this.tryagainbutton.setFocus()"/>
+		</s:HGroup>
+		<s:Label id="errormessage" textAlign="center" maxWidth="250"/>
+	</s:VGroup>
+	<s:VGroup horizontalAlign="center" includeIn="loggingin" gap="15" paddingTop="10" paddingBottom="12">
+		<s:Label text="Attempting to log into your MDID." textAlign="center" maxWidth="250"/>
+		<mx:Image source="{busyAnimation}"/>
+		<s:Label text="[ Please be patient. ]" textAlign="center" maxWidth="250"/>
+	</s:VGroup>
+	<s:VGroup horizontalAlign="center" includeIn="retrievingslideshows" gap="15" paddingTop="10" paddingBottom="12">
+		<s:Label textAlign="center" maxWidth="250">
+			<s:text>SUCCESS! You are logged into MDID. Attempting to retrieve your slideshows...</s:text>
+		</s:Label>
+		<mx:Image source="{busyAnimation}"/>
+		<s:Label text="[ Please be patient. ]" textAlign="center" maxWidth="250"/>
+	</s:VGroup>
+	<s:VGroup includeIn="retrievingslideshowsfailed" gap="15" paddingTop="10" paddingBottom="8" horizontalAlign="center">
+		<s:Label text="ERROR: Unable to your list of slideshows." textAlign="center" maxWidth="250"/>
+		<s:HGroup gap="10">
+			<s:Button label="Close Window" click="this.closeButton_clickHandler(event)" includeInLayout="false"/>
+			<s:Button label="Logout and Try Again" click="logoutbutton_clickHandler(event)"/>
+		</s:HGroup>
+		<s:Label id="errormessage2" textAlign="center" maxWidth="250"/>
+	</s:VGroup>
+</s:TitleWindow>

@@ -8,11 +8,11 @@ class Preference(models.Model):
 
     def __unicode__(self):
         return "%s=%s" % (self.setting, self.value)
-    
+
 
 class UserProfile(models.Model):
     user = models.ForeignKey(User, unique=True)
-    preferences = models.ManyToManyField(Preference)
+    preferences = models.ManyToManyField(Preference, blank=True)
 
     def __unicode__(self):
         return "%s" % self.user

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:components="org.mdid.MediaViewer.views.components.*"
+		 xmlns:seb="com.sebastiaanholtrop.components.coverflow.*" 
+		 width="100%" height="100%"
+		 creationComplete="init()"
+		 addedToStage="handleResize()"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import mx.containers.BoxDirection;
+		
+			import mx.events.ResizeEvent;
+			import mx.events.StateChangeEvent;
+			
+			import org.mdid.MediaViewer.events.ControlBarEvent;
+			import org.mdid.MediaViewer.events.TopBarEvent;
+			
+			private var delayResizeTimer:Timer = new Timer(5, 1);
+			private var topbarRollOverTimer:Timer = new Timer(250, 1);
+			private var controlbarRollOverTimer:Timer = new Timer(250, 1);
+			
+			protected function init():void {
+				this.setCurrentState("singlePane");
+				this.topbar.depth = controlbar.depth + 1;
+				delayResizeTimer.addEventListener(TimerEvent.TIMER, centerAndRevealDoublePaneImages);
+				this.topbarRollOverTimer.addEventListener(TimerEvent.TIMER, hitTestTopBarHandler);
+				this.controlbarRollOverTimer.addEventListener(TimerEvent.TIMER, hitTestControlBarHandler);
+				controlbar.addEventListener(ControlBarEvent.SHOW_CONTROLBAR, controlbarRollOverHandler);
+				topbar.addEventListener(TopBarEvent.SHOW_TOPBAR, topbarRollOverHandler);
+				this.parent.addEventListener(ResizeEvent.RESIZE, handleResize);
+				this.parentApplication.addEventListener(NativeWindowDisplayStateEvent.DISPLAY_STATE_CHANGE, handleResize);
+				this.controlbar.addEventListener(ControlBarEvent.SPLIT_DISPLAY_H, handlePaneChange);
+				this.controlbar.addEventListener(ControlBarEvent.SPLIT_DISPLAY_V, handlePaneChange);
+				this.controlbar.addEventListener(ControlBarEvent.UNSPLIT_DISPLAY, handlePaneChange);
+				this.appmenu.setStyle("showEffect", rollUpAppMenu);
+				this.appmenu.setStyle("hideEffect", rollDownAppMenu);
+			}
+			protected function handlePaneChange(e:ControlBarEvent):void {
+				switch (e.type) {
+					case ControlBarEvent.SPLIT_DISPLAY_V :
+						this.controlbar.singleHsplit.enabled = true;
+						this.controlbar.singlescreen.enabled = true;
+						this.controlbar.singleVsplit.enabled = false;
+						setCurrentState("doublePane");
+						this.doublepane.direction = BoxDirection.VERTICAL;
+						this.controlbar.paneControl.enabled = true;
+						delayResizeTimer.reset();
+						delayResizeTimer.start();
+						break;
+					case ControlBarEvent.SPLIT_DISPLAY_H :
+						this.controlbar.singleHsplit.enabled = false;
+						this.controlbar.singlescreen.enabled = true;
+						this.controlbar.singleVsplit.enabled = true;
+						setCurrentState("doublePane");
+						this.doublepane.direction = BoxDirection.HORIZONTAL;
+						this.controlbar.paneControl.enabled = true;
+						delayResizeTimer.reset();
+						delayResizeTimer.start();
+						break;
+					case ControlBarEvent.UNSPLIT_DISPLAY :
+						this.controlbar.singleHsplit.enabled = true;
+						this.controlbar.singlescreen.enabled = false;
+						this.controlbar.singleVsplit.enabled = true;
+						setCurrentState("singlePane");
+						this.singlepane.imageHolder.imageViewer.visible = true;
+						this.singlepane.imageHolder.imageViewer.centerView();
+						this.controlbar.paneControl.enabled = false;
+						break;
+				}
+				this.controlbar.blankscreen.styleName = "ScreenBlank";	
+			}
+			protected function centerAndRevealDoublePaneImages(e:TimerEvent):void {
+				delayResizeTimer.stop();
+				if (this.doublepane.imageHolder != null) {
+					this.doublepane.imageHolder.imageViewer.centerView();
+					this.doublepane.imageHolder.imageViewer.visible = true;
+				} 
+				if (this.doublepane.imageHolder2 != null) {
+					this.doublepane.imageHolder2.imageViewer.centerView();
+					this.doublepane.imageHolder2.imageViewer.visible = true;
+				}
+			}
+			protected function controlbarRollOverHandler(e:Event=null):void {
+				if (controlbar.pinbutton.styleName == "PinnedButton") return;
+				controlbarRollOverTimer.reset();
+				controlbarRollOverTimer.start();
+				this.parentApplication.stage.addEventListener(Event.MOUSE_LEAVE, hitTestControlBarHandler);
+				if (moveOutFromBottom.isPlaying) moveOutFromBottom.stop();
+				if (!moveInFromBottom.isPlaying) moveInFromBottom.play();
+			}
+			protected function hitTestControlBarHandler(e:Event):void {
+				controlbarRollOverTimer.stop();
+				this.parentApplication.stage.removeEventListener(Event.MOUSE_LEAVE, hitTestControlBarHandler);
+				if (e.type == Event.MOUSE_LEAVE || !controlbar.hitTestPoint(stage.mouseX, stage.mouseY)) controlbarRollOutHandler();
+			}
+			public function controlbarRollOutHandler(e:Event=null):void {
+				if (controlbar.pinbutton.styleName == "PinnedButton" || appmenu.visible) return;
+				if (moveInFromBottom.isPlaying) moveInFromBottom.stop();
+				if (!moveOutFromBottom.isPlaying) moveOutFromBottom.play();
+			}
+			protected function topbarRollOverHandler(e:Event=null):void {
+				if (topbar.smallpinbutton.styleName == "SmallPinnedButton") return;
+				topbarRollOverTimer.reset();
+				topbarRollOverTimer.start();
+				this.parentApplication.stage.addEventListener(Event.MOUSE_LEAVE, hitTestTopBarHandler);
+				if (moveOutFromTop.isPlaying) moveOutFromTop.stop();
+				if (!moveInFromTop.isPlaying) moveInFromTop.play();
+			}
+			protected function hitTestTopBarHandler(e:Event):void {
+				topbarRollOverTimer.stop();
+				this.parentApplication.stage.removeEventListener(Event.MOUSE_LEAVE, hitTestTopBarHandler);
+				if (e.type == Event.MOUSE_LEAVE || !topbar.hitTestPoint(stage.mouseX, stage.mouseY)) topbarRollOutHandler();
+			}
+			protected function topbarRollOutHandler(e:Event=null):void {
+				if (topbar.smallpinbutton.styleName == "SmallPinnedButton") return;
+				if (moveInFromTop.isPlaying) moveInFromTop.stop();
+				if (!moveOutFromTop.isPlaying) moveOutFromTop.play();
+			}
+			public function handleResize(e:Event=null):void {
+				trace("handleResize: " + this.stage.stageHeight);
+				this.appmenu.width = this.topbar.width = this.controlbar.width = this.stage.stageWidth;
+				this.appmenu.y = this.stage.stageHeight - this.appmenu.height - this.controlbar.height;
+				this.controlbar.y = this.stage.stageHeight - ((this.controlbar.pinbutton.styleName == "PinButton") ? 0 : this.controlbar.height);
+				if (this.currentState == "singlePane" && this.singlepane != null && this.singlepane.imageHolder != null) {
+					this.singlepane.imageHolder.imageViewer.centerView();
+				} else if (this.currentState == "doublePane" && this.doublepane != null && this.doublepane.imageHolder != null) {
+					this.doublepane.imageHolder.imageViewer.centerView();
+					this.doublepane.imageHolder2.imageViewer.centerView();
+				}
+				if (this.controlbar.includeInLayout == false && this.appmenu.visible) this.appmenu.visible = false;
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<s:Animate id="moveInFromTop" target="{topbar}" duration="250" disableLayout="false">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y"  valueTo="0"/>
+				<s:SimpleMotionPath property="alpha" valueTo="1"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="moveOutFromTop" target="{topbar}" duration="250" startDelay="500" disableLayout="false">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueTo="-35"/>
+				<s:SimpleMotionPath property="alpha" valueTo="0"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="moveInFromBottom" target="{controlbar}" duration="250" disableLayout="false">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y"  valueTo="{this.height-45}"/>
+				<s:SimpleMotionPath property="alpha" valueTo="1"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="moveOutFromBottom" target="{controlbar}" effectStart="this.appmenu.visible=false" duration="250" startDelay="500" disableLayout="false">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueTo="{this.height}"/>
+				<s:SimpleMotionPath property="alpha" valueTo="0"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="rollUpAppMenu" duration="200" effectEnd="this.appmenu.visible=true;">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueFrom="{this.height}" valueBy="-90"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="rollDownAppMenu" duration="200" effectEnd="this.appmenu.visible=false;">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueBy="90"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations> 
+	<s:layout>
+		<s:VerticalLayout gap="0" paddingBottom="0" paddingLeft="0" paddingRight="0" paddingTop="0"/>
+	</s:layout>
+	<s:states>
+		<s:State name="singlePane"/>
+		<s:State name="doublePane"/>
+	</s:states>
+	<s:TextInput id="dummyFocusHolder" maxChars="1" visible="false" includeInLayout="false" y="-100" x="-100" width="0" height="0"/>
+	<components:TopBar id="topbar" includeInLayout="true" rollOut="topbarRollOutHandler(event)" rollOver="topbarRollOverHandler(event)"/>
+	<components:DoublePane id="doublepane" includeIn="doublePane"/>
+	<components:SinglePane id="singlepane" includeIn="singlePane"/>
+	<components:AppMenu id="appmenu" left="0" includeInLayout="false" x="0" visible="false"/>
+	<components:ControlBar id="controlbar" left="0" includeInLayout="true" rollOut="controlbarRollOutHandler(event)" rollOver="controlbarRollOverHandler(event)"/>
+</s:Group>

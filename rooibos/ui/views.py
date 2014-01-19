@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.views.decorators.cache import cache_control
 from django.utils import simplejson
+from django.contrib.auth.forms import AuthenticationForm
+from django.views.decorators.csrf import csrf_protect
 from rooibos.util import json_view
 from rooibos.data.models import Record, Collection
 from rooibos.storage.models import Storage
@@ -31,37 +33,46 @@ def css(request, stylesheet):
                               context_instance=RequestContext(request),
                               mimetype='text/css')
 
-
+@csrf_protect
 def main(request):
+
+    criteria = ['mimetype:image/jpeg', '-owner:[* TO *]']
+    try:
+        criteria.append('allcollections:%d' %
+                        Collection.objects.get(name='front-page-content').id)
+    except Collection.DoesNotExist:
+        pass
 
     (hits, records, search_facets, orfacet, query, fields) = run_search(
         request.user,
-        criteria=['mimetype:image/jpeg'],
+        criteria=criteria,
         sort='random_%d asc' % random.randint(100000, 999999),
         page=1,
         pagesize=8,
         produce_facets=False)
 
-    order = range(1, 8)
+    order = range(1, len(records or []))
     random.shuffle(order)
+
+    request.session.set_test_cookie()
+    form = AuthenticationForm()
 
     return render_to_response('main.html',
                               {'records': records,
-                               'order': [0] + order},
+                               'order': [0] + order,
+                               'login_form': form},
                               context_instance=RequestContext(request))
 
 
 @json_view
 def select_record(request):
-    selected = request.session.get('selected_records', ())
+    selected = list(request.session.get('selected_records', ()))
     if request.method == "POST":
         ids = simplejson.loads(request.POST.get('id', '[]'))
-        checked = request.POST.get('checked') == 'true'
-        if checked:
-            selected = set(selected) | set(ids)
-        else:
-            selected = set(selected) - set(ids)
-    request.session['selected_records'] = selected
+        [selected.remove(id) for id in ids if id in selected]
+        if request.POST.get('checked') == 'true':
+            selected.extend(ids)
+        request.session['selected_records'] = selected
 
     context = ctx_selected_records(request)
     rc = RequestContext(request)

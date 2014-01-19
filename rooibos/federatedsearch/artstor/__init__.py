@@ -14,6 +14,7 @@ from rooibos.federatedsearch.models import FederatedSearch, HitCount
 from BeautifulSoup import BeautifulSoup
 import cookielib
 import datetime
+import socket
 
 
 class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
@@ -42,7 +43,11 @@ class ArtstorSearch(FederatedSearch):
         )
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookielib.CookieJar()), SmartRedirectHandler())
         request = urllib2.Request(url)
-        response = opener.open(request)
+        socket.setdefaulttimeout(self.timeout)
+        try:
+            response = opener.open(request)
+        except urllib2.URLError:
+            return 0
         soup = BeautifulSoup(response)
         try:
             return int(soup.find('numberofrecords').contents[0])
@@ -77,7 +82,11 @@ class ArtstorSearch(FederatedSearch):
             pagesize,
             (page - 1) * pagesize + 1,
         )
-        response = opener.open(urllib2.Request(url))
+        socket.setdefaulttimeout(self.timeout)
+        try:
+            response = opener.open(urllib2.Request(url))
+        except urllib2.URLError:
+            return None
 
         try:
             results = ElementTree(file=response)
@@ -107,3 +116,7 @@ class ArtstorSearch(FederatedSearch):
         cached.results = simplejson.dumps(result, separators=(',', ':'))
         cached.save()
         return result
+
+    @classmethod
+    def available(cls):
+        return bool(settings.ARTSTOR_GATEWAY)

@@ -9,7 +9,7 @@ from django.utils import simplejson
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import FieldValue, get_system_field
-import Image
+from PIL import Image
 
 def _seconds_to_timestamp(seconds):
     hours = seconds / 3600
@@ -26,6 +26,40 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         cmd = 'ffmpeg -i "%s" %s -y "%s"' % (infile, parameters, filename)
         ffmpeg = Popen(cmd, executable=settings.FFMPEG_EXECUTABLE, stdout=PIPE, stderr=PIPE)
         (output, errors) = ffmpeg.communicate()
+        file = open(filename, 'rb')
+        result = StringIO(file.read())
+        file.close()
+        return result, output, errors
+    except:
+        return None, None, None
+    finally:
+        os.remove(filename)
+
+def _which(program):
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+    return None
+
+def _pdfthumbnail(infile):
+    handle, filename = tempfile.mkstemp('.pdf')
+    os.close(handle)
+    try:
+        cmd = 'python "%s" "%s" "%s"' % (
+            os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
+            infile,
+            filename,
+        )
+        proc = Popen(cmd, executable=_which('python.exe'), stdout=PIPE, stderr=PIPE)
+        (output, errors) = proc.communicate()
         file = open(filename, 'rb')
         result = StringIO(file.read())
         file.close()
@@ -104,10 +138,18 @@ def render_audio_waveform_by_mimetype(audiofile, mimetype):
                                  format['left'], format['top'], format['height'], format['width'],
                                  format['max_only'])
 
+
+def render_pdf(pdffile):
+    image, output, errors = _pdfthumbnail(pdffile)
+    return image
+
+
 def get_image(media):
+    logging.debug('get_image: %s (%s)' % (media.get_absolute_file_path(), media.mimetype))
+    image = None
     if media.mimetype.startswith('image/'):
-        return media.load_file()
-    if media.mimetype.startswith('video/'):
+        image = media.load_file()
+    elif media.mimetype.startswith('video/'):
         # retrieve offset if available
         try:
             offset = int(media.record.fieldvalue_set.filter(
@@ -116,7 +158,43 @@ def get_image(media):
             )[0].value)
         except IndexError, ValueError:
             offset = 5
-        return capture_video_frame(media.get_absolute_file_path(), offset=offset)
-    if media.mimetype.startswith('audio/'):
-        return render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
-    return None
+        image = capture_video_frame(media.get_absolute_file_path(), offset=offset)
+    elif media.mimetype.startswith('audio/'):
+        image = render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
+    elif media.mimetype == 'application/pdf':
+        image = render_pdf(media.get_absolute_file_path())
+    return image
+
+
+def overlay_image_with_mimetype_icon(image, mimetype):
+    """
+    Overlays an image with an icon in the lower right corner
+    No scaling of image or overlay icon
+    Image must be a file-like object
+    @returns a file-like object with the new image, or the same object if no
+    overlay was found
+    """
+    path = os.path.join(os.path.dirname(__file__), '..', 'static', 'images', 'overlays')
+    overlay = os.path.join(path, mimetype.replace('/', '_') + ".png")
+    if not os.path.exists(overlay):
+        overlay = os.path.join(path, mimetype.split('/')[0] + ".png")
+    if not os.path.exists(overlay):
+        return image
+
+    if not isinstance(image, Image.Image):
+        original_image = image if img_object else Image.open(image)
+    else:
+        original_image = image
+
+    overlay_image = Image.open(open(overlay, 'rb'))
+    pos = (original_image.size[0] - overlay_image.size[0],
+           original_image.size[1] - overlay_image.size[1])
+    original_image.paste(overlay_image, pos, overlay_image)
+
+    if isinstance(image, Image.Image):
+        return image
+
+    output = StringIO()
+    original_image.save(output, 'JPEG', quality=85, optimize=True)
+    output.seek(0)
+    return output

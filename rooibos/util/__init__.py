@@ -4,11 +4,23 @@ from django.http import HttpResponse
 from django.utils import simplejson
 from django.core.mail import mail_admins
 from django.utils.translation import ugettext as _
+from django.utils.decorators import wraps
+from django.utils.functional import SimpleLazyObject
 import sys
 import mimetypes
 import logging
 import os
+import hashlib
 
+# Decorator to solve issues with IE/SSL/Flash caching
+def must_revalidate(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        response["Cache-Control"] = "bogus"  #"no-cache, must-revalidate, no-store"
+        response["Pragma"] = "bogus"  #"no-cache"
+        return response
+    return wrapper
 
 def json_view(func):
     # http://www.djangosnippets.org/snippets/622/
@@ -48,7 +60,7 @@ def json_view(func):
                         'text': msg}
 
         json = simplejson.dumps(response)
-        return HttpResponse(json, mimetype='application/json')
+        return HttpResponse(json, mimetype='text/plain') # mimetype='application/json')
     return wrap
 
 
@@ -134,14 +146,31 @@ def xfilter(func, iterator):
             yield next
 
 
-def create_symlink(file, symlink):
-    if hasattr(os, 'symlink'):
+def create_link(file, link, hard=False):
+    func = 'link' if hard else 'symlink'
+    if hasattr(os, func):
         # Linux, use built-in function
         try:
-            os.symlink(file, symlink)
+            getattr(os, func)(file, link)
             return True
         except OSError:
             return False
     else:
         # Windows, use mklink
-        return 0 == os.system("mklink \"%s\" \"%s\"" % (symlink, file))
+        return 0 == os.system("mklink %s \"%s\" \"%s\"" %
+                              ('/H' if hard else '', link, file))
+
+
+def calculate_hash(*args):
+    hash = hashlib.md5()
+    for arg in args:
+        hash.update(repr(arg))
+    return hash.hexdigest()
+
+
+
+class IterableLazyObject(SimpleLazyObject):
+
+    def __iter__(self):
+        if self._wrapped is None: self._setup()
+        return self._wrapped.__iter__()

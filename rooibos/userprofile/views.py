@@ -4,6 +4,8 @@ from models import UserProfile, Preference
 
 
 def load_settings(user, filter=None):
+    if not user.is_authenticated():
+        return {}
     try:
         profile = user.get_profile()
     except UserProfile.DoesNotExist:
@@ -16,19 +18,20 @@ def load_settings(user, filter=None):
     for setting in preferences:
         settings.setdefault(setting.setting, []).append(setting.value)
     return settings
-    
+
 def store_settings(user, key, value):
+    if not user.is_authenticated():
+        return False
     try:
         profile = user.get_profile()
     except UserProfile.DoesNotExist:
         profile = UserProfile.objects.create(user=user)
-    
+
     if key and value:
-        setting, created = profile.preferences.get_or_create(setting=key)
-        setting.value = value
-        setting.save()
+        profile.preferences.filter(setting=key).delete()
+        profile.preferences.create(setting=key, value=value)
         return True
-        
+
     return False
 
 @json_view
@@ -36,7 +39,7 @@ def load_settings_view(request, filter=None):
     if not request.user.is_authenticated():
         return dict(error='Not logged in')
     return dict(settings=load_settings(request.user, filter))
-    
+
 
 @json_view
 def store_settings_view(request):

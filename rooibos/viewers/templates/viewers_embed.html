@@ -1,0 +1,6 @@
+<!-- Begin embedded object: {{ obj.title }} -->
+{% block embed-div %}
+<div id="{{ divid }}"></div>
+{% endblock %}
+<script type="text/javascript" src="http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{{ url }}?id={{ divid }}{% for key, val in options.items %}&amp;{{ key }}={{ val|urlencode }}{% endfor %}"></script>
+<!-- End embedded object -->

@@ -8,7 +8,7 @@ from rooibos.contrib.ipaddr import IP
 
 class AccessControl(models.Model):
     content_type = models.ForeignKey(ContentType)
-    object_id = models.PositiveIntegerField()
+    object_id = models.PositiveIntegerField(db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User, null=True, blank=True)
     usergroup = models.ForeignKey(Group, null=True, blank=True)
@@ -61,11 +61,6 @@ def update_membership_by_attributes(user, info):
         group.update_membership_by_attributes(user, info)
     return True
 
-def update_membership_by_ip(user, ip):
-    for group in ExtendedGroup.objects.filter(type=IP_BASED_GROUP):
-        group.update_membership_by_ip(user, ip)
-    return True
-
 
 class ExtendedGroupManager(models.Manager):
 
@@ -75,6 +70,9 @@ class ExtendedGroupManager(models.Manager):
         q = Q(type=EVERYBODY_GROUP)
         if assume_authenticated or user.is_authenticated():
             q = q | Q(type=AUTHENTICATED_GROUP)
+        ip_group_memberships = getattr(user, '_cached_ip_group_memberships', [])
+        if ip_group_memberships:
+            q = q | Q(id__in=ip_group_memberships)
         return self.filter(q)
 
 
@@ -94,14 +92,6 @@ class ExtendedGroup(Group):
     def update_membership_by_attributes(self, user, info=None):
         if self.type == ATTRIBUTE_BASED_GROUP:
             if info and self._check_attributes(info):
-                self.user_set.add(user)
-            else:
-                self.user_set.remove(user)
-
-    # to be called upon a user login
-    def update_membership_by_ip(self, user, ip=None):
-        if self.type == IP_BASED_GROUP:
-            if ip and self._check_subnet(ip):
                 self.user_set.add(user)
             else:
                 self.user_set.remove(user)

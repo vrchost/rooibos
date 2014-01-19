@@ -11,8 +11,34 @@ from rooibos.util.models import OwnedWrapper
 from rooibos.contrib.tagging.models import Tag, TaggedItem
 from pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
+from rooibos.access.models import AccessControl
 
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
+
+
+def object_acl_to_solr(obj):
+    content_type = ContentType.objects.get_for_model(obj)
+    acl = AccessControl.objects.filter(
+        content_type=content_type,
+        object_id=obj.id,
+        ).values_list('user_id', 'usergroup_id', 'read', 'write', 'manage')
+    result = dict(read=[], write=[], manage=[])
+    for user, group, read, write, manage in acl:
+        acct = 'u%d' % user if user else 'g%d' % group if group else 'anon'
+        if read != None:
+            result['read'].append(acct if read else acct.upper())
+        if write != None:
+            result['write'].append(acct if write else acct.upper())
+        if manage != None:
+            result['manage'].append(acct if manage else acct.upper())
+    if not result['read']:
+        result['read'].append('default')
+    if not result['write']:
+        result['write'].append('default')
+    if not result['manage']:
+        result['manage'].append('default')
+    return result
+
 
 class SolrIndex():
 
@@ -22,14 +48,21 @@ class SolrIndex():
 
     def search(self, q, sort=None, start=None, rows=None, facets=None, facet_limit=-1, facet_mincount=0, fields=None):
         if not fields:
-            fields = ['id']
-        elif not 'id' in fields:
+            fields = []
+        if not 'id' in fields:
             fields.append('id')
+        if not 'presentations' in fields:
+            fields.append('presentations')
         conn = Solr(settings.SOLR_URL)
         result = conn.search(q, sort=sort, start=start, rows=rows,
                              facets=facets, facet_limit=facet_limit, facet_mincount=facet_mincount, fields=fields)
         ids = [int(r['id']) for r in result]
         records = Record.objects.in_bulk(ids)
+        for r in result:
+            record = records.get(int(r['id']))
+            presentations = r.get('presentations')
+            if record and presentations:
+                record.solr_presentation_ids = presentations
         return (result.hits, filter(None, map(lambda i: records.get(i), ids)), result.facets)
 
     def clear(self):
@@ -76,17 +109,17 @@ class SolrIndex():
             if not record_ids:
                 break
             # convert to plain list, because Django's value lists will add a LIMIT clause when used
-            # in an __in query, which causes MySQL to break
-            record_ids = list(record_ids)
-            media_dict = self._preload_related(Media, record_ids)
-            fieldvalue_dict = self._preload_related(FieldValue, record_ids, related=2)
-            groups_dict = self._preload_related(CollectionItem, record_ids)
-            count += len(record_ids)
+            # in an __in query, which causes MySQL to break.  (ph): also, made an explicit separate value for this
+            record_id_list = list(record_ids)
+            media_dict = self._preload_related(Media, record_id_list)
+            fieldvalue_dict = self._preload_related(FieldValue, record_id_list, related=2)
+            groups_dict = self._preload_related(CollectionItem, record_id_list)
+            count += len(record_id_list)
 
-            def process_data(groups, fieldvalues, media):
+            def process_data(groups, fieldvalues, media, record_id_list):
                 def process():
                     docs = []
-                    for record in Record.objects.filter(id__in=record_ids):
+                    for record in Record.objects.filter(id__in=record_id_list):
                         docs += [self._record_to_solr(record, core_fields, groups.get(record.id, []),
                                                       fieldvalues.get(record.id, []), media.get(record.id, []))]
                     conn.add(docs)
@@ -94,7 +127,7 @@ class SolrIndex():
 
             if process_thread:
                 process_thread.join()
-            process_thread = Thread(target=process_data(groups_dict, fieldvalue_dict, media_dict))
+            process_thread = Thread(target=process_data(groups_dict, fieldvalue_dict, media_dict, record_id_list))
             process_thread.start()
             reset_queries()
 
@@ -142,10 +175,10 @@ class SolrIndex():
         mark_for_update(record_id, delete)
 
     def _preload_related(self, model, record_ids, filter=Q(), related=0):
-        dict = {}
+        d = dict((i, []) for i in record_ids)
         for x in model.objects.select_related(depth=related).filter(filter, record__id__in=record_ids):
-            dict.setdefault(x.record_id, []).append(x)
-        return dict
+            d[x.record_id].append(x)
+        return d
 
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media):
         required_fields = dict((f.name, None) for f in core_fields.keys())
@@ -169,18 +202,33 @@ class SolrIndex():
         all_parents = [g.collection_id for g in groups]
         parents = [g.collection_id for g in groups if not g.hidden]
         # Combine the direct parents with (great-)grandparents
+        # 'collections' is used for access control, hidden collections deny access
         doc['collections'] = list(reduce(lambda x, y: set(x) | set(y), [self.parent_groups[p] for p in parents], parents))
+        # 'allcollections' is used for collection filtering, can filter by hidden collections
         doc['allcollections'] = list(reduce(lambda x, y: set(x) | set(y), [self.parent_groups[p] for p in all_parents], all_parents))
+        doc['presentations'] = record.presentationitem_set.all().distinct().values_list('presentation_id', flat=True)
         if record.owner_id:
             doc['owner'] = record.owner_id
         for m in media:
             doc.setdefault('mimetype', []).append('s%s-%s' % (m.storage_id, m.mimetype))
             doc.setdefault('resolution', []).append('s%s-%s' % (m.storage_id, self._determine_resolution_label(m.width, m.height)))
+            try:
+                doc.setdefault('filecontent', []).append(m.extract_text())
+            except:
+                pass
         # Index tags
         for ownedwrapper in OwnedWrapper.objects.select_related('user').filter(content_type=self._record_type, object_id=record.id):
             for tag in ownedwrapper.taggeditem.select_related('tag').all().values_list('tag__name', flat=True):
                 doc.setdefault('tag', []).append(tag)
                 doc.setdefault('ownedtag', []).append('%s-%s' % (ownedwrapper.user.id, tag))
+        # Creation and modification dates
+        doc['created'] = record.created
+        doc['modified'] = record.modified
+        # Access control
+        acl = object_acl_to_solr(record)
+        doc['acl_read'] = acl['read']
+        doc['acl_write'] = acl['write']
+        doc['acl_manage'] = acl['manage']
         return doc
 
     def _clean_string(self, s):

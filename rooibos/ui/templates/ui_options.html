@@ -1,6 +1,7 @@
 {% extends "master.html" %}
 {% load ui %}
 {% load impersonate_tags %}
+{% load data %}
 
 {% block content %}
 
@@ -27,6 +28,9 @@
 </div>
 
 </form>
+
+
+{% collection_visibility_preferences %}
 
 
 {% endblock %}

@@ -4,6 +4,7 @@
 {% load humanize %}
 {% load solr %}
 {% load access_control %}
+{% load pagination_tags %}
 
 
 {% block javascript %}
@@ -17,20 +18,62 @@
     var img = new Image();
     img.src = '{% url static 'images/loading.gif' %}';
 
-    function selectAllOnPage() {
+    function selectAllOnPage(s) {
         ids = Array();
-        $(".record-select").each(function (i) { ids[i] = this.value; }).val(ids);
-        recordSelection(ids, true);
+        s = typeof s === 'boolean' ? s : true; // default to select (vs deselect)
+        $(".record-select").each(function (i) { ids[i] = this.value; }).val(s ? ids : []);
+        recordSelection(ids, s);
     }
+    function deselectAllOnPage() {
+      selectAllOnPage(false);
+    }
+
     $(document).ready(function() {
         $("#submit_record_selections").replaceWith($("<input type='button' value='Select all on page'>").click(selectAllOnPage));
+        $("#deselect_all_on_page").show().append($("<input type='button' value='Deselect all on page'>").click(deselectAllOnPage));
 
         $("#sort_dropdown, #viewmode_dropdown").change(function() { $("#explore-form").submit(); })
         $("#sort_go_button").hide();
-        $("#external-results").show().html("<div style='text-align: center;'>Loading <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>");
-    {% if not facets %}
-        $("#facets").html("<div style='text-align: center;'>Loading facets <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>");
+    {% if not federated_search.cache_hit %}
+        $("#external-results").html("<div style='text-align: center;'>Loading <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>");
     {% endif %}
+        $("#external-results").show();
+    {% if not facets %}
+        $("#facets").html("<div style='text-align: center;'>Loading facets <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>").show();
+    {% else %}
+        process_facets();
+        $("#facets").show();
+    {% endif %}
+
+        $("#resultlist div.record a img.record-anchor").parent("a").unbind('click').click(function(e) {
+            var a = $(this);
+            var img = $("img.record-anchor", a);
+            var prev = function() { return a.parent("div.record").prev("div.record").children("a").first() };
+            var next = function() { return a.parent("div.record").next("div.record").children("a").first() };
+            if (!prev().length) prev = function() {
+                // on first record on this page, see if there is a previous page
+                var link = $("#navigate-previous-page").clone();
+                link.click(function() { window.location = link.attr('href') + '#preview-last'; });
+                return link;
+            }
+            if (!next().length) next = function() {
+                // on last record on this page, see if there is a next page
+                var link = $("#navigate-next-page").clone();
+                link.click(function() { window.location = link.attr('href') + '#preview-first'; });
+                return link;
+            }
+            preview_dialog(a, img, prev, next)
+            e.preventDefault();
+        });
+
+        if (location.hash == '#preview-first') {
+            $("#resultlist div.record a img.record-anchor").parent("a").first().click();
+        }
+
+        if (location.hash == '#preview-last') {
+            $("#resultlist div.record a img.record-anchor").parent("a").last().click();
+        }
+
     });
 
     $(window).load(function() {
@@ -50,7 +93,7 @@
                 }
             });
         {% endif %}
-        {% if federated_search_query %}
+        {% if not federated_search.cache_hit and federated_search_query %}
         ajaxManager.add({
             type: 'GET',
             url: '{% url federatedsearch-sidebar-api %}?q={{ federated_search_query|urlencode }}',
@@ -70,11 +113,13 @@
 {% block sidebar %}
 {{ block.super }}
 
-{% if federated_search_query and user.is_authenticated %}
+{% if federated_sources and federated_search_query and user.is_authenticated %}
   <div class="facet active-facet" id="results_sidebar_external">
     <div class="facet-header">Additional Content</div>
     <div class="facet-body" id="external-results">
-
+{% if federated_search.cache_hit %}
+  {{ federated_search.html }}
+{% endif %}
     </div>
   </div>
 {% endif %}
@@ -109,9 +154,33 @@
     </div>
 {% endif %}
 
-<div id="facets">
-{% include "results_facets.html" %}
+<div id="facets" style="display: none;">
+{{ facets|default:"" }}
 </div>
+
+{% if not has_last_modified_criteria %}
+<div class="facet" id="results_sidebar_last_modified">
+  <div class="facet-header collapsed">Last modified</div>
+  <div class="facet-body" style="display: none;">
+    <a href="{{ limit_url }}c=modified:[NOW-1DAY TO *]" rel="nofollow">Within last 1 day</a><br />
+    <a href="{{ limit_url }}c=modified:[NOW-2DAYS TO *]" rel="nofollow">Within last 2 days</a><br />
+    <a href="{{ limit_url }}c=modified:[NOW-7DAYS TO *]" rel="nofollow">Within last 7 days</a><br />
+    <a href="{{ limit_url }}c=modified:[NOW-30DAYS TO *]" rel="nofollow">Within last 30 days</a><br />
+  </div>
+</div>
+{% endif %}
+
+{% if not has_record_created_criteria %}
+<div class="facet" id="results_sidebar_record_created">
+  <div class="facet-header collapsed">Record created</div>
+  <div class="facet-body" style="display: none;">
+    <a href="{{ limit_url }}c=created:[NOW-1DAY TO *]" rel="nofollow">Within last 1 day</a><br />
+    <a href="{{ limit_url }}c=created:[NOW-2DAYS TO *]" rel="nofollow">Within last 2 days</a><br />
+    <a href="{{ limit_url }}c=created:[NOW-7DAYS TO *]" rel="nofollow">Within last 7 days</a><br />
+    <a href="{{ limit_url }}c=created:[NOW-30DAYS TO *]" rel="nofollow">Within last 30 days</a><br />
+  </div>
+</div>
+{% endif %}
 
 <div style="text-align: center; margin-top: 20px;">
     <a href="{{ reset_url }}">Reset Search</a>
@@ -123,7 +192,13 @@
 
 {% block content-top %}
 
+<<<<<<< HEAD
 <form method="GET" action="{{ form_url }}" id="explore-form">{% csrf_token %}
+=======
+{{ block.super }}
+
+<form method="POST" action="{{ form_url }}" id="explore-form">{% csrf_token %}
+>>>>>>> d16d736956e8d76f4a081d9d3560d0655a3878cd
 {% for f,v in hiddenfields %}
 <input type="hidden" name="{{ f }}" value="{{ v }}" />
 {% endfor %}
@@ -139,17 +214,25 @@
     <select name="v" id="viewmode_dropdown">
         <option value="thumb"{% ifequal viewmode "thumb" %} selected="selected"{% endifequal %}>Thumbnails</option>
         <option value="list"{% ifequal viewmode "list" %} selected="selected"{% endifequal %}>List</option>
+        <option value="metadata"{% ifequal viewmode "metadata" %} selected="selected"{% endifequal %}>Metadata</option>
     </select>
     Sort by:
     <select name="s" id="sort_dropdown">
         <option value="score desc"{% ifequal sort "score" %} selected="selected"{% endifequal %}>Score</option>
         <option value="random_{{ random }}"{% ifequal sort "random" %} selected="selected"{% endifequal %}>Random</option>
         <option value="title_sort"{% ifequal sort "title" %} selected="selected"{% endifequal %}>Title</option>
+        <option value="creator_sort"{% ifequal sort "creator" %} selected="selected"{% endifequal %}>Creator</option>
+        <option value="date_sort"{% ifequal sort "date" %} selected="selected"{% endifequal %}>Date</option>
+        <option value="format_sort"{% ifequal sort "format" %} selected="selected"{% endifequal %}>Format</option>
+        <option value="identifier_sort"{% ifequal sort "identifier" %} selected="selected"{% endifequal %}>Identifier</option>
+        <option value="created desc"{% ifequal sort "created" %} selected="selected"{% endifequal %}>Record creation</option>
+        <option value="modified desc"{% ifequal sort "modified" %} selected="selected"{% endifequal %}>Last modified</option>
     </select>
     <input type="submit" value="Go" id="sort_go_button" />
   </div>
 </li>
 <li><input id="submit_record_selections" type="submit" name="action" value="Select" /></li>
+<li style="display: none;" id="deselect_all_on_page"></li>
 {% endif %}
 
 {% endif %}
@@ -176,13 +259,10 @@
 {% endif %}
 -->
 
-{% if pages %}
 <li class="pagination">
-    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
-    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
-    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+    {% autopaginate pagination_helper pagesize %}
+    {% paginate 3 %}
 </li>
-{% endif %}
 
 </ul>
 
@@ -208,16 +288,19 @@ Your search query is invalid.  Please go back and correct your search parameters
 </div>
 {% endif %}
 
-{% if pages %}
 <div style="text-align: center; clear: both;">
-    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
-    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
-    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+{% autopaginate pagination_helper pagesize %}
+{% paginate %}
 </div>
-{% endif %}
 
 {% endif %}
 
 </form>
+
+<div style="display: none;">
+    <!-- navigation links for preview dialog -->
+    {% if prev_page %}<a id="navigate-previous-page" href="{{ prev_page }}">Previous</a>{% endif %}
+    {% if next_page %}<a id="navigate-next-page" href="{{ next_page }}">Next</a>{% endif %}
+</div>
 
 {% endblock %}

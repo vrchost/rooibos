@@ -23,7 +23,8 @@ USE_I18N = False
 
 USE_ETAGS = False
 
-SESSION_SAVE_EVERY_REQUEST = True
+# When set to True, may cause problems with basket functionality
+SESSION_SAVE_EVERY_REQUEST = False
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -49,6 +50,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.request",
     "rooibos.context_processors.settings",
     "rooibos.context_processors.selected_records",
+    "rooibos.context_processors.current_presentation",
 )
 
 MIDDLEWARE_CLASSES = (
@@ -62,6 +64,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.http.ConditionalGetMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
@@ -71,7 +74,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
+    'rooibos.access.middleware.AccessOnStart',
+    'rooibos.data.middleware.DataOnStart',
     'rooibos.middleware.HistoryMiddleware',
+    'rooibos.access.middleware.AnonymousIpGroupMembershipMiddleware',
 )
 
 ROOT_URLCONF = 'rooibos.urls'
@@ -103,12 +109,17 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch',
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
-    'rooibos.federatedsearch.nasa',
+#    'rooibos.federatedsearch.nasa',
     'rooibos.converters',
     'rooibos.contrib.tagging',
     'rooibos.workers',
     'rooibos.userprofile',
     'rooibos.mediaviewer',
+    'rooibos.megazine',
+    'rooibos.groupmanager',
+    'rooibos.pdfviewer',
+    'rooibos.pptexport',
+    'rooibos.audiotextsync',
     'pagination',
     'impersonate',
     'compressor',
@@ -118,11 +129,12 @@ INSTALLED_APPS = (
 STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
-    'pseudostreaming': 'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
+    'pseudostreaming': 'rooibos.storage.pesudostreaming.PseudoStreamingStorageSystem',
+    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
 }
 
 GROUP_MANAGERS = {
-    'nasaimageexchange': 'rooibos.federatedsearch.nasa.nix.NasaImageExchange',
+ #   'nasaimageexchange': 'rooibos.federatedsearch.nasa.nix.NasaImageExchange',
 }
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
@@ -150,6 +162,26 @@ STATIC_DIR = os.path.join(install_dir, 'rooibos', 'static')
 FFMPEG_EXECUTABLE = os.path.join(install_dir, 'dist', 'windows', 'ffmpeg', 'bin', 'ffmpeg.exe')
 
 PDF_PAGESIZE = 'letter'  # 'A4'
+
+SHOW_FRONTPAGE_LOGIN = "yes"
+
+MASTER_TEMPLATE = 'master_root.html'
+
+# Settings that should be available in template rendering
+EXPOSE_TO_CONTEXT = (
+    'STATIC_DIR',
+    'PRIMARY_COLOR',
+    'SECONDARY_COLOR',
+    'CUSTOM_TRACKER_HTML',
+    'ADMINS',
+    'LOGO_URL',
+    'FAVICON_URL',
+    'COPYRIGHT',
+    'TITLE',
+    'SHOW_FRONTPAGE_LOGIN',
+    'MASTER_TEMPLATE',
+    )
+
 
 additional_settings = [
     'settings_local',

@@ -1,7 +1,7 @@
 $(document).ready(function() {
     $(".removetag").click(function() {
         var span = $(this).parent();
-        ajaxManager.add({
+        ajaxInteractionManager.add({
             type: 'POST',
             url: this.href,
             dataType: 'json',
@@ -12,7 +12,7 @@ $(document).ready(function() {
 });
 
 jQuery.fn.hint = function (blurClass) {
-  if (!blurClass) { 
+  if (!blurClass) {
     blurClass = 'blur';
   }
 
@@ -32,7 +32,7 @@ jQuery.fn.hint = function (blurClass) {
     }
 
     // only apply logic if the element has the attribute
-    if (title) { 
+    if (title) {
       // on blur, set value to title attr if text is blank
       $input.blur(function () {
         if (this.value === '') {

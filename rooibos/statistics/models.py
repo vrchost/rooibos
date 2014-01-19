@@ -7,12 +7,12 @@ from datetime import datetime
 
 class Activity(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
-    object_id = models.PositiveIntegerField(null=True)
+    object_id = models.PositiveIntegerField(null=True, db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     user_field = models.ForeignKey(User, null=True, blank=True, db_column='user_id')
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     time = models.TimeField()
-    event = models.CharField(max_length=64)
+    event = models.CharField(max_length=64, db_index=True)
     data_field = models.TextField(blank=True, db_column='data')
 
     def __unicode__(self):
@@ -60,10 +60,10 @@ class Activity(models.Model):
 
 class AccumulatedActivity(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
-    object_id = models.PositiveIntegerField(null=True)
+    object_id = models.PositiveIntegerField(null=True, db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    date = models.DateField()
-    event = models.CharField(max_length=64)
+    date = models.DateField(db_index=True)
+    event = models.CharField(max_length=64, db_index=True)
     final = models.BooleanField(default=False)
     count = models.IntegerField()
 

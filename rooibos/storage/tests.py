@@ -527,6 +527,8 @@ class GetMediaForRecordTestCase(unittest.TestCase):
         self.owner_can_read = User.objects.create(username='getmediatest2')
         self.owner_cant_read = User.objects.create(username='getmediatest3')
         AccessControl.objects.create(user=self.owner_can_read, content_object=self.collection, read=True)
+        self.record_standalone = Record.objects.create(name='no_collection', owner=self.owner_can_read)
+        self.record_standalone.media_set.create(name='getmediatest', url='getmediatest', storage=self.storage)
         self.presentation_ok = Presentation.objects.create(title='GetMediaTest1', owner=self.owner_can_read)
         self.presentation_ok.items.create(record=self.record, order=1)
         self.presentation_hidden = Presentation.objects.create(title='GetMediaTest5', owner=self.owner_can_read, hidden=True)
@@ -536,15 +538,19 @@ class GetMediaForRecordTestCase(unittest.TestCase):
         self.presentation_password = Presentation.objects.create(title='GetMediaTest3', owner=self.owner_can_read, password='test')
         self.presentation_password.items.create(record=self.record, order=1)
         self.presentation_no_record = Presentation.objects.create(title='GetMediaTest4', owner=self.owner_can_read)
+        self.presentation_standalone_record = Presentation.objects.create(title='GetMediaTest6', owner=self.owner_can_read)
+        self.presentation_standalone_record.items.create(record=self.record_standalone, order=1)
         AccessControl.objects.create(user=self.user, content_object=self.storage, read=True)
 
     def tearDown(self):
         self.presentation_ok.delete()
         self.presentation_broken.delete()
+        self.presentation_standalone_record.delete()
         self.user.delete()
         self.owner_can_read.delete()
         self.owner_cant_read.delete()
         self.record.delete()
+        self.record_standalone.delete()
         self.storage.delete()
         self.collection.delete()
         shutil.rmtree(self.tempdir, ignore_errors=True)
@@ -587,3 +593,8 @@ class GetMediaForRecordTestCase(unittest.TestCase):
         AccessControl.objects.filter(user=self.user).delete()
         self.presentation_hidden.hidden = True
         self.presentation_hidden.save()
+
+    def test_standalone_record_access(self):
+        self.assertEqual(0, get_media_for_record(self.record_standalone, user=self.user).count())
+        AccessControl.objects.create(user=self.user, content_object=self.presentation_standalone_record, read=True)
+        self.assertEqual(1, get_media_for_record(self.record_standalone, user=self.user).count())

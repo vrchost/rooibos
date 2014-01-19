@@ -1,14 +1,15 @@
 from __future__ import with_statement
-import Image
+from PIL import Image
 import StringIO
 import logging
 import mimetypes
 import os
+import re
 from django.conf import settings
 from django.db.models import Q
 from django.contrib.auth.models import User
-from rooibos.access import accessible_ids, get_effective_permissions_and_restrictions
-from rooibos.data.models import Collection, Record, standardfield
+from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions
+from rooibos.data.models import Collection, Record, standardfield, standardfield_ids
 from models import Media, Storage
 
 
@@ -44,13 +45,13 @@ def get_media_for_record(record, user=None, passwords={}):
         # doesn't have access to the record.
         pw_q = Q(
             # Presentation must not have password
-            Q(password=None) |
+            Q(password=None) | Q(password='') |
             # or must know password
             Q(id__in=Presentation.check_passwords(passwords))
         )
         access_q = Q(
             # Must have access to presentation
-            id__in=accessible_ids(user, Presentation),
+            id__in=filter_by_access(user, Presentation),
             # and presentation must not be archived
             hidden=False
         )
@@ -64,8 +65,15 @@ def get_media_for_record(record, user=None, passwords={}):
 
     return Media.objects.filter(
         record__id=record_id,
-        storage__id__in=accessible_ids(user, Storage),
+        storage__id__in=filter_by_access(user, Storage),
         )
+
+
+try:
+    import gfx
+    PDF_SUPPORT = True
+except ImportError:
+    PDF_SUPPORT = False
 
 
 def get_image_for_record(record, user=None, width=100000, height=100000, passwords={}, crop_to_square=False):
@@ -74,6 +82,8 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
     if settings.FFMPEG_EXECUTABLE:
         # also support video and audio
         q = q | Q(mimetype__startswith='video/') | Q(mimetype__startswith='audio/')
+    if PDF_SUPPORT:
+        q = q | Q(mimetype='application/pdf')
 
     media = media.select_related('storage').filter(q)
 
@@ -100,19 +110,24 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
     # check what user size restrictions are
     restrictions = get_effective_permissions_and_restrictions(user, m.storage)[3]
     if restrictions:
-        width = min(width, restrictions.get('width', width))
-        height = min(height, restrictions.get('height', height))
+        try:
+            width = min(width, int(restrictions.get('width', width)))
+            height = min(height, int(restrictions.get('height', height)))
+        except ValueError:
+            logging.exception('Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
     if m.width > width or m.height > height or m.mimetype != 'image/jpeg' or not m.is_local():
 
         def derivative_image(master, width, height):
             if not master.file_exists():
-                logging.error('Image derivative failed for media %d, cannot find file' % master.id)
+                logging.error('Image derivative failed for media %d, cannot find file "%s"' % (master.id, master.get_absolute_file_path()))
                 return None, (None, None)
-            import ImageFile
+            from PIL import ImageFile
             ImageFile.MAXBLOCK = 16 * 1024 * 1024
-            from multimedia import get_image
+            # Import here to avoid circular reference
+            # TODO: need to move all these functions out of __init__.py
+            from multimedia import get_image, overlay_image_with_mimetype_icon
             try:
                 file = get_image(master)
                 image = Image.open(file)
@@ -123,7 +138,10 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
                     elif w < h:
                         image = image.crop((0, (h - w) / 2, w, (h - w) / 2 + w))
                 image.thumbnail((width, height), Image.ANTIALIAS)
+                image = overlay_image_with_mimetype_icon(image, master.mimetype)
                 output = StringIO.StringIO()
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
                 image.save(output, 'JPEG', quality=85, optimize=True)
                 return output.getvalue(), image.size
             except Exception, e:
@@ -134,14 +152,6 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
         name = '%s-%sx%s%s.jpg' % (m.id, width, height, 'sq' if crop_to_square else '')
         sp = m.storage.get_derivative_storage_path()
         if sp:
-            if not os.path.exists(sp):
-                try:
-                    os.makedirs(sp)
-                except:
-                    # check if directory exists now, if so another process may have created it
-                    if not os.path.exists(sp):
-                        # still does not exist, raise error
-                        raise
             path = os.path.join(sp, name)
 
             if not os.path.exists(path) or os.path.getsize(path) == 0:
@@ -165,19 +175,29 @@ def get_thumbnail_for_record(record, user=None, crop_to_square=False):
     return get_image_for_record(record, user, width=100, height=100, crop_to_square=crop_to_square)
 
 
+def find_record_by_identifier(identifiers, collection, owner=None,
+        ignore_suffix=False, suffix_regex=r'[-_]\d+$'):
+    idfields = standardfield_ids('identifier', equiv=True)
+    if not isinstance(identifiers, (list, tuple)):
+        identifiers = [identifiers]
+    else:
+        identifiers = list(identifiers)
+    if ignore_suffix:
+        identifiers.extend([re.sub(suffix_regex, '', id) for id in identifiers])
+    records = Record.by_fieldvalue(idfields, identifiers).filter(collection=collection, owner=owner)
+    return records
+
+
 def match_up_media(storage, collection):
-    broken, files = analyze_media(storage)
+    _broken, files = analyze_media(storage)
     # find records that have an ID matching one of the remaining files
-    idfields = standardfield('identifier', equiv=True)
-    results = []
     for file in files:
         # Match identifiers that are either full file name (with extension) or just base name match
         filename = os.path.split(file)[1]
         id = os.path.splitext(filename)[0]
-        records = Record.by_fieldvalue(idfields, (id, filename)).filter(collection=collection, owner=None)
+        records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True)
         if len(records) == 1:
-            results.append((records[0], file))
-    return results
+            yield records[0], file
 
 
 def analyze_records(collection, storage):

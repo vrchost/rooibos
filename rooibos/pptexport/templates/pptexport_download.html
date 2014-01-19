@@ -1,0 +1,7 @@
+
+<div>
+Selected template:<br />
+<img src="{% url pptexport-thumbnail options.template|default:default_template %}" />
+</div>
+
+<div><a href="{% url pptexport-download obj.id options.template|default:default_template %}">Download PowerPoint file</a></div>

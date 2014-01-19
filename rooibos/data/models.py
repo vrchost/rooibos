@@ -4,16 +4,17 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from rooibos.access import accessible_ids, check_access
+from rooibos.access import filter_by_access, check_access
 from rooibos.access.models import AccessControl
 from rooibos.util import unique_slug
 from rooibos.util.caching import get_cached_value, cache_get, cache_get_many, cache_set, cache_set_many
 import logging
 import random
+import types
 
 
 class Collection(models.Model):
@@ -88,15 +89,23 @@ class CollectionItem(models.Model):
     def __unicode__(self):
         return "Record %s Collection %s%s" % (self.record_id, self.collection_id, 'hidden' if self.hidden else '')
 
+
+def _records_with_individual_acl_by_ids(ids):
+    return list(AccessControl.objects.filter(
+        content_type=ContentType.objects.get_for_model(Record),
+        object_id__in=ids).values_list('object_id', flat=True))
+
+
 class Record(models.Model):
-    created = models.DateTimeField(default=datetime.now())
+    created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
-    parent = models.ForeignKey('self', null=True)
-    source = models.CharField(max_length=1024, null=True)
-    manager = models.CharField(max_length=50, null=True)
-    next_update = models.DateTimeField(null=True)
-    owner = models.ForeignKey(User, null=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
+    source = models.CharField(max_length=1024, null=True, blank=True)
+    manager = models.CharField(max_length=50, null=True, blank=True)
+    next_update = models.DateTimeField(null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=True)
+
 
     @staticmethod
     def filter_by_access(user, *ids):
@@ -127,16 +136,21 @@ class Record(models.Model):
             allowed_ids = []
             to_check = ids
 
-        cq = Q(collectionitem__collection__in=accessible_ids(user, Collection),
-               collectionitem__hidden=False)
-        mq = Q(collectionitem__collection__in=accessible_ids(user, Collection, write=True),
-               owner=None)
-        oq = Q(owner=user) if user and not user.is_anonymous() else Q()
-        records = records.filter(cq | mq | oq)
-
-        checked = records.filter(id__in=to_check).values_list('id', flat=True)
-
-        allowed_ids.extend(checked)
+        # check which records have individual ACLs set
+        individual = _records_with_individual_acl_by_ids(to_check)
+        if individual:
+            allowed_ids.extend(filter_by_access(user, Record.objects.filter(id__in=individual)).values_list('id', flat=True))
+            to_check = [id for id in to_check if not id in individual]
+        # check records without individual ACLs
+        if to_check:
+            cq = Q(collectionitem__collection__in=filter_by_access(user, Collection),
+                   collectionitem__hidden=False)
+            mq = Q(collectionitem__collection__in=filter_by_access(user, Collection, write=True),
+                   owner=None)
+            oq = Q(owner=user) if user and not user.is_anonymous() else Q()
+            records = records.filter(cq | mq | oq)
+            checked = records.filter(id__in=to_check).values_list('id', flat=True)
+            allowed_ids.extend(checked)
 
         if user:
             cache_update = dict(
@@ -165,7 +179,7 @@ class Record(models.Model):
             fields = iter(fields)
         except TypeError:
             fields = [fields]
-        if not isinstance(values, (list, tuple)):
+        if not isinstance(values, (list, tuple, types.GeneratorType)):
             values = [values]
 
         index_values = [value[:32] for value in values]
@@ -184,6 +198,9 @@ class Record(models.Model):
 
     def get_thumbnail_url(self):
         return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
+
+    def get_square_thumbnail_url(self):
+        return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name}) + '?square'
 
     def get_image_url(self):
         return reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
@@ -261,13 +278,21 @@ class Record(models.Model):
     def shared(self):
         return bool(self.collectionitem_set.filter(hidden=False).count()) if self.owner else None
 
-    def editable_by(self, user):
-        return (
-            # checks if user is owner:
-            check_access(user, self, write=True) or
-            # or if user has write access to collection:
-            len(accessible_ids(user, self.collection_set, write=True)) > 0)
+    def _check_permission_for_user(self, user, **permissions):
+        # checks if user is owner or has ACL access
+        if check_access(user, self, **permissions):
+            return True
+        # if record does not have individual ACL...
+        if len(_records_with_individual_acl_by_ids([self.id])) > 0:
+            return False
+        # ...check collection access
+        return filter_by_access(user, self.collection_set, **permissions).count() > 0
 
+    def editable_by(self, user):
+        return self._check_permission_for_user(user, write=True)
+
+    def manageable_by(self, user):
+        return self._check_permission_for_user(user, manage=True)
 
 
 class MetadataStandard(models.Model):
@@ -331,6 +356,7 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
 
 
+@transaction.commit_on_success
 def get_system_field():
     field, created = Field.objects.get_or_create(name='system-value',
                                                  defaults=dict(label='System Value'))

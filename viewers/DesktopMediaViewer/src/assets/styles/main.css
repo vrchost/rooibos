@@ -1,0 +1,177 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+@font-face {
+	src:url("/assets/fonts/LUCIDASANSREGULAR.TTF");
+	fontFamily: mySparkFont;
+	embedAsCFF: true;
+}
+@font-face {
+	src:url("/assets/fonts/LSANSD.TTF");
+	fontFamily: mySparkFont;
+	fontWeight: bold;
+	embedAsCFF: true;
+}
+@font-face {
+	src:url("/assets/fonts/LSANSI.TTF");
+	fontFamily: mySparkFont;
+	fontStyle: italic;
+	embedAsCFF: true;
+}
+@font-face {
+	src:url("/assets/fonts/LUCIDASANSREGULAR.TTF");
+	fontFamily: myMXFont;
+	embedAsCFF: false;
+}
+@font-face {
+	src:url("/assets/fonts/LSANSD.TTF");
+	fontFamily: myMXFont;
+	fontWeight: bold;
+	embedAsCFF: false;
+}
+@font-face {
+	src:url("/assets/fonts/LSANSI.TTF");
+	fontFamily: myMXFont;
+	fontStyle: italic;
+	embedAsCFF: false;
+}
+global {
+	chrome-color: #528794;
+	color: #F9F9F9;
+	content-background-color: #FFFFFF;
+	symbol-color: #000000;
+	roll-over-color: #355D89;
+	selection-color: #294867;
+	focus-color: #98BDC6;
+	accent-color: #6589AD;
+	vertical-align: middle;
+	font-family: Arial, sans-serif;
+	font-size: 12;
+	text-align: left;
+	modal-transparency: .8;
+	modal-transparency-blur: 2;
+	modal-transparency-color: #000000;
+	modal-transparency-duration: 100;
+}
+s|BorderContainer.AppBar {
+	horizontalAlign: center;
+	background-image: Embed(source="/assets/skins/skin.swf", symbol="AppBarBorderSkin");
+	background-image-fill-mode: repeat;
+}
+s|BorderContainer.TopBar {
+	horizontalAlign: center;
+	background-image: Embed(source="/assets/skins/skin.swf", symbol="AppBarTopBorderSkin");
+	background-image-fill-mode: repeat;
+}
+mx|ControlBar.AppMenu {
+	horizontalAlign: center;
+	borderSkin: Embed(source="/assets/skins/skin.swf", symbol="MenuBarBorderSkin");
+}
+s|Label, s|TextArea, s|TextInput, s|List, s|TitleWindow {
+	font-family: mySparkFont;
+}
+s|Label.DelayCaption {
+	color: #D3D3D3;
+	fontSize: 10;
+	textAlign: left;
+}
+s|List #scroller {
+	horizontalScrollPolicy: off;
+}
+mx|VRule.AppBarVerticalRule {
+	shadowColor: #537379;
+	strokeWidth: 2;
+	strokeColor: #8CAAB0;
+}
+mx|Label, mx|DataGrid {
+	font-family: myMXFont;
+}
+mx|DataGrid, s|List {
+	font-size: 11;
+	chrome-color: #407582;
+	content-background-color: #575757;
+	content-background-alpha: 1.0;
+	alternating-item-colors: #334455, #445566;
+	selection-color: #6D8CAB;
+}
+mx|HSlider.ScrubBarSliderBlue {
+	thumbUpSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_blue");
+	thumbOverSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_blue_over");
+	thumbDisabledSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_disabled");
+	thumbDownSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_blue");
+	trackSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderTrack_invisible");
+	thumbOffset: -24;
+	trackMargin: 0;
+	showTrackHighlight: false;
+}
+mx|HSlider.ScrubBarSliderRed {
+	thumbUpSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_red");
+	thumbOverSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_red_over");
+	thumbDisabledSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_disabled");
+	thumbDownSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderThumb_red");
+	trackSkin: Embed(source="/assets/skins/skin.swf", symbol="SliderTrack_invisible");
+	thumbOffset: -24;
+	trackMargin: 0;
+	showTrackHighlight: false;
+}
+s|HSlider.lightBlue {
+	chrome-color: #70A6C0;	
+}
+s|HSlider.salmonColor {
+	chrome-color: #B98282;	
+}
+
+.smallerButton {
+	button-padding: 0;
+	font-size: 10;
+}	
+.smallerText {
+	font-size: 10;	
+}
+.largerText {
+	font-size: 16;	
+}
+s|TitleWindow {
+	background-alpha: .75;
+	content-background-alpha: 1;
+	cornerRadius: 4;
+	dropShadowVisible: true;
+	border-color: #528794;
+}
+s|TextInput, s|TextArea {
+	content-background-color: #575757;
+	content-background-alpha: 1;
+}
+s|Button {
+	color: #FFFFFF;
+}
+s|VSlider {
+	trackSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderTrack_Skin");
+	showTrackHighlight: true;
+	thumbUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_upSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_overSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_downSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbDisabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_disabledSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	trackHighlightSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderHighlight_Skin");
+	dataTipOffset: 5;
+}
+s|Label.ZoomPercentCaption {
+	color: #D3D3D3;
+	fontSize: 10;
+	textAlign: left;
+}
+s|CheckBox.SmoothBitmap {
+	font-size: 10;
+	color: #FFFFFF;
+	paddingTop: 4;
+	paddingLeft: 2;
+	paddingRight: 2;
+	paddingBottom: 2;
+}
+mx|VBox.PanZoom {
+	borderStyle: none;
+	horizontalAlign: center; 
+	cornerRadius: 2; 
+	backgroundAlpha: 0.65; 
+	backgroundColor: #000000;
+}

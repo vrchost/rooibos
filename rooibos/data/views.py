@@ -17,9 +17,12 @@ from django.template.loader import render_to_string
 from django.utils import simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
+from django.views.decorators.http import require_POST
 from models import *
-from forms import FieldSetChoiceField
-from rooibos.access import filter_by_access, accessible_ids, check_access
+from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
+from functions import get_collection_visibility_preferences, \
+    set_collection_visibility_preferences, apply_collection_visibility_preferences
+from rooibos.access import filter_by_access, check_access
 from rooibos.presentation.models import Presentation
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
@@ -29,23 +32,6 @@ from spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
-
-
-def collections(request):
-    collections = filter_by_access(request.user, Collection)
-    return render_to_response('data_groups.html',
-                              {'groups': collections, },
-                              context_instance=RequestContext(request))
-
-#def collection_raw(request, id, name):
-#    collection = get_object_or_404(filter_by_access(request.user, Collection), id=id)
-##    viewers = map(lambda v: v().generate(collection), get_viewers('collection', 'link'))
-#    return render_to_response('data_group.html',
-#                              {'collection': collection,
-##                               'viewers': viewers,
-#                               },
-#                              context_instance=RequestContext(request))
-
 
 
 @login_required
@@ -67,15 +53,19 @@ def record_delete(request, id, name):
 
 
 def record(request, id, name, contexttype=None, contextid=None, contextname=None,
-           edit=False, customize=False, personal=False):
+           edit=False, customize=False, personal=False, copy=False,
+           copyid=None, copyname=None):
 
-    writable_collections = list(accessible_ids(request.user, Collection, write=True))
-    readable_collections = list(accessible_ids(request.user, Collection))
+    collections = apply_collection_visibility_preferences(request.user, Collection.objects.all())
+    writable_collections = list(filter_by_access(request.user, collections, write=True).values_list('id', flat=True))
+    readable_collections = list(filter_by_access(request.user, collections).values_list('id', flat=True))
     can_edit = request.user.is_authenticated()
+    can_manage = False
 
     if id and name:
         record = Record.get_or_404(id, request.user)
         can_edit = can_edit and record.editable_by(request.user)
+        can_manage = record.manageable_by(request.user)
     else:
         if request.user.is_authenticated() and (writable_collections or (personal and readable_collections)):
             record = Record()
@@ -96,7 +86,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
         context = get_object_or_404(filter_by_access(request.user, model_class), id=contextid)
 
     media = Media.objects.select_related().filter(record=record,
-                                                  storage__id__in=accessible_ids(request.user, Storage))
+                                                  storage__in=filter_by_access(request.user, Storage))
     # Only list media that is downloadable or editable
     for m in media:
         # Calculate permissions and store with object for later use in template
@@ -105,6 +95,8 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     media = filter(lambda m: m.downloadable_in_template or m.editable_in_template, media)
 
     edit = edit and request.user.is_authenticated()
+
+    copyrecord = Record.get_or_404(copyid, request.user) if copyid else None
 
     class FieldSetForm(forms.Form):
         fieldset = FieldSetChoiceField(user=request.user, default_label='Default' if not edit else None)
@@ -240,7 +232,24 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                 return HttpResponseRedirect(url if request.POST.has_key('save_and_continue') else next)
         else:
 
-            if fieldset:
+            if copyrecord:
+                initial = []
+                for fv in copyrecord.get_fieldvalues(hidden=True):
+                    initial.append(dict(
+                        label=fv.label,
+                        field=fv.field_id,
+                        refinement=fv.refinement,
+                        value=fv.value,
+                        date_start=fv.date_start,
+                        date_end=fv.date_end,
+                        numeric_value=fv.numeric_value,
+                        language=fv.language,
+                        order=fv.order,
+                        group=fv.group,
+                        hidden=fv.hidden,
+                    ))
+                FieldValueFormSet.extra = len(initial) + 3
+            elif fieldset:
                 needed = fieldset.fields.filter(~Q(id__in=[fv.field_id for fv in fieldvalues])).order_by('fieldsetfield__order').values_list('id', flat=True)
                 initial = [{}] * len(fieldvalues) + [{'field': id} for id in needed]
                 FieldValueFormSet.extra = len(needed) + 3
@@ -256,7 +265,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                     )
                 )
 
-                for item in record.collectionitem_set.all():
+                for item in (copyrecord or record).collectionitem_set.all():
                     collections.get(item.collection_id, {}).update(dict(
                         member=True,
                         shared=not item.hidden,
@@ -279,6 +288,9 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     else:
         upload_form = None
 
+    record_usage = record.presentationitem_set.values('presentation') \
+                    .distinct().count() if can_edit else 0
+
     return render_to_response('data_record.html',
                               {'record': record,
                                'media': media,
@@ -290,11 +302,13 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                                'fv_formset': formset,
                                'c_formset': collectionformset,
                                'can_edit': can_edit,
+                               'can_manage': can_manage,
                                'next': request.GET.get('next'),
                                'collection_items': collection_items,
                                'upload_form': upload_form,
-                               'upload_url': (reverse('storage-media-upload', args=(record.id, record.name)) + "?sidebar")
+                               'upload_url': ("%s?sidebar&next=%s" % (reverse('storage-media-upload', args=(record.id, record.name)), request.get_full_path()))
                                              if record.id else None,
+                               'record_usage': record_usage,
                                },
                               context_instance=RequestContext(request))
 
@@ -316,7 +330,7 @@ def data_import(request):
 
         def clean_file(self):
             file = self.cleaned_data['file']
-            if os.path.splitext(file.name)[1] != '.csv':
+            if os.path.splitext(file.name)[1].lower() not in ('.csv', '.txt'):
                 raise forms.ValidationError("Please upload a CSV file with a .csv file extension")
             return file
 
@@ -364,7 +378,7 @@ class DisplayOnlyTextWidget(forms.HiddenInput):
 def data_import_file(request, file):
 
     available_collections = filter_by_access(request.user, Collection)
-    writable_collection_ids = accessible_ids(request.user, Collection, write=True)
+    writable_collection_ids = list(filter_by_access(request.user, Collection, write=True).values_list('id', flat=True))
     if not available_collections:
         raise Http404
     available_fieldsets = FieldSet.for_user(request.user)
@@ -401,7 +415,7 @@ def data_import_file(request, file):
         update = forms.BooleanField(label='Update existing records', initial=True, required=False)
         add = forms.BooleanField(label='Add new records', initial=True, required=False)
         test = forms.BooleanField(label='Test import only', initial=False, required=False)
-        personal = forms.BooleanField(label='Personal records', initial=True, required=False)
+        personal = forms.BooleanField(label='Personal records', initial=False, required=False)
 
         def clean(self):
             cleaned_data = self.cleaned_data
@@ -543,8 +557,7 @@ def manage_collections(request):
 def manage_collection(request, id=None, name=None):
 
     if id and name:
-        collection = get_object_or_404(Collection,
-                                       id__in=accessible_ids(request.user, Collection, manage=True),
+        collection = get_object_or_404(filter_by_access(request.user, Collection, manage=True),
                                        id=id)
     else:
         collection = Collection(title='Untitled')
@@ -614,3 +627,18 @@ def manage_collection(request, id=None, name=None):
                            'can_delete': collection.id and (request.user.is_superuser or collection.owner == request.user),
                           },
                           context_instance=RequestContext(request))
+
+
+@require_POST
+@login_required
+def save_collection_visibility_preferences(request):
+    form = get_collection_visibility_prefs_form(request.user)(request.POST)
+
+    if form.is_valid():
+        if set_collection_visibility_preferences(request.user,
+                                              form.cleaned_data['show_or_hide'],
+                                              form.cleaned_data['collections']):
+            request.user.message_set.create(message="Collection visibility preferences saved.")
+
+    next = request.GET.get('next', reverse('main'))
+    return HttpResponseRedirect(next)

@@ -1,0 +1,30 @@
+{% extends "master.html" %}
+
+
+
+{% block content %}
+
+<h1>Delete Announcement</h1>
+
+Are you sure you want to delete the following announcement?
+
+{% if perms.comments.add_comment or perms.comment.change_comment %}
+
+<form action="" method="POST">{% csrf_token %}
+
+<div style="margin: 10px; border: thin solid grey;">
+{{ object.comment }}
+</div>
+
+
+<input type="submit" value="Delete" /> <a href="{% url main %}">Cancel</a>
+
+</form>
+
+{% else %}
+
+You do not have access to this function.
+
+{% endif %}
+
+{% endblock %}

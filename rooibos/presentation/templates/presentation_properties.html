@@ -2,91 +2,12 @@
 {% load ui %}
 {% load access_control %}
 {% load viewers %}
-
-
-
-{% block stylesheets %}
-{{ block.super }}
-<style type="text/css">
-
-html.js-enabled #items {
-    display: none;
-}
-
-#lighttable {
-    border: solid 2px lightgrey;
-    padding: 5px;
-    overflow: scroll;
-    user-select: none; /* CSS3 */
-    -moz-user-select: none; /* Gecko (Firefox) */
-    -khtml-user-select:none; /* Webkit (Safari, Chrome) */
-}
-
-#lighttable div.slide, .lighttable-placeholder {
-    float: left;
-    margin: 5px;
-    background-color: lightgrey;
-    padding: 8px;
-    -moz-border-radius: 3px;
-    width: 100px;
-    height: 115px;
-}
-
-.lighttable-placeholder {
-    background-color: {{ PRIMARY_COLOR }};
-}
-
-#lighttable div.slide.selected {
-    background-color: {{ PRIMARY_COLOR }};
-}
-
-#lighttable div.slide.hidden div.title {
-    font-style: italic;
-}
-
-#lighttable div.slide.hidden div.title:before {
-    content: "[Hidden] ";
-}
-
-#lighttable div.slide.hidden img {
-    filter: alpha(opacity=30);
-	-moz-opacity: 0.3;
-	-khtml-opacity: 0.3;
-	opacity: 0.3;
-}
-
-#lighttable div.slide div.title {
-    font-size: xx-small;
-    width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-}
-
-#lighttable-annotation {
-    border: solid 2px lightgrey;
-    border-top: none;
-    padding: 5px;
-}
-
-#lighttable-annotation textarea {
-    height: 100px;
-    width: 600px;
-    vertical-align: top;
-}
-
-td.annotation-col textarea {
-    height: 30px;
-    width: 200px;
-}
-
-</style>
-{% endblock %}
-
-
+{% load compress %}
 
 
 {% block javascript %}
 {{ block.super }}
+{% compress js %}
 <script type="text/javascript">
 
     $(document).ready(function() {
@@ -94,8 +15,12 @@ td.annotation-col textarea {
 		var unsaved_changes = false;
 		$(window).bind('beforeunload', function() {
 			if (unsaved_changes)
-				return 'You have unsaved changes in your presentation that will be lost if you continue.';
+				return 'You made changes to your presentation slides that will be lost if you continue.';
 		});
+		function mark_unsaved_changes(saved) {
+			unsaved_changes = (saved != 'saved');
+			$('#update-items').css('font-weight', unsaved_changes ? 'bolder' : '');
+		}
 
         $("#items tbody tr").each(function(i, e) {
             var inputs = $(".thumbnail-col", e).children().not('a');
@@ -122,13 +47,14 @@ td.annotation-col textarea {
                     var name = input.attr('name', input.attr('name').replace(/[0-9]+/, idx)).attr('id', 'id_' + input.attr('name')).attr('name');
                     if (name.match(/-id$/)) input.val('');
                 });
+                $("div.title a", copy).bind('click', bind_preview_dialog);
                 insert_after.after(copy);
                 insert_after = copy;
             });
             $(".orderinput input").each(function(i, e) { $(e).val(i); });
             e.preventDefault();
             add_metadata_popup($("#lighttable"));
-			unsaved_changes = true;
+			mark_unsaved_changes();
         });
 
         $("#delete-button").click(function(e) {
@@ -138,7 +64,7 @@ td.annotation-col textarea {
             });
             $("#lighttable-buttons button").attr('disabled', true);
             e.preventDefault();
-			unsaved_changes = true;
+			mark_unsaved_changes();
         });
 
 		$("#select-button").click(function(e) {
@@ -160,14 +86,14 @@ td.annotation-col textarea {
                 $("input[id$=hidden]", e).attr('checked', hide);
             });
             markHidden();
-			unsaved_changes = true;
+			mark_unsaved_changes();
         }
 
         $("#show-button").click(function(e) { showHide(false); e.preventDefault(); });
         $("#hide-button").click(function(e) { showHide(true); e.preventDefault(); });
 
 		$("#lighttable-annotation textarea").change(function() {
-			unsaved_changes = true;
+			mark_unsaved_changes();
 		})
 
         var last_selected;
@@ -191,7 +117,7 @@ td.annotation-col textarea {
 
         $("#items-form").submit(function() {
 			selectionChanged();
-			unsaved_changes = false;
+			mark_unsaved_changes('saved');
 		});
 
         var firstselection;
@@ -209,6 +135,40 @@ td.annotation-col textarea {
             selectionChanged();
             e.stopPropagation();
         }
+
+		function convert_to_slide(item) {
+			var record_url = item.attr('href');
+			var image = item.children('img');
+			var id = image.attr("id");
+			id = id.substring(id.lastIndexOf('-') + 1);
+			recordSelection(id, false);
+			var title = image.attr("alt");
+			var idx = parseInt($("#id_form-TOTAL_FORMS").val());
+			$("#id_form-TOTAL_FORMS").val(idx + 1);
+			var copy = $("#lighttable div.slide").eq(0).clone();
+			copy.attr('id', 'slide' + idx).removeClass('selected');
+			// fix customize link
+			customize_url = $("a.customize", copy).attr('href');
+			// TODO: this relies on specific URLs, should not be hardcoded
+			customize_url = customize_url.substring(customize_url.indexOf('/edit/') + 1)
+			$("a.customize", copy).attr('href', record_url + customize_url);
+			// fix title
+			$("div.title a", copy).attr('href', record_url).text(title).bind('click', bind_preview_dialog);
+			// fix thumbnail
+			$("img", copy).attr('alt', title).attr('src', image.attr('src')).attr('id', 'item-' + idx + image.attr('id').substring(6));
+			// fix form inputs
+			$("input,textarea", copy).each(function(i, e) {
+				var input = $(e);
+				var name = input.attr('name', input.attr('name').replace(/[0-9]+/, idx)).attr('id', 'id_' + input.attr('name')).attr('name');
+				if (name.match(/-id$/)) input.val('');
+				else if (name.match(/-record$/)) input.val(id);
+				else if (name.match(/-annotation$/)) input.val('');
+				else if (name.match(/-hidden$/)) input.attr('checked', false);
+				else if (name.match(/-DELETE$/)) input.attr('checked', false);
+			});
+			item.replaceWith(copy);
+			copy.show();
+		}
 
         var selected_elements;
 
@@ -243,9 +203,15 @@ td.annotation-col textarea {
                 ui.item.unbind('click').one("click", function (e) {
                     e.stopImmediatePropagation(); $(this).click(select_slide);
                 });
-				unsaved_changes = true;
+				mark_unsaved_changes();
 				selectionChanged();
             },
+			receive: function(event, ui) {
+				// received a dragged item from the basket
+				convert_to_slide($("#lighttable a.ui-draggable"));
+				// fix in case slide got dropped behind trailing <br> element
+				$("#lighttable>br").appendTo($("#lighttable"));
+			},
             start: function(event, ui) {
                 if (!ui.item.hasClass('selected')) {
                     $("#lighttable div.slide").removeClass('selected');
@@ -262,7 +228,18 @@ td.annotation-col textarea {
             }
             }).show();
 
-        $(window).resize(function() { $("#lighttable").css('max-height', Math.max(250, $(window).height() - 250)); }).resize();
+		$("#basket-thumbs").bind('update', function() {
+			$("#basket-thumbs a").draggable({
+				scroll: true,
+				helper: 'clone',
+				revert: 'invalid',
+				appendTo: 'body',
+				cursor: 'move',
+				cursorAt: {left: 50, top: 50},
+				connectToSortable: '#lighttable'
+			});
+			$("#lighttable").sortable('refresh');
+		}).trigger('update');
 
         $("#lighttable-annotation").show().children().attr('disabled', true);
 
@@ -274,19 +251,111 @@ td.annotation-col textarea {
 		$("#presentation_sidebar_actions a").each(function() {
 			addCopyLinkIcon($(this));
 		});
+
+		var bind_preview_dialog = function(e) {
+			var a = $(this);
+			var img = $("img.record-anchor", a.parent().parent());
+			var prev = function() { return a.parents("div.slide").prev("div.slide").children("div.title").children("a") };
+			var next = function() { return a.parents("div.slide").next("div.slide").children("div.title").children("a") };
+			preview_dialog(a, img, prev, next)
+			e.preventDefault();
+		}
+
+		$("#lighttable div.slide div.title a").bind('click', bind_preview_dialog);
+
+		keepAtTop($("#lighttable-actionbar"), $("#lighttable"));
+		keepAtTop($("#lighttable-annotation"), $("#lighttable"));
+
     });
 </script>
+{% endcompress %}
+{% endblock %}
+
+
+
+{% block content-top %}
+
+{{ block.super }}
+
+{% store_recent_presentation request.user presentation %}
+
+{% if formset.forms %}
+<a href="#properties" style="float: right;">Jump to Properties</a>
+{% endif %}
+
+<h1>{{ presentation.title }}</h1>
+
+
+
+
+<!-- Lighttable -->
+{% if formset.forms %}
+
+
+
+<form method="POST" action="" id="items-form">{% csrf_token %}
+{{ formset.management_form }}
+
+<ul class="actionbar" id="lighttable-actionbar">
+<li><input type="submit" name="update-items" id='update-items' value="Save" /></li>
+<li><a href=".">Undo changes</a></li>
+<li class="secondary">Highlighted:</li>
+<li class="secondary"><button id="show-button">Show</button></li>
+<li class="secondary"><button id="hide-button">Hide</button></li>
+<li class="secondary"><button id="duplicate-button">Duplicate</button></li>
+<li class="secondary"><button id="delete-button">Delete</button></li>
+<li><button id="select-button">Add to Basket</button></li>
+<li class="secondary">
+	<input type="submit" name="add-selected-items" value="Add All from Basket" />
+</li>
+</ul>
+
+
+<div id="lighttable-annotation" style="display: none; clear: both;">
+    Annotation: <textarea name="annotation"></textarea>
+    <span id="customize-link"></span>
+</div>
+<div id="lighttable" style="display: none; clear: both;"></div>
+
+<table id="items" summary="Included records" class="list">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Title</th>
+        <th><span class="orderinput">Order</span></th>
+        <th>Annotation</th>
+        <th>Hidden</th>
+        <th>Remove</th>
+    </tr>
+    </thead>
+    <tbody>
+{% for form in formset.forms %}
+    <tr class="sortable{% cycle "" " altrow" %} framed-thumbnails small middle-align">
+        <td class="thumbnail-col">{{ form.id }}{{ form.record }}<a name="s{{ form.instance.id }}" href="{{ form.instance.record.get_absolute_url }}"><img src="{{ form.instance.record.get_square_thumbnail_url }}" alt="{{ form.instance.record.title }}" class="record-anchor" id="item-{{ forloop.counter }}-record-id-{{ form.instance.record.id }}"data-record-id="{{ form.instance.record.id }}" data-record-name="{{ form.instance.record.name }}" /></a></td>
+        <td class="title-col"><a href="{% url data-record form.instance.record.id, form.instance.record.name %}" target="record_view">{{ form.instance.record.title }}</a></td>
+        <td class="order-col"><span class="orderinput">{{ form.order }} {{ form.order.errors }}</span></td>
+        <td class="annotation-col">{{ form.annotation }}<br />
+            <a class="customize" href="{% url data-record-edit-context form.instance.record.id, form.instance.record.name, contenttype, presentation.id, presentation.name %}?next={{ request.get_full_path|urlencode }}%23s{{ form.instance.id }}">Customize record for this presentation</a></td>
+        <td class="controls">{{ form.hidden }}</td>
+        <td class="controls delete">{{ form.DELETE }}</td>
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+
+</form>
+
+{% endif %}
+<!-- end Lighttable -->
+
 {% endblock %}
 
 
 
 {% block content %}
 
-<h1>{{ presentation.title }}</h1>
+<h2 id="properties" style="padding-top: 60px;">Properties</h2>
 
-{% if formset.forms %}
-<a href="#sort_and_annotate">Sort and annotate records</a>
-{% endif %}
 
 <form action="{% url presentation-edit presentation.id, presentation.name %}" method="POST">{% csrf_token %}
 
@@ -340,64 +409,6 @@ td.annotation-col textarea {
 </form>
 
 
-{% if formset.forms %}
-
-<h2 style="clear: both; padding-top: 50px;">Sort and annotate records</h2>
-
-
-<form method="POST" action="" id="items-form">{% csrf_token %}
-{{ formset.management_form }}
-
-<a name="sort_and_annotate" href="#sort_and_annotate"></a>
-
-<ul class="actionbar">
-<li><input type="submit" name="update-items" value="Save" /></li>
-<li><a href=".">Undo changes</a></li>
-<li class="secondary">Highlighted Items:</li>
-<li class="secondary"><button id="show-button">Show</button></li>
-<li class="secondary"><button id="hide-button">Hide</button></li>
-<li class="secondary"><button id="duplicate-button">Duplicate</button></li>
-<li class="secondary"><button id="delete-button">Delete</button></li>
-<li class="secondary"><button id="select-button">Add to Selected Items</button></li>
-</ul>
-
-
-<div id="lighttable" style="display: none; clear: both;"></div>
-<div id="lighttable-annotation" style="display: none;">
-    Annotation: <textarea name="annotation"></textarea>
-    <span id="customize-link"></span>
-</div>
-
-<table id="items" summary="Included records" class="list">
-    <thead>
-    <tr>
-        <th></th>
-        <th>Title</th>
-        <th><span class="orderinput">Order</span></th>
-        <th>Annotation</th>
-        <th>Hidden</th>
-        <th>Remove</th>
-    </tr>
-    </thead>
-    <tbody>
-{% for form in formset.forms %}
-    <tr class="sortable{% cycle "" " altrow" %} framed-thumbnails small middle-align">
-        <td class="thumbnail-col">{{ form.id }}{{ form.record }}<a name="s{{ form.instance.id }}" href="{{ form.instance.record.get_absolute_url }}"><img src="{{ form.instance.record.get_thumbnail_url }}?square" alt="{{ form.instance.record.title }}" class="record-anchor no-metadata-popup" id="item-{{ forloop.counter }}-record-id-{{ form.instance.record.id }}" /></a></td>
-        <td class="title-col"><a href="{% url data-record form.instance.record.id, form.instance.record.name %}" target="record_view">{{ form.instance.record.title }}</a></td>
-        <td class="order-col"><span class="orderinput">{{ form.order }} {{ form.order.errors }}</span></td>
-        <td class="annotation-col">{{ form.annotation }}<br />
-            <a class="customize" href="{% url data-record-edit-context form.instance.record.id, form.instance.record.name, contenttype, presentation.id, presentation.name %}?next={{ request.get_full_path|urlencode }}%23s{{ form.instance.id }}">Customize record for this presentation</a></td>
-        <td class="controls">{{ form.hidden }}</td>
-        <td class="controls delete">{{ form.DELETE }}</td>
-    </tr>
-{% endfor %}
-    </tbody>
-</table>
-
-</form>
-
-{% endif %}
-
 {% endblock %}
 
 
@@ -419,8 +430,8 @@ td.annotation-col textarea {
         {% list_viewers presentation request.get_full_path "<br />" %}
         <br />
         <br />
-        <form action="{% url presentation-edit presentation.id, presentation.name %}" method="POST">{% csrf_token %}
-        <input type="submit" name="add-selected-items" value="Add selected items" />
+        <form action="{% url presentation-duplicate presentation.id, presentation.name %}" method="POST">{% csrf_token %}
+        <input type="submit" name="duplicate-presentation" value="Duplicate presentation" />
         </form>
     </div>
   </div>

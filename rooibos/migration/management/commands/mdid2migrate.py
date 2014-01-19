@@ -62,6 +62,9 @@ IMAGE_SUGGESTED = 2
 IMAGE_REJECTED = 4
 
 
+STATIC_CONTENT_HASH = content_hash('static')
+
+
 class MergeObjectsException(Exception):
 
     def __init__(self, instance):
@@ -94,13 +97,13 @@ class MigrateModel(object):
             self.object_history = dict((original_id, int(hash, 16)) for original_id, hash in q.values_list('original_id', 'content_hash'))
         else:
             self.object_history = dict((o.original_id, o) for o in q)
-        self.added = self.updated = self.deleted = self.unchanged = self.recreated = self.errors = 0
+        self.added = self.updated = self.deleted = self.unchanged = self.recreated = self.errors = self.nohistory = 0
         self.need_instance_map = False
         self.supports_deletion = True
         self.query = query
 
     def hash(self, row):
-        return content_hash('static')
+        return STATIC_CONTENT_HASH
 
     def update(self, instance, row):
         pass
@@ -128,6 +131,13 @@ class MigrateModel(object):
         return str(row.ID)
 
     def run(self, step=None, steps=None):
+
+        def compare_hash(historic, current):
+            if self.preserve_memory:
+                return historic == int(current, 16)
+            else:
+                return historic.content_hash == current
+
         print "\n%sMigrating %s" % ('Step %s of %s: ' % (step, steps) if step and steps else '', self.model_name)
         r = re.match('^SELECT (.+) FROM (.+)$', self.query)
         pb = ProgressBar(list(self.cursor.execute("SELECT COUNT(*) FROM %s" % r.groups()[1]))[0][0]) if r else None
@@ -138,16 +148,25 @@ class MigrateModel(object):
             h = self.object_history.pop(self.key(row), None)
             create = True
             if h:
-                if self.preserve_memory:
-                    same = (h == int(hash, 16))
-                else:
-                    same = (h.content_hash == hash)
-                if same or self.m2m_model:
+                if compare_hash(h, hash) or self.m2m_model:
                     # object unchanged, don't need to do anything
                     # or, we're working on a many-to-many relation, don't need to do anything on the instance
                     logging.debug('%s %s unchanged in source, skipping' % (self.model_name, self.key(row)))
                     create = False
                     self.unchanged += 1
+                elif compare_hash(h, STATIC_CONTENT_HASH):
+                    # object may have changed, but we don't have the hash of the previous version
+                    # so we can't know.  Just store the new hash in the history to be able
+                    # to track future changes
+                    if self.preserve_memory:
+                        h = ObjectHistory.objects.get(content_type=self.content_type,
+                                         m2m_content_type=self.m2m_content_type,
+                                         type=self.type,
+                                         original_id=self.key(row))
+                    h.content_hash = hash
+                    h.save()
+                    create = False
+                    self.nohistory += 1
                 else:
                     if self.preserve_memory:
                         h = ObjectHistory.objects.get(content_type=self.content_type,
@@ -175,7 +194,7 @@ class MigrateModel(object):
                             h.content_hash = hash
                             h.save()
                             self.updated += 1
-                        except IntegrityError, ex:
+                        except (IntegrityError, pyodbc.IntegrityError), ex:
                             logging.error("Integrity error: %s %s" % (self.model_name, self.key(row)))
                             logging.error(ex)
                             self.errors += 1
@@ -199,8 +218,8 @@ class MigrateModel(object):
                         else:
                             logging.error("No instance created: %s %s" % (self.model_name, self.key(row)))
                             self.errors += 1
-                    except (IntegrityError, pyodbc.IntegrityError), ex:
-                        logging.error("Integrity error: %s %s" % (self.model_name, self.key(row)))
+                    except (IntegrityError, pyodbc.IntegrityError, ValueError), ex:
+                        logging.error("%s: %s %s" % (type(ex).__name__, self.model_name, self.key(row)))
                         logging.error(ex)
                         self.errors += 1
                     except MergeObjectsException, ex:
@@ -257,10 +276,10 @@ class MigrateModel(object):
             self.instance_map.update((ids.get(o.id, None), o) for o in self.model.objects.all())
             self.instance_map.update(merged_ids)
 
-        print "  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t Errors"
-        print "%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d" % (
+        print "  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t Errors\tNo hist"
+        print "%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d" % (
             self.added, self.recreated, self.deleted, self.updated, self.unchanged,
-            len(merged_ids), self.errors
+            len(merged_ids), self.errors, self.nohistory
         )
 
 
@@ -280,9 +299,9 @@ class MigrateUsers(MigrateModel):
             instance.password = row.Password.lower()
         else:
             instance.set_unusable_password()
-        instance.last_name = row.Name[:30]
-        instance.first_name = row.FirstName[:30]
-        instance.email = row.Email[:75]
+        instance.last_name = row.Name[:30] if row.Name else ''
+        instance.first_name = row.FirstName[:30] if row.FirstName else ''
+        instance.email = row.Email[:75] if row.Email else ''
         instance.is_superuser = instance.is_staff = row.Administrator
 
     def create_instance(self, row):
@@ -658,6 +677,9 @@ class MigratePresentations(MigrateModel):
         self.users = MigrateModel.instance_maps['user']
         self.need_instance_map = True
 
+    def hash(self, row):
+        return content_hash(row.Title, row.UserID, row.Description, row.ArchiveFlag, row.AccessPassword)
+
     def update(self, instance, row):
         instance.title = row.Title
         instance.owner = self.users[str(row.UserID)]
@@ -1017,16 +1039,20 @@ class Command(BaseCommand):
             return
 
         servertype, connection = self.readConfig(config_files[0])
-        if servertype == "MSSQL":
-            conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
-        elif servertype == "MYSQL":
-            conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
-        else:
-            print "Unsupported database type"
-            return
 
-        cursor = conn.cursor()
-        row = cursor.execute("SELECT Version FROM DatabaseVersion").fetchone()
+        def get_cursor():
+            if servertype == "MSSQL":
+                conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
+            elif servertype == "MYSQL":
+                conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
+            elif servertype == "CUSTOM":
+                conn = pyodbc.connect(connection)
+            else:
+                print "Unsupported database type"
+                return None
+            return conn.cursor()
+
+        row = get_cursor().execute("SELECT Version FROM DatabaseVersion").fetchone()
         if not row.Version in ("00006", "00007", "00008"):
             print "Database version is not supported"
             return
@@ -1069,6 +1095,6 @@ class Command(BaseCommand):
             MigrateFieldValues,
         ]
 
-        map(lambda (i, m): m(cursor).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
+        map(lambda (i, m): m(get_cursor()).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
 
         print "You must now run 'manage.py solr reindex' to rebuild the full-text index."

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx"
+				   xmlns:reflector="com.rictus.reflector.*"
+				   width="100%" height="35"
+				   styleName="TopBar"
+				   borderVisible="false"
+				   creationComplete="init();">
+	<s:layout>
+		<s:HorizontalLayout 
+			horizontalAlign="center" 
+			verticalAlign="top"
+			gap="0"
+			paddingBottom="0" paddingLeft="3" paddingRight="3" paddingTop="6"
+			/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import spark.components.Application;
+			import spark.components.supportClasses.TextBase;
+			TextBase.mx_internal::truncationIndicatorResource = "...";
+			
+			[Embed(source="/assets/skins/skin.swf", symbol="Connected")] 
+			public var connected:Class; 
+			[Embed(source="/assets/skins/skin.swf", symbol="Disconnected")] 
+			public var disconnected:Class; 
+			[Embed(source="/assets/skins/skin.swf", symbol="Package")] 
+			public var package_icon:Class;
+			[Embed(source="/assets/skins/skin.swf", symbol="FocusIn")] 
+			public var focus_in:Class;
+			[Embed(source="/assets/skins/skin.swf", symbol="FocusOut")] 
+			public var focus_out:Class;
+
+			private function init():void {
+				this.status.source = disconnected;
+				trace("topbar");
+			}
+
+
+			protected function hideShowTitle_clickHandler(event:MouseEvent):void {
+				if (this.hideShowTitle.styleName == "HideTitle") {
+					if (this.slideshowTitle.text.charAt(this.slideshowTitle.text.length - 1) == ":") {
+						this.slideshowTitle.text = this.slideshowTitle.text.substr(0, this.slideshowTitle.text.length - 1) + " ";
+					} 
+					this.slideTitle.visible = this.slideTitle.includeInLayout = false;
+					this.hideShowTitle.styleName = "ShowTitle";					
+				} else {
+					if (this.slideshowTitle.text.charAt(this.slideshowTitle.text.length - 1) == " ") {
+						this.slideshowTitle.text = this.slideshowTitle.text.substr(0, this.slideshowTitle.text.length - 1) + ":";
+					} 
+					this.slideTitle.visible = this.slideTitle.includeInLayout = true;
+					this.hideShowTitle.styleName = "HideTitle";						
+				}
+			}
+
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<s:HGroup id="leftGroup" horizontalAlign="left" verticalAlign="middle" gap="0" paddingLeft="0" paddingRight="12">
+		<s:VGroup gap="0">
+			<mx:LinkButton id="info" styleName="Info" paddingTop="3" enabled="false" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+			<reflector:Reflector id="infoReflector" target="{info}" alpha=".4" falloff=".4" blurAmount=".1"/>			
+		</s:VGroup>
+		<mx:Spacer width="6"/>
+		<s:VGroup gap="0">
+			<s:Label id="XofY" styleName="PositionStatus" height="19" paddingTop="2"/>
+			<reflector:Reflector id="XofYReflector" target="{XofY}" alpha=".4" falloff=".4" blurAmount=".1"/>
+		</s:VGroup>
+	</s:HGroup>
+	<s:HGroup id="centerGroup" horizontalAlign="center" verticalAlign="middle" gap="0" width="{this.width - this.leftGroup.width - this.rightGroup.width - 6}" >
+		<s:VGroup gap="0">
+			<s:HGroup id="titleGroup" horizontalAlign="center" paddingTop="1" gap="0" paddingBottom="-2">
+				<s:Label id="slideshowTitle" styleName="MainTitle" height="19" textAlign="right" maxDisplayedLines="1"/>
+				<s:Label id="slideTitle" maxDisplayedLines="1" styleName="MainTitle" height="19" textAlign="center" maxWidth="{this.centerGroup.width - this.slideshowTitle.width - this.hideShowTitle.width}" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>				
+				<mx:LinkButton id="hideShowTitle"  styleName="HideTitle" paddingRight="3" visible="false" includeInLayout="false" click="hideShowTitle_clickHandler(event)" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+			</s:HGroup>
+			<reflector:Reflector id="mainTitleReflector" target="{titleGroup}" alpha=".4" falloff=".4" blurAmount=".1"/>
+		</s:VGroup>
+	</s:HGroup>
+	<s:HGroup id="rightGroup" horizontalAlign="right" verticalAlign="middle" gap="8" paddingLeft="16">
+		<s:VGroup id="vbox1" gap="0">
+			<mx:Image id="focusIndicator"/>
+			<reflector:Reflector id="focusIndicator_refl" target="{focusIndicator}" alpha=".4" falloff=".4" blurAmount=".1"/>			
+		</s:VGroup>
+		<s:VGroup id="vbox2" gap="0">
+			<mx:Image id="status"/>
+			<reflector:Reflector target="{status}" alpha=".4" falloff=".4" blurAmount=".1"/>			
+		</s:VGroup>
+		<s:VGroup id="vbox3" gap="0">
+			<mx:LinkButton id="fullscreen" enabled="true" styleName="Fullscreen" paddingTop="3" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+			<reflector:Reflector id="fullscreen_refl" target="{fullscreen}" alpha=".4" falloff=".4" blurAmount=".1"/>			
+		</s:VGroup>
+		<s:VGroup id="vbox4" gap="0">
+			<mx:LinkButton id="smallpinbutton" enabled="true" styleName="SmallPinnedButton" paddingTop="3" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+			<reflector:Reflector id="pinbutton_refl" target="{smallpinbutton}" alpha=".4" falloff=".4" blurAmount=".1"/>			
+		</s:VGroup>
+	</s:HGroup>
+</s:BorderContainer>

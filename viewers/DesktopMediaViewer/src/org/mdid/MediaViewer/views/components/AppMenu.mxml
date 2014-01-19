@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:ControlBar xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="45"
+			   paddingTop="0" paddingLeft="0" paddingBottom="0" paddingRight="0"
+			   horizontalGap="0" verticalGap="0" verticalAlign="top"
+			   styleName="AppMenu"		   
+			   >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import assets.skins.CustomCheckboxSkin;
+			private function getAppVersion():String {
+				var appXml:XML = NativeApplication.nativeApplication.applicationDescriptor;
+				var ns:Namespace = appXml.namespace();
+				var appVersion:String = appXml.ns::versionNumber[0];
+				return appVersion;
+			}
+		]]>
+	</fx:Script>
+
+	<s:HGroup horizontalAlign="left" gap="2" width="100%" height="100%" paddingLeft="3">
+		<s:VGroup gap="0" paddingBottom="2" paddingTop="4" verticalAlign="middle" height="100%">
+			<s:Label id="status" text="You are not logged in." color="#FFFFFF" styleName="smallerText" alpha=".67" />
+			<mx:Spacer width="0" height="100%"/>
+			<s:Label text="{'MediaViewer v' + getAppVersion()}" color="#FFFFFF" styleName="smallerText" alpha=".67"/>
+		</s:VGroup>
+	</s:HGroup>
+	<s:HGroup id="menuitems" horizontalAlign="right" verticalAlign="bottom" gap="0" width="270" height="100%" paddingTop="1" paddingLeft="4">
+		<s:VGroup verticalAlign="top" height="100%" paddingRight="5">
+			<s:CheckBox id="smoothbitmap" selected="true" width="55" skinClass="assets.skins.CustomCheckboxSkin" styleName="SmoothBitmap" label="Smooth image edges" toolTip="" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>		
+		</s:VGroup>
+		<mx:LinkButton id="login" label="Login/Logout" labelPlacement="bottom" enabled="true" styleName="Login" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+		<mx:LinkButton id="slideshows" label="My Slideshows" labelPlacement="bottom" enabled="true" styleName="OpenSlideshow" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+	</s:HGroup>
+	<s:HGroup horizontalAlign="right" verticalAlign="top" gap="0" paddingTop="0" width="25">
+		<mx:LinkButton paddingTop="0" id="closebutton" enabled="true" styleName="CloseMenuButton" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+	</s:HGroup>
+</mx:ControlBar>

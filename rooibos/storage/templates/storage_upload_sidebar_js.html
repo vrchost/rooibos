@@ -6,6 +6,8 @@
 function update_form_parameters(control) {
 	control.swfupload('removePostParam', '{{ upload_form.storage.name }}');
 	control.swfupload('addPostParam', '{{ upload_form.storage.name }}', $("#{{ upload_form.storage.auto_id }}").val());
+	var limit = $("#{{ upload_form.storage.auto_id }}").val().split(',')[1];
+	control.swfupload('setFileSizeLimit', limit);
 }
 
 </script>

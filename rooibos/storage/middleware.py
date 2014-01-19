@@ -33,5 +33,9 @@ class StorageOnStart:
             return 'no'
         add_restriction_precedence('download', download_precedence)
 
+        def upload_limit_precedence(a, b):
+            return a if (a > b) else b
+        add_restriction_precedence('uploadlimit', upload_limit_precedence)
+
         # Only need to run once
         raise MiddlewareNotUsed

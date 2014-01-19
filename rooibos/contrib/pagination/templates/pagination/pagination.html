@@ -1,5 +1,6 @@
 {% if is_paginated %}
 {% load i18n %}
+{% load humanize %}
 <div class="pagination">
     {% if page_obj.has_previous %}
         <a href="?page={{ page_obj.previous_page_number }}{{ getvars }}" class="prev">&lsaquo;&lsaquo; {% trans "previous" %}</a>
@@ -9,9 +10,9 @@
     {% for page in pages %}
         {% if page %}
             {% ifequal page page_obj.number %}
-                <span class="current page">{{ page }}</span>
+                <span class="current page">{{ page|intcomma }}</span>
             {% else %}
-                <a href="?page={{ page }}{{ getvars }}" class="page">{{ page }}</a>
+                <a href="?page={{ page }}{{ getvars }}" class="page">{{ page|intcomma }}</a>
             {% endifequal %}
         {% else %}
             ...

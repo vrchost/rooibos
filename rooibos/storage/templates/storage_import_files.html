@@ -4,18 +4,21 @@
 {% block javascript %}
 {{ block.super }}
 <script type="text/javascript">
-
 function update_form_parameters(control) {
 	control.swfupload('removePostParam', '{{ upload_form.collection.name }}');
 	control.swfupload('removePostParam', '{{ upload_form.storage.name }}');
 	control.swfupload('removePostParam', '{{ upload_form.create_records.name }}');
 	control.swfupload('removePostParam', '{{ upload_form.personal_records.name }}');
 	control.swfupload('removePostParam', '{{ upload_form.replace_files.name }}');
+	control.swfupload('removePostParam', '{{ upload_form.multiple_files.name }}');
 	control.swfupload('addPostParam', '{{ upload_form.collection.name }}', $("#{{ upload_form.collection.auto_id }}").val());
 	control.swfupload('addPostParam', '{{ upload_form.storage.name }}', $("#{{ upload_form.storage.auto_id }}").val());
 	control.swfupload('addPostParam', '{{ upload_form.create_records.name }}', $("#{{ upload_form.create_records.auto_id }}").attr("checked") ? "on" : "");
 	control.swfupload('addPostParam', '{{ upload_form.personal_records.name }}', $("#{{ upload_form.personal_records.auto_id }}").attr("checked") ? "on" : "");
 	control.swfupload('addPostParam', '{{ upload_form.replace_files.name }}', $("#{{ upload_form.replace_files.auto_id }}").attr("checked") ? "on" : "");
+	control.swfupload('addPostParam', '{{ upload_form.multiple_files.name }}', $("#{{ upload_form.multiple_files.auto_id }}").attr("checked") ? "on" : "");
+	var limit = $("#{{ upload_form.storage.auto_id }}").val().split(',')[1];
+	control.swfupload('setFileSizeLimit', limit);
 }
 
 </script>
@@ -60,6 +63,14 @@ function update_form_parameters(control) {
 		<th>{{ upload_form.replace_files.label }}
 		</th>
 		<td>{{ upload_form.replace_files }}
+		</td>
+	</tr>
+	<tr>
+		<th>{{ upload_form.multiple_files.label }}
+		</th>
+		<td>{{ upload_form.multiple_files }}<br />
+			Allows attaching more than one file of the same type to a record
+			by adding a suffix to the name, e.g. ABC001_01.jpg, ABC001_02.jpg, ...
 		</td>
 	</tr>
 </table>

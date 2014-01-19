@@ -1,11 +1,13 @@
 
 <script type="text/javascript">
-
 $(document).ready(function() {
     $("#html-upload-control").hide();
+	$("#{{ upload_form.storage.auto_id }}").change(function() {
+		update_form_parameters($('#upload-control'));
+	});
     $('#upload-control').swfupload({
 		upload_url: "{{ upload_url|default:request.get_full_path }}",
-		file_size_limit : "{{ UPLOAD_LIMIT|default:"512000" }}",
+//		file_size_limit : "{{ UPLOAD_LIMIT|default:"512000" }}",
 		file_types : "*.*",
 		file_types_description : "All Files",
 		file_upload_limit : "0",
@@ -19,6 +21,7 @@ $(document).ready(function() {
 		post_params : {swfupload : "true"}
 	})
 		.bind('swfuploadLoaded', function(event){
+			update_form_parameters($(this));
 			$('#log').append('<li>Loaded<'+'/li>');
 		})
 		.bind('fileQueued', function(event, file){

@@ -5,7 +5,7 @@ import os
 import random
 from time import time
 import hashlib
-from rooibos.util import create_symlink
+from rooibos.util import create_link
 from rooibos.statistics.models import Activity
 
 
@@ -31,7 +31,8 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
             filename = '-'.join([valid_until, code, name])
             symlink = os.path.join(storage.deliverybase, filename)
             if not os.path.exists(symlink):
-                create_symlink(self.get_absolute_file_path(storage, media), symlink)
+                create_link(self.get_absolute_file_path(storage, media), symlink,
+                            hard=getattr(settings, 'HARD_VIDEO_DELIVERY_LINKS', False))
 
             Activity.objects.create(event='media-delivery-url',
                     content_object=media,
