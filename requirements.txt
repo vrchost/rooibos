@@ -32,3 +32,4 @@ flake8-docstrings
 django-cas
 boto
 django-storages
+https://github.com/knabar/django-shibboleth/archive/master.zip
