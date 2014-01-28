@@ -76,6 +76,8 @@ urls = [
     url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_DIR}, name='static'),
 
     url(r'^exception/$', raise_exception),
+
+    (r'^shibboleth/', include('django_shibboleth.urls')),
     ]
 
 for app in apps:
