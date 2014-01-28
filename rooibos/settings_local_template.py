@@ -193,6 +193,12 @@ POP_AUTH = (
 
 SESSION_COOKIE_AGE = 6 * 3600  # in seconds
 
+SHIB_ATTRIBUTE_MAP = None
+SHIB_USERNAME = None
+SHIB_EMAIL = None
+SHIB_FIRST_NAME = None
+SHIB_LAST_NAME = None
+
 SSL_PORT = None  # ':443'
 
 # Theme colors for use in CSS
