@@ -1,5 +1,5 @@
 from django import forms
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext

@@ -36,7 +36,7 @@ class BasicAuthenticationMiddleware:
     def process_response(self, request, response):
         if (type(response) == HttpResponseForbidden
             and not request.user.is_authenticated()
-            and "CSRF verification failed." not in response.content):
+            and not response.content):
             return basic_challenge()
         else:
             return response
