@@ -204,7 +204,7 @@ HARD_VIDEO_DELIVERY_LINKS = False
 MASTER_TEMPLATE = 'master_root.html'
 
 
-INSTALLED_APPS = []
+INSTALLED_APPS = ()
 
 
 additional_settings = [
