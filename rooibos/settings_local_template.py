@@ -203,6 +203,10 @@ HARD_VIDEO_DELIVERY_LINKS = False
 
 MASTER_TEMPLATE = 'master_root.html'
 
+
+INSTALLED_APPS = []
+
+
 additional_settings = [
 #    'apps.jmutube.settings_local',
 #    'apps.svohp.settings_local',
