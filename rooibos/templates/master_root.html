@@ -105,12 +105,19 @@
         <ul>
             {% if user.is_authenticated %}
             <li>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</li>
-            <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
+            {% if SHIB_ENABLED %}
+                <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
+            {% endif %}
             <li><a href="{% url ui-options %}">Options</a></li>
             <li><a href="{% url ui-management %}">Management</a></li>
             {% else %}
-            <li><a href="{% url login %}?next={{ request.get_full_path }}">CAS Login</a></li>
-            <li><a href="{% url local-login %}?next={{ request.get_full_path }}">Local Login</a></li>
+                {% if SHIB_ENABLED %}
+                    <li><a href="{% url shib_login %}?next={{ request.get_full_path }}">Log in</a></li>
+                    <li><a href="{% url login %}?next={{ request.get_full_path }}">Local login</a></li>
+                {% else %}
+                    <li><a href="{% url login %}?next={{ request.get_full_path }}">CAS Login</a></li>
+                    <li><a href="{% url local-login %}?next={{ request.get_full_path }}">Local Login</a></li>
+                {% endif %}
             {% endif %}
             <li>{% with request.pagehelp|default:"" as help %}{% pagehelp help %}{% endwith %}</li>
             {% if ADMINS %}

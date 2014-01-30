@@ -117,6 +117,9 @@
         {% if SHOW_FRONTPAGE_LOGIN|default:"yes" != "no" %}
         <h2>Log in</h2>
 
+            {% if SHIB_ENABLED %}
+                <div>Please <a href="{% url shib_login %}">log in using Shibboleth</a></div>
+            {% else %}
         <form action="{% url login %}" method="post">{% csrf_token %}
             <table summary="Login">
             <tr><td>{{ login_form.username.label_tag }}</td><td>{{ login_form.username }}</td></tr>
@@ -125,6 +128,7 @@
             </table>
             <input type="hidden" name="next" value="{% url main %}" />
         </form>
+            {% endif %}
         {% endif %}
         -->
         <div>Please <a href="{% url login %}">log in using CAS</a></div>

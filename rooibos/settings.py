@@ -184,6 +184,7 @@ EXPOSE_TO_CONTEXT = (
     'PREVIEW_WIDTH',
     'PREVIEW_HEIGHT',
     'SHOW_TERMS',
+    'SHIB_ENABLED',
     )
 
 
