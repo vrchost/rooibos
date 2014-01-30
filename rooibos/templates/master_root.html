@@ -105,7 +105,7 @@
         <ul>
             {% if user.is_authenticated %}
             <li>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</li>
-            {% if SHIB_ENABLED %}
+            {% if not SHIB_ENABLED %}
                 <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
             {% endif %}
             <li><a href="{% url ui-options %}">Options</a></li>
