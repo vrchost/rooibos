@@ -17,9 +17,10 @@ unused_bin/
 Thumbs.db
 rooibos/static/cache/*
 2*M.mysql
+<<<<<<< HEAD
+.idea/*
+=======
 bin-release-temp/
 .DS_Store
-.idea/.name
-mdid-data
-mdid-data/*
-.idea
+
+>>>>>>> d16d736956e8d76f4a081d9d3560d0655a3878cd
