@@ -486,7 +486,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                           mode,
                           str(ids),
                           )
-    print hash
+
     facets = cache.get('search_facets_html_%s' % hash)
 
     sort = sort.startswith('random') and 'random' or sort.split()[0]
