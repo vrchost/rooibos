@@ -110,6 +110,7 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
 #    'rooibos.federatedsearch.nasa',
+    'rooibos.federatedsearch.shared',
     'rooibos.converters',
     'rooibos.contrib.tagging',
     'rooibos.workers',

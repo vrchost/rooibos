@@ -11,6 +11,7 @@ from models import HitCount
 # from nasa import NasaImageExchange
 from artstor import ArtstorSearch
 from flickr import FlickrSearch
+from shared import SharedSearch
 
 import logging
 
@@ -23,8 +24,9 @@ import logging
 
 source_classes = [
 #    NasaImageExchange,
-    ArtstorSearch,
-    FlickrSearch,
+#    ArtstorSearch,
+#    FlickrSearch,
+    SharedSearch,
 ]
 
 def available_federated_sources():
