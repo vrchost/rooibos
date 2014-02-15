@@ -1,0 +1,82 @@
+{% extends "master.html" %}
+{% load humanize %}
+{% load access_control %}
+{% load ui %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#delete-collection").click(function(event) {
+            if (!confirm("Are you sure you want to remove this shared collection?"))
+                event.preventDefault();
+        });
+    });
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url ui-management %}", "title": "Management"},
+    {"url": "{% url shared-manage %}", "title": "Shared Collection Management"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+{% if collection.id %}
+  <div class="facet active-facet" id="collection_sidebar_permissions">
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url collection %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-body">
+        {% permissions_display collection %}
+    </div>
+  </div>
+
+  <div class="facet active-facet" id="collection_sidebar_effective_permissions">
+    <div class="facet-header">Effective Permissions</div>
+    <div class="facet-body">
+        {% effective_permissions_form collection %}
+    </div>
+  </div>
+
+  <div class="facet active-facet" id="collection_sidebar_delete">
+    <div class="facet-header">Remove Shared Collection</div>
+    <div class="facet-body">
+        <form action="." method="POST">{% csrf_token %}
+        <input type="submit" value="Delete" name="delete-collection" id="delete-collection" />
+        </form>
+    </div>
+  </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Edit Shared Collection</h1>
+
+<h2>{{ collection.title }}</h2>
+
+<form action="." method="POST" class="vertical">{% csrf_token %}
+
+
+{{ form.title.label_tag }}{{ form.title }}{{ form.title.errors }}
+{{ form.url.label_tag }}{{ form.url }}{{ form.url.errors }}
+{{ form.username.label_tag }}{{ form.username }}{{ form.username.errors }}
+{{ form.password.label_tag }}{{ form.password }}{{ form.password.errors }}
+{{ form.description.label_tag }}{{ form.description }}{{ form.description.errors }}
+
+<div class="row">
+    <br />
+    <input type="submit" value="{% if collection.id %}Update{% else %}Create{% endif %}" />
+    <a href="{% url shared-manage %}">Cancel</a>
+</div>
+
+</form>
+
+{% endblock %}

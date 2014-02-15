@@ -1,0 +1,43 @@
+{% extends "master.html" %}
+{% load pagination_tags %}
+{% load humanize %}
+
+{% block content %}
+
+{% autopaginate collections 50 %}
+
+<h1>Shared Collection Management</h1>
+
+<a href="{% url shared-new %}">Add Shared Collection</a>
+
+
+{% if collections %}
+
+{% paginate %}
+
+<table class="list" summary="Collections">
+    <tr>
+        <th>Title</th>
+        <th>Url</th>
+        <th>Username</th>
+    </tr>
+
+{% for collection in collections %}
+<tr class="{% cycle "" "altrow" %}"{% if master %} style="color: gray;"{% endif %}>
+    <td><a href="{% url shared-edit collection.id, collection.name %}">{{ collection.title }}</a></td>
+    <td>{{ collection.url }}</td>
+    <td>{{ collection.username|default:"-" }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+{% paginate %}
+
+{% else %}
+
+<div>No shared collections yet.</div>
+
+{% endif %}
+
+{% endblock %}

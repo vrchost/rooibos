@@ -1,8 +1,8 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.utils.http import urlencode
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 import urllib2
 import math
 import urllib
@@ -16,7 +16,9 @@ from rooibos.access.models import AccessControl, ExtendedGroup, \
 from rooibos.workers.models import JobInfo
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django import forms
 from rooibos.federatedsearch.models import FederatedSearch, HitCount
+from models import SharedCollection
 import datetime
 import socket
 import json
@@ -295,3 +297,66 @@ def select(request):
 
     from rooibos.ui.views import select_record
     return select_record(request)
+
+
+@login_required
+def manage(request):
+    if not request.user.is_superuser:
+        raise Http404()
+
+    return render_to_response('federatedsearch/shared/manage.html', {
+            'collections': SharedCollection.objects.all(),
+        },
+        context_instance=RequestContext(request))
+
+
+@login_required
+def edit(request, id=None, name=None):
+    if not request.user.is_superuser:
+        raise Http404()
+
+    if id and name:
+        collection = get_object_or_404(SharedCollection, id=id)
+    else:
+        collection = SharedCollection(title='Untitled')
+
+    class SharedCollectionForm(forms.ModelForm):
+
+        url = forms.CharField()
+        username = forms.CharField()
+        password = forms.CharField()
+
+        class Meta:
+            model = SharedCollection
+
+        def __init__(self, *args, **kwargs):
+            super(SharedCollectionForm, self).__init__(*args, **kwargs)
+            self.fields['url'].initial = self.instance.url
+            self.fields['username'].initial = self.instance.username
+            self.fields['password'].initial = self.instance.password
+
+        def save(self, commit=True):
+            self.instance.url = self.cleaned_data['url']
+            self.instance.username = self.cleaned_data['username']
+            self.instance.password = self.cleaned_data['password']
+            super(SharedCollectionForm, self).save(commit=commit)
+
+    if request.method == "POST":
+        if request.POST.get('delete-collection'):
+            request.user.message_set.create(message="Shared collection '%s' has been removed." % collection.title)
+            collection.delete()
+            return HttpResponseRedirect(reverse('shared-manage'))
+        else:
+            form = SharedCollectionForm(request.POST, instance=collection)
+            if form.is_valid():
+                form.save()
+                return HttpResponseRedirect(reverse('shared-edit', kwargs=dict(
+                    id=form.instance.id, name=form.instance.name)))
+    else:
+        form = SharedCollectionForm(instance=collection)
+
+    return render_to_response('federatedsearch/shared/edit.html',
+                          {'form': form,
+                           'collection': collection,
+                          },
+                          context_instance=RequestContext(request))
