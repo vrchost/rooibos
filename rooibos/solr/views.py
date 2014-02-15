@@ -519,7 +519,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                            'sort': sort,
                            'random': random.random(),
                            'viewmode': viewmode,
-                           'federated_sources': bool(available_federated_sources()),
+                           'federated_sources': bool(available_federated_sources(request.user)),
                            'federated_search': federated_search,
                            'federated_search_query': federated_search_query,
                            'pagination_helper': [None] * hits,

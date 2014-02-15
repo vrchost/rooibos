@@ -4,6 +4,7 @@ from rooibos.storage.models import Media
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.federatedsearch.shared import SharedSearch
+from rooibos.federatedsearch.shared.models import SharedCollection
 from rooibos.util import guess_extension
 import logging
 import urllib2
@@ -19,9 +20,10 @@ def shared_download_media(job):
         if jobinfo.status.startswith == 'Complete':
             # job finished previously
             return
-        shared = SharedSearch()
         arg = simplejson.loads(jobinfo.arg)
-        record = Record.objects.get(id=arg['record'], manager='shared')
+        shared = SharedSearch(arg['shared_id'])
+        record = Record.objects.get(id=arg['record'],
+                                    manager=shared.get_source_id())
         url = arg['url']
         storage = shared.get_storage()
         file = urllib2.urlopen(url)
@@ -38,5 +40,5 @@ def shared_download_media(job):
 
     except Exception, ex:
 
-        logging.info('flickr_download_media failed for %s (%s)' % (job, ex))
+        logging.info('shared_download_media failed for %s (%s)' % (job, ex))
         jobinfo.update_status('Failed: %s' % ex)

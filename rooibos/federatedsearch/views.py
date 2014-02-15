@@ -29,13 +29,18 @@ source_classes = [
     SharedSearch,
 ]
 
-def available_federated_sources():
-    return [c for c in source_classes if c.available()]
+def available_federated_sources(user):
+    for c in source_classes:
+        if hasattr(c, 'get_instances'):
+            for i in c.get_instances(user):
+                yield i
+        elif c.available():
+            yield c()
 
 def sidebar_api_raw(request, query, cached_only=False):
 
     sources = dict(
-        (lambda s: (s.get_source_id(), s))(c()) for c in available_federated_sources()
+        (s.get_source_id(), s) for s in available_federated_sources(request.user)
     )
 
     if not sources:

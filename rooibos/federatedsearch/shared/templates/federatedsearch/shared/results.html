@@ -14,7 +14,7 @@
         if (ids.constructor != Array) ids = [ids];
         ajaxManager.add({
             type: method,
-            url: '{% url shared-select %}',
+            url: '{% url shared-select shared.id, shared.name %}',
             data: {'id': JSON.stringify(ids), 'checked': checked},
             dataType: 'json',
             success: function(r) {
@@ -60,7 +60,7 @@
 
 {{ block.super }}
 
-<h1>Shared Collection Results</h1>
+<h1>{{ shared.title }} Results</h1>
 {% endblock %}
 
 
