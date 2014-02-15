@@ -559,11 +559,13 @@ def manage_collection(request, id=None, name=None):
     if id and name:
         collection = get_object_or_404(filter_by_access(request.user, Collection, manage=True),
                                        id=id)
-    else:
+    elif request.user.has_perm('data.add_collection'):
         collection = Collection(title='Untitled')
         if not request.user.is_superuser:
             collection.owner = request.user
             collection.hidden = True
+    else:
+        raise Http404()
 
     class CollectionForm(forms.ModelForm):
 
