@@ -1,1 +1,1 @@
-from views import SharedSearch
+from views import SharedSearch  # noqa

@@ -4,7 +4,6 @@ from rooibos.storage.models import Media
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.federatedsearch.shared import SharedSearch
-from rooibos.federatedsearch.shared.models import SharedCollection
 from rooibos.util import guess_extension
 import logging
 import urllib2

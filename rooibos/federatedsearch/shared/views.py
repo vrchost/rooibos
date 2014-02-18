@@ -12,8 +12,6 @@ from django.utils import simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
 from rooibos.storage import Storage
-from rooibos.access.models import AccessControl, ExtendedGroup, \
-    AUTHENTICATED_GROUP
 from rooibos.workers.models import JobInfo
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -106,7 +104,8 @@ class SharedSearch(FederatedSearch):
         return self.shared.title
 
     def get_search_url(self):
-        return reverse('shared-search', kwargs={'id': self.shared.id, 'name': self.shared.name})
+        return reverse('shared-search',
+                       kwargs={'id': self.shared.id, 'name': self.shared.name})
 
     def get_source_id(self):
         return 'shared_%s' % self.shared.name
@@ -133,12 +132,16 @@ class SharedSearch(FederatedSearch):
         for record in data.get('records'):
             if 'thumbnail' in record and '://' not in record['thumbnail']:
                 record['thumbnail'] = '%s?%s' % (
-                    reverse('shared-proxy-image', kwargs={'id': self.shared.id, 'name': self.shared.name}),
+                    reverse('shared-proxy-image',
+                            kwargs={'id': self.shared.id,
+                                    'name': self.shared.name}),
                     urllib.urlencode([('url', record['thumbnail'])])
                     )
             if 'image' in record and '://' not in record['image']:
                 record['image'] = '%s?%s' % (
-                    reverse('shared-proxy-image', kwargs={'id': self.shared.id, 'name': self.shared.name}),
+                    reverse('shared-proxy-image',
+                            kwargs={'id': self.shared.id,
+                                    'name': self.shared.name}),
                     urllib.urlencode([('url', record['image'])])
                     )
 
@@ -203,15 +206,17 @@ class SharedSearch(FederatedSearch):
 
         for index, metadata in enumerate(data['record']['metadata']):
             try:
-                field = standardfield(metadata['dc']) if metadata.get('dc') else unmapped_field
+                field = (standardfield(metadata['dc'])
+                         if metadata.get('dc') else unmapped_field)
             except Field.DoesNotExist:
                 field = unmapped_field
-            FieldValue.objects.create(record=record,
-                                      field=field,
-                                      order=metadata.get('order', index),
-                                      value=metadata['value'],
-                                      label=metadata['label'],
-                                     )
+            FieldValue.objects.create(
+                record=record,
+                field=field,
+                order=metadata.get('order', index),
+                value=metadata['value'],
+                label=metadata['label'],
+            )
 
         CollectionItem.objects.create(collection=collection, record=record)
 
@@ -268,8 +273,8 @@ def search(request, id, name):
 def proxy_image(request, id, name):
 
     shared = SharedSearch(id)
-    
-    url = urlparse(self.shared.url)
+
+    url = urlparse(shared.url)
     server = '://'.join([url.scheme, url.netloc])
 
     url = server + request.GET.get('url')
@@ -313,7 +318,9 @@ def manage(request):
     if not request.user.is_superuser:
         raise Http404()
 
-    return render_to_response('federatedsearch/shared/manage.html', {
+    return render_to_response(
+        'federatedsearch/shared/manage.html',
+        {
             'collections': SharedCollection.objects.all(),
         },
         context_instance=RequestContext(request))
@@ -352,7 +359,9 @@ def edit(request, id=None, name=None):
 
     if request.method == "POST":
         if request.POST.get('delete-collection'):
-            request.user.message_set.create(message="Shared collection '%s' has been removed." % collection.title)
+            request.user.message_set.create(
+                message=("Shared collection '%s' has been removed." %
+                         collection.title))
             collection.delete()
             return HttpResponseRedirect(reverse('shared-manage'))
         else:
@@ -364,8 +373,10 @@ def edit(request, id=None, name=None):
     else:
         form = SharedCollectionForm(instance=collection)
 
-    return render_to_response('federatedsearch/shared/edit.html',
-                          {'form': form,
-                           'collection': collection,
-                          },
-                          context_instance=RequestContext(request))
+    return render_to_response(
+        'federatedsearch/shared/edit.html',
+        {
+            'form': form,
+            'collection': collection,
+        },
+        context_instance=RequestContext(request))
