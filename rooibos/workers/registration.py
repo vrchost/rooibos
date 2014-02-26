@@ -1,14 +1,10 @@
-import sys
 from django.conf import settings
-from django.db import connection
-from gearman import Task, GearmanWorker, GearmanClient
-from gearman.connection import GearmanConnection
-from gearman.task import Taskset
-
+import pika
 import traceback
 import logging
-
+from collections import namedtuple
 from django.db import transaction
+
 
 @transaction.commit_manually
 def flush_transaction():
@@ -25,8 +21,6 @@ def flush_transaction():
 
 
 workers = dict()
-
-client = settings.GEARMAN_SERVERS and GearmanClient(settings.GEARMAN_SERVERS) or None
 
 
 def register_worker(id):
@@ -54,38 +48,41 @@ def discover_workers():
                 pass
 
 
-def create_worker():
+Job = namedtuple('Job', 'arg')
+
+
+def worker_callback(ch, method, properties, body):
+    logging.debug('worker_callback running')
     discover_workers()
-    worker = GearmanWorker(settings.GEARMAN_SERVERS)
-    for id, func in workers.iteritems():
-        worker.register_function(id, func)
-    return worker
+    job, identifier = body.split()
+    handler = workers.get(job)
+    if not handler:
+        logging.error('Received job with unknown method %s' % method)
+        return
+    logging.debug('Running job %s %s' % (job, identifier))
+    job = Job(arg=identifier)  # for backwards compatibility
+    handler(job)
+    logging.debug('Job %s %s completed' % (job, identifier))
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 
 def run_worker(worker, arg, **kwargs):
     flush_transaction()
     discover_workers()
     logging.debug("Running worker %s with arg %s" % (worker, arg))
-    task = Task(worker, arg, **kwargs)
-    if client:
-        logging.debug("Using gearman")
-        if task.background:
-            logging.debug("Running task in background")
-            taskset = Taskset([task])
-            try:
-                client.do_taskset(taskset)
-            except GearmanConnection.ConnectionError:
-                logging.debug("ConnectionError, trying once more")
-                # try again, perhaps server connection was reset
-                client.do_taskset(taskset)
-            logging.debug("Done scheduling background task")
-            return task.handle
-        else:
-            logging.debug("Running task immediately")
-            return client.do_task(task)
-    else:
-        logging.debug("Gearman not found, running immediately")
-        if workers.has_key(worker):
-            return workers[worker](task)
-        else:
-            raise NotImplementedError()
+
+    connection = pika.BlockingConnection(pika.ConnectionParameters(
+        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))))
+    channel = connection.channel()
+
+    queue_name = 'rooibos-%s-jobs' % (
+        getattr(settings, 'INSTANCE_NAME', 'default'))
+    channel.queue_declare(queue=queue_name, durable=True)
+    logging.debug('Sending message to worker process')
+    channel.basic_publish(exchange='',
+                          routing_key=queue_name,
+                          body='%s %s' % (worker, arg),
+                          properties=pika.BasicProperties(
+                              delivery_mode=2,  # make message persistent
+                          ))
+    connection.close()
