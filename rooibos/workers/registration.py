@@ -54,15 +54,21 @@ Job = namedtuple('Job', 'arg')
 def worker_callback(ch, method, properties, body):
     logging.debug('worker_callback running')
     discover_workers()
-    job, identifier = body.split()
-    handler = workers.get(job)
+    jobname, data = body.split()
+    handler = workers.get(jobname)
     if not handler:
         logging.error('Received job with unknown method %s' % method)
         return
-    logging.debug('Running job %s %s' % (job, identifier))
-    job = Job(arg=identifier)  # for backwards compatibility
-    handler(job)
-    logging.debug('Job %s %s completed' % (job, identifier))
+    logging.debug('Running job %s %s' % (jobname, data))
+    try:
+        # Classic mode with Job record identifier
+        identifier = int(data)
+        job = Job(arg=identifier)  # for backwards compatibility
+        handler(job)
+        logging.debug('Job %s %s completed' % (job, identifier))
+    except ValueError:
+        # New mode with all data included in call
+        handler(data)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 

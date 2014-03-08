@@ -1,5 +1,6 @@
 from datetime import datetime
 import re
+import logging
 from threading import Thread
 from django.conf import settings
 from django.db.models import Q
@@ -13,7 +14,10 @@ from pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
 from rooibos.access.models import AccessControl
 
+
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
+
+logger = logging.getLogger("rooibos_solr")
 
 
 def object_acl_to_solr(obj):
@@ -78,13 +82,13 @@ class SolrIndex():
     def index(self, verbose=False, all=False):
         from models import SolrIndexUpdates
         self._build_group_tree()
-        conn = Solr(settings.SOLR_URL)
         core_fields = dict((f, f.get_equivalent_fields()) for f in Field.objects.filter(standard__prefix='dc'))
         count = 0
         batch_size = 500
         process_thread = None
         if all:
             total_count = Record.objects.count()
+            to_delete = None
         else:
             processed_updates = []
             to_update = []
@@ -95,9 +99,15 @@ class SolrIndex():
                     to_delete.append(record)
                 else:
                     to_update.append(record)
-            if to_delete:
-                conn.delete(q='id:(%s)' % ' '.join(map(str, to_delete)))
             total_count = len(to_update)
+
+        if not to_update and not to_delete:
+            logger.info("Nothing to update in index, returning early")
+            return 0
+
+        conn = Solr(settings.SOLR_URL)
+        if to_delete:
+            conn.delete(q='id:(%s)' % ' '.join(map(str, to_delete)))
 
         if verbose: pb = ProgressBar(total_count)
         while True:
@@ -139,6 +149,9 @@ class SolrIndex():
             SolrIndexUpdates.objects.filter(delete=False).delete()
         else:
             SolrIndexUpdates.objects.filter(id__in=processed_updates).delete()
+
+        return count
+
 
     def clear_missing(self, verbose=False):
         conn = Solr(settings.SOLR_URL)

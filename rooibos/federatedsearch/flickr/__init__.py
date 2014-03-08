@@ -5,7 +5,6 @@ from rooibos.access.models import AccessControl, ExtendedGroup, AUTHENTICATED_GR
 from rooibos.data.models import Collection, Record, standardfield, CollectionItem, Field, FieldValue, FieldSet
 from rooibos.federatedsearch.models import FederatedSearch
 from rooibos.solr import SolrIndex
-from rooibos.solr.models import SolrIndexUpdates
 from rooibos.storage import Storage, Media
 from rooibos.workers.models import JobInfo
 from django.utils import simplejson

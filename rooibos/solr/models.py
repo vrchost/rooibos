@@ -5,7 +5,7 @@ from rooibos.data.models import Record, Collection, Field, CollectionItem
 from rooibos.contrib.tagging.models import TaggedItem
 from rooibos.util.models import OwnedWrapper
 from pysolr import Solr
-
+from workers import schedule_solr_index
 
 class SolrIndexUpdates(models.Model):
     record = models.IntegerField()
@@ -14,7 +14,7 @@ class SolrIndexUpdates(models.Model):
 
 def mark_for_update(record_id, delete=False):
     SolrIndexUpdates.objects.create(record=record_id, delete=delete)
-
+    schedule_solr_index()
 
 def post_record_delete_callback(sender, **kwargs):
     mark_for_update(record_id=kwargs['instance'].id, delete=True)

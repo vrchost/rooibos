@@ -11,7 +11,7 @@ from os import makedirs
 from rooibos.data.models import Collection, CollectionItem, Record, FieldSet, Field
 from rooibos.settings import FLICKR_KEY, FLICKR_SECRET
 from rooibos.solr import SolrIndex
-from rooibos.solr.models import SolrIndexUpdates
+#from rooibos.solr.models import SolrIndexUpdates
 from rooibos.storage import Storage, Media
 from rooibos.util import json_view
 import flickrapi
