@@ -43,7 +43,7 @@ def discover_workers():
     if not workers:
         for app in settings.INSTALLED_APPS:
             try:
-                module = __import__(app + ".workers")
+                __import__(app + ".workers")
             except ImportError:
                 pass
 

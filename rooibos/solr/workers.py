@@ -6,6 +6,7 @@ from rooibos.workers.registration import register_worker, run_worker
 
 logger = logging.getLogger("rooibos_solr_workers")
 
+
 @register_worker("solr_index")
 def solr_index(data):
     logger.info("Starting solr index")
