@@ -68,7 +68,24 @@ def logout(request):
     return dict(result='ok')
 
 
-def _record_as_json(record, owner=None, context=None, process_url=lambda url: url):
+def _record_as_json(record, owner=None, context=None, process_url=lambda url: url,
+                    dc_mapping_cache=None):
+    if dc_mapping_cache is None:
+        dc_mapping_cache = dict()
+
+    def get_dc_field(field):
+        if not field.id in dc_mapping_cache:
+            if field.standard and field.standard.prefix == 'dc':
+                dc_mapping_cache[field.id] = field.name
+            else:
+                equivalents = (field for field in field.get_equivalent_fields()
+                              if field.standard and field.standard.prefix == 'dc')
+                try:
+                    dc_mapping_cache[field.id] = equivalents.next().name
+                except StopIteration:
+                    pass
+        return dc_mapping_cache.get(field.id)
+
     return dict(
                 id=record.id,
                 name=record.name,
@@ -78,14 +95,18 @@ def _record_as_json(record, owner=None, context=None, process_url=lambda url: ur
                 metadata=[
                     dict(
                         label=value.resolved_label,
-                        value=value.value
+                        value=value.value,
+                        order=value.order,
+                        dc=get_dc_field(value.field),
                         )
                     for value in record.get_fieldvalues(owner=owner, context=context)
                 ]
             )
 
 def _records_as_json(records, owner=None, context=None, process_url=lambda url: url):
-    return [_record_as_json(record, owner, context, process_url) for record in records]
+    dc_mapping_cache = dict()
+    return [_record_as_json(record, owner, context, process_url, dc_mapping_cache)
+            for record in records] if records else []
 
 
 def _presentation_item_as_json(item, owner=None, process_url=lambda url: url):

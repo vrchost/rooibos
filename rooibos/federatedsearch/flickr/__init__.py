@@ -62,7 +62,7 @@ class FlickrSearch(FederatedSearch):
                                                          defaults=dict(
                                                             title='Flickr',
                                                             system='local',
-                                                            base=os.path.join(settings.AUTO_STORAGE_DIR, 'nix')
+                                                            base=os.path.join(settings.AUTO_STORAGE_DIR, 'flickr')
                                                          ))
         if created:
             authenticated_users, created = ExtendedGroup.objects.get_or_create(type=AUTHENTICATED_GROUP)
