@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from threading import Thread
 from models import HitCount
 
-from nasa import NasaImageExchange
+# from nasa import NasaImageExchange
 from artstor import ArtstorSearch
 from flickr import FlickrSearch
 
@@ -22,17 +22,22 @@ import logging
 #}
 
 source_classes = [
-    NasaImageExchange,
+#    NasaImageExchange,
     ArtstorSearch,
     FlickrSearch,
 ]
 
+def available_federated_sources():
+    return [c for c in source_classes if c.available()]
 
 def sidebar_api_raw(request, query, cached_only=False):
 
     sources = dict(
-        (lambda s: (s.get_source_id(), s))(c()) for c in source_classes
+        (lambda s: (s.get_source_id(), s))(c()) for c in available_federated_sources()
     )
+
+    if not sources:
+        return dict(html='', hits=0)
 
     if not request.user.is_authenticated():
         return dict(html="Please log in to see additional content.", hits=0)

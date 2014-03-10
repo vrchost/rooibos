@@ -4,7 +4,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
@@ -199,6 +199,9 @@ class Record(models.Model):
     def get_thumbnail_url(self):
         return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
 
+    def get_square_thumbnail_url(self):
+        return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name}) + '?square'
+
     def get_image_url(self):
         return reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
 
@@ -353,6 +356,7 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
 
 
+@transaction.commit_on_success
 def get_system_field():
     field, created = Field.objects.get_or_create(name='system-value',
                                                  defaults=dict(label='System Value'))

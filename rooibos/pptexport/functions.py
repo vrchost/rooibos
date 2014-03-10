@@ -3,7 +3,7 @@ from zipfile import ZipFile, ZIP_DEFLATED
 import os
 import xml.dom.minidom
 from rooibos.storage import get_image_for_record
-import Image
+from PIL import Image
 
 
 PROCESS_FILES = {

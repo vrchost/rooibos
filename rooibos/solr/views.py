@@ -20,7 +20,7 @@ from rooibos.data.functions import apply_collection_visibility_preferences, \
     get_collection_visibility_preferences
 from rooibos.storage.models import Storage
 from rooibos.ui import update_record_selection, clean_record_selection_vars
-from rooibos.federatedsearch.views import sidebar_api_raw
+from rooibos.federatedsearch.views import sidebar_api_raw, available_federated_sources
 import re
 import copy
 import random
@@ -57,6 +57,10 @@ class SearchFacet(object):
     def federated_search_query(self, value):
         return value.replace('|', ' ')
 
+    def fetch_facet_values(self):
+        return True
+
+
 class RecordDateSearchFacet(SearchFacet):
 
     def or_available(self):
@@ -74,6 +78,10 @@ class RecordDateSearchFacet(SearchFacet):
                 )
         else:
             return value
+
+    def fetch_facet_values(self):
+        return False
+
 
 class OwnerSearchFacet(SearchFacet):
 
@@ -310,7 +318,7 @@ def run_search(user,
 
     s = SolrIndex()
 
-    return_facets = search_facets.keys() if produce_facets else []
+    return_facets = [key for key, facet in search_facets.iteritems() if facet.fetch_facet_values()] if produce_facets else []
 
     try:
         (hits, records, facets) = s.search(query, sort=sort, rows=pagesize, start=(page - 1) * pagesize,
@@ -512,6 +520,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                            'sort': sort,
                            'random': random.random(),
                            'viewmode': viewmode,
+                           'federated_sources': bool(available_federated_sources()),
                            'federated_search': federated_search,
                            'federated_search_query': federated_search_query,
                            'pagination_helper': [None] * hits,

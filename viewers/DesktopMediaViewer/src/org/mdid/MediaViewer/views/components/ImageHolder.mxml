@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:ns1="com.adobe.wheelerstreet.fig.panzoom.*"
+		 xmlns:components="org.mdid.MediaViewer.views.components.*"
+		 creationComplete="init()"
+		 width="100%" height="100%"
+		 mouseUp=";"
+		 >
+	<fx:Script>
+		<![CDATA[
+			import com.degrafa.core.degrafa_internal;
+			
+			import mx.controls.FlexNativeMenu;
+			
+			public var rightClickMenu:FlexNativeMenu = new FlexNativeMenu();
+			
+			protected function init():void {
+				this.setCurrentState('imagenotcached');
+				rightClickMenu.dataProvider = this.menuData;
+				rightClickMenu.labelField = "@label";
+				rightClickMenu.showRoot = false;
+				rightClickMenu.setContextMenu(this);
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<fx:Boolean id="isCatalogWindowVisible"/>
+		<!-- The XML data provider --> 
+		<fx:XML format="e4x" id="menuData">
+			<root>
+				<menuitem id="first" label="Go to First Image" enabled="false"/>
+				<menuitem id="previous" label="Go to Previous Image" enabled="false"/>
+				<menuitem id="next" label="Go to Next Image" enabled="false"/>
+				<menuitem id="last" label="Go to Last Image" enabled="false"/>
+				<menuitem id="separator1" type="separator"/>
+				<menuitem id="goto" submenuversion="-1" label="Go to Image ..." enabled="false"/>
+				<menuitem id="separator2" type="separator"/>
+				<menuitem id="show_hide_image" label="Hide This Image" showText="Show This Image" hideText="Hide This Image" isHidden="true" enabled="false"/>
+				<menuitem id="resize_image" label="Resize This Image to 100%" enabled="false"/>
+				<menuitem id="reposition_image" label="Reposition This Image" enabled="false"/>
+				<menuitem id="separator3" type="separator"/>
+				<menuitem id="show_hide_catalog_data" label="Show Catalog Data" showText="Show Catalog Data" hideText="Hide Catalog Data" enabled="false"/>
+				<menuitem id="separator4" type="separator"/>
+				<menuitem id="split_1" label="Split Display Horizontally" splitHText="Split Display Horizontally" unsplitText="Undo Split Display" enabled="false"/>
+				<menuitem id="split_2" label="Split Display Vertically" splitVText="Split Display Vertically" splitHText="Split Display Horizontally" enabled="false"/>
+				<menuitem id="separator5" type="separator"/>
+				<menuitem id="fullscreen" label="Toggle Fullscreen Mode" enterText="Enter Fullscreen Mode" exitText="Exit Fullscreen Mode" enabled="true"/>
+				<menuitem id="separator5" type="separator"/>
+				<menuitem id="goto_mdid_support_url" label="Browse MDID Support Site" enabled="true"/>
+			</root>
+		</fx:XML>
+	</fx:Declarations>
+	
+	<s:states>
+		<s:State name="imageincache"/>
+		<s:State name="imagenotcached"/>
+	</s:states>
+	
+	<ns1:ImageViewer includeIn="imageincache"
+					 id="imageViewer"
+					 smoothBitmap="{this.parentApplication.isSmoothBitmap}"
+					 autoCenterImageOnLoad="true"
+					 bitmapScaleFactorMax="2"
+					 bitmapScaleFactorMin=".1"
+					 width="100%" height="100%"
+					 />
+	
+	<components:EdgeControls id="edges" includeIn="imageincache,imagenotcached" includeInLayout="true"/>
+	<s:BitmapImage includeIn="imagenotcached" id="bitmap" smooth="true" verticalCenter="0" horizontalCenter="0"/>
+	<components:ImageControlBox includeIn="imageincache" id="imageControlBox" imageViewer="{this.imageViewer}" includeInLayout="false" />
+	
+</s:Group>

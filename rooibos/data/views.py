@@ -330,7 +330,7 @@ def data_import(request):
 
         def clean_file(self):
             file = self.cleaned_data['file']
-            if os.path.splitext(file.name)[1] != '.csv':
+            if os.path.splitext(file.name)[1].lower() not in ('.csv', '.txt'):
                 raise forms.ValidationError("Please upload a CSV file with a .csv file extension")
             return file
 
@@ -415,7 +415,7 @@ def data_import_file(request, file):
         update = forms.BooleanField(label='Update existing records', initial=True, required=False)
         add = forms.BooleanField(label='Add new records', initial=True, required=False)
         test = forms.BooleanField(label='Test import only', initial=False, required=False)
-        personal = forms.BooleanField(label='Personal records', initial=True, required=False)
+        personal = forms.BooleanField(label='Personal records', initial=False, required=False)
 
         def clean(self):
             cleaned_data = self.cleaned_data

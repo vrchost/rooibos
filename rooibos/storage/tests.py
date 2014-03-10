@@ -443,7 +443,7 @@ class AutoConnectMediaTestCase(unittest.TestCase):
         r3 = self.create_record('id_3')
         Media.objects.create(record=r1, storage=self.storage, url='id_1.txt')
 
-        matches = match_up_media(self.storage, self.collection)
+        matches = list(match_up_media(self.storage, self.collection))
 
         self.assertEqual(1, len(matches))
         match = matches[0]

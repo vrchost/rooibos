@@ -39,3 +39,7 @@ class FederatedSearch(object):
 
     def get_search_url(self):
         raise NotImplementedError
+
+    @classmethod
+    def available(cls):
+        return False

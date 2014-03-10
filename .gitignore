@@ -11,6 +11,12 @@ solr/wrapper-license.conf
 config.xml
 CACHE
 rooibos/static/flowplayer/flowplayer.commercial*
+bin-debug/
+unused_bin/
+.metadata/
 Thumbs.db
 rooibos/static/cache/*
 2*M.mysql
+.idea/*
+bin-release-temp/
+.DS_Store

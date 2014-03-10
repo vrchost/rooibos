@@ -1,4 +1,4 @@
-from rooibos.auth import login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 from models import Impersonation
 from django.db.models import Q

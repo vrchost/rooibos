@@ -10,7 +10,7 @@ from django.conf import settings
 from django import forms
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from models import AccessControl, update_membership_by_ip
+from models import AccessControl
 from . import check_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object
 from rooibos.statistics.models import Activity
 import re
@@ -39,7 +39,6 @@ def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
         return HttpResponseRedirect((login_url or reverse('login')) + '?' + request.GET.urlencode())
     if type(response) == HttpResponseRedirect:
         # Successful login, add user to IP based groups
-        update_membership_by_ip(request.user, request.META['REMOTE_ADDR'])
         Activity.objects.create(event='login',
                                 request=request,
                                 content_object=request.user)

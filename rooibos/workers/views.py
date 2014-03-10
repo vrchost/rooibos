@@ -24,6 +24,7 @@ def joblist(request):
             JobInfo.objects.create(
                 owner=request.user,
                 func='testjob',
+                arg='This is a test',
             ).run()
         else:
             for k, v in request.POST.iteritems():

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:List xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		xmlns:layouts="com.rialvalue.layouts.*"
+		includeInLayout="false"
+		contentBackgroundAlpha="0"
+		borderAlpha="0"
+		useVirtualLayout="true"
+		maxWidth="50000"
+		>
+	<s:layout>
+		<s:HorizontalLayout id="hLayout" gap="4" />
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import spark.components.supportClasses.TextBase;
+			TextBase.mx_internal::truncationIndicatorResource = "...";
+		]]>
+	</fx:Script>
+	<s:itemRenderer>
+		<fx:Component>	
+			<s:ItemRenderer autoDrawBackground="false" width="110" height="140">
+				<fx:Script>
+					<![CDATA[
+						override public function set data(value:Object):void {
+							this.title.text = value.title;
+							this.thumbnail.source = value.source;
+						}
+					]]>
+				</fx:Script>
+				
+				<s:states>
+					<s:State name="normal" />
+					<s:State name="selected" />
+				</s:states>
+				<s:BorderContainer width="110" height="140" y.normal="5" borderColor.normal="#999999" borderColor.selected="#FFFFFF" borderWeight="2" backgroundAlpha.selected="1" backgroundAlpha.normal=".85" backgroundColor.normal="#353535" backgroundColor.selected="#000000">
+					<s:VGroup width="100%" height="100%" paddingBottom="2" paddingLeft="2" paddingRight="2" paddingTop="4" gap="4" verticalCenter="0" horizontalAlign="center">
+						<s:Label id="title" styleName=".smallerText" color="#FFFFFF" maxWidth="100" maxDisplayedLines="2" focusEnabled="false" tabEnabled="false" tabFocusEnabled="false"/>
+						<s:Image id="thumbnail" maxHeight="100" maxWidth="100"/>
+					</s:VGroup>
+				</s:BorderContainer>
+			</s:ItemRenderer>
+		</fx:Component>
+	</s:itemRenderer>
+</s:List>

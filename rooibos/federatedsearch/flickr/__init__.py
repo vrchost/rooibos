@@ -218,6 +218,9 @@ class FlickrSearch(FederatedSearch):
 
         return record
 
+    @classmethod
+    def available(cls):
+        return bool(settings.FLICKR_KEY) and bool(settings.FLICKR_SECRET)
 
 
     #

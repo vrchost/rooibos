@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
-from rooibos.auth import login, authenticate
+from django.contrib.auth import login, authenticate
 
 def basic_challenge(realm = None):
     if realm is None:

@@ -2,7 +2,7 @@ from __future__ import with_statement
 from datetime import datetime, timedelta
 from django import forms
 from django.conf import settings
-from rooibos.auth import login, authenticate
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.core.urlresolvers import resolve, reverse
@@ -23,6 +23,7 @@ from rooibos.data.models import Collection, Record, Field, FieldValue, Collectio
 from rooibos.storage import get_media_for_record, get_image_for_record, get_thumbnail_for_record, match_up_media, analyze_media, analyze_records, find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
+from rooibos.workers.models import JobInfo
 import logging
 import os
 import uuid
@@ -36,7 +37,13 @@ def add_content_length(func):
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
         if type(response) == HttpResponse:
-            response['Content-Length'] = len(response.content)
+            if hasattr(response._container, 'size'):
+                response['Content-Length'] = response._container.size
+            elif isinstance(response._container, file):
+                if os.path.exists(response._container.name):
+                    response['Content-Length'] = os.path.getsize(response._container.name)
+            elif response._is_string:
+                response['Content-Length'] = len(response.content)
         return response
     return _add_header
 
@@ -55,6 +62,7 @@ def retrieve(request, recordid, record, mediaid, media):
     try:
         content = mediaobj.load_file()
     except IOError:
+        logging.error("mediaobj.load_file() failed for media.id %s" % mediaid)
         raise Http404()
 
     Activity.objects.create(event='media-download',
@@ -74,6 +82,7 @@ def retrieve_image(request, recordid, record, width=None, height=None):
 
     path = get_image_for_record(recordid, request.user, int(width or 100000), int(height or 100000), passwords)
     if not path:
+        logging.error("get_image_for_record failed for record.id %s" % recordid)
         raise Http404()
 
     Activity.objects.create(event='media-download-image',
@@ -462,24 +471,13 @@ def match_up_files(request):
             collection = get_object_or_404(filter_by_access(request.user, Collection.objects.filter(id=form.cleaned_data['collection']), manage=True))
             storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=form.cleaned_data['storage']), manage=True))
 
-            matches = match_up_media(storage, collection)
+            job = JobInfo.objects.create(owner=request.user,
+                func='storage_match_up_media', arg=simplejson.dumps(dict(
+                collection=collection.id, storage=storage.id)))
+            job.run()
 
-            for record, filename in matches:
-                id = os.path.splitext(os.path.split(filename)[1])[0]
-                mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
-                media = Media.objects.create(record=record,
-                                             name=id,
-                                             storage=storage,
-                                             url=filename,
-                                             mimetype=mimetype)
-
-            request.user.message_set.create(message='%s files were matched up with existing records.' % len(matches))
-            return HttpResponseRedirect('%s?collection=%s&storage=%s' % (
-                reverse('storage-match-up-files'),
-                collection.id,
-                storage.id
-                ))
-
+            request.user.message_set.create(message='Match up media job has been submitted.')
+            return HttpResponseRedirect("%s?highlight=%s" % (reverse('workers-jobs'), job.id))
     else:
         form = MatchUpForm(request.GET)
 

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="30"
+		 mouseOver="if (moveOut.isPlaying) moveOut.stop(); if (!moveIn.isPlaying) moveIn.play();"
+		 mouseOut="if (moveIn.isPlaying) moveIn.stop(); if (!moveOut.isPlaying) moveOut.play();"
+		 mouseDown="mouseDownHandler(event)"
+		 mouseUp="mouseUpHandler(event)"
+		 creationComplete="this.zoomout.source = zoomoutVestige;"
+		 >
+	<fx:Script>
+		<![CDATA[
+			
+			[Embed(source="/assets/skins/skin.swf", symbol="Edge_ZoomOut")]
+			public var zoomoutUpOver:Class;
+			[Embed(source="/assets/skins/skin.swf", symbol="Edge_ZoomOut_down")]
+			public var zoomoutDown:Class;
+			[Embed(source="/assets/skins/skin.swf", symbol="Edge_ZoomOut_vestige")]
+			public var zoomoutVestige:Class;
+			
+			protected function mouseDownHandler(e:MouseEvent):void{
+				if (this.zoomout.source != this.zoomoutVestige) {
+					this.zoomout.source = this.zoomoutDown;
+				}
+			}
+			protected function mouseUpHandler(e:MouseEvent):void {
+				if (this.zoomout.source != this.zoomoutVestige) {
+					this.zoomout.source = this.zoomoutUpOver;
+				}
+			}
+		]]>
+	</fx:Script>
+
+	<fx:Declarations>
+		<s:Animate id="moveIn" target="{zoomout}" duration="150" disableLayout="true">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueTo="0"/>
+				<s:SimpleMotionPath property="alpha" valueTo="1"/>
+			</s:motionPaths>
+		</s:Animate>
+		<s:Animate id="moveOut" target="{zoomout}" duration="150" startDelay="150" disableLayout="true">
+			<s:motionPaths>
+				<s:SimpleMotionPath property="y" valueTo="30"/>
+				<s:SimpleMotionPath property="alpha" valueTo="0"/>
+			</s:motionPaths>
+		</s:Animate>
+	</fx:Declarations>
+	<s:HGroup width="100%">
+		<s:Group id="leftBlock" width="40" height="30" />
+		<mx:Spacer width="100%"/>
+		<s:BitmapImage id="zoomout" verticalCenter="0" horizontalCenter="0" alpha="0"/>
+		<mx:Spacer width="100%"/>
+		<s:Group id="rightBlock" width="40" height="30" />		
+	</s:HGroup>
+	
+</s:Group>

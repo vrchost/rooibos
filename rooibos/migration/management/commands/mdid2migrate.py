@@ -218,8 +218,8 @@ class MigrateModel(object):
                         else:
                             logging.error("No instance created: %s %s" % (self.model_name, self.key(row)))
                             self.errors += 1
-                    except (IntegrityError, pyodbc.IntegrityError), ex:
-                        logging.error("Integrity error: %s %s" % (self.model_name, self.key(row)))
+                    except (IntegrityError, pyodbc.IntegrityError, ValueError), ex:
+                        logging.error("%s: %s %s" % (type(ex).__name__, self.model_name, self.key(row)))
                         logging.error(ex)
                         self.errors += 1
                     except MergeObjectsException, ex:
@@ -299,9 +299,9 @@ class MigrateUsers(MigrateModel):
             instance.password = row.Password.lower()
         else:
             instance.set_unusable_password()
-        instance.last_name = row.Name[:30] if row.Name else None
-        instance.first_name = row.FirstName[:30] if row.FirstName else None
-        instance.email = row.Email[:75] if row.Email else None
+        instance.last_name = row.Name[:30] if row.Name else ''
+        instance.first_name = row.FirstName[:30] if row.FirstName else ''
+        instance.email = row.Email[:75] if row.Email else ''
         instance.is_superuser = instance.is_staff = row.Administrator
 
     def create_instance(self, row):
@@ -1039,18 +1039,20 @@ class Command(BaseCommand):
             return
 
         servertype, connection = self.readConfig(config_files[0])
-        if servertype == "MSSQL":
-            conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
-        elif servertype == "MYSQL":
-            conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
-        elif servertype == "CUSTOM":
-            conn = pyodbc.connect(connection)
-        else:
-            print "Unsupported database type"
-            return
 
-        cursor = conn.cursor()
-        row = cursor.execute("SELECT Version FROM DatabaseVersion").fetchone()
+        def get_cursor():
+            if servertype == "MSSQL":
+                conn = pyodbc.connect('DRIVER={SQL Server};%s' % connection)
+            elif servertype == "MYSQL":
+                conn = pyodbc.connect('DRIVER={MySQL};%s' % connection)
+            elif servertype == "CUSTOM":
+                conn = pyodbc.connect(connection)
+            else:
+                print "Unsupported database type"
+                return None
+            return conn.cursor()
+
+        row = get_cursor().execute("SELECT Version FROM DatabaseVersion").fetchone()
         if not row.Version in ("00006", "00007", "00008"):
             print "Database version is not supported"
             return
@@ -1093,6 +1095,6 @@ class Command(BaseCommand):
             MigrateFieldValues,
         ]
 
-        map(lambda (i, m): m(cursor).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
+        map(lambda (i, m): m(get_cursor()).run(step=i + 1, steps=len(migrations)), enumerate(migrations))
 
         print "You must now run 'manage.py solr reindex' to rebuild the full-text index."

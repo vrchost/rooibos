@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 import random
-import Image
+from PIL import Image
 import os
 import uuid
 from rooibos.contrib.ipaddr import IP
@@ -95,7 +95,16 @@ class Storage(models.Model):
         return storage and storage.size(name) or None
 
     def get_derivative_storage_path(self):
-        return os.path.join(settings.SCRATCH_DIR, self.name)
+        sp = os.path.join(settings.SCRATCH_DIR, self.name)
+        if not os.path.exists(sp):
+            try:
+                os.makedirs(sp)
+            except:
+                # check if directory exists now, if so another process may have created it
+                if not os.path.exists(sp):
+                    # still does not exist, raise error
+                    raise
+        return sp
 
     def is_local(self):
         return self.storage_system and self.storage_system.is_local()

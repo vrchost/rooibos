@@ -130,6 +130,8 @@
 
 {% block content-top %}
 
+{{ block.super }}
+
 {% autopaginate presentations 50 %}
 
 <h1>{{ manage|yesno:"Manage,Browse" }} Presentations</h1>

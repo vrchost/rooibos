@@ -94,7 +94,7 @@
         {% with record.title as title %}
     <div class="image-preview-thumb{% if forloop.first %} active-image-preview-thumb{% endif %} record-anchor" id="record-id-{{ record.id }}">
         <a href="{{ record.get_absolute_url }}">
-            <img src="{{ record.get_thumbnail_url }}?square" title="{{ title }}" alt="{{ title }}" />
+            <img src="{{ record.get_square_thumbnail_url }}" title="{{ title }}" alt="{{ title }}" />
         </a>
     </div>
         {% endwith %}
@@ -113,6 +113,7 @@
 
     <div class="column">
     {% if not user.is_authenticated %}
+        {% if SHOW_FRONTPAGE_LOGIN|default:"yes" != "no" %}
         <h2>Log in</h2>
 
         <form action="{% url login %}" method="post">{% csrf_token %}
@@ -123,7 +124,7 @@
             </table>
             <input type="hidden" name="next" value="{% url main %}" />
         </form>
-
+        {% endif %}
     {% else %}
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}

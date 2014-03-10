@@ -1,0 +1,127 @@
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+/*
+//------------------------------
+//  CursorManager
+//------------------------------
+*/
+mx|CursorManager{
+	busyCursor: Embed(source="/assets/skins/kingnarestyle.swf", symbol="BusyCursor");
+	busyCursorBackground: Embed(source="/assets/skins/kingnarestyle.swf",symbol="BusyCursor");
+}
+mx|DividedBox {
+	divider-skin: Embed(source="/assets/skins/kingnarestyle.swf",symbol="DividedBox_VDividerSkin");
+	horizontal-divider-cursor: Embed(source="/assets/skins/kingnarestyle.swf",symbol="DividedBox_horizontalCursor");
+	vertical-divider-cursor: Embed(source="/assets/skins/kingnarestyle.swf",symbol="DividedBox_verticalCursor");
+	background-color: #FFFFFF;
+	background-alpha: 0;
+	horizontal-gap: 6;
+	vertical-gap: 6;
+	horizontal-align: center;
+	vertical-align: middle;
+	divider-thickness: 6;
+	divider-alpha: .65;
+	divider-color: #FFFFFF;
+	divider-affordance: 6;
+}
+
+/*
+//------------------------------
+//  HScrollBar
+//------------------------------
+*/
+mx|HScrollBar {
+
+	trackSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_trackSkin");
+	thumbUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbUpSkin");
+	thumbOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbOverSkin");
+	thumbDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbDownSkin");
+	thumbIcon:	Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbIcon");
+	upArrowSkin:  ClassReference(null);
+	downArrowSkin:  ClassReference(null);
+}
+
+/*
+//------------------------------
+//  HSlider
+//------------------------------
+*/
+mx|HSlider {
+	trackSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderTrack_Skin");
+	showTrackHighlight: true;
+	thumbUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_upSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_overSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_downSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	thumbDisabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderThumb_disabledSkin",scaleGridBottom="10",scaleGridLeft="1",scaleGridTop="1",scaleGridRight="10");
+	trackHighlightSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="SliderHighlight_Skin");
+	dataTipOffset: 5;
+}
+
+/*
+//------------------------------
+//  Label
+//------------------------------
+*/
+mx|Label {
+	color: #FFFFFF;
+	disabledColor: #BBBBBB;
+}
+
+/*
+//------------------------------
+//  ToolTip
+//------------------------------
+*/
+mx|ToolTip { 
+	color: #FFFFFF;
+	backgroundColor: 0;
+	borderSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ToolTip_Border");
+	paddingLeft: 10;
+	paddingRight: 10;
+}
+
+/*
+//------------------------------
+//  VRule
+//------------------------------
+*/
+mx|VRule {
+	strokeColor: #000000;
+	shadowColor: #CCCCCC;
+	strokeWidth: 1;
+}
+
+/*
+//------------------------------
+//  VScrollBar
+//------------------------------
+*/
+mx|VScrollBar {
+	trackUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_trackSkin");
+	trackOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_trackSkin");
+	trackDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_trackSkin");
+	trackDisabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_trackSkin");
+	
+	thumbUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbUpSkin");
+	thumbOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbOverSkin");
+	thumbDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbDownSkin");
+	thumbIcon:	Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_thumbIcon");
+	
+	downArrowUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_downArrowUpSkin");
+	downArrowOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_downArrowOverSkin");
+	downArrowDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_downArrowDownSkin");
+	downArrowDisabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_downArrowDisabledSkin");
+	upArrowUpSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_upArrowUpSkin");
+	upArrowOverSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_upArrowOverSkin");
+	upArrowDownSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_upArrowDownSkin");
+	upArrowDisabledSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="ScrollBars_upArrowDisabledSkin");
+	
+	/* upArrowSkin:  ClassReference(null);
+	downArrowSkin:  ClassReference(null); */
+}
+
+.textBorder
+{
+	borderSkin: Embed(source="/assets/skins/kingnarestyle.swf", symbol="TextInput_borderSkin"); 
+}
+/* End */

@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.files.temp import NamedTemporaryFile
 from django.core.servers.basehttp import FileWrapper
 from django.template import Context, Template
+from django.utils.encoding import smart_str, smart_unicode
 from rooibos.access import get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.storage import get_image_for_record
@@ -23,7 +24,7 @@ from reportlab.platypus import flowables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-import Image
+from PIL import Image
 import re
 import math
 import zipfile
@@ -74,6 +75,7 @@ class FlashCardViewer(Viewer):
         passwords = request.session.get('passwords', dict())
 
         response = HttpResponse(mimetype='application/pdf')
+        response['Content-Disposition'] = 'filename="' + presentation.title + '-flashCards.pdf"'
 
         pagesize = getattr(pagesizes, settings.PDF_PAGESIZE)
         width, height = pagesize
@@ -188,6 +190,8 @@ class PrintViewViewer(Viewer):
 
         response = HttpResponse(mimetype='application/pdf')
 
+
+
         pagesize = getattr(pagesizes, settings.PDF_PAGESIZE)
         width, height = pagesize
 
@@ -199,6 +203,7 @@ class PrintViewViewer(Viewer):
             return Frame(left, inch / 2,
                            width=width / 2 - 0.75 * inch, height = height - inch,
                           leftPadding=0, bottomPadding=0, rightPadding=0, topPadding=0, showBoundary=False)
+
 
         def prepare_first_page(canvas, document):
             p1 = Paragraph(presentation.title, styles['Heading'])
@@ -296,6 +301,8 @@ class PrintViewViewer(Viewer):
         doc.addPageTemplates([first_template, later_template])
         doc.build(content)
 
+        response['Content-Disposition'] = 'filename="' + smart_str(presentation.title) + '.pdf"'
+
         return response
 
 
@@ -323,12 +330,12 @@ class PackageFilesViewer(Viewer):
                     str(index + 1).zfill(4),
                     filename(title),
                     os.path.splitext(image)[1])
-                  ).encode('ascii', 'replace'))
+                    ).encode('ascii', 'replace'))
 
         def metadata_file(tempfile, record):
             t = Template("{% load data %}{% metadata record %}")
             c = Context({'record': record, 'request': request})
-            tempfile.write(t.render(c))
+            tempfile.write(smart_str(t.render(c)))
             tempfile.flush()
             return tempfile.name
 
