@@ -21,7 +21,7 @@ from rooibos.access.functions import filter_by_access, sync_access
 from models import SharedCollection
 import datetime
 import socket
-import json
+from django.utils import simplejson as json
 import logging
 import os
 
@@ -272,7 +272,7 @@ def search(request, id, name):
 @login_required
 def proxy_image(request, id, name):
 
-    shared = SharedSearch(id)
+    shared = SharedSearch(id).shared
 
     url = urlparse(shared.url)
     server = '://'.join([url.scheme, url.netloc])
