@@ -1,6 +1,1 @@
-MUED271_1_FA11,Music Education,d:/streaming/MUED271_1_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
-MUED380_1_FA11,Music Education,d:/streaming/MUED380_1_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
-MUED301_1_FA11,Music Education,d:/streaming/MUED301_1_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
-MUS317_2_FA11,Music Education,d:/streaming/MUS317_2_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
-MUS317_4_FA11,Music Education,d:/streaming/MUS317_4_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
-MUPED704_1_FA11,Music Education,d:/streaming/MUPED704_1_FA11,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery
+MUED372_1_SP14,Music Education,d:/streaming/MUED372_1_SP14,rtmp://flash.streaming.jmu.edu:80/mdid/_definst_/mp4:delivery/%(filename)s,d:/streaming/delivery

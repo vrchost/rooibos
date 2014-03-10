@@ -56,7 +56,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     continue
                 return user
             except ldap.LDAPError, error_message:
-                logging.debug('LDAP error: %s' % error_message)
+                logging.debug('LDAP error [username=%s]: %s' % (username, error_message))
             finally:
                 if l:
                     l.unbind_s()

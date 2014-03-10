@@ -116,7 +116,7 @@ class SolrIndex():
             groups_dict = self._preload_related(CollectionItem, record_id_list)
             count += len(record_id_list)
 
-            def process_data(groups, fieldvalues, media):
+            def process_data(groups, fieldvalues, media, record_id_list):
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
@@ -127,7 +127,7 @@ class SolrIndex():
 
             if process_thread:
                 process_thread.join()
-            process_thread = Thread(target=process_data(groups_dict, fieldvalue_dict, media_dict))
+            process_thread = Thread(target=process_data(groups_dict, fieldvalue_dict, media_dict, record_id_list))
             process_thread.start()
             reset_queries()
 
@@ -175,10 +175,10 @@ class SolrIndex():
         mark_for_update(record_id, delete)
 
     def _preload_related(self, model, record_ids, filter=Q(), related=0):
-        dict = {}
+        d = dict((i, []) for i in record_ids)
         for x in model.objects.select_related(depth=related).filter(filter, record__id__in=record_ids):
-            dict.setdefault(x.record_id, []).append(x)
-        return dict
+            d[x.record_id].append(x)
+        return d
 
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media):
         required_fields = dict((f.name, None) for f in core_fields.keys())

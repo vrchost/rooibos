@@ -29,7 +29,8 @@ def accumulate(event=None, from_date=None, until_date=None, object=None):
             content_type=data['content_type'],
             object_id=data['object_id'],
             date=data['date'],
-            event=data['event'])
+            event=data['event'],
+            defaults=dict(count=0))
         accumulated.final = data['date'] < today
         accumulated.count = data['count']
         accumulated.save()

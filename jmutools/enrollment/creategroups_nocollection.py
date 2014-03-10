@@ -12,8 +12,9 @@ def get_enrollment(course):
 
 
 def run():
-    reader = csv.reader(open('courses.txt', 'rb'))
-    for course, collectiongroup, base, urlbase, serverbase in reader:
+    reader = csv.reader(open('groups.txt', 'rb'))
+    for row in reader:
+        course = row[0] 
         print course
 
         def get_cmdline(users, first):
@@ -22,14 +23,6 @@ def run():
                 '-a "%s"' % ','.join(users),
                 '--createusers',
                 ]
-            if first:
-                parameters.extend([
-                    '-s "%s"' % base,
-                    '-c',
-                    '-g "%s"' % collectiongroup,
-                    '--storageurlbase="%s"' % urlbase,
-                    '--storageserverbase="%s"' % serverbase,
-                ])
             return (r"python.exe ..\..\rooibos\manage.py managegroup %s" %
                     ' '.join(parameters))
 
