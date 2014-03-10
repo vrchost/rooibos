@@ -110,6 +110,7 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
 #    'rooibos.federatedsearch.nasa',
+    'rooibos.federatedsearch.shared',
     'rooibos.converters',
     'rooibos.contrib.tagging',
     'rooibos.workers',
@@ -130,7 +131,7 @@ STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
     'pseudostreaming': 'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
-    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
+#    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
 }
 
 GROUP_MANAGERS = {

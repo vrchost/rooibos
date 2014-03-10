@@ -1,0 +1,110 @@
+{% extends "master.html" %}
+{% load ui %}
+{% load help %}
+{% load humanize %}
+{% load solr %}
+
+
+{% block javascript %}
+{{ block.super }}
+<script type="text/javascript">
+
+    function remoteRecordSelection(ids, checked) {
+        var method = ids == 0 ? 'GET' : 'POST';
+        if (ids.constructor != Array) ids = [ids];
+        ajaxManager.add({
+            type: method,
+            url: '{% url shared-select shared.id, shared.name %}',
+            data: {'id': JSON.stringify(ids), 'checked': checked},
+            dataType: 'json',
+            success: function(r) {
+                $("#basket-thumbs").html(r.basket);
+                $("#basket-tab").html(r.header);
+                basket_scroll_arrows();
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        $("#submit_record_selections").hide();
+        $(".remote-record-select").click(function() { remoteRecordSelection($(this).attr('value'), $(this).attr('checked')); });
+    });
+
+</script>
+{% endblock %}
+
+
+{% block sidebar %}
+
+{% var as related_pages %}
+{"pages": [
+    {"url": "{% url solr-search %}?kw={{ query|urlencode }}", "title": "Back to Explore"}
+]}
+{% endvar %}
+
+{{ block.super }}
+
+  <div class="facet active-facet" id="results_sidebar_keywords">
+    <div class="facet-header">Keywords</div>
+    <div class="facet-body">
+        <form method="GET" action=".">
+        <input type="text" id="keywords" name="q" value="{{ query }}"/><input type="image" class="image" src="{% url static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
+        </form>
+    </div>
+  </div>
+
+{% endblock %}
+
+
+{% block content-top %}
+
+{{ block.super }}
+
+<h1>{{ shared.title }} Results</h1>
+{% endblock %}
+
+
+{% block content %}
+<form method="POST" action=".">{% csrf_token %}
+<input type="hidden" name="q" value="{{ query }}" />
+<div>
+    <input id="submit_record_selections" type="submit" name="action" value="Select" />
+</div>
+
+
+
+{% if results.records %}
+
+{% if pages %}
+<div style="text-align: center;">
+    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
+    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
+    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+</div>
+{% endif %}
+
+<div id="resultlist" class="resultlist-thumb">
+{% for r in results.records %}
+
+<div class="record">
+    <img class="thumbnail" src="{{ r.thumbnail }}" alt="{{ r.title }}" />
+    <div class="record-title">{{ r.title }}</div>
+    <input type="checkbox" class="remote-record-select" name="r" value="{{ r.id }}"{% if r.selected %} checked="checked"{% endif %} />
+</div>
+
+{% endfor %}
+</div>
+
+{% if pages %}
+<div style="text-align: center; clear: left;">
+    {% if prev_page %}<a href="{{ prev_page }}">Previous</a>{% endif %}
+    <span style="padding: 0 20px;">Page {{ page|intcomma }} of {{ pages|intcomma }}</span>
+    {% if next_page %}<a href="{{ next_page }}">Next</a>{% endif %}
+</div>
+{% endif %}
+
+{% endif %}
+
+</form>
+
+{% endblock %}
