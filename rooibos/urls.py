@@ -62,6 +62,7 @@ urls = [
 #    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
     (r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
+    (r'^shared/', include('rooibos.federatedsearch.shared.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
     (r'^megazine/', include('rooibos.megazine.urls')),
