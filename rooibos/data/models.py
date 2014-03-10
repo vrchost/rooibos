@@ -319,6 +319,9 @@ class VocabularyTerm(models.Model):
     vocabulary = models.ForeignKey(Vocabulary)
     term = models.TextField()
 
+    def __unicode__(self):
+        return self.term
+
 
 class Field(models.Model):
     label = models.CharField(max_length=100)
