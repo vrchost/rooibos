@@ -57,11 +57,11 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         media.save_file('test.txt', content)
 
         media2 = Media.objects.create(record=self.record, name='image', storage=self.storage)
-        self.assertNotEqual('image', media2.name)
 
         content2 = StringIO('hallo welt')
         media2.save_file('test.txt', content2)
         self.assertNotEqual('test.txt', media2.url)
+        self.assertNotEqual('test', media2.name)
 
         self.assertEqual('hello world', media.load_file().read())
         self.assertEqual('hallo welt', media2.load_file().read())
@@ -598,3 +598,35 @@ class GetMediaForRecordTestCase(unittest.TestCase):
         self.assertEqual(0, get_media_for_record(self.record_standalone, user=self.user).count())
         AccessControl.objects.create(user=self.user, content_object=self.presentation_standalone_record, read=True)
         self.assertEqual(1, get_media_for_record(self.record_standalone, user=self.user).count())
+
+
+class MediaNameTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+        self.storage = Storage.objects.create(title='MediaNameTest', name='medianametest', system='local', base=self.tempdir)
+        self.record = Record.objects.create()
+
+    def tearDown(self):
+        self.record.delete()
+        self.storage.delete()
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+
+    def testDefaultMediaName(self):
+        media = self.record.media_set.create(storage=self.storage)
+        self.assertTrue(media.name.startswith('m-'))
+
+    def testMediaNameFromUrl(self):
+        media = self.record.media_set.create(url='test.txt', storage=self.storage)
+        self.assertEqual('test', media.name)
+
+    def testMediaNameFromSave(self):
+        media = self.record.media_set.create(storage=self.storage)
+        self.assertTrue(media.name.startswith('m-'))
+
+        content = StringIO('hello world')
+        media.save_file('hello-world.txt', content)
+
+        # check updated name
+        media = self.record.media_set.filter(name='hello-world')
+        self.assertEqual(1, len(media))
