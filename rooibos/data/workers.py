@@ -4,7 +4,6 @@ from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.data.models import Collection, FieldSet
 import logging
-import datetime
 import os
 import csv
 from spreadsheetimport import SpreadsheetImport
@@ -62,23 +61,27 @@ def csvimport(job):
             return handler
 
         counter = Counter()
-        handlers = dict((e, create_handler(e, counter)) for e in SpreadsheetImport.events)
+        handlers = dict(
+            (e, create_handler(e, counter)) for e in SpreadsheetImport.events)
 
-        fieldset = FieldSet.objects.filter(id=arg['fieldset']) if arg['fieldset'] else None
+        fieldset = FieldSet.objects.filter(
+            id=arg['fieldset']) if arg['fieldset'] else None
 
         collections = Collection.objects.filter(id__in=arg['collections'])
 
-        imp = SpreadsheetImport(infile,
-                                collections,
-                                separator=arg['separator'],
-                                owner=jobinfo.owner if arg['personal'] else None,
-                                preferred_fieldset=fieldset[0] if fieldset else None,
-                                mapping=arg['mapping'],
-                                separate_fields=arg['separate_fields'],
-                                labels=arg['labels'],
-                                order=arg['order'],
-                                hidden=arg['hidden'],
-                                **handlers)
+        imp = SpreadsheetImport(
+            infile,
+            collections,
+            separator=arg['separator'],
+            owner=jobinfo.owner if arg['personal'] else None,
+            preferred_fieldset=fieldset[0] if fieldset else None,
+            mapping=arg['mapping'],
+            separate_fields=arg['separate_fields'],
+            labels=arg['labels'],
+            order=arg['order'],
+            hidden=arg['hidden'],
+            **handlers
+        )
 
         logging.debug('csvimport calling run() for %s' % job)
 
