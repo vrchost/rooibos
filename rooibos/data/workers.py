@@ -66,8 +66,10 @@ def csvimport(job):
 
         fieldset = FieldSet.objects.filter(id=arg['fieldset']) if arg['fieldset'] else None
 
+        collections = Collection.objects.filter(id__in=arg['collections'])
+
         imp = SpreadsheetImport(infile,
-                                Collection.objects.filter(id__in=arg['collections']),
+                                collections,
                                 separator=arg['separator'],
                                 owner=jobinfo.owner if arg['personal'] else None,
                                 preferred_fieldset=fieldset[0] if fieldset else None,
@@ -83,7 +85,7 @@ def csvimport(job):
         imp.run(arg['update'],
                 arg['add'],
                 arg['test'],
-                arg['collections'],
+                collections,
                 skip_rows=skip_rows)
 
         logging.info('csvimport complete: %s' % job)
