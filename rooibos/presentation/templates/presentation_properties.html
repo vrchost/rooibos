@@ -331,7 +331,7 @@
     <tbody>
 {% for form in formset.forms %}
     <tr class="sortable{% cycle "" " altrow" %} framed-thumbnails small middle-align">
-        <td class="thumbnail-col">{{ form.id }}{{ form.record }}<a name="s{{ form.instance.id }}" href="{{ form.instance.record.get_absolute_url }}"><img src="{{ form.instance.record.get_square_thumbnail_url }}" alt="{{ form.instance.record.title }}" class="record-anchor" id="item-{{ forloop.counter }}-record-id-{{ form.instance.record.id }}"data-record-id="{{ form.instance.record.id }}" data-record-name="{{ form.instance.record.name }}" /></a></td>
+        <td class="thumbnail-col">{{ form.id }}{{ form.record }}<a name="s{{ form.instance.id }}" href="{{ form.instance.record.get_absolute_url }}"><img src="{{ form.instance.record.get_square_thumbnail_url }}" alt="{{ form.instance.record.title }}" class="record-anchor" id="item-{{ forloop.counter }}-record-id-{{ form.instance.record.id }}" data-record-id="{{ form.instance.record.id }}" data-record-name="{{ form.instance.record.name }}" /></a></td>
         <td class="title-col"><a href="{% url data-record form.instance.record.id, form.instance.record.name %}" target="record_view">{{ form.instance.record.title }}</a></td>
         <td class="order-col"><span class="orderinput">{{ form.order }} {{ form.order.errors }}</span></td>
         <td class="annotation-col">{{ form.annotation }}<br />
