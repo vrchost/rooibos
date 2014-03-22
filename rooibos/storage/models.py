@@ -14,6 +14,8 @@ from rooibos.access import sync_access, get_effective_permissions_and_restrictio
 import multimedia
 from functions import extractTextFromPdfStream
 
+import logging
+
 
 class Storage(models.Model):
     title = models.CharField(max_length=100)
@@ -51,7 +53,11 @@ class Storage(models.Model):
             for c in modulename.split('.')[1:]:
                 module = getattr(module, c)
             classobj = getattr(module, classname)
-            return classobj(base=self.base)
+            try:
+                return classobj(base=self.base)
+            except Exception:
+                logging.exception("Could not initialize storage %s" % classname)
+                return None
         else:
             return None
 
