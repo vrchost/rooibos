@@ -154,13 +154,8 @@ class SpreadsheetImport(object):
         def __str__(self):
             return repr(self.value)
 
-<<<<<<< HEAD
-
-    def run(self, update=True, add=True, test=False, target_collections=[], skip_rows=0):
-=======
-    def run(self, update=True, add=True, test=False, update_names=False,
-            target_collections=[], skip_rows=0):
->>>>>>> flake8 cleanup
+    def run(self, update=True, add=True, test=False, target_collections=[],
+            skip_rows=0):
         if not self.analyzed:
             self.analyze(preview_rows=1)
 
