@@ -6,7 +6,7 @@ from collections import namedtuple
 from django.db import transaction
 
 
-logger = logging.getLogger('workers-registration')
+logger = logging.getLogger('rooibos_workers_registration')
 
 
 @transaction.commit_manually
