@@ -6,6 +6,9 @@ from collections import namedtuple
 from django.db import transaction
 
 
+logger = logging.getLogger('workers-registration')
+
+
 @transaction.commit_manually
 def flush_transaction():
     """
@@ -31,41 +34,45 @@ def register_worker(id):
             try:
                 return worker(*args, **kwargs)
             except:
-                logging.exception(traceback.format_exc())
+                logger.exception(traceback.format_exc())
                 raise
 
         workers[id] = wrapped_worker
+        logger.debug('Registered worker %s' % id)
         return workers[id]
     return register
 
 
 def discover_workers():
-    if not workers:
+    if not '_discovered' in workers:
         for app in settings.INSTALLED_APPS:
             try:
                 __import__(app + ".workers")
+                logging.debug('Imported workers for %s' % app)
             except ImportError:
-                pass
+                logging.debug('No workers found for %s' % app)
+        workers['_discovered'] = True
 
 
 Job = namedtuple('Job', 'arg')
 
 
 def worker_callback(ch, method, properties, body):
-    logging.debug('worker_callback running')
+    logger.debug('worker_callback running')
     discover_workers()
     jobname, data = body.split()
     handler = workers.get(jobname)
     if not handler:
-        logging.error('Received job with unknown method %s' % method)
+        logger.error('Received job with unknown method %s. '
+                      'Known workers are %s' % (jobname, workers.keys()))
         return
-    logging.debug('Running job %s %s' % (jobname, data))
+    logger.debug('Running job %s %s' % (jobname, data))
     try:
         # Classic mode with Job record identifier
         identifier = int(data)
         job = Job(arg=identifier)  # for backwards compatibility
         handler(job)
-        logging.debug('Job %s %s completed' % (job, identifier))
+        logger.debug('Job %s %s completed' % (job, identifier))
     except ValueError:
         # New mode with all data included in call
         handler(data)
@@ -75,7 +82,7 @@ def worker_callback(ch, method, properties, body):
 def run_worker(worker, arg, **kwargs):
     flush_transaction()
     discover_workers()
-    logging.debug("Running worker %s with arg %s" % (worker, arg))
+    logger.debug("Running worker %s with arg %s" % (worker, arg))
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))))
@@ -84,7 +91,7 @@ def run_worker(worker, arg, **kwargs):
     queue_name = 'rooibos-%s-jobs' % (
         getattr(settings, 'INSTANCE_NAME', 'default'))
     channel.queue_declare(queue=queue_name, durable=True)
-    logging.debug('Sending message to worker process')
+    logger.debug('Sending message to worker process')
     channel.basic_publish(exchange='',
                           routing_key=queue_name,
                           body='%s %s' % (worker, arg),
