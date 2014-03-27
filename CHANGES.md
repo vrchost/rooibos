@@ -14,6 +14,20 @@ Changes
 
 List of significant changes, with the latest at the top:
 
+  * 2014/03/27
+
+    [MIGRATION]
+    **Shared collections.** A new table is required to manage remote shared
+    collections.  Run `python manage.py syncdb`.
+
+    [DEPENDENCY]
+    **New job manager.** MDID now uses RabbitMQ to run background jobs and to
+    instantly update the Solr full-text index.  You must [install RabbitMQ](http://www.rabbitmq.com/download.html).
+
+    [DEPENDENCY]
+    **New Python library dependencies.** Check `requirements.txt` for newly
+    added third-party library dependencies.
+
   * 2013/10/20
 
     [SETTING]

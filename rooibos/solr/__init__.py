@@ -92,6 +92,7 @@ class SolrIndex():
         process_thread = None
         if all:
             total_count = Record.objects.count()
+            to_update = None
             to_delete = None
         else:
             processed_updates = []
@@ -107,7 +108,7 @@ class SolrIndex():
                     to_update.append(record)
             total_count = len(to_update)
 
-        if not to_update and not to_delete:
+        if not all and not to_update and not to_delete:
             logger.info("Nothing to update in index, returning early")
             return 0
 
