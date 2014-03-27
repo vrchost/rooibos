@@ -6,6 +6,7 @@ from django.core.mail import mail_admins
 from django.utils.translation import ugettext as _
 from django.utils.decorators import wraps
 from django.utils.functional import SimpleLazyObject
+from django.db.models import Q
 import sys
 import mimetypes
 import logging
@@ -105,6 +106,10 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name', id
             l.remove(slug_field)
             unique_with = l[0]
             query = query & itemModel.objects.complex_filter({unique_with: getattr(item, unique_with)})
+
+        # don't find ourselves to avoid conflict if our slug is already the same
+        if getattr(item, id_field):
+            query = query & itemModel.objects.complex_filter(~Q(**{id_field: getattr(item, id_field)}))
 
         allSlugs = [getattr(i, slug_field) for i in query]
 

@@ -20,16 +20,22 @@ class AccessOnStart:
             )
             cursor = connection.cursor()
             for s in sql:
+                logging.debug("running query %s" % s)
                 cursor.execute(s)
+                logging.debug("done")
         except:
-            pass
+            logging.exception("error running query")
+            #pass
 
         try:
             # Remove IP based group members
             for group in ExtendedGroup.objects.filter(type=IP_BASED_GROUP):
-                group.user_set.all().delete()
+                logging.debug("deleting users from group %s" % group.id)
+                group.user_set.clear()
+                logging.debug("done")
         except:
-            pass
+            logging.exception("error deleting users")
+            #pass
 
         # Only need to run once
         raise MiddlewareNotUsed

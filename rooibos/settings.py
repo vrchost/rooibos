@@ -54,20 +54,20 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 )
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.http.ConditionalGetMiddleware',
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
 #    'rooibos.profile_middleware.ProfileMiddleware',
     'rooibos.sslredirect.SSLRedirect',
-    'rooibos.ui.middleware.PageTitles',
     'django.middleware.common.CommonMiddleware',
     'rooibos.util.stats_middleware.StatsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.http.ConditionalGetMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'rooibos.ui.middleware.PageTitles',
     'pagination.middleware.PaginationMiddleware',
     'djangologging.middleware.LoggingMiddleware',
     'djangologging.middleware.SuppressLoggingOnAjaxRequestsMiddleware',
@@ -110,6 +110,7 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
 #    'rooibos.federatedsearch.nasa',
+    'rooibos.federatedsearch.shared',
     'rooibos.converters',
     'rooibos.contrib.tagging',
     'rooibos.workers',
@@ -130,7 +131,7 @@ STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
     'pseudostreaming': 'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
-    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
+#    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
 }
 
 GROUP_MANAGERS = {

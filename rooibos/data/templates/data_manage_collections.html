@@ -8,8 +8,9 @@
 
 <h1>Collection Management</h1>
 
+{% if perms.data.add_collection %}
 <a href="{% url data-collection-new %}">Create new Collection</a>
-
+{% endif %}
 
 {% if collections %}
 

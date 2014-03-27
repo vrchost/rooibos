@@ -1,5 +1,6 @@
 import unittest
-from models import Collection, CollectionItem, Record, Field, get_system_field
+from models import Collection, CollectionItem, Record, Field, FieldValue, \
+    get_system_field, standardfield
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
@@ -515,27 +516,6 @@ T003,Title8"""),
         self.assertEqual('Title', t1[0].value)
 
 
-    def testUpdateNames(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
-        title = Field.objects.get(name='title', standard__prefix='dc')
-
-        r1 = Record.objects.create(name='old-title')
-        CollectionItem.objects.create(record=r1, collection=self.collection)
-        r1.fieldvalue_set.create(field=identifier, value='D001')
-        r1.fieldvalue_set.create(field=title, value='Old Title')
-
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nD001,New Title 1\nD001,New Title 2"),
-                                       [self.collection])
-        testimport.name_field = 'Title'
-        testimport.run(update_names=True)
-
-        self.assertEqual(0, testimport.added)
-        self.assertEqual(1, testimport.updated)
-        self.assertEqual(0, testimport.duplicate_in_file_skipped)
-
-        r1 = Record.objects.get(id=r1.id)
-        self.assertEqual('new-title-1', r1.name)
-
     def testBOM(self):
 
         """Make sure the import can handle the BOM at the beginning of some UTF-8 files"""
@@ -684,3 +664,63 @@ class RecordAccessTestCase(unittest.TestCase):
         # check again
         self.assertTrue(record.editable_by(self.collectionreader))
         self.assertFalse(record.editable_by(self.collectionwriter))
+
+
+class RecordNameTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.collection = Collection.objects.create(title='Test Collection', name='test')
+        self.dcid = standardfield('identifier')
+        self.idfield = Field.objects.create(label='My Identifier')
+        self.idfield.equivalent.add(self.dcid)
+
+    def tearDown(self):
+        self.collection.delete()
+        self.idfield.delete()
+
+    def testDefaultRecordName(self):
+        record = Record.objects.create()
+        self.assertTrue(record.name.startswith('r-'))
+
+    def testRecordNameFromIdentifier(self):
+        record = Record.objects.create()
+        rid = record.id
+        self.assertTrue(record.id)
+        fv = FieldValue.objects.create(field=self.dcid,
+                                       record=record,
+                                       value='Identifier 205')
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-205', record.name)
+
+        # setting field value again should not change name
+        fv.save()
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-205', record.name)
+
+    def testRecordNameFromEquivIdentifier(self):
+        record = Record.objects.create()
+        rid = record.id
+        self.assertTrue(record.id)
+        fv = FieldValue.objects.create(field=self.idfield,
+                                       record=record,
+                                       value='Identifier 407')
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)
+
+        # setting field value again should not change name
+        fv.save()
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)
+
+        # make sure setting another field value does not change the id
+
+        FieldValue.objects.create(field=standardfield('title'),
+                                  record=record,
+                                  value='Some title')
+
+        record = Record.objects.get(id=rid)
+        self.assertEqual('identifier-407', record.name)

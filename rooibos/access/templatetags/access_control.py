@@ -34,7 +34,7 @@ class PermissionsModifyUrlNode(template.Node):
         try:
             object = self.object.resolve(context)
             ct = ContentType.objects.get_for_model(object.__class__)
-            return reverse('access-modify-permissions', args=(ct.app_label, ct.name, object.id, object.name))
+            return reverse('access-modify-permissions', args=(ct.app_label, ct.model, object.id, object.name))
         except template.VariableDoesNotExist:
             return ''
 

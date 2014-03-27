@@ -30,10 +30,15 @@
 {% if collection_write %}
     <li><a href="{% url data-import %}"><img src="{% url static 'images/icons/applix.png' %}" alt="Import Metadata" /> Import Metadata</a></li>
 {% endif %}
+{% if perms.data.add_collection or collection_write %}
     <li><a href="{% url data-collections-manage %}"><img src="{% url static 'images/icons/bookcase.png' %}" alt="Manage Collections" /> Manage Collections</a></li>
+{% endif %}
 {% if storage_write and collection_write %}
     <li><a href="{% url storage-import %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Import Media Files" /> Import Media Files</a></li>
     <li><a href="{% url storage-match-up-files %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Match Up Media" /> Match Up Media</a></li>
+{% endif %}
+{% if user.is_superuser %}
+    <li><a href="{% url shared-manage %}"><img src="{% url static 'images/icons/folder-remote.png' %}" alt="Manage Shared Collections" /> Manage Shared Collections</a></li>    
 {% endif %}
 {% if collection_write and storage_write %}
     <li><a href="{% url converters-powerpoint %}"><img src="{% url static 'images/icons/kpresenter.png' %}" alt="Import PowerPoint" /> Import PowerPoint</a></li>

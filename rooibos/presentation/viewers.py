@@ -328,7 +328,7 @@ class PackageFilesViewer(Viewer):
                 output.write(image, ('%s%s %s%s' % (
                     os.path.join(prefix, '') if prefix else '',
                     str(index + 1).zfill(4),
-                    filename(title),
+                    filename(title or 'Slide %s' % (index + 1)),
                     os.path.splitext(image)[1])
                     ).encode('ascii', 'replace'))
 

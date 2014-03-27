@@ -150,9 +150,9 @@ class Media(models.Model):
     def __unicode__(self):
         return self.url
 
-    def save(self, **kwargs):
-        unique_slug(self, slug_literal="m-%s" % random.randint(1000000, 9999999),
-                    slug_field='name', check_current_slug=kwargs.get('force_insert'))
+    def save(self, force_update_name=False, **kwargs):
+        unique_slug(self, slug_literal=os.path.splitext(os.path.basename(self.url))[0] if self.url else "m-%s" % random.randint(1000000, 9999999),
+                    slug_field='name', check_current_slug=kwargs.get('force_insert') or force_update_name)
         super(Media, self).save(kwargs)
 
     def get_absolute_url(self):
@@ -177,7 +177,8 @@ class Media(models.Model):
         if name:
             self.url = name
             self.identify(save=False)
-            self.save()
+            self.name = os.path.splitext(os.path.basename(name))[0]
+            self.save(force_update_name=True)
         else:
             raise IOError("Media file could not be stored")
 

@@ -32,7 +32,7 @@ class JobInfo(models.Model):
         self.save()
 
     def complete(self, status, result):
-        self.result = result
+        self.result = result or "-"
         self.completed = True
         self.update_status(status)
 
