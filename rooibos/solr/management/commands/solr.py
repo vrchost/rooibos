@@ -1,8 +1,10 @@
 from django.core.management.base import BaseCommand
 from rooibos.solr import SolrIndex
 
+
 class Command(BaseCommand):
-    help = 'Updates the Solr index\nAvailable commands: optimize|index|reindex|rebuild|clean|clear'
+    help = """Updates the Solr index
+Available commands: optimize|index|reindex|rebuild|clean|clear"""
     args = 'command'
 
     def handle(self, *commands, **options):

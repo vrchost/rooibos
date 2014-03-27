@@ -1,6 +1,5 @@
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
-import logging
 import time
 
 

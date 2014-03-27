@@ -3,7 +3,6 @@ from django.utils import simplejson
 from os import makedirs
 from rooibos.data.models import Collection, CollectionItem, Record, FieldSet, Field
 from rooibos.storage import Storage, Media
-from rooibos.solr.models import SolrIndexUpdates
 from rooibos.solr import SolrIndex
 from rooibos.access.models import AccessControl
 from xml.etree.ElementTree import ElementTree

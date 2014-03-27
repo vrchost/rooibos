@@ -1,10 +1,10 @@
 from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.contrib.contenttypes.models import ContentType
-from rooibos.data.models import Record, Collection, Field, CollectionItem
+from rooibos.data.models import Record, CollectionItem
 from rooibos.contrib.tagging.models import TaggedItem
 from rooibos.util.models import OwnedWrapper
-from pysolr import Solr
+from workers import schedule_solr_index
 
 
 class SolrIndexUpdates(models.Model):
@@ -14,19 +14,23 @@ class SolrIndexUpdates(models.Model):
 
 def mark_for_update(record_id, delete=False):
     SolrIndexUpdates.objects.create(record=record_id, delete=delete)
+    schedule_solr_index()
 
 
 def post_record_delete_callback(sender, **kwargs):
     mark_for_update(record_id=kwargs['instance'].id, delete=True)
+
 
 def post_record_save_callback(sender, **kwargs):
     mark_for_update(record_id=kwargs['instance'].id)
 
 
 def post_taggeditem_callback(sender, instance, **kwargs):
-    if instance and instance.content_type == ContentType.objects.get_for_model(OwnedWrapper):
+    owned_wrapper_type = ContentType.objects.get_for_model(OwnedWrapper)
+    if instance and instance.content_type == owned_wrapper_type:
         instance = instance.object
-        if instance and instance.content_type == ContentType.objects.get_for_model(Record):
+        record_type = ContentType.objects.get_for_model(Record)
+        if instance and instance.content_type == record_type:
             mark_for_update(record_id=instance.object_id)
 
 
