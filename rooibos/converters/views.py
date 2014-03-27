@@ -10,7 +10,6 @@ from django.template import RequestContext
 from rooibos.access import filter_by_access
 from rooibos.data.models import Collection, CollectionItem, Record, FieldSet, Field
 from rooibos.solr import SolrIndex
-from rooibos.solr.models import SolrIndexUpdates
 from rooibos.storage.models import Storage, Media
 from rooibos.presentation.models import Presentation, PresentationItem
 import subprocess, re, os, sys, shutil

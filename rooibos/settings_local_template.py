@@ -91,8 +91,6 @@ ARTSTOR_GATEWAY = None
 
 OPEN_OFFICE_PATH = 'C:/Program Files/OpenOffice.org 3/program/'
 
-GEARMAN_SERVERS = ['127.0.0.1']
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'rooibos.auth.ldapauth.LdapAuthenticationBackend',

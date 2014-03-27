@@ -1,10 +1,9 @@
-from django.http import HttpResponse, Http404,  HttpResponseRedirect, HttpResponseForbidden
-from django.core.urlresolvers import reverse
-from django.conf import settings
-from django.shortcuts import get_object_or_404, get_list_or_404, render_to_response
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from models import JobInfo
+
 
 @login_required
 def joblist(request):

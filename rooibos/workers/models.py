@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from rooibos.contrib.gearman.task import Task
 from registration import run_worker
 from datetime import datetime, timedelta
+
 
 class JobInfo(models.Model):
     owner = models.ForeignKey(User, null=True, blank=True)
@@ -13,10 +13,10 @@ class JobInfo(models.Model):
     status_time = models.DateTimeField(null=True, blank=True)
     completed = models.BooleanField(default=False)
     result = models.TextField()
-    
+
     class Meta:
         ordering = ['completed', '-created_time']
-        
+
     def run(self):
         try:
             self.status = 'Starting'
@@ -25,7 +25,7 @@ class JobInfo(models.Model):
         except Exception, ex:
             self.status = 'Start failed. %s' % ex
             self.save()
-        
+
     def update_status(self, status):
         self.status = status
         self.status_time = datetime.now()
@@ -37,5 +37,6 @@ class JobInfo(models.Model):
         self.update_status(status)
 
     def stalled(self):
-        return not self.completed and self.status_time and (datetime.now() - self.status_time > timedelta(0, 60))
-    
+        return (not self.completed
+                and self.status_time
+                and (datetime.now() - self.status_time > timedelta(0, 60)))

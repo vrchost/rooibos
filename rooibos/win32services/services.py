@@ -17,9 +17,9 @@ class Service(win32serviceutil.ServiceFramework):
     """
     Need to subclass this and set the following class variables:
 
-    _svc_name_ = "GearmanServer"
-    _svc_display_name_ = "MDID Simple Gearman Server"
-    _exe_args_ = "runworkers --server"
+    _svc_name_ = "SampleServer"
+    _svc_display_name_ = "MDID Simple Sample Server"
+    _exe_args_ = "runsimpleserver"
     """
 
     def __init__(self, *args):
