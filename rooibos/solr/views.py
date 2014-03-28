@@ -690,10 +690,10 @@ def browse(request, id=None, name=None):
         fields = list(Field.objects.filter(id__in=fields))
     else:
         ids = list(FieldValue.objects.filter(
-		record__collection=collection).order_by().distinct()
-		.values_list('field_id', flat=True))
+            record__collection=collection).order_by().distinct()
+            .values_list('field_id', flat=True))
         fields = list(Field.objects.filter(id__in=ids))
-        cache.set('browse_fields_%s' % collection.id, 
+        cache.set('browse_fields_%s' % collection.id,
                   [f.id for f in fields], 60)
 
     if not fields:
