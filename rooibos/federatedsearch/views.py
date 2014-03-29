@@ -24,8 +24,8 @@ import logging
 
 source_classes = [
 #    NasaImageExchange,
-#    ArtstorSearch,
-#    FlickrSearch,
+    ArtstorSearch,
+    FlickrSearch,
     SharedSearch,
 ]
 
