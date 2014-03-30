@@ -195,7 +195,7 @@ def match_up_media(storage, collection, allow_multiple_use=False):
         # Match identifiers that are either full file name (with extension) or just base name match
         filename = os.path.split(file)[1]
         id = os.path.splitext(filename)[0]
-        records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True)
+        records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True).filter(media=None)
         if len(records) == 1:
             yield records[0], file
 
