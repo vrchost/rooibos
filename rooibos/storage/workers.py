@@ -21,11 +21,12 @@ def storage_match_up_media_job(job):
 
     storage = Storage.objects.get(id=arg['storage'])
     collection = Collection.objects.get(id=arg['collection'])
+    allow_multiple_use = arg.get('allow_multiple_use')
 
     jobinfo.update_status('Analyzing available files')
 
     count = -1
-    for count, (record, filename) in enumerate(match_up_media(storage, collection)):
+    for count, (record, filename) in enumerate(match_up_media(storage, collection, allow_multiple_use)):
         id = os.path.splitext(os.path.split(filename)[1])[0]
         mimetype = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
         media = Media.objects.create(record=record,

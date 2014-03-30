@@ -462,6 +462,7 @@ def match_up_files(request):
     class MatchUpForm(forms.Form):
         collection = forms.ChoiceField(choices=((c.id, c.title) for c in sorted(available_collections, key=lambda c: c.title)))
         storage = forms.ChoiceField(choices=available_storage)
+        allow_multiple_use = forms.BooleanField()
 
     if request.method == 'POST':
 
@@ -473,7 +474,7 @@ def match_up_files(request):
 
             job = JobInfo.objects.create(owner=request.user,
                 func='storage_match_up_media', arg=simplejson.dumps(dict(
-                collection=collection.id, storage=storage.id)))
+                collection=collection.id, storage=storage.id, allow_multiple_use=form.cleaned_data['allow_multiple_use'])))
             job.run()
 
             request.user.message_set.create(message='Match up media job has been submitted.')
