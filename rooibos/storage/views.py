@@ -462,7 +462,7 @@ def match_up_files(request):
     class MatchUpForm(forms.Form):
         collection = forms.ChoiceField(choices=((c.id, c.title) for c in sorted(available_collections, key=lambda c: c.title)))
         storage = forms.ChoiceField(choices=available_storage)
-        allow_multiple_use = forms.BooleanField()
+        allow_multiple_use = forms.BooleanField(required=False)
 
     if request.method == 'POST':
 
