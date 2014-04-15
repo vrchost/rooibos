@@ -489,13 +489,13 @@ def match_up_files(request):
 
 
 @login_required
-def analyze(request, id, name):
+def analyze(request, id, name, allow_multiple_use=True):
     storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=id), manage=True))
-    broken, extra = analyze_media(storage)
+    broken, extra = analyze_media(storage, allow_multiple_use)
     return render_to_response('storage_analyze.html',
                           {'storage': storage,
-                           'broken': broken,
-                           'extra': extra,
+                           'broken': sorted(broken),
+                           'extra': sorted(extra),
                            },
                           context_instance=RequestContext(request))
 
