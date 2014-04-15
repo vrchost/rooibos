@@ -207,7 +207,7 @@ def analyze_records(collection, storage):
 
 def analyze_media(storage, allow_multiple_use=False):
     broken = []
-    extra = []
+    used = []
     # Storage must be able to provide file list
     if hasattr(storage, 'get_files'):
         # Find extra files, i.e. files in the storage area that don't have a matching media record
@@ -221,8 +221,12 @@ def analyze_media(storage, allow_multiple_use=False):
                 # File is in use
                 if not allow_multiple_use:
                     del extra[url]
+                else:
+                    used.append(url)
             else:
                 # missing file
                 broken.append(media)
         extra = extra.keys()
+        for url in used:
+            extra.remove(url)
     return broken, extra
