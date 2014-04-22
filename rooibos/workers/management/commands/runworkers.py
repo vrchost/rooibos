@@ -27,4 +27,8 @@ class Command(BaseCommand):
                       'on queue %s' % queue_name)
         channel.basic_qos(prefetch_count=1)
         channel.basic_consume(worker_callback, queue=queue_name)
-        channel.start_consuming()
+        try:
+            channel.start_consuming()
+        except KeyboardInterrupt:
+            channel.stop_consuming()
+        connection.close()
