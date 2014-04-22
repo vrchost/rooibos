@@ -3,7 +3,7 @@ import pika
 import traceback
 import logging
 from collections import namedtuple
-from django.db import transaction
+from django.db import transaction, close_connection
 
 
 logger = logging.getLogger('rooibos_workers_registration')
@@ -20,7 +20,12 @@ def flush_transaction():
     "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
     this function at the appropriate moment
     """
-    transaction.commit()
+    try:
+        transaction.commit()
+    except Exception:
+        # database connection probably closed, open a new one
+        logger.exception("Forcing connection close")
+        close_connection()
 
 
 workers = dict()
