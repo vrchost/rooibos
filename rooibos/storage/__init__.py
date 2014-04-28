@@ -228,5 +228,6 @@ def analyze_media(storage, allow_multiple_use=False):
                 broken.append(media)
         extra = extra.keys()
         for url in used:
-            extra.remove(url)
+            if url in extra:
+                extra.remove(url)
     return broken, extra
