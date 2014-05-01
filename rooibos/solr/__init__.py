@@ -259,6 +259,9 @@ class SolrIndex():
                     break
             else:
                 doc.setdefault(v.field.name + '_t', []).append(clean_value)
+                # also make sortable
+                if not v.field.name + '_sort' in doc:
+                    doc[v.field.name + '_sort'] = clean_value
             # For exact retrieval through browsing
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
         for f in required_fields:
