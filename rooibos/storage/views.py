@@ -492,6 +492,7 @@ def match_up_files(request):
 def analyze(request, id, name, allow_multiple_use=True):
     storage = get_object_or_404(filter_by_access(request.user, Storage.objects.filter(id=id), manage=True))
     broken, extra = analyze_media(storage, allow_multiple_use)
+    broken = [m.url for m in broken]
     return render_to_response('storage_analyze.html',
                           {'storage': storage,
                            'broken': sorted(broken),
