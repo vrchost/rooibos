@@ -138,3 +138,17 @@ class Attribute(models.Model):
 class AttributeValue(models.Model):
     attribute = models.ForeignKey(Attribute)
     value = models.CharField(max_length=255)
+
+
+# Signal handlers for Shibboleth
+
+from django_shibboleth.signals import shib_logon_done
+
+def post_shibboleth_login(sender, **kwargs):
+    user = kwargs.get('user')
+    shib_attrs = kwargs.get('shib_attrs')
+    if user and shib_attrs:
+        update_membership_by_attributes(user, shib_attrs)
+
+shib_logon_done.connect(post_shibboleth_login,
+                        dispatch_uid='post_shibboleth_login')
