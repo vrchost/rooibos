@@ -11,7 +11,7 @@
     </div>
 {% endfor %}
 
-{% for collection in record.collection_set.all %}
+{% for collection in collections %}
     <div class='metadata-item'>
         <div class='label{% cycle '' ' altrow' %}'>Collection:</div>
         <div class='value{% cycle '' ' altrow' %}'>{{ collection.title }}</div>

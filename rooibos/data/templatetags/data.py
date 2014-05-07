@@ -5,6 +5,7 @@ from django.template.loader import get_template
 from django.template import Context, Variable
 from rooibos.data.forms import get_collection_visibility_prefs_form
 from rooibos.data.functions import get_collection_visibility_preferences
+from rooibos.access.functions import filter_by_access
 
 register = template.Library()
 
@@ -26,10 +27,13 @@ class MetaDataNode(template.Node):
                                       fieldvalues[i].group == fieldvalues[i - 1].group and
                                       fieldvalues[i].resolved_label == fieldvalues[i - 1].resolved_label)
 
+        collections = filter_by_access(context['request'].user, record.collection_set.all())
+
         return render_to_string('data_metadata.html',
                                 dict(
                                     values=fieldvalues,
                                     record=record,
+                                    collections=collections,
                                 ),
                                 context_instance=context)
 
