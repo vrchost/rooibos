@@ -189,7 +189,9 @@ def find_record_by_identifier(identifiers, collection, owner=None,
 
 
 def match_up_media(storage, collection, allow_multiple_use=False):
-    _broken, files = analyze_media(storage, allow_multiple_use)
+    # While matching up when multiple use is allowed, we want to get all
+    # the files that are already in use as well, so they can be matched up again
+    _broken, files = analyze_media(storage, allow_multiple_use, remove_used_from_extra=not allow_multiple_use)
     # find records that have an ID matching one of the remaining files
     for file in files:
         # Match identifiers that are either full file name (with extension) or just base name match
@@ -205,7 +207,7 @@ def analyze_records(collection, storage):
     return collection.records.exclude(id__in=collection.records.filter(media__storage=storage).values('id'))
 
 
-def analyze_media(storage, allow_multiple_use=False):
+def analyze_media(storage, allow_multiple_use=False, remove_used_from_extra=True):
     broken = []
     used = []
     # Storage must be able to provide file list
@@ -227,7 +229,8 @@ def analyze_media(storage, allow_multiple_use=False):
                 # missing file
                 broken.append(media)
         extra = extra.keys()
-        for url in used:
-            if url in extra:
-                extra.remove(url)
+        if remove_used_from_extra:
+            for url in used:
+                if url in extra:
+                    extra.remove(url)
     return broken, extra
