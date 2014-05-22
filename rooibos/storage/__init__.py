@@ -228,9 +228,9 @@ def analyze_media(storage, allow_multiple_use=False, remove_used_from_extra=True
             else:
                 # missing file
                 broken.append(media)
-        extra = extra.keys()
         if remove_used_from_extra:
             for url in used:
                 if url in extra:
-                    extra.remove(url)
+                    del extra[url]
+        extra = extra.keys()
     return broken, extra
