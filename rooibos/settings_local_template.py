@@ -98,9 +98,7 @@ AUTHENTICATION_BACKENDS = (
 #    'rooibos.auth.mailauth.PopAuthenticationBackend',
 )
 
-MIDDLEWARE_CLASSES = (
-    'rooibos.auth.middleware.BasicAuthenticationMiddleware',
-)
+MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware',)
 
 LDAP_AUTH = (
     {
