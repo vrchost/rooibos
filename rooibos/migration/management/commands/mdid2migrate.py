@@ -1053,8 +1053,10 @@ class Command(BaseCommand):
             return conn.cursor()
 
         row = get_cursor().execute("SELECT Version FROM DatabaseVersion").fetchone()
-        if not row.Version in ("00006", "00007", "00008"):
+        supported = ("00006", "00007", "00008")
+        if not row.Version in supported:
             print "Database version is not supported"
+            print "Found %r, supported is %r" % (row.Version, supported)
             return
 
         import rooibos.solr.models
