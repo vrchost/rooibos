@@ -11,6 +11,9 @@ from subprocess import Popen, PIPE
 from rooibos.data.models import FieldValue, get_system_field
 from PIL import Image
 
+logger = logging.getLogger(__name__)
+
+
 def _seconds_to_timestamp(seconds):
     hours = seconds / 3600
     minutes = seconds / 60
@@ -50,21 +53,27 @@ def _which(program):
     return None
 
 def _pdfthumbnail(infile):
-    handle, filename = tempfile.mkstemp('.pdf')
+    logger.debug('Creating PDF thumbnail for %s' % infile)
+    handle, filename = tempfile.mkstemp('.jpg')
     os.close(handle)
     try:
-        cmd = 'python "%s" "%s" "%s"' % (
+        executable=_which('python.exe') or _which('python') or 'python'
+        cmd = [
+            executable,
             os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
             infile,
             filename,
-        )
-        proc = Popen(cmd, executable=_which('python.exe'), stdout=PIPE, stderr=PIPE)
+        ]
+        logger.debug('Running %s' % cmd)
+        proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
         (output, errors) = proc.communicate()
+        logger.debug('output "%s" errors "%s"' % (output, errors))
         file = open(filename, 'rb')
         result = StringIO(file.read())
         file.close()
         return result, output, errors
     except:
+        logger.exception('Could not create PDF thumbnail')
         return None, None, None
     finally:
         os.remove(filename)
