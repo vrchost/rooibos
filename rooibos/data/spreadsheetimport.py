@@ -259,9 +259,12 @@ class SpreadsheetImport(object):
 
         last_row = None
         try:
-            delay_record_indexing()
 
             for i, row in enumerate(reader):
+
+                # On every row, delay record indexing for a little longer
+                delay_record_indexing()
+
                 row = self._split_values(row)
                 if not last_row:
                     last_row = row

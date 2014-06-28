@@ -31,8 +31,8 @@ def mark_for_update(record_id, delete=False):
 
 
 def delay_record_indexing():
-    logger.debug('Delaying record indexing')
-    cache.set(DELAY_INDEXING_CACHE_KEY, True)
+    logger.debug('Delaying record indexing for 60 seconds')
+    cache.set(DELAY_INDEXING_CACHE_KEY, True, 60)
 
 def resume_record_indexing():
     logger.debug('Resuming record indexing')
