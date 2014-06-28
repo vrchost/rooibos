@@ -346,7 +346,8 @@ if logging_output_enabled:
     # Can't do sys.argv since it does not exist when running under PyISAPIe
     cmdline = getattr(sys, 'argv', [])
     if len(cmdline) > 1:
-        basename = 'rooibos-%s' % '-'.join(re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:])
+        # only use first command line argument for log file name
+        basename = 'rooibos-%s' % '-'.join(re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:2])
     else:
         basename = 'rooibos'
     from logging.handlers import TimedRotatingFileHandler
