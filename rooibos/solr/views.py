@@ -134,11 +134,11 @@ class StorageSearchFacet(SearchFacet):
 
     def __init__(self, name, label, available_storage):
         super(StorageSearchFacet, self).__init__(name, label)
-        self.available_storage = available_storage
+        # if no storage available, use 'x' which should never match anything
+        self.available_storage = available_storage or ['x']
 
     def process_criteria(self, criteria, user, *args, **kwargs):
         criteria = '|'.join('s*-%s' % s for s in criteria.split('|'))
-        # TODO: need to handle case when no storage is available
         return user.is_superuser and criteria or '(%s) AND (%s)' % (
             ' '.join('s%s-*' % s for s in self.available_storage), criteria
             )
