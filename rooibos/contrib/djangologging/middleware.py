@@ -158,12 +158,16 @@ def enhanced_make_record(self, *args, **kwargs):
     the code logging a message.""" 
     rv = _makeRecord(self, *args, **kwargs)
     frame = get_meaningful_frame()
-    
-    source_lines = inspect.getsourcelines(frame)
-    lineno = frame.f_lineno - source_lines[1]
-    show = 5
-    start, stop = max(0, lineno - show), lineno + show + 1
-    rv.__dict__['source_lines'] = python_to_html(''.join(source_lines[0][start:stop]), source_lines[1] + start, [lineno - start + 1])
+
+    try:
+        source_lines = inspect.getsourcelines(frame)
+        lineno = frame.f_lineno - source_lines[1]
+        show = 5
+        start, stop = max(0, lineno - show), lineno + show + 1
+        rv.__dict__['source_lines'] = python_to_html(''.join(source_lines[0][start:stop]), source_lines[1] + start, [lineno - start + 1])
+    except IOError:
+        # probably got a 'source code not available' error
+        pass
     rv.__dict__['local_variables'] = frame.f_locals.items()
     return rv
 
