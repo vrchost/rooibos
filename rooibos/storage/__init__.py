@@ -184,7 +184,7 @@ def find_record_by_identifier(identifiers, collection, owner=None,
         identifiers = list(identifiers)
     if ignore_suffix:
         identifiers.extend([re.sub(suffix_regex, '', id) for id in identifiers])
-    records = Record.by_fieldvalue(idfields, identifiers).filter(collection=collection, owner=owner)
+    records = Record.by_fieldvalue(idfields, identifiers).filter(collection=collection, owner=owner).distinct()
     return records
 
 
