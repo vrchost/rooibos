@@ -2,10 +2,31 @@ from django.contrib import admin
 from models import Storage, Media, ProxyUrl, TrustedSubnet
 
 class StorageAdmin(admin.ModelAdmin):
-    pass
+    # hide the derivative fields since it can cause data loss
+    # see storage.models.Storage.derivative
+    list_display = ('name', 'base', 'urlbase', 'deliverybase')
+    fields = ('title', 'name', 'base', 'urlbase', 'deliverybase')
+    readonly_fields = ['name']
+
 
 class MediaAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('name', 'record',  'master', 'storage', 'mimetype')
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'record', 'master')
+        }),
+        ('Media File info', {
+            'fields': ('media_file_path', 'delivery_url', 'width', 'height', 'mimetype', 'bitrate')
+        }),
+    )
+    readonly_fields = ['delivery_url', 'media_file_path', 'mimetype', 'width', 'height', 'bitrate']
+
+    def delivery_url(self, obj):
+        return obj.get_delivery_url()
+
+    def media_file_path(self, obj):
+        return obj.get_absolute_file_path()
+
 
 class ProxyUrlAdmin(admin.ModelAdmin):
     pass
