@@ -1,6 +1,6 @@
 from django.db.models import Q, Count
 from models import Field, FieldValue, Record, CollectionItem, get_system_field
-from solr.models import delay_record_indexing, resume_record_indexing
+from rooibos.solr.models import delay_record_indexing, resume_record_indexing
 import csv
 
 

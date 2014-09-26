@@ -134,11 +134,11 @@ class StorageSearchFacet(SearchFacet):
 
     def __init__(self, name, label, available_storage):
         super(StorageSearchFacet, self).__init__(name, label)
-        self.available_storage = available_storage
+        # if no storage available, use 'x' which should never match anything
+        self.available_storage = available_storage or ['x']
 
     def process_criteria(self, criteria, user, *args, **kwargs):
         criteria = '|'.join('s*-%s' % s for s in criteria.split('|'))
-        # TODO: need to handle case when no storage is available
         return user.is_superuser and criteria or '(%s) AND (%s)' % (
             ' '.join('s%s-*' % s for s in self.available_storage), criteria
             )
@@ -782,8 +782,6 @@ def search_form(request):
     collections = filter_by_access(request.user, Collection)
     collections = apply_collection_visibility_preferences(
         request.user, collections)
-    if not collections:
-        raise Http404()
 
     def _get_fields():
         return Field.objects.select_related('standard').all().order_by(
@@ -874,5 +872,6 @@ def search_form(request):
     return render_to_response('search.html',
                               {'collectionform': collectionform,
                                'formset': formset,
+                               'collections': collections,
                                },
                               context_instance=RequestContext(request))
