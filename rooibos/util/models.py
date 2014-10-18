@@ -1,9 +1,12 @@
-from django.db import models
+from django.db import models, IntegrityError, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User, Group
 
 
+# Using race condition fix for get_or_created suggested on
+# https://stackoverflow.com/questions/2235318
+@transaction.commit_on_success
 class OwnedWrapperManager(models.Manager):
     """
     Allows retrieval of a wrapper object by specifying
@@ -14,10 +17,17 @@ class OwnedWrapperManager(models.Manager):
         except TypeError:
             pass
 
-        obj, created = self.get_or_create(
-            user=user,
-            object_id=object and object.id or object_id,
-            content_type=object and OwnedWrapper.t(object.__class__) or type)
+        try:
+            obj, created = self.get_or_create(
+                user=user,
+                object_id=object and object.id or object_id,
+                content_type=object and OwnedWrapper.t(object.__class__) or type)
+        except IntegrityError:
+            transaction.commit()
+            obj = self.get(
+                user=user,
+                object_id=object and object.id or object_id,
+                content_type=object and OwnedWrapper.t(object.__class__) or type)
         return obj
 
 
