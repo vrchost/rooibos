@@ -58,7 +58,7 @@ def post_taggeditem_callback(sender, instance, **kwargs):
 
 
 def post_collectionitem_callback(sender, **kwargs):
-    mark_for_update(record_id=kwargs['instance'].record.id)
+    mark_for_update(record_id=kwargs['instance'].record_id)
 
 
 post_delete.connect(post_record_delete_callback, sender=Record)
