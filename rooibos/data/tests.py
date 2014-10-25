@@ -866,7 +866,8 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         self.assertFalse(image_record.is_work_record)
         self.assertTrue(image_record.is_image_record)
         self.assertEqual(1, image_record.get_work_records().count())
-        self.assertFalse(image_record.get_image_records().exists())
+        self.assertEqual(1, image_record.get_image_records().count())
+        self.assertFalse(image_record.get_image_records(siblings=False).exists())
 
     def testSolrIndexing(self):
         work_record = Record.objects.create()

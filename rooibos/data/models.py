@@ -418,7 +418,7 @@ class Record(models.Model):
         record's identifier.
         FieldValue ownership is not considered here.
         """
-        return self.get_image_records().exists()
+        return self.get_image_records(siblings=False).exists()
 
     @property
     def is_image_record(self):
@@ -443,26 +443,36 @@ class Record(models.Model):
                     field__name='relation',
                     refinement='IsPartOf',
                 ).values('value'),
-            ).values('id'),
+            ).values('record'),
         )
         return query
 
-    def get_image_records(self):
+    def get_image_records(self, siblings=True):
         """
         Returns all records with dc.relation.IsPartOf field values
         that match this record's identifiers.
+        If siblings, include all records
+        that have the same dc.relation.IsPartOf as this record.
         FieldValue ownership is not considered here.
         """
-        query = Record.objects.filter(
-            id__in=FieldValue.objects.filter(
+        q = Q(
+            value__in=self.fieldvalue_set.filter(
+                field__standard__prefix='dc',
+                field__name='identifier',
+            ).values('value'))
+        if siblings:
+            q = Q(value__in=self.fieldvalue_set.filter(
                 field__standard__prefix='dc',
                 field__name='relation',
                 refinement='IsPartOf',
-                value__in=self.fieldvalue_set.filter(
-                    field__standard__prefix='dc',
-                    field__name='identifier',
-                ).values('value'),
-            ).values('id'),
+            ).values('value')) | q
+        query = Record.objects.filter(
+            id__in=FieldValue.objects.filter(
+                q,
+                field__standard__prefix='dc',
+                field__name='relation',
+                refinement='IsPartOf',
+            ).exclude(record=self.id).values('record'),
         )
         return query
 
