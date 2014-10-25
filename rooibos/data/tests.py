@@ -882,7 +882,7 @@ class ImageWorkRecordTestCase(unittest.TestCase):
 
         index = SolrIndex()
         work_to_images = index._preload_work_to_images(identifiers)
-        self.assertEqual(1, len(work_to_images))
+        self.assertEqual(3, len(work_to_images))
         w2i = work_to_images[work_record.id]
         self.assertTrue(image_record.id in w2i)
         self.assertTrue(image_record2.id in w2i)
@@ -891,3 +891,21 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         self.assertEqual(2, len(image_to_works))
         self.assertEqual([work_record.id], image_to_works[image_record.id])
         self.assertEqual([work_record.id], image_to_works[image_record2.id])
+
+    def testImageRecordsOnlySolrIndexing(self):
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
+
+        identifiers = [image_record.id, image_record2.id]
+
+        index = SolrIndex()
+        work_to_images = index._preload_work_to_images(identifiers)
+        self.assertEqual(2, len(work_to_images))
+        self.assertEqual([image_record.id], work_to_images[image_record2.id])
+        self.assertEqual([image_record2.id], work_to_images[image_record.id])
+
+        image_to_works = index._preload_image_to_works(identifiers)
+        self.assertEqual(0, len(image_to_works))

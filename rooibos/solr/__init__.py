@@ -309,9 +309,17 @@ class SolrIndex():
 
     def _preload_work_to_images(self, record_ids):
 
-        identifiers = FieldValue.objects.filter(
+        q = Q(
             field__standard__prefix='dc',
             field__name='identifier',
+        ) | Q(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        )
+
+        identifiers = FieldValue.objects.filter(
+            q,
             record__in=record_ids,
         ).values_list('value', 'record__id')
 
@@ -323,13 +331,16 @@ class SolrIndex():
         )
         images = images.values_list('record__id', 'value')
 
-        identifiers = dict(identifiers)
+        identifier_map = dict()
+        for v, r in identifiers:
+            identifier_map.setdefault(v, []).append(r)
 
         work_to_images = dict()
         for record_id, image in images:
-            image_id = identifiers.get(image)
-            if image_id:
-                work_to_images.setdefault(image_id, []).append(record_id)
+            image_ids = identifier_map.get(image)
+            for i in image_ids:
+                if record_id != i:
+                    work_to_images.setdefault(i, []).append(record_id)
 
         return work_to_images
 
