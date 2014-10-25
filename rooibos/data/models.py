@@ -411,6 +411,61 @@ class Record(models.Model):
     def manageable_by(self, user):
         return self._check_permission_for_user(user, manage=True)
 
+    @property
+    def is_work_record(self):
+        """
+        Checks if any other record has a dc.relation.IsPartOf with this
+        record's identifier.
+        FieldValue ownership is not considered here.
+        """
+        return self.get_image_records().exists()
+
+    @property
+    def is_image_record(self):
+        """
+        Checks if this record has a dc.relation.IsPartOf.
+        FieldValue ownership is not considered here.
+        """
+        return self.get_work_records().exists()
+
+    def get_work_records(self):
+        """
+        Returns all records with identifiers that match this record's
+        dc.relation.IsPartOf field values
+        FieldValue ownership is not considered here.
+        """
+        query = Record.objects.filter(
+            id__in=FieldValue.objects.filter(
+                field__standard__prefix='dc',
+                field__name='identifier',
+                value__in=self.fieldvalue_set.filter(
+                    field__standard__prefix='dc',
+                    field__name='relation',
+                    refinement='IsPartOf',
+                ).values('value'),
+            ).values('id'),
+        )
+        return query
+
+    def get_image_records(self):
+        """
+        Returns all records with dc.relation.IsPartOf field values
+        that match this record's identifiers.
+        FieldValue ownership is not considered here.
+        """
+        query = Record.objects.filter(
+            id__in=FieldValue.objects.filter(
+                field__standard__prefix='dc',
+                field__name='relation',
+                refinement='IsPartOf',
+                value__in=self.fieldvalue_set.filter(
+                    field__standard__prefix='dc',
+                    field__name='identifier',
+                ).values('value'),
+            ).values('id'),
+        )
+        return query
+
 
 class MetadataStandardManager(models.Manager):
     def get_by_natural_key(self, prefix):

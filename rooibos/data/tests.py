@@ -830,3 +830,39 @@ class RecordNameTestCase(unittest.TestCase):
 
         record = Record.objects.get(id=rid)
         self.assertEqual('identifier-407', record.name)
+
+
+class ImageWorkRecordTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.dcid = standardfield('identifier')
+        self.dcrelation = standardfield('relation')
+
+    def tearDown(self):
+        pass
+
+    def testNoRelation(self):
+        record = Record.objects.create()
+        self.assertFalse(record.is_work_record)
+        self.assertFalse(record.is_image_record)
+        self.assertFalse(record.get_work_records().exists())
+        self.assertFalse(record.get_image_records().exists())
+
+    def testRelation(self):
+        work_record = Record.objects.create()
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        work_record.fieldvalue_set.create(field=self.dcid, value='WORK')
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
+
+        self.assertTrue(work_record.is_work_record)
+        self.assertFalse(work_record.is_image_record)
+        self.assertFalse(work_record.get_work_records().exists())
+        self.assertEqual(2, work_record.get_image_records().count())
+
+        self.assertFalse(image_record.is_work_record)
+        self.assertTrue(image_record.is_image_record)
+        self.assertEqual(1, image_record.get_work_records().count())
+        self.assertFalse(image_record.get_image_records().exists())
