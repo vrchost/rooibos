@@ -176,6 +176,10 @@ class SolrIndex():
             fieldvalue_dict = self._preload_related(FieldValue, record_id_list,
                                                     related=2)
             groups_dict = self._preload_related(CollectionItem, record_id_list)
+
+            image_to_works = self._preload_image_to_works(record_id_list)
+            work_to_images = self._preload_work_to_images(record_id_list)
+
             count += len(record_id_list)
 
             def process_data(groups, fieldvalues, media, record_id_list):
@@ -193,7 +197,10 @@ class SolrIndex():
                             media=m,
                         )
                         doc = self._record_to_solr(
-                            record, core_fields, g, fv, m)
+                            record, core_fields, g, fv, m,
+                            image_to_works,
+                            work_to_images,
+                        )
                         doc = custom_doc_processor(
                             doc,
                             record=record,
@@ -220,6 +227,7 @@ class SolrIndex():
             pb.done()
 
         if all:
+            # TODO: this will remove objects that have been added in the meantime
             SolrIndexUpdates.objects.filter(delete=False).delete()
         else:
             SolrIndexUpdates.objects.filter(id__in=processed_updates).delete()
@@ -275,7 +283,58 @@ class SolrIndex():
             d[x.record_id].append(x)
         return d
 
-    def _record_to_solr(self, record, core_fields, groups, fieldvalues, media):
+    def _preload_image_to_works(self, record_ids):
+
+        work_relation = FieldValue.objects.filter(
+            record__in=record_ids,
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).values_list('record__id', 'value')
+
+        works = FieldValue.objects.filter(
+            field__standard__prefix='dc',
+            field__name='identifier',
+            value__in=(wr[1] for wr in work_relation),
+        ).values_list('value', 'record__id')
+        works = dict(works)
+
+        image_to_works = dict()
+        for record_id, work in work_relation:
+            work_id = works.get(work)
+            if work_id:
+                image_to_works.setdefault(record_id, []).append(work_id)
+
+        return image_to_works
+
+    def _preload_work_to_images(self, record_ids):
+
+        identifiers = FieldValue.objects.filter(
+            field__standard__prefix='dc',
+            field__name='identifier',
+            record__in=record_ids,
+        ).values_list('value', 'record__id')
+
+        images = FieldValue.objects.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+            value__in=(i[0] for i in identifiers)
+        )
+        images = images.values_list('record__id', 'value')
+
+        identifiers = dict(identifiers)
+
+        work_to_images = dict()
+        for record_id, image in images:
+            image_id = identifiers.get(image)
+            if image_id:
+                work_to_images.setdefault(image_id, []).append(record_id)
+
+        return work_to_images
+
+    def _record_to_solr(self, record, core_fields, groups, fieldvalues, media,
+                        image_to_works, work_to_images):
         required_fields = dict((f.name, None) for f in core_fields.keys())
         doc = {'id': str(record.id)}
         for v in fieldvalues:
@@ -346,6 +405,13 @@ class SolrIndex():
         doc['acl_read'] = acl['read']
         doc['acl_write'] = acl['write']
         doc['acl_manage'] = acl['manage']
+        # Work-Image relations
+        i2w = image_to_works.get(record.id)
+        if i2w:
+            doc['related_works'] = [str(wid) for wid in i2w]
+        w2i = work_to_images.get(record.id)
+        if w2i:
+            doc['related_images'] = [str(iid) for iid in w2i]
         return doc
 
     def _clean_string(self, s):

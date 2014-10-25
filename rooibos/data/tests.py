@@ -4,6 +4,7 @@ from models import Collection, CollectionItem, Record, Field, FieldValue, \
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
+from rooibos.solr import SolrIndex
 from spreadsheetimport import SpreadsheetImport
 from cStringIO import StringIO
 
@@ -866,3 +867,26 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         self.assertTrue(image_record.is_image_record)
         self.assertEqual(1, image_record.get_work_records().count())
         self.assertFalse(image_record.get_image_records().exists())
+
+    def testSolrIndexing(self):
+        work_record = Record.objects.create()
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        work_record.fieldvalue_set.create(field=self.dcid, value='SOLR')
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+
+        identifiers = [work_record.id, image_record.id, image_record2.id]
+
+        index = SolrIndex()
+        work_to_images = index._preload_work_to_images(identifiers)
+        self.assertEqual(1, len(work_to_images))
+        w2i = work_to_images[work_record.id]
+        self.assertTrue(image_record.id in w2i)
+        self.assertTrue(image_record2.id in w2i)
+
+        image_to_works = index._preload_image_to_works(identifiers)
+        self.assertEqual(2, len(image_to_works))
+        self.assertEqual([work_record.id], image_to_works[image_record.id])
+        self.assertEqual([work_record.id], image_to_works[image_record2.id])
