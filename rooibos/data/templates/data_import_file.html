@@ -29,6 +29,7 @@
         <tr>
             <th>Source field</th>
             <th>Map to</th>
+            <th>Refinement</th>
             <th>Separate</th>
             <th>Label</th>
             <th>Hidden</th>
@@ -40,12 +41,14 @@
         <tr>
             <td>{{ mapping_form.fieldname }}</td>
             <td>{{ mapping_form.mapping }}</td>
+            <td>{{ mapping_form.refinement }}</td>
             <td style="text-align: center;">{{ mapping_form.separate }}</td>
             <td>{{ mapping_form.label }}</td>
             <td style="text-align: center;">{{ mapping_form.hidden }}</td>
             <td class="orderinput">{{ mapping_form.ORDER }}
             {{ mapping_form.fieldname.errors }}
             {{ mapping_form.mapping.errors }}
+            {{ mapping_form.refinement.errors }}
             {{ mapping_form.separate.errors }}
             {{ mapping_form.label.errors }}
             {{ mapping_form.hidden.errors }}

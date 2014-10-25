@@ -80,6 +80,7 @@ def csvimport(job):
             labels=arg['labels'],
             order=arg['order'],
             hidden=arg['hidden'],
+            refinements=arg['refinements'],
             **handlers
         )
 

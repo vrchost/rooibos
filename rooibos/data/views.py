@@ -593,6 +593,7 @@ def data_import_file(request, file):
         separate = forms.BooleanField(required=False)
         label = forms.CharField(required=False)
         hidden = forms.BooleanField(required=False)
+        refinement = forms.CharField(required=False)
 
     class BaseMappingFormSet(forms.formsets.BaseFormSet):
         def clean(self):
@@ -666,6 +667,7 @@ def data_import_file(request, file):
             )
 
             if request.POST.get('import_button'):
+
                 arg = dict(
                     file=_get_filename(request, file),
                     separator=form.cleaned_data['separator'],
@@ -706,6 +708,14 @@ def data_import_file(request, file):
                         (f.cleaned_data['fieldname'], f.cleaned_data['hidden'])
                         for f in mapping_formset.forms
                     ),
+                    refinements=dict(
+                        (
+                            f.cleaned_data['fieldname'],
+                            f.cleaned_data['refinement']
+                        )
+                        for f in mapping_formset.forms
+                    ),
+
                 )
 
                 j = JobInfo.objects.create(
