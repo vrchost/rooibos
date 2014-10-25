@@ -406,12 +406,14 @@ class SolrIndex():
         doc['acl_write'] = acl['write']
         doc['acl_manage'] = acl['manage']
         # Work-Image relations
-        i2w = image_to_works.get(record.id)
+        i2w = image_to_works.get(record.id, [])
         if i2w:
             doc['related_works'] = [str(wid) for wid in i2w]
-        w2i = work_to_images.get(record.id)
+        doc['related_works_count'] = len(i2w)
+        w2i = work_to_images.get(record.id, [])
         if w2i:
             doc['related_images'] = [str(iid) for iid in w2i]
+        doc['related_images_count'] = len(w2i)
         return doc
 
     def _clean_string(self, s):
