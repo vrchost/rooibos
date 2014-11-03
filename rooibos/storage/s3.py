@@ -24,12 +24,8 @@ class S3StorageSystem(S3BotoStorage):
     def __init__(self, base=None, storage=None):
         self.base = base
         self.storage = storage
-        instance = getattr(settings, 'INSTANCE_NAME', '')
         access_key = getattr(settings, 'AWS_ACCESS_KEY', None)
         secret_key = getattr(settings, 'AWS_SECRET_KEY', None)
-        name = ''.join([instance, '-' if instance else '', base])
-        mapping = getattr(settings, 'S3_FOLDER_MAPPING', {})
-        name = mapping.get(name, name)
         self.location = name
         super(S3StorageSystem, self).__init__(location=self.location, access_key=access_key, secret_key=secret_key)
 
