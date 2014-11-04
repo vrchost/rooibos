@@ -26,7 +26,7 @@ class S3StorageSystem(S3BotoStorage):
         self.storage = storage
         access_key = getattr(settings, 'AWS_ACCESS_KEY', None)
         secret_key = getattr(settings, 'AWS_SECRET_KEY', None)
-        self.location = name
+        self.location = base
         super(S3StorageSystem, self).__init__(location=self.location, access_key=access_key, secret_key=secret_key)
 
     def _normalize_name(self, name):
