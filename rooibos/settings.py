@@ -185,6 +185,7 @@ EXPOSE_TO_CONTEXT = (
     'PREVIEW_HEIGHT',
     'SHOW_TERMS',
     'SHIB_ENABLED',
+    'SHIB_LOGOUT_URL',
     )
 
 
