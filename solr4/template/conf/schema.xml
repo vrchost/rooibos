@@ -282,8 +282,6 @@
    <field name="acl_manage" type="string" indexed="true" stored="true" multiValued="true" />
 
    <!-- Image/Work records -->
-   <field name="related_works" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="related_images" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="related_works_count" type="long" indexed="true" stored="true" multiValued="false" />
    <field name="related_images_count" type="long" indexed="true" stored="true" multiValued="false" />
 
