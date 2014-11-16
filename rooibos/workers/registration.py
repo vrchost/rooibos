@@ -8,6 +8,9 @@ from django.db import transaction, close_connection
 
 logger = logging.getLogger('rooibos_workers_registration')
 
+QUEUE_VERSION = '4'
+ROUTING_KEY = 'jobs'
+
 
 @transaction.commit_manually
 def flush_transaction():
@@ -92,8 +95,6 @@ def worker_callback(ch, method, properties, body):
         # New mode with all data included in call
         result = execute_handler(handler, data)
 
-    ch.basic_ack(delivery_tag=method.delivery_tag)
-
 
 def run_worker(worker, arg, **kwargs):
     flush_transaction()
@@ -101,17 +102,19 @@ def run_worker(worker, arg, **kwargs):
     logger.debug("Running worker %s with arg %s" % (worker, arg))
 
     connection = pika.BlockingConnection(pika.ConnectionParameters(
-        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))))
+        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='127.0.0.1'))))
     channel = connection.channel()
     channel.confirm_delivery()
-    queue_name = 'rooibos-%s-jobs' % (
-        getattr(settings, 'INSTANCE_NAME', 'default'))
+    queue_name = 'rooibos-%s-jobs-%s' % (
+        getattr(settings, 'INSTANCE_NAME', 'default'),
+        QUEUE_VERSION,
+    )
     channel.queue_declare(queue=queue_name, durable=True)
     logger.debug('Sending message to worker process')
     try:
         channel.basic_publish(
-            exchange='',
-            routing_key=queue_name,
+            exchange='rooibos-workers',
+            routing_key=ROUTING_KEY,
             body='%s %s' % (worker, arg),
             properties=pika.BasicProperties(
                 delivery_mode=2,  # make message persistent
@@ -119,4 +122,5 @@ def run_worker(worker, arg, **kwargs):
         )
     except Exception:
         logger.exception('Could not publish message %s %s' % (worker, arg))
-    connection.close()
+    finally:
+        connection.close()
