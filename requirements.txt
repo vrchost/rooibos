@@ -19,7 +19,7 @@ werkzeug
 MySQL-Python
 python-memcached
 Pillow
-flickrapi
+flickrapi==1.4.5
 python-ldap
 flup
 reportlab
