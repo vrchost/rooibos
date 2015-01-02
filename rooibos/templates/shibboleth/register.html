@@ -10,7 +10,7 @@
 {% block content %}
 
 <h2>Register</h2>
-<form method="post" action=".">
+<form method="post" action=".">{% csrf_token %}
   <div>
       <p>By registering for this service:</p>
       <ul>
