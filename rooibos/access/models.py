@@ -144,11 +144,43 @@ class AttributeValue(models.Model):
 
 from django_shibboleth.signals import shib_logon_done
 
+
+SEPARATOR = ' :: '
+
+
+def join_values(values):
+    return SEPARATOR.join(values.split(';'))
+
+
+def split_values(values):
+    if SEPARATOR in values:
+        return values.split(SEPARATOR)
+    else:
+        return values
+
+
+def process_shibboleth_attributes(attributes):
+    """
+    django-shibboleth only supports single value attributes, so
+    attribute lists are converted to single values before submitting
+    them to django-shibboleth.
+    :return: dict of attributes with value lists converted to single values
+    """
+    return dict((attribute, split_values(values))
+                for attribute, values in attributes.iteritems())
+
+
 def post_shibboleth_login(sender, **kwargs):
     user = kwargs.get('user')
     shib_attrs = kwargs.get('shib_attrs')
     if user and shib_attrs:
-        update_membership_by_attributes(user, shib_attrs)
+        # django-shibboleth only supports single value attributes, so
+        # attribute lists are converted to single values before submitting
+        # them to django-shibboleth.  Afterwards we have to convert them
+        # back here
+        attributes = process_shibboleth_attributes(shib_attrs)
+        update_membership_by_attributes(user, attributes)
+
 
 shib_logon_done.connect(post_shibboleth_login,
                         dispatch_uid='post_shibboleth_login')

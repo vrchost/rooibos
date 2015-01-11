@@ -1,12 +1,14 @@
 import unittest
-from rooibos.data.models import Collection, Record, Field
+from rooibos.data.models import Collection
 from rooibos.storage.models import Storage
 from models import update_membership_by_attributes, AccessControl, ExtendedGroup, \
-    ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, IP_BASED_GROUP
+    ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, \
+    join_values, split_values, process_shibboleth_attributes
 from . import check_access, get_effective_permissions, filter_by_access, \
     get_effective_permissions_and_restrictions, add_restriction_precedence
 from django.contrib.auth.models import User, Group, AnonymousUser
 from django.core.exceptions import PermissionDenied
+
 
 class AccessTestCase(unittest.TestCase):
 
@@ -199,6 +201,7 @@ class AccessTestCase(unittest.TestCase):
         self.assertFalse(restrictions.has_key('height'))
         self.assertFalse(restrictions.has_key('width'))
 
+
 class ExtendedGroupTestCase(unittest.TestCase):
 
     def testAttributeBased(self):
@@ -253,3 +256,23 @@ class ExtendedGroupTestCase(unittest.TestCase):
         self.assertEqual(1, len(groups))
         self.assertTrue(usergroup.id in groups.values_list('id', flat=True))
         self.assertFalse(authgroup.id in groups.values_list('id', flat=True))
+
+
+class ShibbolethAttributesTestCase(unittest.TestCase):
+
+    def testProcess(self):
+        attributes = dict(
+            name='John Doe',
+            member='staff;alumni;faculty',
+        )
+        processed = dict(
+            (k, join_values(v)) for k, v in attributes.iteritems()
+        )
+
+        self.assertEqual('John Doe', processed['name'])
+        self.assertTrue(type(processed['member']) is str)
+        self.assertTrue(';' not in processed['member'])
+
+        processed = process_shibboleth_attributes(processed)
+        self.assertEqual('John Doe', processed['name'])
+        self.assertEqual(['staff', 'alumni', 'faculty'], processed['member'])
