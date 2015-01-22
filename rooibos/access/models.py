@@ -153,7 +153,7 @@ def join_values(values):
 
 
 def split_values(values):
-    if SEPARATOR in values:
+    if values and SEPARATOR in values:
         return values.split(SEPARATOR)
     else:
         return values
