@@ -20,3 +20,5 @@ rooibos/static/cache/*
 .idea/*
 bin-release-temp/
 .DS_Store
+SyncToy_*.dat
+rooibos/static/web.config
