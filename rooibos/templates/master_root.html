@@ -119,8 +119,12 @@
                     <li><a href="{% url shib_login %}?next={{ request.get_full_path }}">Log in</a></li>
                     <li><a href="{% url login %}?next={{ request.get_full_path }}">Local login</a></li>
                 {% else %}
+                    {% if CAS_SERVER_URL %}
                     <li><a href="{% url login %}?next={{ request.get_full_path }}">CAS Login</a></li>
                     <li><a href="{% url local-login %}?next={{ request.get_full_path }}">Local Login</a></li>
+                    {% else %}
+                    <li><a href="{% url login %}?next={{ request.get_full_path }}">Login</a></li>
+                    {% endif %}
                 {% endif %}
             {% endif %}
             <li>{% with request.pagehelp|default:"" as help %}{% pagehelp help %}{% endwith %}</li>

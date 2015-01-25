@@ -113,25 +113,27 @@
 
     <div class="column">
     {% if not user.is_authenticated %}
-        <!--
         {% if SHOW_FRONTPAGE_LOGIN|default:"yes" != "no" %}
         <h2>Log in</h2>
 
             {% if SHIB_ENABLED %}
                 <div>Please <a href="{% url shib_login %}">log in using Shibboleth</a></div>
             {% else %}
-        <form action="{% url login %}" method="post">{% csrf_token %}
-            <table summary="Login">
-            <tr><td>{{ login_form.username.label_tag }}</td><td>{{ login_form.username }}</td></tr>
-            <tr><td>{{ login_form.password.label_tag }}</td><td>{{ login_form.password }}
-                <br /><br /><input type="submit" value="Log in" /></td></tr>
-            </table>
-            <input type="hidden" name="next" value="{% url main %}" />
-        </form>
+                {% if CAS_SERVER_URL %}
+                <div>Please <a href="{% url login %}">log in using CAS</a></div>
+                {% else %}
+                <form action="{% url login %}" method="post">{% csrf_token %}
+                    <table summary="Login">
+                    <tr><td>{{ login_form.username.label_tag }}</td><td>{{ login_form.username }}</td></tr>
+                    <tr><td>{{ login_form.password.label_tag }}</td><td>{{ login_form.password }}
+                        <br /><br /><input type="submit" value="Log in" /></td></tr>
+                    </table>
+                    <input type="hidden" name="next" value="{% url main %}" />
+                </form>
+                {% endif %}
             {% endif %}
         {% endif %}
-        -->
-        <div>Please <a href="{% url login %}">log in using CAS</a></div>
+
     {% else %}
         <h2>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</h2>
     {% endif %}

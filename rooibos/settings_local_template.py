@@ -113,18 +113,18 @@ ARTSTOR_GATEWAY = None
 
 OPEN_OFFICE_PATH = 'C:/Program Files/OpenOffice.org 3/program/'
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'django_cas.backends.CASBackend',
+GEARMAN_SERVERS = ['127.0.0.1']
+
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+#    'django_cas.backends.CASBackend',
 #    'rooibos.auth.ldapauth.LdapAuthenticationBackend',
 #    'rooibos.auth.mailauth.ImapAuthenticationBackend',
 #    'rooibos.auth.mailauth.PopAuthenticationBackend',
-)
 
 
 CAS_SERVER_URL = None
 
-MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware', 'django_cas.middleware.CASMiddleware', )
+MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware',)
 
 LDAP_AUTH = (
     {
@@ -216,8 +216,10 @@ WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your Univ
 
 CUSTOM_TRACKER_HTML = ""
 
-
 SHOW_FRONTPAGE_LOGIN = 'yes'
+
+EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS', 'LOGO_URL', 'FAVICON_URL', 'COPYRIGHT', 'CAS_SERVER_URL',)
+
 
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
