@@ -1,11 +1,18 @@
  # ############################################################################
  #
- # Copyright (c) Microsoft Corporation. 
+ # Copyright (c) Center for Instructional Technology, James Madison University
  #
- # This source code is subject to terms and conditions of the Apache License, Version 2.0. A 
- # copy of the license can be found in the License.html file at the root of this distribution. If 
- # you cannot locate the Apache License, Version 2.0, please send an email to 
- # vspython@microsoft.com. By using this source code in any fashion, you are agreeing to be bound 
+ # This modified version of the original source code is distributed and subject
+ # to the same tems and conditions of the original license.
+ #
+ # ############################################################################
+ #
+ # Copyright (c) Microsoft Corporation.
+ #
+ # This source code is subject to terms and conditions of the Apache License, Version 2.0. A
+ # copy of the license can be found in the License.html file at the root of this distribution. If
+ # you cannot locate the Apache License, Version 2.0, please send an email to
+ # vspython@microsoft.com. By using this source code in any fashion, you are agreeing to be bound
  # by the terms of the Apache License, Version 2.0.
  #
  # You must not remove this notice, or any other, from this software.
@@ -21,6 +28,7 @@ import struct
 import sys
 import traceback
 from xml.dom import minidom
+from tempfile import SpooledTemporaryFile
 
 try:
     from cStringIO import StringIO
@@ -78,11 +86,11 @@ class FastCgiRecord(object):
         self.role = role
         self.flags = flags
         self.params = {}
-        
+
     def __repr__(self):
-        return '<FastCgiRecord(%d, %d, %d, %d)>' % (self.type, 
-                                                    self.req_id, 
-                                                    self.role, 
+        return '<FastCgiRecord(%d, %d, %d, %d)>' % (self.type,
+                                                    self.req_id,
+                                                    self.role,
                                                     self.flags)
 
 #typedef struct {
@@ -191,7 +199,7 @@ def read_encoded_int(content, offset):
 
     if i < 0x80:
         return offset + 1, i
-    
+
     return offset + 4, struct.unpack_from('>I', content, offset)[0] & ~0x80000000
 
 
@@ -203,7 +211,7 @@ def read_fastcgi_keyvalue_pairs(content, offset):
 
     name = content[offset:(offset + name_len)]
     offset += name_len
-    
+
     value = content[offset:(offset + value_len)]
     offset += value_len
 
@@ -227,7 +235,7 @@ def write_fastcgi_keyvalue_pairs(pairs):
     for raw_key, raw_value in pairs.items():
         key = wsgi_encode(raw_key)
         value = wsgi_encode(raw_value)
-        
+
         parts.append(get_encoded_int(len(key)))
         parts.append(get_encoded_int(len(value)))
         parts.append(key)
@@ -264,12 +272,18 @@ def read_fastcgi_input(stream, req_id, content):
     """reads FastCGI std-in and stores it in wsgi.input passed in the
     wsgi environment array"""
     res = _REQUESTS[req_id].params
-    if 'wsgi.input' not in res:
-        res['wsgi.input'] = content
-    else:
-        res['wsgi.input'] += content
 
-    if not content:
+    # When uploading large files, storing all of the input from STDIN
+    # in-memory results in really slow uploads.  Instead, we are using
+    # a SpooledTemporaryFile object, with a max size of 500k.  Anything
+    # under 500k will be kept in memory, and over the limit will be
+    # spooled to disk.
+    if 'wsgi.input' not in res:
+        res['wsgi.input'] = SpooledTemporaryFile(max_size=512000)
+
+    if content:
+        res['wsgi.input'].write(content)
+    else:
         # we've hit the end of the input stream, time to process input...
         return _REQUESTS[req_id]
 
@@ -290,7 +304,7 @@ def read_fastcgi_abort_request(stream, req_id, content):
 
 
 def read_fastcgi_get_values(stream, req_id, content):
-    """reads the fastcgi request to get parameter values, and immediately 
+    """reads the fastcgi request to get parameter values, and immediately
     responds"""
     offset = 0
     request = {}
@@ -345,11 +359,11 @@ def maybe_log(txt):
 
 def send_response(stream, req_id, resp_type, content, streaming = True):
     """sends a response w/ the given id, type, and content to the server.
-    If the content is streaming then an empty record is sent at the end to 
+    If the content is streaming then an empty record is sent at the end to
     terminate the stream"""
     if not isinstance(content, bytes):
         raise TypeError("content must be encoded before sending: %r" % content)
-    
+
     offset = 0
     while True:
         len_remaining = max(min(len(content) - offset, 0xFFFF), 0)
@@ -447,7 +461,7 @@ def start_file_watcher(path, restartRegex):
     elif not restartRegex:
         # restart regex set to empty string, no restart behavior
         return
-    
+
     def enum_changes(path):
         """Returns a generator that blocks until a change occurs, then yields
         the filename of the changed file.
@@ -459,8 +473,8 @@ def start_file_watcher(path, restartRegex):
         bytes_ret = ctypes.c_uint32()
 
         the_dir = CreateFile(
-            path, 
-            FILE_LIST_DIRECTORY, 
+            path,
+            FILE_LIST_DIRECTORY,
             FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
             None,
             OPEN_EXISTING,
@@ -473,10 +487,10 @@ def start_file_watcher(path, restartRegex):
 
         while True:
             ret_code = ReadDirectoryChangesW(
-                the_dir, 
-                buffer, 
-                ctypes.sizeof(buffer), 
-                True, 
+                the_dir,
+                buffer,
+                ctypes.sizeof(buffer),
+                True,
                 FILE_NOTIFY_CHANGE_LAST_WRITE,
                 ctypes.byref(bytes_ret),
                 None,
@@ -519,13 +533,13 @@ def start_file_watcher(path, restartRegex):
 def get_wsgi_handler(handler_name):
     if not handler_name:
         raise Exception('WSGI_HANDLER env var must be set')
-    
+
     if not isinstance(handler_name, str):
         if sys.version_info >= (3,):
             handler_name = handler_name.decode(sys.getfilesystemencoding())
         else:
             handler_name = handler_name.encode(sys.getfilesystemencoding())
-    
+
     module_name, _, callable_name = handler_name.rpartition('.')
     should_call = callable_name.endswith('()')
     callable_name = callable_name[:-2] if should_call else callable_name
@@ -546,10 +560,10 @@ def get_wsgi_handler(handler_name):
             callable_name = callable_name[:-2] if should_call else callable_name
             name_list.insert(0, (callable_name, should_call))
             handler = None
-    
+
     if handler is None:
         raise ValueError('"%s" could not be imported' % handler_name)
-    
+
     return handler
 
 def read_wsgi_handler(physical_path):
@@ -563,7 +577,7 @@ def read_wsgi_handler(physical_path):
             path
         )
         sys.path.extend(fs_encode(p) for p in expanded_path.split(';') if p)
-    
+
     handler_name = os.getenv('WSGI_HANDLER')
     return env, get_wsgi_handler(handler_name)
 
@@ -586,7 +600,7 @@ class handle_response(object):
 
     def __enter__(self):
         record = self.record
-        record.params['wsgi.input'] = BytesIO(record.params['wsgi.input'])
+        record.params['wsgi.input'].seek(0)     # Be kind, rewind
         record.params['wsgi.version'] = (1, 0)
         record.params['wsgi.url_scheme'] = 'https' if record.params.get('HTTPS', '').lower() == 'on' else 'http'
         record.params['wsgi.multiprocess'] = True
@@ -608,6 +622,9 @@ class handle_response(object):
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        # Make sure our wsgi.input stream is closed
+        self.record.params['wsgi.input'].close()
+
         # Send any error message on FCGI_STDERR.
         if exc_type and exc_type is not _ExitException:
             error_msg = "%s:\n\n%s\n\nStdOut: %s\n\nStdErr: %s" % (
@@ -626,10 +643,10 @@ class handle_response(object):
 
         # End the request. This has to run in both success and failure cases.
         self.send(FCGI_END_REQUEST, zero_bytes(8), streaming=False)
-        
+
         # Remove the request from our global dict
         del _REQUESTS[self.record.req_id]
-        
+
         # Suppress all exceptions unless requested
         return not self.fatal_errors
 
