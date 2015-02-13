@@ -2,9 +2,7 @@
 
 import requests
 import json
-
-HIPCHAT_MDID_URL = ('https://api.hipchat.com/v2/room/1178917/notification'
-                    '?auth_token=1NZi9eeceS2ZUkKeJbIkotAq3OfHKVfOyPcC66UF')
+import settings
 
 payload = {
     'color': 'green',
@@ -16,4 +14,5 @@ payload = {
 
 headers = {'content-type': 'application/json'}
 
-r = requests.post(HIPCHAT_MDID_URL, data=json.dumps(payload), headers=headers)
+r = requests.post(settings.HIPCHAT_MDID_URL, data=json.dumps(payload),
+        headers=headers)
