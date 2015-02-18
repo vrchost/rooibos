@@ -2,8 +2,10 @@ from django.conf import settings
 import pika
 import traceback
 import logging
+from  _mysql_exceptions import OperationalError
 from collections import namedtuple
 from django.db import transaction
+from django.db import connection as Database
 
 
 logger = logging.getLogger('rooibos_workers_registration')
@@ -68,15 +70,25 @@ def worker_callback(ch, method, properties, body):
         return
     logger.debug('Running job %s %s' % (jobname, data))
     try:
-        # Classic mode with Job record identifier
-        identifier = int(data)
-        job = Job(arg=identifier)  # for backwards compatibility
-        handler(job)
-        logger.debug('Job %s %s completed' % (job, identifier))
-    except ValueError:
-        # New mode with all data included in call
-        handler(data)
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+        try:
+            # Classic mode with Job record identifier
+            identifier = int(data)
+            job = Job(arg=identifier)  # for backwards compatibility
+            handler(job)
+            logger.debug('Job %s %s completed' % (job, identifier))
+        except ValueError:
+            # New mode with all data included in call
+            handler(data)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+    except OperationalError:
+        # close the connection, Django is supposed to automagically reconnect
+        # a closed connection
+        Database.close()
+        # return the message to the queue, requeing it for the next round
+        ch.basic_reject(delivery_tag=method.delivery_tag)
+        # lit-o-bit of debugging
+        logger.debug("MySQL connection was closed on the server-side"
+                     " of things.  Let's try this again...")
 
 
 def run_worker(worker, arg, **kwargs):
