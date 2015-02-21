@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     url(r'^collection/(?P<id>\d+)/(?P<name>[-\w]+)/manage/$', manage_collection, name='data-collection-manage'),
     url(r'^record/(?P<id>\d+)/(?P<name>[-\w]+)/$', record, name='data-record'),
     url(r'^record-preview/(?P<id>\d+)/$', record_preview, name='data-record-preview'),
+    # The following URL is to get the correct prefix for all record URLs
+    url(r'^record/$', lambda request: None, name='data-record-back-helper-url'),
     url(r'^record/(?P<id>\d+)/(?P<name>[-\w]+)/edit/$', record, kwargs={'edit': True}, name='data-record-edit'),
     url(r'^record/(?P<id>\d+)/(?P<name>[-\w]+)/delete/$', record_delete, name='data-record-delete'),
     url(r'^record/(?P<id>\d+)/(?P<name>[-\w]+)/edit/(?P<contexttype>\w+\.\w+)/(?P<contextid>\d+)/(?P<contextname>[-\w]+)/$', record, kwargs={'edit': True}, name='data-record-edit-context'),

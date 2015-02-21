@@ -80,6 +80,15 @@ $(document).ready(function() {
 </div>
 {% endif %}
 
+{% if back_url %}
+<div class="facet active-facet" id="data_record_back">
+    <div class="facet-header">Go Back</div>
+    <div class="facet-body">
+        <a href="{{ back_url }}">Return to previous page</a>
+    </div>
+</div>
+{% endif %}
+
 {% if record.owner %}
 <div class="facet active-facet" id="data_record_owner">
     <div class="facet-header">Owner</div>
