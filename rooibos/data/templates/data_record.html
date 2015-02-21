@@ -89,6 +89,15 @@ $(document).ready(function() {
 </div>
 {% endif %}
 
+{% if not fv_formset %}
+<div class="facet active-facet" id="data_record_viewers">
+    <div class="facet-header">Viewers</div>
+    <div class="facet-body">
+        {% list_viewers record request.get_full_path '<br />' %}
+    </div>
+</div>
+{% endif %}
+
 {% if record.owner %}
 <div class="facet active-facet" id="data_record_owner">
     <div class="facet-header">Owner</div>
@@ -189,13 +198,8 @@ $(document).ready(function() {
 </div>
 {% endif %}
 
+
 {% if not fv_formset %}
-<div class="facet active-facet" id="data_record_viewers">
-    <div class="facet-header">Viewers</div>
-    <div class="facet-body">
-        {% list_viewers record request.get_full_path '<br />' %}
-    </div>
-</div>
 
 {% if media or can_edit %}
 <div class="facet active-facet" id="data_record_media">
