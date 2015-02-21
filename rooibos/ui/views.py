@@ -159,7 +159,8 @@ def options(request):
     )
 
     class UserInterfaceForm(forms.Form):
-        basket_thumbnails = forms.ChoiceField(choices=[('square', 'Square'), ('normal', 'Normal'),])
+        basket_thumbnails = forms.ChoiceField(choices=[('square', 'Square'), ('normal', 'Normal'),],
+                                              label='Basket and lighttable thumbnails')
 
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)

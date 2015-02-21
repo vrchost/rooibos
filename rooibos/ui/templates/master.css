@@ -1289,6 +1289,7 @@ html.js-enabled #items {
     -moz-border-radius: 3px;
     width: 100px;
     height: 115px;
+    text-align: center;
 }
 
 .lighttable-placeholder {
