@@ -65,6 +65,20 @@ apt-get install -y libldap2-dev libsasl2-dev
 apt-get install -y libtiff5-dev libjpeg8-dev zlib1g-dev
 
 ##############################################################################
+# Setup files and directories
+##############################################################################
+# create a symlink from /vagrant to our home dir
+ln -s /vagrant mdid
+
+# create directories for our mdid data
+mkdir mdid_data
+# set the vagrant user as the owner
+chown vagrant:vagrant mdid_data
+
+# link in a little helper script for running the django dev server
+ln -s mdid/.vagrant_provision/runserver .
+
+##############################################################################
 # Configure Python and setup a Virtual Environment
 ##############################################################################
 # Use PIP for python package management
@@ -74,13 +88,13 @@ apt-get install -y python-pip
 pip install virtualenv
 
 # move into our project dir
-cd /vagrant
+cd mdid
 
 # create a virtual environment (if needed)
-[[ ! -d venv/ ]] && virtualenv venv
+[[ ! -d venv.vagrant/ ]] && virtualenv venv.vagrant
 
 # enter our virtual environment
-source venv/bin/activate
+source venv.vagrant/bin/activate
 
 # install our requirements
 pip install -r requirements.txt
@@ -92,10 +106,14 @@ pip install -r requirements.txt
 mysql -uroot -pmdid < .vagrant_provision/create_database.sql
 
 # create the local settings
+# Get the default gateway IP address so we can add it to INTERNAL_IPS
+GATEWAY_IP=`route -n | grep 'UG' | awk '{print $2}'`
+cat .vagrant_provision/settings_local.vagrant.py \
+  | sed -e "s/<<GATEWAY_IP>>/$GATEWAY_IP/" \
+  > rooibos/settings_local.py
+
+# move into the rooibos app directory
 cd rooibos
-cp settings_local_template.py settings_local.py
-# TODO: what all can we programatically set in the settings file, and what do
-#       we need to do manually?
 
 # setup the database
 python manage.py syncdb --noinput
