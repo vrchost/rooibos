@@ -24,3 +24,4 @@ SyncToy_*.dat
 rooibos/static/web.config
 venv/
 jmutools/workers/settings.py
+.vagrant/
