@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 rooibos/settings_local.py
+rooibos/settings_local.*.py
 solr/logs/*.log
 solr/solr/data/
 apps/
@@ -22,6 +23,6 @@ bin-release-temp/
 .DS_Store
 SyncToy_*.dat
 rooibos/static/web.config
-venv/
+venv*/
 jmutools/workers/settings.py
 .vagrant/
