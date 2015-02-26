@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+HOME_DIR=`pwd`
+VAGRANT_DIR=/vagrant
+PROVISION_DIR=$VAGRANT_DIR/.vagrant_provision
+MDID_DIR=$HOME_DIR/mdid
+MDID_DATA_DIR=$HOME_DIR/mdid_data
+ROOIBOS_DIR=$MDID_DIR/rooibos
+
 ##############################################################################
 # A Vagrant provisioning shell script to setup an MDID Development VM
 ##############################################################################
@@ -40,16 +47,6 @@ apt-get install -y rabbitmq-server
 apt-get install -y memcached
 
 ##############################################################################
-# Setup init scripts for Solr
-##############################################################################
-# use sysv-rc-conf to manage runlevels
-apt-get install -y sysv-rc-conf
-
-# the solr init script will be copied to the /etc/init.d dir with vagrant file
-# provisioning
-# TODO: set runlevels for the solr init script and start the service
-
-##############################################################################
 # Python build dependencies
 ##############################################################################
 # Need the python development libs
@@ -68,15 +65,13 @@ apt-get install -y libtiff5-dev libjpeg8-dev zlib1g-dev
 # Setup files and directories
 ##############################################################################
 # create a symlink from /vagrant to our home dir
-ln -s /vagrant mdid
+sudo -u vagrant ln -s $VAGRANT_DIR $MDID_DIR
 
 # create directories for our mdid data
-mkdir mdid_data
-# set the vagrant user as the owner
-chown vagrant:vagrant mdid_data
+sudo -u vagrant mkdir $MDID_DATA_DIR
 
 # link in a little helper script for running the django dev server
-ln -s mdid/.vagrant_provision/runserver .
+sudo -u vagrant ln -s $PROVISION_DIR/runserver $HOME_DIR/
 
 ##############################################################################
 # Configure Python and setup a Virtual Environment
@@ -88,7 +83,7 @@ apt-get install -y python-pip
 pip install virtualenv
 
 # move into our project dir
-cd mdid
+cd $MDID_DIR
 
 # create a virtual environment (if needed)
 [[ ! -d venv.vagrant/ ]] && virtualenv venv.vagrant
@@ -108,13 +103,19 @@ mysql -uroot -pmdid < .vagrant_provision/create_database.sql
 # create the local settings
 # Get the default gateway IP address so we can add it to INTERNAL_IPS
 GATEWAY_IP=`route -n | grep 'UG' | awk '{print $2}'`
-cat .vagrant_provision/settings_local.vagrant.py \
+cat $PROVISION_DIR/settings_local.vagrant.py \
   | sed -e "s/<<GATEWAY_IP>>/$GATEWAY_IP/" \
-  > rooibos/settings_local.py
+  > $ROOIBOS_DIR/settings_local.py
 
 # move into the rooibos app directory
-cd rooibos
+cd $ROOIBOS_DIR
 
 # setup the database
 python manage.py syncdb --noinput
 python manage.py createcachetable cache
+
+##############################################################################
+# Add Upstart script for Solr, and fire it up
+##############################################################################
+cp $PROVISION_DIR/mdid3-solr.conf /etc/init
+service mdid3-solr start
