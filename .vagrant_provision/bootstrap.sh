@@ -69,6 +69,10 @@ sudo -u vagrant ln -s $VAGRANT_DIR $MDID_DIR
 
 # create directories for our mdid data
 sudo -u vagrant mkdir $MDID_DATA_DIR
+# explicitly create the log directory, because when the workers service fires
+# up later in the provisioning, if they're not there then they will get
+# created by root and permissions will be all jacked up
+sudo -u vagrant mkdir -p $MDID_DATA_DIR/scratch/logs
 
 # link in a little helper script for running the django dev server
 sudo -u vagrant ln -s $PROVISION_DIR/runserver $HOME_DIR/
