@@ -101,8 +101,13 @@ pip install -r requirements.txt
 mysql -uroot -pmdid < .vagrant_provision/create_database.sql
 
 # create the local settings
+if [ -f $ROOIBOS_DIR/settings_local.py ]; then
+  # backup any existing local settings first
+  mv $ROOIBOS_DIR/settings_local.py $ROOIBOS_DIR/settings_local.backup.py
+fi
 # Get the default gateway IP address so we can add it to INTERNAL_IPS
 GATEWAY_IP=`route -n | grep 'UG' | awk '{print $2}'`
+# filter our local settings template, replacing necessary values
 cat $PROVISION_DIR/settings_local.vagrant.py \
   | sed -e "s/<<GATEWAY_IP>>/$GATEWAY_IP/" \
   > $ROOIBOS_DIR/settings_local.py
@@ -115,7 +120,10 @@ python manage.py syncdb --noinput
 python manage.py createcachetable cache
 
 ##############################################################################
-# Add Upstart script for Solr, and fire it up
+# Add Upstart scripts for Solr and the Workers
 ##############################################################################
-cp $PROVISION_DIR/mdid3-solr.conf /etc/init
+cp $PROVISION_DIR/mdid3-*.conf /etc/init
+
+# start up the services
 service mdid3-solr start
+service mdid3-workers start
