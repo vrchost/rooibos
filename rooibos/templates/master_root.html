@@ -107,7 +107,7 @@
             <li>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</li>
             {% if SHIB_ENABLED %}
                 {% if SHIB_LOGOUT_URL %}
-                    <li><a href="{{ SHIB_LOGOUT_URL }}">Log out</a></li>
+                    <li><a href="{% url logout %}?next={{ SHIB_LOGOUT_URL|urlencode }}">Log out</a></li>
                 {% endif %}
             {% else %}
                 <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
