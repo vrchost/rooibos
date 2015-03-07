@@ -217,6 +217,36 @@ class OwnedTagSearchFacet(SearchFacet):
         return ''
 
 
+class RelatedWorksSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def federated_search_query(self, value):
+        return ''
+
+    def display_value(self, value):
+        return "Number of related works: %s" % value
+
+    def fetch_facet_values(self):
+        return False
+
+
+class RelatedImagesSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def federated_search_query(self, value):
+        return ''
+
+    def display_value(self, value):
+        return "Number of related images: %s" % value
+
+    def fetch_facet_values(self):
+        return False
+
+
 def _generate_query(search_facets, user, collection, criteria, keywords,
                     selected, *exclude):
 
@@ -375,6 +405,8 @@ def run_search(user,
     search_facets.append(RelatedToSearchFacet('presentations', 'Related to'))
     search_facets.append(RecordDateSearchFacet('modified', 'Last modified'))
     search_facets.append(RecordDateSearchFacet('created', 'Record created'))
+    search_facets.append(RelatedImagesSearchFacet('related_images_count', 'Images for Work'))
+    search_facets.append(RelatedWorksSearchFacet('related_works_count', 'Works for Image'))
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)
 
