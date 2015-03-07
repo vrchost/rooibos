@@ -434,15 +434,20 @@ class Record(models.Model):
         dc.relation.IsPartOf field values
         FieldValue ownership is not considered here.
         """
+        values = self.fieldvalue_set.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).values_list('value', flat=True)
+        index_values = [
+            value[:32] for value in values
+        ]
+
         query = Record.objects.filter(
             id__in=FieldValue.objects.filter(
-                field__standard__prefix='dc',
-                field__name='identifier',
-                value__in=self.fieldvalue_set.filter(
-                    field__standard__prefix='dc',
-                    field__name='relation',
-                    refinement='IsPartOf',
-                ).values('value'),
+                field__in=standardfield('identifier', equiv=True),
+                value__in=values,
+                index_value__in=index_values,
             ).values('record'),
         )
         return query
@@ -455,17 +460,27 @@ class Record(models.Model):
         that have the same dc.relation.IsPartOf as this record.
         FieldValue ownership is not considered here.
         """
-        q = Q(
-            value__in=self.fieldvalue_set.filter(
-                field__standard__prefix='dc',
-                field__name='identifier',
-            ).values('value'))
+        values = self.fieldvalue_set.filter(
+            field__in=standardfield('identifier', equiv=True),
+        ).values_list('value', flat=True)
+        index_values = [
+            value[:32] for value in values
+        ]
+
+        q = Q(value__in=values, index_value__in=index_values)
+
         if siblings:
-            q = Q(value__in=self.fieldvalue_set.filter(
+
+            values = self.fieldvalue_set.filter(
                 field__standard__prefix='dc',
                 field__name='relation',
                 refinement='IsPartOf',
-            ).values('value')) | q
+            ).values_list('value', flat=True)
+            index_values = [
+                value[:32] for value in values
+            ]
+
+            q = Q(value__in=values, index_value__in=index_values) | q
         query = Record.objects.filter(
             id__in=FieldValue.objects.filter(
                 q,

@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.db import reset_queries
 from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, Collection, Field, FieldValue, \
-    CollectionItem
+    CollectionItem, standardfield
 from rooibos.storage.models import Media
 from rooibos.util.models import OwnedWrapper
 from pysolr import Solr
@@ -95,7 +95,7 @@ class SolrIndex():
             (f, f.get_equivalent_fields())
             for f in Field.objects.filter(standard__prefix='dc'))
         count = 0
-        batch_size = 500
+        batch_size = 100
         process_thread = None
         if all:
             query = Record.objects.all()
@@ -182,7 +182,12 @@ class SolrIndex():
 
             count += len(record_id_list)
 
-            def process_data(groups, fieldvalues, media, record_id_list):
+            # VERY IMPORTANT:  SINCE process_data RUNS IN ANOTHER THREAD, IT
+            # CANNOT DIRECTLY ACCESS ANY VARIABLES FROM THE OUTER SCOPE
+            # ALWAYS PASS IN ANY NEEDED VARIABLES
+
+            def process_data(groups, fieldvalues, media, record_id_list,
+                             image_to_works, work_to_images):
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
@@ -217,9 +222,11 @@ class SolrIndex():
                 process_thread.join()
             process_thread = Thread(
                 target=process_data(groups_dict, fieldvalue_dict,
-                                    media_dict, record_id_list))
+                                    media_dict, record_id_list,
+                                    image_to_works, work_to_images))
             process_thread.start()
             reset_queries()
+
 
         if process_thread:
             process_thread.join()
@@ -285,6 +292,8 @@ class SolrIndex():
 
     def _preload_image_to_works(self, record_ids):
 
+        image_to_works = dict()
+
         work_relation = FieldValue.objects.filter(
             record__in=record_ids,
             field__standard__prefix='dc',
@@ -293,13 +302,12 @@ class SolrIndex():
         ).values_list('record__id', 'value')
 
         works = FieldValue.objects.filter(
-            field__standard__prefix='dc',
-            field__name='identifier',
+            field__in=standardfield('identifier', equiv=True),
             value__in=(wr[1] for wr in work_relation),
+            index_value__in=(wr[1][:32] for wr in work_relation),
         ).values_list('value', 'record__id')
         works = dict(works)
 
-        image_to_works = dict()
         for record_id, work in work_relation:
             work_id = works.get(work)
             if work_id:
@@ -310,8 +318,7 @@ class SolrIndex():
     def _preload_work_to_images(self, record_ids):
 
         q = Q(
-            field__standard__prefix='dc',
-            field__name='identifier',
+            field__in=standardfield('identifier', equiv=True),
         ) | Q(
             field__standard__prefix='dc',
             field__name='relation',
@@ -327,7 +334,8 @@ class SolrIndex():
             field__standard__prefix='dc',
             field__name='relation',
             refinement='IsPartOf',
-            value__in=(i[0] for i in identifiers)
+            value__in=(i[0] for i in identifiers),
+            index_value__in=(i[0][:32] for i in identifiers),
         )
         images = images.values_list('record__id', 'value')
 
