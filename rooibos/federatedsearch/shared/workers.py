@@ -5,9 +5,9 @@ from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.federatedsearch.shared import SharedSearch
 from rooibos.util import guess_extension
+from StringIO import StringIO
 import logging
-import urllib2
-
+import requests
 
 @register_worker('shared_download_media')
 def shared_download_media(job):
@@ -25,9 +25,21 @@ def shared_download_media(job):
                                     manager=shared.get_source_id())
         url = arg['url']
         storage = shared.get_storage()
-        file = urllib2.urlopen(url)
-        setattr(file, 'size', int(file.info().get('content-length')))
-        mimetype = file.info().get('content-type')
+
+        username = shared.shared.username
+        password = shared.shared.password
+
+        # do an authenticated request if we have a username and password
+        if username and password:
+            r = requests.get(url, auth=(username, password))
+        else:
+            r = requests.get(url)
+
+        # turn our conent into a "file-like" object :)
+        file = StringIO(r.content)
+        setattr(file, 'size', int(r.headers['content-length']))
+        mimetype = r.headers['content-type']
+
         media = Media.objects.create(
             record=record,
             storage=storage,
