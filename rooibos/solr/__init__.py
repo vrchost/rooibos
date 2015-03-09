@@ -81,7 +81,7 @@ class SolrIndex():
         conn = Solr(settings.SOLR_URL)
         conn.optimize()
 
-    def index(self, verbose=False, all=False):
+    def index(self, verbose=False, all=False, collections=None):
         from models import SolrIndexUpdates
         self._build_group_tree()
         core_fields = dict(
@@ -91,7 +91,10 @@ class SolrIndex():
         batch_size = 500
         process_thread = None
         if all:
-            total_count = Record.objects.count()
+            query = Record.objects.all()
+            if collections:
+                query = query.filter(collection__in=collections)
+            total_count = query.count()
             to_update = None
             to_delete = None
         else:
@@ -123,6 +126,8 @@ class SolrIndex():
                 pb.update(count)
             if all:
                 records = Record.objects.all()
+                if collections:
+                    records = records.filter(collection__in=collections)
             else:
                 records = Record.objects.filter(id__in=to_update)
             records = records[count:count + batch_size]
@@ -231,6 +236,8 @@ class SolrIndex():
                     if not cf.name + '_sort' in doc:
                         doc[cf.name + '_sort'] = clean_value
                     required_fields.pop(cf.name, None)
+                    if cf.full_name != cf.name:
+                        doc.setdefault(cf.full_name + '_t', []).append(clean_value)
                     break
             else:
                 doc.setdefault(v.field.name + '_t', []).append(clean_value)
