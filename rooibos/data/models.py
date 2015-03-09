@@ -428,12 +428,7 @@ class Record(models.Model):
         """
         return self.get_work_records().exists()
 
-    def get_work_records(self):
-        """
-        Returns all records with identifiers that match this record's
-        dc.relation.IsPartOf field values
-        FieldValue ownership is not considered here.
-        """
+    def get_work_records_query(self):
         values = self.fieldvalue_set.filter(
             field__standard__prefix='dc',
             field__name='relation',
@@ -443,23 +438,24 @@ class Record(models.Model):
             value[:32] for value in values
         ]
 
+        return FieldValue.objects.filter(
+            field__in=standardfield('identifier', equiv=True),
+            value__in=values,
+            index_value__in=index_values,
+        ).values('record')
+
+    def get_work_records(self):
+        """
+        Returns all records with identifiers that match this record's
+        dc.relation.IsPartOf field values
+        FieldValue ownership is not considered here.
+        """
         query = Record.objects.filter(
-            id__in=FieldValue.objects.filter(
-                field__in=standardfield('identifier', equiv=True),
-                value__in=values,
-                index_value__in=index_values,
-            ).values('record'),
+            id__in=list(self.get_work_records_query().values_list('record', flat=True)),
         )
         return query
 
-    def get_image_records(self, siblings=True):
-        """
-        Returns all records with dc.relation.IsPartOf field values
-        that match this record's identifiers.
-        If siblings, include all records
-        that have the same dc.relation.IsPartOf as this record.
-        FieldValue ownership is not considered here.
-        """
+    def get_image_records_query(self, siblings=True):
         values = self.fieldvalue_set.filter(
             field__in=standardfield('identifier', equiv=True),
         ).values_list('value', flat=True)
@@ -481,13 +477,25 @@ class Record(models.Model):
             ]
 
             q = Q(value__in=values, index_value__in=index_values) | q
+        return FieldValue.objects.filter(
+            q,
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).exclude(record=self.id).values('record')
+
+    def get_image_records(self, siblings=True):
+        """
+        Returns all records with dc.relation.IsPartOf field values
+        that match this record's identifiers.
+        If siblings, include all records
+        that have the same dc.relation.IsPartOf as this record.
+        FieldValue ownership is not considered here.
+        """
+        ids = self.get_image_records_query(siblings).values_list(
+            'record', flat=True)
         query = Record.objects.filter(
-            id__in=FieldValue.objects.filter(
-                q,
-                field__standard__prefix='dc',
-                field__name='relation',
-                refinement='IsPartOf',
-            ).exclude(record=self.id).values('record'),
+            id__in=list(ids),
         )
         return query
 
