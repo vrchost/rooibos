@@ -4,7 +4,7 @@
   <div class="facet-body">
     <ul>
       {% for page in related_pages.pages %}
-        <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+        <li><a href="{{ page.url }}"{% if page.new_window %} target="_blank"{% endif %}>{{ page.title }}</a></li>
       {% endfor %}
     </ul>
   </div>

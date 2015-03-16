@@ -4,7 +4,7 @@ import traceback
 import logging
 from  _mysql_exceptions import OperationalError
 from collections import namedtuple
-from django.db import transaction
+from django.db import transaction, close_connection
 from django.db import connection as Database
 
 
@@ -22,7 +22,12 @@ def flush_transaction():
     "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
     this function at the appropriate moment
     """
-    transaction.commit()
+    try:
+        transaction.commit()
+    except Exception:
+        # database connection probably closed, open a new one
+        logger.exception("Forcing connection close")
+        close_connection()
 
 
 workers = dict()
@@ -59,6 +64,15 @@ def discover_workers():
 Job = namedtuple('Job', 'arg')
 
 
+def execute_handler(handler, arg):
+    try:
+        handler(arg)
+        return True
+    except Exception:
+        logger.exception("Exception in job execution")
+        return False
+
+
 def worker_callback(ch, method, properties, body):
     logger.debug('worker_callback running')
     discover_workers()
@@ -66,7 +80,7 @@ def worker_callback(ch, method, properties, body):
     handler = workers.get(jobname)
     if not handler:
         logger.error('Received job with unknown method %s. '
-                      'Known workers are %s' % (jobname, workers.keys()))
+                     'Known workers are %s' % (jobname, workers.keys()))
         return
     logger.debug('Running job %s %s' % (jobname, data))
     try:
@@ -74,11 +88,13 @@ def worker_callback(ch, method, properties, body):
             # Classic mode with Job record identifier
             identifier = int(data)
             job = Job(arg=identifier)  # for backwards compatibility
-            handler(job)
-            logger.debug('Job %s %s completed' % (job, identifier))
+            result = execute_handler(handler, job)
+            logger.debug('Job %s %s completed with result %s' %
+                         (job, identifier, result))
         except ValueError:
             # New mode with all data included in call
-            handler(data)
+            result = execute_handler(handler, data)
+
         ch.basic_ack(delivery_tag=method.delivery_tag)
     except OperationalError:
         # close the connection, Django is supposed to automagically reconnect
@@ -99,15 +115,20 @@ def run_worker(worker, arg, **kwargs):
     connection = pika.BlockingConnection(pika.ConnectionParameters(
         **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))))
     channel = connection.channel()
-
+    channel.confirm_delivery()
     queue_name = 'rooibos-%s-jobs' % (
         getattr(settings, 'INSTANCE_NAME', 'default'))
     channel.queue_declare(queue=queue_name, durable=True)
     logger.debug('Sending message to worker process')
-    channel.basic_publish(exchange='',
-                          routing_key=queue_name,
-                          body='%s %s' % (worker, arg),
-                          properties=pika.BasicProperties(
-                              delivery_mode=2,  # make message persistent
-                          ))
+    try:
+        channel.basic_publish(
+            exchange='',
+            routing_key=queue_name,
+            body='%s %s' % (worker, arg),
+            properties=pika.BasicProperties(
+                delivery_mode=2,  # make message persistent
+            )
+        )
+    except Exception:
+        logger.exception('Could not publish message %s %s' % (worker, arg))
     connection.close()

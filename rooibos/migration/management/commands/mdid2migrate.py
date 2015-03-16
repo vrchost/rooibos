@@ -250,6 +250,7 @@ class MigrateModel(object):
             print "Removing unused objects"
             pb = ProgressBar(len(self.object_history))
             count = 0
+            to_delete = []  # Delete many objects at once for better performance
             for oid, o in self.object_history.iteritems():
                 if self.preserve_memory:
                     o = ObjectHistory.objects.get(content_type=self.content_type,
@@ -257,15 +258,24 @@ class MigrateModel(object):
                              type=self.type,
                              original_id=oid)
                 # these objects have been deleted since the last migration
+                logging.debug('%s %s not in source, deleting' % (self.model_name, o.original_id))
                 if not self.m2m_model:
-                    self.model.objects.filter(id=o.object_id).delete()
+                    to_delete.append(o)
+                    if len(to_delete) >= 1000:
+                        self.model.objects.filter(id__in=[d.object_id for d in to_delete]).delete()
+                        ObjectHistory.objects.filter(id__in=[d.id for d in to_delete]).delete()
+                        to_delete = []
                 else:
                     self.m2m_delete(object_id=o.object_id, m2m_object_id=o.m2m_object_id)
-                logging.debug('%s %s not in source, deleting' % (self.model_name, o.original_id))
+                    o.delete()
                 self.deleted += 1
-                o.delete()
                 count += 1
+                if count % 1000 == 0:
+                    reset_queries()
                 pb.update(count)
+            if to_delete:
+                self.model.objects.filter(id__in=[d.object_id for d in to_delete]).delete()
+                ObjectHistory.objects.filter(id__in=[d.id for d in to_delete]).delete()
             pb.done()
             reset_queries()
         if self.need_instance_map and not self.m2m_model:
@@ -1053,8 +1063,10 @@ class Command(BaseCommand):
             return conn.cursor()
 
         row = get_cursor().execute("SELECT Version FROM DatabaseVersion").fetchone()
-        if not row.Version in ("00006", "00007", "00008"):
+        supported = ("00006", "00007", "00008")
+        if not row.Version in supported:
             print "Database version is not supported"
+            print "Found %r, supported is %r" % (row.Version, supported)
             return
 
         import rooibos.solr.models

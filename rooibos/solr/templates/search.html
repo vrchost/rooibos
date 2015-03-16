@@ -30,6 +30,8 @@ $(document).ready(function() {
 
 <h1>Search collections</h1>
 
+{% if collections %}
+
 <form method="POST" action=".">{% csrf_token %}
 {{ formset.management_form }}
 
@@ -48,6 +50,12 @@ Collections: <br />
 
     <input type="submit" value="Search" />
 </form>
+
+{% else %}
+
+<div>No collections available.</div>
+
+{% endif %}
 
 
 {% endblock %}

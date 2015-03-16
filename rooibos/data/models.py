@@ -73,7 +73,7 @@ class Collection(models.Model):
                         todo += (g,)
             if not todo:
                 break
-            sub = todo
+            parents = todo
         return result
 
     @property
