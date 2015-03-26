@@ -5,6 +5,7 @@ from rooibos.workers.registration import worker_callback, QUEUE_VERSION, ROUTING
 import rooibos.contrib.djangologging.middleware
 import logging
 import pika
+import time
 
 
 LOGGER = logging.getLogger(__name__)
@@ -26,20 +27,31 @@ class Command(BaseCommand):
 
         LOGGER.info('Queue name %s', queue_name)
 
-        consumer = WorkerConsumer(
-            pika.ConnectionParameters(
-                **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))
-            ),
-            queue_name,
-            dict(
-                durable=True
-            ),
-        )
+        while True:
 
-        try:
-            consumer.run()
-        except KeyboardInterrupt:
-            consumer.stop()
+            LOGGER.debug('Starting consumer')
+
+            try:
+
+                consumer = WorkerConsumer(
+                    pika.ConnectionParameters(
+                        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))
+                    ),
+                    queue_name,
+                    dict(
+                        durable=True
+                    ),
+                )
+
+                try:
+                    consumer.run()
+                except KeyboardInterrupt:
+                    consumer.stop()
+                    break
+
+            except:
+                LOGGER.exception('Exception in consumer')
+                time.sleep(5)
 
 
 class WorkerConsumer(object):
