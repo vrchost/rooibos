@@ -366,9 +366,10 @@ class SolrIndex():
                     if not cf.name + '_sort' in doc:
                         doc[cf.name + '_sort'] = clean_value
                     required_fields.pop(cf.name, None)
-                    if cf.full_name != cf.name:
+                    if v.refinement:
                         doc.setdefault(
-                            cf.full_name + '_t', []).append(clean_value)
+                            cf.name + '.' + v.refinement + '_t', []
+                        ).append(clean_value)
                     break
             else:
                 doc.setdefault(v.field.name + '_t', []).append(clean_value)

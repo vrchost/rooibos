@@ -418,7 +418,7 @@ class Record(models.Model):
         record's identifier.
         FieldValue ownership is not considered here.
         """
-        return self.get_image_records(siblings=False).exists()
+        return self.get_image_records_query(siblings=False).exists()
 
     @property
     def is_image_record(self):
@@ -426,18 +426,21 @@ class Record(models.Model):
         Checks if this record has a dc.relation.IsPartOf.
         FieldValue ownership is not considered here.
         """
-        return self.get_work_records().exists()
+        return self.get_work_records_query().exists()
 
-    def get_work_records_query(self):
+    def get_works(self):
         values = self.fieldvalue_set.filter(
             field__standard__prefix='dc',
             field__name='relation',
             refinement='IsPartOf',
         ).values_list('value', flat=True)
+        return values
+
+    def get_work_records_query(self):
+        values = self.get_works()
         index_values = [
             value[:32] for value in values
         ]
-
         return FieldValue.objects.filter(
             field__in=standardfield('identifier', equiv=True),
             value__in=values,

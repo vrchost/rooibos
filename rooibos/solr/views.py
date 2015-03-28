@@ -405,8 +405,10 @@ def run_search(user,
     search_facets.append(RelatedToSearchFacet('presentations', 'Related to'))
     search_facets.append(RecordDateSearchFacet('modified', 'Last modified'))
     search_facets.append(RecordDateSearchFacet('created', 'Record created'))
+    # Image/Work facets
     search_facets.append(RelatedImagesSearchFacet('related_images_count', 'Images for Work'))
     search_facets.append(RelatedWorksSearchFacet('related_works_count', 'Works for Image'))
+    search_facets.append(SearchFacet('relation.IsPartOf_t', 'Part of Work'))
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)
 
