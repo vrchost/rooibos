@@ -85,13 +85,16 @@
 
 <div id="resultlist" class="resultlist-thumb">
 {% for r in results.records %}
-
-<div class="record">
+<div class="record"
+    {% for m in r.metadata %}
+    data-{{ m.label|slugify }}="{{ m.value }}"
+    {% endfor %}
+    >
     <img class="thumbnail" src="{{ r.thumbnail }}" alt="{{ r.title }}" />
     <div class="record-title">{{ r.title }}</div>
     <input type="checkbox" class="remote-record-select" name="r" value="{{ r.id }}"{% if r.selected %} checked="checked"{% endif %} />
+    <img src="{% url static 'images/info.png' %}" alt="Information" class="info-icon remote-metadata-anchor" />
 </div>
-
 {% endfor %}
 </div>
 

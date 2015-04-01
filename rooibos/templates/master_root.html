@@ -300,7 +300,71 @@
             });
         }
 
+        function add_remote_metadata_popup() {
+            var formatLabel = function(key) {
+                words = [];
+                key.split('-').forEach(function(cur, idx, arr) {
+                    console.log(cur);
+                    words.push(cur[0].toUpperCase() + cur.slice(1).toLowerCase());
+                });
+                return words.join(' ') + ':';
+            };
+
+            $(".remote-metadata-anchor").each(function(index) {
+                var anchor = $(this);
+                var record = anchor.parents(".record");
+                var data = record.data();
+
+                var metadata = $('<div class="metadata">');
+                for(var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        var label = $('<div class="label">').html(formatLabel(key));
+                        var value = $('<div class="value">').html(data[key]);
+                        var item = $('<div class="metadata-item">')
+                            .append(label)
+                            .append(value);
+                        metadata.append(item);
+                    }
+                }
+                var tipContent = $('<div class="record-preview">').append(metadata);
+
+                anchor.qtip({
+                    content: {
+                        text: tipContent
+                    },
+                    show: {
+                        delay: 1000,
+                        solo: true
+                    },
+                    hide: {
+                        delay: 250,
+                        fixed: true
+                    },
+                    position: {
+                        corner: {
+                            tooltip: 'bottomLeft',
+                            target: 'topRight'
+                        },
+                        adjust: {
+                            screen: true
+                        }
+                    },
+                    style: {
+                        border: {
+                            radius: 4
+                        },
+                        fontSize: 'smaller',
+                        tip: true,
+                        name: 'cream',
+                        width: 380
+                    }
+
+                });
+            });
+        }
+
         add_metadata_popup();
+        add_remote_metadata_popup();
 
 
         function store_profile_setting(key, value) {
