@@ -310,6 +310,27 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
 templates = dict(l='list', im='images')
 
 
+def _get_facet_fields():
+    fields = cache.get('facet_fields')
+    if fields:
+        fields = Field.objects.filter(id__in=fields)
+    else:
+        # check if fieldset for facets exists
+        fieldset = None
+        try:
+            fieldset = FieldSet.objects.get(name='facet-fields')
+        except FieldSet.DoesNotExist:
+            pass
+        if fieldset:
+            fields = fieldset.fields.all()
+        else:
+            exclude_facets = ['identifier']
+            fields = Field.objects.filter(standard__prefix='dc').exclude(
+                name__in=exclude_facets)
+        cache.set('facet_fields', [f.id for f in fields], 60)
+    return fields
+
+
 def run_search(user,
                collection=None,
                criteria=[],
@@ -324,9 +345,8 @@ def run_search(user,
 
     available_storage = list(filter_by_access(user, Storage).values_list(
         'id', flat=True))
-    exclude_facets = ['identifier']
-    fields = Field.objects.filter(standard__prefix='dc').exclude(
-        name__in=exclude_facets)
+
+    fields = _get_facet_fields()
 
     search_facets = [SearchFacet('tag', 'Tags')] + [
         SearchFacet(field.name + '_t', field.label) for field in fields]

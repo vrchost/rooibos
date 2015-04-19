@@ -1,6 +1,6 @@
 import unittest
-from rooibos.data.models import Collection, Record, Field, FieldSet, FieldSetField, CollectionItem
-from views import _get_browse_fields
+from rooibos.data.models import Collection, Record, Field, FieldSet, FieldSetField, CollectionItem, standardfield
+from views import _get_browse_fields, _get_facet_fields
 from models import disconnect_signals
 
 
@@ -67,3 +67,30 @@ class BrowseLimitGlobalTestCase(BrowseTestCaseBaseClass):
         fields = _get_browse_fields(self.collection.id)
         self.assertEqual(1, len(fields))
         self.assertEqual(self.creatorField.id, fields[0].id)
+
+
+class FacetsDefaultsTestCase(unittest.TestCase):
+
+    def testDefaultFacets(self):
+        fields = _get_facet_fields()
+        names = [field.full_name for field in fields]
+        self.assertTrue(all(name.startswith('dc.') for name in names))
+        self.assertFalse('dc.identifier' in names)
+
+
+class FacetsCustomTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.fieldset = FieldSet.objects.create(title='facet-fields')
+        FieldSetField.objects.create(fieldset=self.fieldset, field=standardfield('title'))
+        FieldSetField.objects.create(fieldset=self.fieldset, field=standardfield('creator'))
+
+    def tearDown(self):
+        self.fieldset.delete()
+
+    def testDefaultFacets(self):
+        fields = _get_facet_fields()
+        names = [field.full_name for field in fields]
+        self.assertEqual(2, len(names))
+        self.assertTrue('dc.title' in names)
+        self.assertTrue('dc.creator' in names)
