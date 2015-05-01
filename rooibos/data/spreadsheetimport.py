@@ -284,7 +284,7 @@ class SpreadsheetImport(object):
                 if not current_id or (last_id == current_id):
                     # combine current and last rows
                     for key, values in row.iteritems():
-                        v = last_row.setdefault(key, [])
+                        v = last_row.get(key) or []
                         for value in (values or []):
                             if not value in v:
                                 v.append(value)
