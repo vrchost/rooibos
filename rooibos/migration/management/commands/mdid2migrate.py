@@ -101,6 +101,7 @@ class MigrateModel(object):
         self.need_instance_map = False
         self.supports_deletion = True
         self.query = query
+        self.force_migration = False
 
     def hash(self, row):
         return STATIC_CONTENT_HASH
@@ -148,13 +149,13 @@ class MigrateModel(object):
             h = self.object_history.pop(self.key(row), None)
             create = True
             if h:
-                if compare_hash(h, hash) or self.m2m_model:
+                if not self.force_migration and (compare_hash(h, hash) or self.m2m_model):
                     # object unchanged, don't need to do anything
                     # or, we're working on a many-to-many relation, don't need to do anything on the instance
                     logging.debug('%s %s unchanged in source, skipping' % (self.model_name, self.key(row)))
                     create = False
                     self.unchanged += 1
-                elif compare_hash(h, STATIC_CONTENT_HASH):
+                elif not self.force_migration and compare_hash(h, STATIC_CONTENT_HASH):
                     # object may have changed, but we don't have the hash of the previous version
                     # so we can't know.  Just store the new hash in the history to be able
                     # to track future changes
@@ -762,6 +763,7 @@ class MigrateFields(MigrateModel):
             query="SELECT ID,Label,Name,ControlledListID FROM FieldDefinitions")
         self.vocabularies = MigrateModel.instance_maps['vocabulary']
         self.need_instance_map = True
+        self.force_migration = True
 
     def hash(self, row):
         return content_hash(row.Label, row.Name, row.ControlledListID)
