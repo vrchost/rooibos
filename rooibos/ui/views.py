@@ -162,7 +162,7 @@ def options(request):
     class UserInterfaceForm(forms.Form):
         basket_thumbnails = forms.ChoiceField(choices=[('square', 'Square'), ('normal', 'Normal'),],
                                               label='Basket and lighttable thumbnails')
-        alternate_password = forms.CharField(required=False)
+        alternate_password = forms.CharField(required=False, help_text='<small>Alternate Password for e.g. Desktop MediaViewer login</small>')
 
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)
