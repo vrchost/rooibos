@@ -21,6 +21,10 @@ from rooibos.util import safe_int, json_view, must_revalidate
 from rooibos.util.models import OwnedWrapper
 from rooibos.contrib.tagging.models import Tag
 from django.views.decorators.csrf import csrf_exempt
+from rooibos.ui.alternate_password import check_alternate_password
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 @json_view
@@ -51,6 +55,10 @@ def login(request):
         username = request.POST["username"]
         password = request.POST["password"]
         user = auth.authenticate(username=username, password=password)
+        if user is None:
+            # normal authentication failed, try alternate password (for MediaViewer)
+            logger.debug('Regular authentication failed, trying alternate password')
+            user = check_alternate_password(username, password)
         if (user is not None) and user.is_active:
             auth.login(request, user)
             return dict(result='ok',

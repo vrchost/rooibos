@@ -22,6 +22,7 @@ from rooibos.solr.views import run_search
 from rooibos.context_processors import selected_records as ctx_selected_records
 from rooibos.presentation.models import Presentation
 from rooibos.userprofile.views import load_settings, store_settings
+from rooibos.ui.alternate_password import set_alternate_password
 import random
 
 
@@ -161,18 +162,22 @@ def options(request):
     class UserInterfaceForm(forms.Form):
         basket_thumbnails = forms.ChoiceField(choices=[('square', 'Square'), ('normal', 'Normal'),],
                                               label='Basket and lighttable thumbnails')
+        alternate_password = forms.CharField(required=False)
 
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)
         if ui_form.is_valid():
             for key in option_defaults.keys():
                 store_settings(request.user, 'options_%s' % key, ui_form.cleaned_data[key])
+            if ui_form.cleaned_data['alternate_password'] != '[unchanged]':
+                set_alternate_password(request.user, ui_form.cleaned_data['alternate_password'])
             request.user.message_set.create(message="Updated settings have been saved.")
             return HttpResponseRedirect(request.get_full_path())
     else:
         initial = option_defaults.copy()
         initial.update(dict((key[8:], val[0])
             for (key, val) in load_settings(request.user, filter='options_').iteritems()))
+        initial['alternate_password'] = '[unchanged]'
         ui_form = UserInterfaceForm(initial)
 
     return render_to_response('ui_options.html',
