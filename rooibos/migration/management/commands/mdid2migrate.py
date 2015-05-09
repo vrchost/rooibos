@@ -829,7 +829,7 @@ class MigrateFieldSetFields(MigrateModel):
 
     def update(self, instance, row):
         instance.fieldset = self.fieldsets.get(str(row.CollectionID))
-        instance.field = self.fields.get(str(row.ID))
+        instance.field = self.fields.get(str(row.ID)) or instance.field
         instance.label = row.Label
         instance.order = row.DisplayOrder
         instance.importance = (row.ShortView and 4) + (row.MediumView and 2) + (row.LongView and 1)
