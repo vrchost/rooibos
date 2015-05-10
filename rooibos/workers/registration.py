@@ -8,8 +8,7 @@ from django.db import transaction, close_connection
 
 logger = logging.getLogger('rooibos_workers_registration')
 
-QUEUE_VERSION = '4'
-ROUTING_KEY = 'jobs'
+QUEUE_VERSION = '5'
 
 
 @transaction.commit_manually
@@ -109,12 +108,14 @@ def run_worker(worker, arg, **kwargs):
         getattr(settings, 'INSTANCE_NAME', 'default'),
         QUEUE_VERSION,
     )
+    # for simplicity, use queue name for routing key as well
+    routing_key = queue_name
     channel.queue_declare(queue=queue_name, durable=True)
     logger.debug('Sending message to worker process')
     try:
         channel.basic_publish(
             exchange='rooibos-workers',
-            routing_key=ROUTING_KEY,
+            routing_key=routing_key,
             body='%s %s' % (worker, arg),
             properties=pika.BasicProperties(
                 delivery_mode=2,  # make message persistent
