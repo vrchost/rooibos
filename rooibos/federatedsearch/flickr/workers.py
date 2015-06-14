@@ -5,10 +5,10 @@ from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.federatedsearch.flickr import FlickrSearch
 from rooibos.util import guess_extension
+from StringIO import StringIO
 import logging
-import mimetypes
 import urllib2
-import traceback
+
 
 @register_worker('flickr_download_media')
 def flickr_download_media(job):
@@ -26,17 +26,19 @@ def flickr_download_media(job):
         url = arg['url']
         storage = flickr.get_storage()
         file = urllib2.urlopen(url)
-        setattr(file, 'size', int(file.info().get('content-length')))
         mimetype = file.info().get('content-type')
         media = Media.objects.create(record=record,
                              storage=storage,
                              name=record.name,
                              mimetype=mimetype)
+        # should be done better: loading file into StringIO object to make it
+        # seekable
+        file = StringIO(file.read())
         media.save_file(record.name + guess_extension(mimetype), file)
         jobinfo.complete('Complete', 'File downloaded')
 
     except Exception, ex:
 
-        logging.info('flickr_download_media failed for %s (%s)' % (job, ex))
+        logging.exception('flickr_download_media failed for %s (%s)' % (job, ex))
         jobinfo.update_status('Failed: %s' % ex)
         
