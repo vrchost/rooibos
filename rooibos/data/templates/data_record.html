@@ -76,6 +76,10 @@ $(document).ready(function() {
     <div class="facet-header">Thumbnail</div>
     <div class="facet-body">
         {% record record "True" "thumb" "True" %}
+
+        {% if download_image %}
+            <a href="{% url storage-retrieve-image-nosize record.id record.name %}?forcedl">Download Image</a>
+        {% endif %}
     </div>
 </div>
 {% endif %}
