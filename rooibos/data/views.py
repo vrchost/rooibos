@@ -29,6 +29,7 @@ from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view
 from rooibos.workers.models import JobInfo
 from spreadsheetimport import SpreadsheetImport
+from rooibos.util import safe_int
 import os
 import random
 import string
@@ -494,7 +495,7 @@ def data_import_file(request, file):
                                                                      for f in mapping_formset.forms),
                                                 labels=dict((f.cleaned_data['fieldname'], f.cleaned_data['label'])
                                                              for f in mapping_formset.forms),
-                                                order=dict((f.cleaned_data['fieldname'], int(f.cleaned_data['ORDER']))
+                                                order=dict((f.cleaned_data['fieldname'], safe_int(f.cleaned_data['ORDER'], 0))
                                                              for f in mapping_formset.forms),
                                                 hidden=dict((f.cleaned_data['fieldname'], f.cleaned_data['hidden'])
                                                              for f in mapping_formset.forms),
