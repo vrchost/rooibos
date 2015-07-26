@@ -27,8 +27,12 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     if type(dn) in (tuple, list):
                         dn = dn[0]
                 else:
-                    dn = '%s=%s,%s' % (ldap_auth['cn'],
-                                       username, ldap_auth['base'])
+                    domain = ldap_auth.get('domain')
+                    if domain:
+                        dn = '%s@%s' % (username, domain)
+                    else:
+                        dn = '%s=%s,%s' % (ldap_auth['cn'],
+                                           username, ldap_auth['base'])
 
                 l.simple_bind_s(dn, password)
                 result = l.search_s(ldap_auth['base'],
