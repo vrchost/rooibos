@@ -39,9 +39,11 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                                     ldap_auth['scope'],
                                     '%s=%s' % (ldap_auth['cn'], username),
                                     attrlist=ldap_auth['attributes'])
-                if (len(result) != 1):
+                # filter results to hits only
+                result = [r[1] for r in result if r[0]]
+                if len(result) != 1:
                     continue
-                attributes = result[0][1]
+                attributes = result[0]
                 for attr in ldap_auth['attributes']:
                     if attributes.has_key(attr):
                         if not type(attributes[attr]) in (tuple, list):
