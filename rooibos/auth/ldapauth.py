@@ -53,11 +53,16 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
+                    emails = attributes[ldap_auth['email']]
+                    if not emails:
+                        email = ldap_auth.get('email_default', '%s@unknown') % username
+                    else:
+                        email = emails[0]
                     user = self._create_user(username,
                         None,
                         ' '.join(attributes[ldap_auth['firstname']]),
                         ' '.join(attributes[ldap_auth['lastname']]),
-                        attributes[ldap_auth['email']][0])
+                        email)
                 if not self._post_login_check(user, attributes):
                     continue
                 return user

@@ -137,6 +137,7 @@ LDAP_AUTH = (
         'bind_user': 'CN=LDAP Bind user,OU=users,DC=ad,DC=jmu,DC=edu',
         'bind_password': 'abc123',
         'domain': 'ad.example.com',
+        'email_default': '%s@example.com',  # user name will replace %s
     },
 
 )
