@@ -15,7 +15,8 @@ from pysolr import SolrError
 from rooibos.access import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
-from rooibos.data.models import Field, Collection, FieldValue, Record, FieldSet
+from rooibos.data.models import Field, Collection, FieldValue, Record, \
+    FieldSet, FieldSetField
 from rooibos.data.functions import apply_collection_visibility_preferences, \
     get_collection_visibility_preferences
 from rooibos.storage.models import Storage
@@ -633,8 +634,19 @@ def search_facets(request, id=None, name=None, selected=False):
     qurl = q.urlencode()
     limit_url = "%s?%s%s" % (url, qurl, qurl and '&' or '')
 
-    # sort facets by label
-    facets = sorted(search_facets.values(), key=lambda f: f.label)
+    # sort facets by specified order, if any, then by label
+    ordered_facets = (FieldSetField.objects
+                      .filter(fieldset__name='facet-fields')
+                      .values_list('field__name', flat=True)
+                      .order_by('order', 'label', 'field__label', 'field__name')
+                      )
+    facets = []
+    for of in ordered_facets:
+        try:
+            facets.append(search_facets.pop(of + '_t'))
+        except KeyError:
+            pass
+    facets.extend(sorted(search_facets.values(), key=lambda f: f.label))
 
     # clean facet items
     for f in facets:
