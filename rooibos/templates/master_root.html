@@ -134,6 +134,9 @@
                             <li><a href="{% url solr-search %}">Explore</a></li>
                             <li><a href="{% url solr-searchform %}">Advanced Search</a></li>
                             <li><a href="{% url solr-browse %}">Browse</a></li>
+                            {% if user.is_authenticated and SHOW_TERMS %}
+                            <li><a href="{% url solr-terms %}">Top Terms</a></li>
+                            {% endif %}
                             <li><a href="{% url solr-overview %}">Overview</a></li>
                         </ul>
                     </li>

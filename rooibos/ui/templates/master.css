@@ -1348,4 +1348,34 @@ td.annotation-col textarea {
     font-size: 90%;
 }
 
+
+.term-size-0 {
+    font-size: 80%;
+}
+
+.term-size-1 {
+    font-size: 90%;
+}
+
+.term-size-2 {
+    font-size: 100%;
+}
+
+.term-size-3 {
+    font-size: 110%;
+}
+
+.term-size-4 {
+    font-size: 120%;
+}
+
+.term-size-5 {
+    font-size: 130%;
+}
+
+.term-size-6 {
+    font-size: 140%;
+}
+
+
 </style>

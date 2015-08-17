@@ -71,6 +71,11 @@ class SolrIndex():
         return (result.hits, filter(None, map(lambda i: records.get(i), ids)),
                 result.facets)
 
+    def terms(self):
+        conn = Solr(settings.SOLR_URL)
+        return conn.terms(fields=['text'], mincount=2, minlength=4).get('text', {})
+
+
     def clear(self):
         from models import SolrIndexUpdates
         SolrIndexUpdates.objects.filter(delete=True).delete()

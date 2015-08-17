@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import patterns, url
 from views import search, search_facets, search_json, browse, overview, \
-    fieldvalue_autocomplete, search_form
+    fieldvalue_autocomplete, search_form, terms
 
 urlpatterns = patterns(
     '',
@@ -18,6 +18,7 @@ urlpatterns = patterns(
     url(r'^selected-facets/$', search_facets, kwargs={'selected': True},
         name='solr-selected-facets'),
     url(r'^browse/$', browse, name='solr-browse'),
+    url(r'^terms/$', terms, name='solr-terms'),
     url(r'^browse/(?P<id>\d+)/(?P<name>[\w-]+)/$', browse,
         name='solr-browse-collection'),
     url(r'^overview/$', overview, name='solr-overview'),

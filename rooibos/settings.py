@@ -181,6 +181,7 @@ EXPOSE_TO_CONTEXT = (
     'TITLE',
     'SHOW_FRONTPAGE_LOGIN',
     'MASTER_TEMPLATE',
+    'SHOW_TERMS',
     )
 
 
