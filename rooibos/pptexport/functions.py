@@ -128,7 +128,10 @@ class PowerPointGenerator:
                     t = item.title or ''
                 e.firstChild.nodeValue = t
             # insert image if available
-            image = get_image_for_record(record, self.user, 800, 600)
+            try:
+                image = get_image_for_record(record, self.user, 800, 600)
+            except:
+                image = None
             if image:
                 # add image to outfile
                 with file(image, 'rb') as f:
