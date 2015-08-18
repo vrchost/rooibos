@@ -132,7 +132,7 @@ class PowerPointGenerator:
                 image = get_image_for_record(record, self.user, 800, 600)
             except:
                 image = None
-            if image:
+            if image and os.path.isfile(image):
                 # add image to outfile
                 with file(image, 'rb') as f:
                     content = f.read()
