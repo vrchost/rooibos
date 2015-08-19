@@ -28,9 +28,10 @@ class Collection(models.Model):
     description = models.TextField(blank=True)
     agreement = models.TextField(blank=True, null=True)
     password = models.CharField(max_length=32, blank=True)
+    order = models.IntegerField(blank=False, null=False, default=100)
 
     class Meta:
-        ordering = ['title']
+        ordering = ['order', 'title']
 
     def save(self, **kwargs):
         unique_slug(self, slug_source='title', slug_field='name', check_current_slug=kwargs.get('force_insert'))
