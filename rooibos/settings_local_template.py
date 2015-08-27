@@ -199,6 +199,11 @@ YAHOO_APPLICATION_ID = ""
 HARD_VIDEO_DELIVERY_LINKS = False
 
 
+# If set to a list of strings, all groups with the given names are granted read
+# access on newly created presentations
+PRESENTATION_PERMISSIONS = []
+
+
 MASTER_TEMPLATE = 'master_root.html'
 
 additional_settings = [

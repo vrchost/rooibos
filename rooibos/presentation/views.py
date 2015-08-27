@@ -2,10 +2,11 @@ from django.http import HttpResponse, HttpResponseRedirect, QueryDict
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.forms.models import modelformset_factory, BaseModelFormSet, ModelForm
 from django.db.models.aggregates import Count
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -40,10 +41,12 @@ def create(request):
     selected = request.session.get('selected_records', ())
     next = request.GET.get('next', '') or reverse('presentation-manage')
 
+    custom_permissions = getattr(settings, 'PRESENTATION_PERMISSIONS', None)
+
     class CreatePresentationForm(forms.Form):
         title = forms.CharField(label='Title', max_length=Presentation._meta.get_field('title').max_length)
         add_selected = forms.BooleanField(label='Add selected records immediately', required=False, initial=True)
-        auth_access = forms.BooleanField(label='Allow access to authenticated users', required=False, initial=True)
+        auth_access = forms.BooleanField(label='Set default permissions', required=False, initial=True)
 
     if request.method == "POST":
         form = CreatePresentationForm(request.POST)
@@ -54,9 +57,18 @@ def create(request):
                 add_selected_items(request, presentation)
 
             if form.cleaned_data['auth_access']:
-                g = ExtendedGroup.objects.filter(type=AUTHENTICATED_GROUP)
-                g = g[0] if g else ExtendedGroup.objects.create(type=AUTHENTICATED_GROUP, name='Authenticated Users')
-                AccessControl.objects.create(content_object=presentation, usergroup=g, read=True)
+                if not custom_permissions:
+                    g = ExtendedGroup.objects.filter(type=AUTHENTICATED_GROUP)
+                    g = g[0] if g else ExtendedGroup.objects.create(type=AUTHENTICATED_GROUP, name='Authenticated Users')
+                    AccessControl.objects.create(content_object=presentation, usergroup=g, read=True)
+                else:
+                    for name in custom_permissions:
+                        g = ExtendedGroup.objects.filter(name=name)
+                        if len(g) == 0:
+                            g = Group.objects.filter(name=name)
+                        if len(g) == 0:
+                            continue
+                        AccessControl.objects.create(content_object=presentation, usergroup=g[0], read=True)
 
             update_actionbar_tags(request, presentation)
 
