@@ -203,6 +203,7 @@ class SpreadsheetImport(object):
                 record__collection__in=self.collections,
                 owner=None,
                 field__in=self._identifier_ids,
+                index_value__in=(x[:32] for x in ids),
                 value__in=ids)
             if not fvs:
                 if add:
