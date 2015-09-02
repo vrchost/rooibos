@@ -739,8 +739,19 @@ def browse(request, id=None, name=None):
             'solr-browse-collection',
             kwargs={'id': collection.id, 'name': collection.name}))
 
-    collection = id and get_object_or_404(collections, id=id) or collections[0]
-    fields = _get_browse_fields(collection.id)
+    fields = None
+    if id:
+        collection = get_object_or_404(collections, id=id)
+        if collection:
+            fields = _get_browse_fields(collection.id)
+            if not fields:
+                return HttpResponseRedirect(reverse('solr-browse'))
+
+    for ic in collections:
+        if fields:
+            break
+        collection = ic
+        fields = _get_browse_fields(collection.id)
 
     if not fields:
         raise Http404()
