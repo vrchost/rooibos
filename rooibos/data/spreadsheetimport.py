@@ -1,4 +1,5 @@
 from django.db.models import Q, Count
+from django.db import reset_queries
 from models import Field, FieldValue, Record, CollectionItem, get_system_field
 from rooibos.solr.models import delay_record_indexing, resume_record_indexing
 import csv
@@ -264,6 +265,7 @@ class SpreadsheetImport(object):
 
                 # On every row, delay record indexing for a little longer
                 delay_record_indexing()
+                reset_queries()
 
                 row = self._split_values(row)
                 if not last_row:
