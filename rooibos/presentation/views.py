@@ -140,6 +140,8 @@ def edit(request, id, name):
             for instance in instances:
                 instance.presentation = presentation
                 instance.save()
+            # trigger modified date update
+            presentation.save()
             request.user.message_set.create(message="Changes to presentation items saved successfully.")
             return self_page
     else:
@@ -147,6 +149,8 @@ def edit(request, id, name):
 
     if request.method == 'POST' and request.POST.get('add-selected-items'):
         add_selected_items(request, presentation)
+        # trigger modified date update
+        presentation.save()
         return self_page
 
     if request.method == "POST" and request.POST.get('update-properties'):
