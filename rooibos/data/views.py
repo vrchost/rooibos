@@ -22,7 +22,7 @@ from models import *
 from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
 from functions import get_collection_visibility_preferences, \
     set_collection_visibility_preferences, apply_collection_visibility_preferences
-from rooibos.access import filter_by_access, check_access
+from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions
 from rooibos.presentation.models import Presentation
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
@@ -52,6 +52,15 @@ def record_delete(request, id, name):
     return HttpResponseRedirect(reverse('data-record', kwargs=dict(id=id, name=name)))
 
 
+def get_allowed_collections_for_personal_records(user, readable_collections):
+    allowed = []
+    for c in Collection.objects.filter(id__in=readable_collections):
+        restrictions = get_effective_permissions_and_restrictions(user, c)[3]
+        if not restrictions or restrictions.get('personal', 'yes').lower() != 'no':
+            allowed.append(c.id)
+    return allowed
+
+
 def record(request, id, name, contexttype=None, contextid=None, contextname=None,
            edit=False, customize=False, personal=False, copy=False,
            copyid=None, copyname=None):
@@ -59,6 +68,7 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     collections = apply_collection_visibility_preferences(request.user, Collection.objects.all())
     writable_collections = list(filter_by_access(request.user, collections, write=True).values_list('id', flat=True))
     readable_collections = list(filter_by_access(request.user, collections).values_list('id', flat=True))
+    personal_collections = None
     can_edit = request.user.is_authenticated()
     can_manage = False
 
@@ -67,15 +77,22 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
         can_edit = can_edit and record.editable_by(request.user)
         can_manage = record.manageable_by(request.user)
     else:
-        if request.user.is_authenticated() and (writable_collections or (personal and readable_collections)):
-            record = Record()
+        if request.user.is_authenticated():
             if personal:
-                record.owner = request.user
+                personal_collections = get_allowed_collections_for_personal_records(request.user, readable_collections)
+            if writable_collections or (personal and personal_collections):
+                record = Record()
+                if personal:
+                    record.owner = request.user
+            else:
+                raise Http404()
         else:
             raise Http404()
 
     if record.owner:
-        valid_collections = set(readable_collections) | set(writable_collections)
+        if personal_collections is None:
+            personal_collections = get_allowed_collections_for_personal_records(request.user, readable_collections)
+        valid_collections = set(personal_collections) | set(writable_collections)
     else:
         valid_collections = writable_collections
 
