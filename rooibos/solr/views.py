@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Count
 from django.core.cache import cache
 from django.shortcuts import render_to_response, get_object_or_404
@@ -660,6 +661,11 @@ def search_facets(request, id=None, name=None, selected=False):
 
     # remove facets with only no filter options
     facets = filter(lambda f: len(f.facets) > 0, facets)
+
+    # remove facets that should be hidden
+    hide_facets = getattr(settings, 'HIDE_FACETS', None)
+    if hide_facets:
+        facets = filter(lambda f: f.label not in hide_facets, facets)
 
     html = render_to_string(
         'results_facets.html',
