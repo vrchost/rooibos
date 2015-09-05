@@ -12,7 +12,11 @@
     <script type="text/javascript">
         document.documentElement.className = 'js-enabled';
         var profile_settings = {% profile_settings ui %};
-        var basket_open = profile_settings['ui_basket_open'] == 'true';
+        {% if user.is_authenticated %}
+        var basket_open = !(profile_settings['ui_basket_open'] == 'false');
+        {% else %}
+        var basket_open = false;
+        {% endif %}
         if (basket_open) document.documentElement.className = 'js-enabled basket-open';
         var custom_process_facets = false;
     </script>
