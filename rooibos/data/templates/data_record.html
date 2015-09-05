@@ -319,7 +319,7 @@ Display metadata as: {{ fieldsetform.fieldset }}
 
     <div id="collection-membership-rows">
     {% for form in c_formset.forms %}
-    <div class="{% cycle 'altrow' '' %}">
+    <div class="{% cycle 'altrow' '' %}" style="clear: left;">
         <div>{{ form.id }}{{ form.title }}</div>
         <div>{{ form.member }}</div>
         <div>{{ form.shared }}</div>
