@@ -363,6 +363,12 @@ def run_search(user,
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)
 
+    # check for overridden facet labels
+    for name, label in (FieldSetField.objects.filter(fieldset__name='facet-fields')
+                                .exclude(label='').values_list('field__name', 'label')):
+        if name + '_t' in search_facets:
+            search_facets[name + '_t'].label = label
+
     query = _generate_query(search_facets, user, collection, criteria,
                             keywords, selected, remove)
 
