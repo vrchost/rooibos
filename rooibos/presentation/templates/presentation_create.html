@@ -25,9 +25,14 @@
     {{ form.add_selected.errors }}
 {% endif %}
 
+
+{% if can_publish %}
+
 {{ form.auth_access.label_tag }}
 {{ form.auth_access }}
 {{ form.auth_access.errors }}
+
+{% endif %}
 
 
 <div class="row">
