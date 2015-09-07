@@ -81,6 +81,7 @@ def create(request):
                            'next': next,
                            'selected': selected,
                            'existing_tags': existing_tags,
+                           'custom_permissions': custom_permissions,
                            },
                           context_instance=RequestContext(request))
 

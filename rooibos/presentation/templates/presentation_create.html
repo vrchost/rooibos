@@ -25,12 +25,22 @@
     {{ form.add_selected.errors }}
 {% endif %}
 
-{{ form.auth_access.label_tag }}
-{{ form.auth_access }}
-{{ form.auth_access.errors }}
+
+<div class="row">
+    <br />
+    {{ form.auth_access }}
+    {{ form.auth_access.errors }}
+    Grant access to
+    {% for group in custom_permissions %}
+      {{ group }}{{ forloop.last|yesno:".,;" }}
+    {% empty %}
+      authenticated users
+    {% endfor %}
+</div>
 
 
 <div class="row">
+    <br />
     <input type="submit" value="Create" />
     {% if next %}
     <a href="{{ next }}">Cancel</a>
