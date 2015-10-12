@@ -57,6 +57,19 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                             attributes[attr] = (attributes[attr],)
                     else:
                         attributes[attr] = []
+
+                # fetch membership in specified groups
+                attributes['_groups'] = []
+                for group in ldap_auth.get('groups', ()):
+                    result = l.search_s(
+                        ldap_auth['base'],
+                        ldap_auth['scope'],
+                        '(&(objectClass=user)(%s=%s)(memberof=%s))' % (ldap_auth['cn'], username, group),
+                    )
+                    if len(result) == 1:
+                        attributes['_groups'].push(group)
+
+                # process Django user
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
