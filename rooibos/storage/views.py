@@ -92,6 +92,10 @@ def retrieve_image(request, recordid, record, width=None, height=None):
     try:
         response = HttpResponse(content=file(path, 'rb').read(), mimetype='image/jpeg')
         if request.GET.has_key('forcedl'):
+            # if filename was used for record stub, remove extension here to
+            # prevent duplication
+            if record.endswith('jpg'):
+                record = record[:-3]
             response["Content-Disposition"] = "attachment; filename=%s.jpg" % record
         return response
     except IOError:
