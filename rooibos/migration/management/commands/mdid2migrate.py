@@ -840,7 +840,7 @@ class MigrateFieldValues(MigrateModel):
 
     def __init__(self, cursor):
         super(MigrateFieldValues, self).__init__(cursor=cursor, model=FieldValue,
-            query="SELECT FieldData.ID,ImageID,FieldID,FieldValue,OriginalValue,Type,Label,DisplayOrder " +
+            query="SELECT fielddata.ID,ImageID,FieldID,FieldInstance,FieldValue,OriginalValue,Type,Label,DisplayOrder " +
                   "FROM FieldData INNER JOIN FieldDefinitions ON FieldID=FieldDefinitions.ID")
         self.fields = MigrateModel.instance_maps['field']
         self.records = MigrateModel.instance_maps['record']
@@ -851,7 +851,7 @@ class MigrateFieldValues(MigrateModel):
     def update(self, instance, row):
         instance.label = row.Label
         instance.value = row.FieldValue
-        instance.order = row.DisplayOrder
+        instance.order = int(row.DisplayOrder) * 100 + int(row.FieldInstance)
 
     def create_instance(self, row):
         if not self.records.has_key(str(row.ImageID)) or not self.fields.has_key(str(row.FieldID)):
