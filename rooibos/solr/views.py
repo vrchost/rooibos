@@ -244,6 +244,10 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
 
     def build_keywords(q, k):
         k = k.lower()
+        if k.startswith('?') or k.startswith('*'):
+            k = k[1:]
+            if not k:
+                return q
         if k == 'and' or k == 'or':
             return q + ' ' + k.upper()
         elif q.endswith(' AND') or q.endswith(' OR'):
@@ -252,6 +256,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             return q + ' AND ' + k
 
     if keywords:
+        keywords = re.sub('[+-\\\|!()\{}\[\]^"~:]', '', keywords)
         keywords = reduce(build_keywords, keywords.split())
 
     query = ''
