@@ -266,6 +266,11 @@ FORCE_SLIDE_REPROCESS = False
 PRESENTATION_PERMISSIONS = []
 
 
+# Show extra field values next to thumbnails, specify by field label
+# THUMB_EXTRA_FIELDS = ['Creator', 'Work Type']
+THUMB_EXTRA_FIELDS = []
+
+
 MASTER_TEMPLATE = 'master_root.html'
 
 

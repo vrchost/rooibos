@@ -6,8 +6,9 @@ from django.template import Context, Variable, Template
 from django.contrib.contenttypes.models import ContentType
 from django.utils import simplejson
 from django.conf import settings
+from django.core.cache import cache
 from rooibos.contrib.tagging.models import Tag
-from rooibos.data.models import Record, Collection
+from rooibos.data.models import Record, Collection, Field
 from rooibos.presentation.models import Presentation
 from rooibos.util.models import OwnedWrapper
 from rooibos.access import filter_by_access
@@ -19,10 +20,34 @@ import glob
 
 register = template.Library()
 
+
 @register.inclusion_tag('ui_record.html', takes_context=True)
 def record(context, record, selectable=False, viewmode="thumb", notitle=False):
     cpr = context['current_presentation_records']
     str(cpr)
+
+    extra = None
+    extra_fields = getattr(settings, 'THUMB_EXTRA_FIELDS', None)
+    if extra_fields:
+        thumb_extra_fields = cache.get('thumb_extra_fields')
+        if not thumb_extra_fields:
+            thumb_extra_fields = dict(
+                Field.objects.filter(label__in=extra_fields).values_list('id', 'label')
+            )
+            cache.set('thumb_extra_fields', thumb_extra_fields)
+        if thumb_extra_fields:
+            values = dict(
+                (thumb_extra_fields[field], value) for field, value in
+                record.fieldvalue_set.filter(
+                    field__in=thumb_extra_fields.keys(),
+                    owner=None,
+                    context_type=None,
+                    hidden=False,
+                ).values_list('field', 'value')
+            )
+            extra = [
+                (field, values[field]) for field in extra_fields if field in values
+            ]
 
     return {'record': record,
             'notitle': notitle,
@@ -31,6 +56,7 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
             'viewmode': viewmode,
             'request': context['request'],
             'record_in_current_presentation': record.id in cpr,
+            'extra': extra,
             }
 
 @register.simple_tag
