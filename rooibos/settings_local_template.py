@@ -268,7 +268,7 @@ PRESENTATION_PERMISSIONS = []
 
 # Show extra field values next to thumbnails, specify by field label
 # THUMB_EXTRA_FIELDS = ['Creator', 'Work Type']
-# THUMB_EXTRA_TEMPLATE = ''
+THUMB_EXTRA_TEMPLATE = 'ui_record_extra.html'
 THUMB_EXTRA_FIELDS = []
 
 
