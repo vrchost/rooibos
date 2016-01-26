@@ -27,6 +27,7 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
     str(cpr)
 
     extra = None
+    extra_template = getattr(settings, 'THUMB_EXTRA_TEMPLATE', 'ui_record_extra.html')
     extra_fields = getattr(settings, 'THUMB_EXTRA_FIELDS', None)
     if extra_fields:
         thumb_extra_fields = cache.get('thumb_extra_fields')
@@ -57,6 +58,7 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
             'request': context['request'],
             'record_in_current_presentation': record.id in cpr,
             'extra': extra,
+            'extra_template': extra_template,
             }
 
 @register.simple_tag

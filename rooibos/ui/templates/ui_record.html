@@ -7,9 +7,7 @@
           {% metadata record %}
       {% else %}
           {% if viewmode == "thumb" and extra %}
-              {% for label, value in extra %}
-                  <div class="record-title">{{ value }}</div>
-              {% endfor %}
+              {% include extra_template %}
           {% endif %}
       {% endif %}
     {% endif %}
