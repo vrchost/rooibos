@@ -41,7 +41,7 @@ load-plugins=
 # multiple time (only on the command line, not in the configuration file where
 
 # it should appear only once).
-#disable=
+disable=C0111
 
 
 [REPORTS]
@@ -52,7 +52,7 @@ load-plugins=
 output-format=text
 
 # Include message's id in output
-include-ids=no
+include-ids=yes
 
 # Put messages in a separate file for each module / package specified on the
 
@@ -62,7 +62,7 @@ include-ids=no
 files-output=no
 
 # Tells whether to display a full report or only the messages
-reports=yes
+reports=no
 
 # Python expression which should return a note less than 10 (10 is the highest
 

@@ -57,9 +57,11 @@ SECRET_KEY = 'e#!poDuIJ}N,".K=H:T/4z5POb;Gl/N6$6a&,(DRAHUF5c",_p'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 SOLR_URL = 'http://127.0.0.1:8983/solr/'
+SOLR_RECORD_INDEXER = None
 
 SCRATCH_DIR = 'c:/mdid-scratch/'
 AUTO_STORAGE_DIR = 'c:/mdid-collections/'
+LOG_DIR = 'c:/mdid-log/'
 
 # File upload size limit in bytes (default 5 MB)
 UPLOAD_LIMIT = 5 * 1024 * 1024
@@ -224,6 +226,10 @@ FORCE_SLIDE_REPROCESS = False
 
 
 MASTER_TEMPLATE = 'master_root.html'
+
+
+INSTALLED_APPS = ()
+
 
 additional_settings = [
 #    'apps.jmutube.settings_local',

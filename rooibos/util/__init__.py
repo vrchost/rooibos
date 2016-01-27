@@ -126,7 +126,7 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name', id
 def safe_int(value, default):
     try:
         return int(value)
-    except ValueError:
+    except (ValueError, TypeError):
         return default
 
 

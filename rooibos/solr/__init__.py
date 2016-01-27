@@ -12,6 +12,8 @@ from rooibos.util.models import OwnedWrapper
 from pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
 from rooibos.access.models import AccessControl
+import logging
+import sys
 
 
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
@@ -126,6 +128,24 @@ class SolrIndex():
 
         if verbose:
             pb = ProgressBar(total_count)
+
+        def get_custom_doc_processor():
+            s = getattr(settings, 'SOLR_RECORD_INDEXER', None)
+            if s:
+                module, _, function = s.rpartition('.')
+                try:
+                    __import__(module)
+                    mod = sys.modules[module]
+                    return getattr(mod, function)
+                except Exception, ex:
+                    logging.debug("Could not import custom Solr record indexer %s: %s",
+                            s, ex)
+            def i(doc, **kwargs):
+                return doc
+            return i
+
+        custom_doc_processor = get_custom_doc_processor()
+
         while True:
             if verbose:
                 pb.update(count)
@@ -153,10 +173,15 @@ class SolrIndex():
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
-                        docs.append(self._record_to_solr(
+                        doc = self._record_to_solr(
                             record, core_fields, groups.get(record.id, []),
                             fieldvalues.get(record.id, []),
-                            media.get(record.id, [])))
+                            media.get(record.id, []))
+                        doc = custom_doc_processor(doc, record=record, core_fields=core_fields,
+                                     groups=groups.get(record.id, []),
+                                     fieldvalues=fieldvalues.get(record.id, []),
+                                     media=media.get(record.id, []))
+                        docs.append(doc)
                     conn.add(docs)
                 return process
 
@@ -246,6 +271,9 @@ class SolrIndex():
                     break
             else:
                 doc.setdefault(v.field.name + '_t', []).append(clean_value)
+                # also make sortable
+                if not v.field.name + '_sort' in doc:
+                    doc[v.field.name + '_sort'] = clean_value
             # For exact retrieval through browsing
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
         for f in required_fields:
