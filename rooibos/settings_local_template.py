@@ -216,6 +216,13 @@ PREVIEW_WIDTH = 640
 PREVIEW_HEIGHT = 480
 
 
+# If the JPEGs available to MDID are not compressed properly, loading a presentation
+# may take a very long time, as a lot of large images have to be transferred.  By
+# setting this, presentation images are forces to be reprocessed and compressed to
+# the usual 85% quality
+FORCE_SLIDE_REPROCESS = False
+
+
 MASTER_TEMPLATE = 'master_root.html'
 
 additional_settings = [

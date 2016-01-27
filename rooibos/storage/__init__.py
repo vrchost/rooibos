@@ -76,7 +76,8 @@ except ImportError:
     PDF_SUPPORT = False
 
 
-def get_image_for_record(record, user=None, width=100000, height=100000, passwords={}, crop_to_square=False):
+def get_image_for_record(record, user=None, width=100000, height=100000, passwords={},
+                         crop_to_square=False, force_reprocess=False):
     media = get_media_for_record(record, user, passwords)
     q = Q(mimetype__startswith='image/')
     if settings.FFMPEG_EXECUTABLE:
@@ -117,7 +118,8 @@ def get_image_for_record(record, user=None, width=100000, height=100000, passwor
             logging.exception('Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
-    if m.width > width or m.height > height or m.mimetype != 'image/jpeg' or not m.is_local():
+    if (m.width > width or m.height > height or m.mimetype != 'image/jpeg' or
+            not m.is_local() or force_reprocess):
 
         def derivative_image(master, width, height):
             if not master.file_exists():

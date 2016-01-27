@@ -202,8 +202,11 @@ class Record(models.Model):
     def get_square_thumbnail_url(self):
         return reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name}) + '?square'
 
-    def get_image_url(self):
-        return reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
+    def get_image_url(self, force_reprocess=False):
+        url = reverse('storage-retrieve-image-nosize', kwargs={'recordid': self.id, 'record': self.name})
+        if force_reprocess:
+            url += '?reprocess'
+        return url
 
     def save(self, force_update_name=False, **kwargs):
         unique_slug(self, slug_literal='r-%s' % random.randint(1000000, 9999999),

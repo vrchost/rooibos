@@ -79,8 +79,11 @@ def retrieve(request, recordid, record, mediaid, media):
 def retrieve_image(request, recordid, record, width=None, height=None):
 
     passwords = request.session.get('passwords', dict())
+    force_reprocess = request.GET.has_key('reprocess')
 
-    path = get_image_for_record(recordid, request.user, int(width or 100000), int(height or 100000), passwords)
+    path = get_image_for_record(
+        recordid, request.user, int(width or 100000), int(height or 100000), passwords,
+        force_reprocess=force_reprocess)
     if not path:
         logging.error("get_image_for_record failed for record.id %s" % recordid)
         raise Http404()

@@ -126,7 +126,9 @@ def _presentation_item_as_json(item, owner=None, process_url=lambda url: url):
                 name=item.record.name,
                 title=item.title_from_fieldvalues(fieldvalues) or 'Untitled',
                 thumbnail=process_url(item.record.get_thumbnail_url()),
-                image=process_url(item.record.get_image_url()),
+                image=process_url(item.record.get_image_url(
+                    force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False)
+                )),
                 metadata=[
                     dict(
                         label=value.resolved_label,
