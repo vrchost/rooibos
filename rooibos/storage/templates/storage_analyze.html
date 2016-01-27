@@ -44,7 +44,7 @@
 <div style="float: left; margin-right: 20px; margin-top: 20px;">
     <h3>{{ broken|length|intcomma }} missing file{{ broken|length|pluralize }}</h3>
     <div style="overflow: auto; max-height: 600px; width: 400px; white-space: nowrap; font-size: smaller;">
-    {% for b in broken %}{{ b.url }}<br />{% empty %}None{% endfor %}
+    {% for b in broken %}{{ b }}<br />{% empty %}None{% endfor %}
     </div>
 </div>
 

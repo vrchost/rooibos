@@ -591,6 +591,8 @@ class MigrateCollectionItems(MigrateModel):
 
 class MigrateMedia(MigrateModel):
 
+    remove_full_prefix = False
+
     def __init__(self, cursor):
         super(MigrateMedia, self).__init__(cursor=cursor, model=Media,
                                            query="SELECT ID,Resource,CollectionID FROM Images")
@@ -601,7 +603,10 @@ class MigrateMedia(MigrateModel):
         return content_hash(row.Resource)
 
     def update(self, instance, row):
-        instance.url = os.path.join('full', row.Resource.strip())
+        if self.remove_full_prefix:
+            instance.url = row.Resource.strip()
+        else:
+            instance.url = os.path.join('full', row.Resource.strip())
 
     def create_instance(self, row):
         if not self.records.has_key(str(row.ID)) or not self.storages.has_key(str(row.CollectionID)):
@@ -1025,6 +1030,11 @@ class Command(BaseCommand):
     help = 'Migrates database from MDID2'
     args = "config_file"
 
+    option_list = BaseCommand.option_list + (
+        make_option('--remove-full-prefix', dest='remove_full_prefix', action='store_true',
+                    help='Remove full/ prefix from media paths'),
+    )
+
     def readConfig(self, file):
         connection = servertype = None
         for e in minidom.parse(file).getElementsByTagName('database')[0].childNodes:
@@ -1070,6 +1080,8 @@ class Command(BaseCommand):
             print "Database version is not supported"
             print "Found %r, supported is %r" % (row.Version, supported)
             return
+
+        MigrateMedia.remove_full_prefix = options.get('remove_full_prefix')
 
         import rooibos.solr.models
         rooibos.solr.models.SolrIndexUpdates.objects.all().delete()

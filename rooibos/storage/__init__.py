@@ -188,14 +188,16 @@ def find_record_by_identifier(identifiers, collection, owner=None,
     return records
 
 
-def match_up_media(storage, collection):
-    _broken, files = analyze_media(storage)
+def match_up_media(storage, collection, allow_multiple_use=False):
+    # While matching up when multiple use is allowed, we want to get all
+    # the files that are already in use as well, so they can be matched up again
+    _broken, files = analyze_media(storage, allow_multiple_use, remove_used_from_extra=not allow_multiple_use)
     # find records that have an ID matching one of the remaining files
     for file in files:
         # Match identifiers that are either full file name (with extension) or just base name match
         filename = os.path.split(file)[1]
         id = os.path.splitext(filename)[0]
-        records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True)
+        records = find_record_by_identifier((id, filename,), collection, ignore_suffix=True).filter(media=None).distinct()
         if len(records) == 1:
             yield records[0], file
 
@@ -205,9 +207,9 @@ def analyze_records(collection, storage):
     return collection.records.exclude(id__in=collection.records.filter(media__storage=storage).values('id'))
 
 
-def analyze_media(storage):
+def analyze_media(storage, allow_multiple_use=False, remove_used_from_extra=True):
     broken = []
-    extra = []
+    used = []
     # Storage must be able to provide file list
     if hasattr(storage, 'get_files'):
         # Find extra files, i.e. files in the storage area that don't have a matching media record
@@ -219,9 +221,16 @@ def analyze_media(storage):
             url = os.path.normcase(os.path.normpath(media.url))
             if extra.has_key(url):
                 # File is in use
-                del extra[url]
+                if not allow_multiple_use:
+                    del extra[url]
+                else:
+                    used.append(url)
             else:
                 # missing file
                 broken.append(media)
+        if remove_used_from_extra:
+            for url in used:
+                if url in extra:
+                    del extra[url]
         extra = extra.keys()
     return broken, extra
