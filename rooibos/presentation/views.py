@@ -64,13 +64,17 @@ def create(request):
     else:
         form = CreatePresentationForm()
 
-    return render_to_response('presentation_create.html',
-                          {'form': form,
-                           'next': next,
-                           'selected': selected,
-                           'existing_tags': existing_tags,
-                           },
-                          context_instance=RequestContext(request))
+    return render_to_response(
+        'presentation_create.html',
+        {
+            'form': form,
+            'next': next,
+            'selected': selected,
+            'existing_tags': existing_tags,
+            'can_publish': request.user.has_perm('presentation.publish_presentations'),
+        },
+        context_instance=RequestContext(request),
+    )
 
 
 def add_selected_items(request, presentation):

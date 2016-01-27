@@ -33,6 +33,8 @@ from rooibos.util import safe_int
 import os
 import random
 import string
+from rooibos.util import safe_int
+from rooibos.middleware import HistoryMiddleware
 
 
 @login_required
@@ -88,11 +90,17 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
 
     media = Media.objects.select_related().filter(record=record,
                                                   storage__in=filter_by_access(request.user, Storage))
+
+    # Can any media be downloaded?
+    download_image = False
+
     # Only list media that is downloadable or editable
     for m in media:
         # Calculate permissions and store with object for later use in template
         m.downloadable_in_template =  m.is_downloadable_by(request.user)
         m.editable_in_template = m.editable_by(request.user)
+        download_image = download_image or m.is_downloadable_by(request.user, original=False)
+
     media = filter(lambda m: m.downloadable_in_template or m.editable_in_template, media)
 
     edit = edit and request.user.is_authenticated()
@@ -292,6 +300,11 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
     record_usage = record.presentationitem_set.values('presentation') \
                     .distinct().count() if can_edit else 0
 
+    back_url = HistoryMiddleware.go_back(
+        request,
+        to_before=reverse('data-record-back-helper-url'),
+    )
+
     return render_to_response('data_record.html',
                               {'record': record,
                                'media': media,
@@ -310,6 +323,8 @@ def record(request, id, name, contexttype=None, contextid=None, contextname=None
                                'upload_url': ("%s?sidebar&next=%s" % (reverse('storage-media-upload', args=(record.id, record.name)), request.get_full_path()))
                                              if record.id else None,
                                'record_usage': record_usage,
+                               'back_url': back_url,
+                               'download_image': download_image,
                                },
                               context_instance=RequestContext(request))
 

@@ -11,6 +11,13 @@
     </div>
 {% endfor %}
 
+{% for collection in collections %}
+    <div class='metadata-item'>
+        <div class='label{% cycle '' ' altrow' %}'>Collection:</div>
+        <div class='value{% cycle '' ' altrow' %}'>{{ collection.title }}</div>
+    </div>
+{% endfor %}
+
 {% if record.created %}
     <div class='metadata-item'>
         <div class='label'>Record created:</div>

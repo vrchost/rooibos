@@ -5,9 +5,10 @@ import os.path
 import Image
 import shutil
 from StringIO import StringIO
+from django.contrib.auth.models import Permission
 from rooibos.data.models import Collection, CollectionItem, Record
 from rooibos.storage.models import Media, Storage
-from rooibos.access.models import AccessControl, User
+from rooibos.access.models import AccessControl, User, Group
 from rooibos.presentation.models import Presentation, PresentationItem
 from viewers import PackageFilesViewer
 from zipfile import ZipFile
@@ -86,3 +87,49 @@ class PackagePresentationTestCase(unittest.TestCase):
         self.assertEqual(461, height1)
         self.assertEqual(200, width2)
         self.assertEqual(149, height2)
+
+
+class PublishPermissionsTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(username='PublishPermissionsTestCase')
+        self.group = Group.objects.create(name='PublishPermissionsTestCase')
+        self.group.user_set.add(self.user)
+        self.presentation = Presentation.objects.create(
+            name='PublishPermissionsTestCase', owner=self.user, hidden=False)
+        self.permission = Permission.objects.get(codename='publish_presentations')
+
+    def tearDown(self):
+        self.presentation.delete()
+        self.group.delete()
+        self.user.delete()
+
+    def assertNotPublished(self):
+        presentations = Presentation.objects.filter(Presentation.published_Q(), owner=self.user)
+        self.assertEqual(0,presentations.count())
+
+    def assertPublished(self):
+        presentations = Presentation.objects.filter(Presentation.published_Q(), owner=self.user)
+        self.assertEqual(1, presentations.count())
+        self.assertEqual(self.presentation.id, presentations[0].id)
+
+    def reloadUser(self):
+        self.user = User.objects.get(id=self.user.id)
+
+    def testNoPublishPermission(self):
+        self.assertNotPublished()
+
+    def testUserPublishPermission(self):
+        self.assertNotPublished()
+        self.user.user_permissions.add(self.permission)
+        self.assertEqual([], list(self.user.get_group_permissions()))
+        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_all_permissions()))
+        self.assertPublished()
+
+    def testGroupPublishPermission(self):
+        self.assertNotPublished()
+        self.group.permissions.add(self.permission)
+        self.reloadUser()
+        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_group_permissions()))
+        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_all_permissions()))
+        self.assertPublished()

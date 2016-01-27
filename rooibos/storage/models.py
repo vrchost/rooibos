@@ -228,12 +228,13 @@ class Media(models.Model):
     def is_local(self):
         return self.storage and self.storage.is_local()
 
-    def is_downloadable_by(self, user):
+    def is_downloadable_by(self, user, original=True):
         r, w, m, restrictions = get_effective_permissions_and_restrictions(user, self.storage)
         # if size or download restrictions exist, no direct download of a media file is allowed
-        if restrictions and (restrictions.has_key('width') or
-                             restrictions.has_key('height') or
-                             restrictions.get('download', 'yes') == 'no'):
+        if (restrictions and
+                ((original and restrictions.has_key('width')) or
+                 (original and restrictions.has_key('height')) or
+                 restrictions.get('download', 'yes') == 'no')):
             return False
         else:
             return r
