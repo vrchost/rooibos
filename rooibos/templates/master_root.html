@@ -762,7 +762,9 @@
     <script type="text/javascript">
 
         // pop-up preview
-         var media_url = "{% url storage-retrieve-image 0, 0, 640, 480 %}";
+         var media_url = "{% url storage-retrieve-image 0, 0, PREVIEW_WIDTH|default:640, PREVIEW_HEIGHT|default:480 %}";
+         var preview_width = {{ PREVIEW_WIDTH|default:640 }};
+         var preview_height = {{ PREVIEW_HEIGHT|default:480 }};
 
          function preview_dialog(a, img, prev, next, position, total) {
              var dialog = $("#preview-dialog");
@@ -789,11 +791,11 @@
              dialog.dialog({
                  buttons: buttons,
                  draggable: false,
-                 height: 600,
+                 height: preview_height + 120,
                  modal: true,
                  resizable: false,
                  title: img.attr('alt'),
-                 width: 700
+                 width: preview_width + 60
              });
 
              var info = $('<img src="{% url static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" />');

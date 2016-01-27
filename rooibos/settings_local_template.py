@@ -212,6 +212,10 @@ HARD_VIDEO_DELIVERY_LINKS = False
 HIDE_FACETS = ()
 
 
+PREVIEW_WIDTH = 640
+PREVIEW_HEIGHT = 480
+
+
 MASTER_TEMPLATE = 'master_root.html'
 
 additional_settings = [
