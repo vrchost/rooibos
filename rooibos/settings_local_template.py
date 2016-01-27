@@ -209,6 +209,7 @@ YAHOO_APPLICATION_ID = ""
 HARD_VIDEO_DELIVERY_LINKS = False
 
 
+<<<<<<< HEAD
 # List of facets to permanently hide in Explore screen
 # Comparison is made on effective (shown) label
 HIDE_FACETS = ()
@@ -223,6 +224,11 @@ PREVIEW_HEIGHT = 480
 # setting this, presentation images are forces to be reprocessed and compressed to
 # the usual 85% quality
 FORCE_SLIDE_REPROCESS = False
+
+
+# If set to a list of strings, all groups with the given names are granted read
+# access on newly created presentations
+PRESENTATION_PERMISSIONS = []
 
 
 MASTER_TEMPLATE = 'master_root.html'
