@@ -275,6 +275,21 @@ class Record(models.Model):
                                 ) if self.id else None
 
     @property
+    def identifier(self):
+        def get_identifier():
+            idfields = standardfield_ids('identifier', equiv=True)
+            identifiers = self.fieldvalue_set.filter(
+                field__in=idfields,
+                owner=None,
+                context_type=None,
+                hidden=False)
+            return identifiers[0].value if identifiers else None
+        return get_cached_value('record-%d-identifiers' % self.id,
+                                get_identifier,
+                                model_dependencies=[Field, FieldValue],
+                                ) if self.id else None
+
+    @property
     def shared(self):
         return bool(self.collectionitem_set.filter(hidden=False).count()) if self.owner else None
 
