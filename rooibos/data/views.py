@@ -388,7 +388,7 @@ def data_import_file(request, file):
         return Field.objects.select_related('standard').all().order_by('standard', 'name')
 
     def _field_choices():
-        fsf = list(FieldSetField.objects.select_related('fieldset', 'field').all().order_by('fieldset__name', 'order', 'field__label'))
+        fsf = list(FieldSetField.objects.select_related('fieldset', 'field').exclude(fieldset__name__startswith='browse-collection-').exclude(fieldset__name='facet-fields').order_by('fieldset__name', 'order', 'field__label'))
         grouped = {}
         for f in fsf:
             grouped.setdefault((f.fieldset.title, f.fieldset.id), []).append(f.field)
