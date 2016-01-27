@@ -117,6 +117,9 @@ LDAP_AUTH = (
         'email': 'mail',
         'bind_user': '',
         'bind_password': '',
+        # list of groups to check for user membership;
+        # populates virtual LDAP attribute '_groups'
+        'groups': (),
     },
     {
         # Active Directory Example
@@ -136,6 +139,11 @@ LDAP_AUTH = (
         'email': 'mail',
         'bind_user': 'CN=LDAP Bind user,OU=users,DC=ad,DC=jmu,DC=edu',
         'bind_password': 'abc123',
+        'domain': 'ad.example.com',
+        'email_default': '%s@example.com',  # user name will replace %s
+        # list of groups to check for user membership;
+        # populates virtual LDAP attribute '_groups'
+        'groups': ('CN=Sample Group,OU=groups,DC=ad,DC=jmu,DC=edu',),
     },
 
 )

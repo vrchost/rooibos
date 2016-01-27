@@ -4,9 +4,12 @@ import ldap
 from baseauth import BaseAuthenticationBackend
 import logging
 
+
 class LdapAuthenticationBackend(BaseAuthenticationBackend):
+
     def authenticate(self, username=None, password=None):
         for ldap_auth in settings.LDAP_AUTH:
+            l = None
             try:
                 username = username.strip()
                 l = ldap.initialize(ldap_auth['uri'])
@@ -15,43 +18,73 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     l.set_option(getattr(ldap, option), value)
 
                 if ldap_auth.get('bind_user'):
-                    l.simple_bind_s(ldap_auth['bind_user'],
-                                    ldap_auth.get('bind_password'))
-                    result = l.search_s(ldap_auth['base'],
-                                    ldap_auth['scope'],
-                                    '%s=%s' % (ldap_auth['cn'], username),
-                                    attrlist=[ldap_auth.get('dn', 'dn')])
-                    if (len(result) != 1):
+                    l.simple_bind_s(
+                        ldap_auth['bind_user'],
+                        ldap_auth.get('bind_password')
+                    )
+                    result = l.search_s(
+                        ldap_auth['base'],
+                        ldap_auth['scope'],
+                        '%s=%s' % (ldap_auth['cn'], username),
+                        attrlist=[ldap_auth.get('dn', 'dn')]
+                    )
+                    if len(result) != 1:
                         continue
                     dn = result[0][1].get(ldap_auth.get('dn', 'dn'))
                     if type(dn) in (tuple, list):
                         dn = dn[0]
                 else:
-                    dn = '%s=%s,%s' % (ldap_auth['cn'],
-                                       username, ldap_auth['base'])
+                    domain = ldap_auth.get('domain')
+                    if domain:
+                        dn = '%s@%s' % (username, domain)
+                    else:
+                        dn = '%s=%s,%s' % (ldap_auth['cn'],
+                                           username, ldap_auth['base'])
 
                 l.simple_bind_s(dn, password)
                 result = l.search_s(ldap_auth['base'],
                                     ldap_auth['scope'],
                                     '%s=%s' % (ldap_auth['cn'], username),
                                     attrlist=ldap_auth['attributes'])
-                if (len(result) != 1):
+                # filter results to hits only
+                result = [r[1] for r in result if r[0]]
+                if len(result) != 1:
                     continue
-                attributes = result[0][1]
+                attributes = result[0]
                 for attr in ldap_auth['attributes']:
-                    if attributes.has_key(attr):
+                    if attr in attributes:
                         if not type(attributes[attr]) in (tuple, list):
                             attributes[attr] = (attributes[attr],)
                     else:
                         attributes[attr] = []
+
+                # fetch membership in specified groups
+                attributes['_groups'] = []
+                for group in ldap_auth.get('groups', ()):
+                    result = l.search_s(
+                        ldap_auth['base'],
+                        ldap_auth['scope'],
+                        '(&(objectClass=user)(%s=%s)(memberof=%s))' % (ldap_auth['cn'], username, group),
+                    )
+                    if len(result) == 1:
+                        attributes['_groups'].push(group)
+
+                # process Django user
                 try:
                     user = User.objects.get(username=username)
                 except User.DoesNotExist:
-                    user = self._create_user(username,
+                    emails = attributes[ldap_auth['email']]
+                    if not emails:
+                        email = ldap_auth.get('email_default', '%s@unknown') % username
+                    else:
+                        email = emails[0]
+                    user = self._create_user(
+                        username,
                         None,
                         ' '.join(attributes[ldap_auth['firstname']]),
                         ' '.join(attributes[ldap_auth['lastname']]),
-                        attributes[ldap_auth['email']][0])
+                        email
+                    )
                 if not self._post_login_check(user, attributes):
                     continue
                 return user
