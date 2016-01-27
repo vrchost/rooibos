@@ -223,6 +223,8 @@ $(document).ready(function() {
                 {{ m.width }}x{{ m.height }}
             {% endif %}
             {% if m.editable_in_template %}
+            <br />
+                {{ m.url }}
             <form class="delete-media-form" method="POST" action="{% url storage-media-delete m.id, m.name %}?next={{ request.get_full_path }}">{% csrf_token %}
                 <input type="submit" value="Delete Media" />
             </form>
