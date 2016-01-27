@@ -21,6 +21,7 @@
         <th>Title</th>
         <th>Owner</th>
         <th>Hidden</th>
+        <th>Order</th>
         <th>Records</th>
         <th>Children</th>
     </tr>
@@ -30,6 +31,7 @@
     <td><a href="{% url data-collection-manage collection.id, collection.name %}">{{ collection.title }}</a></td>
     <td style="text-align: center;">{{ collection.owner.get_full_name|default:"-" }}</td>
     <td style="text-align: center;">{{ collection.hidden|yesno:"hidden," }}</td>
+    <td style="text-align: center;">{{ collection.order|default:"-" }}</td>
     <td style="text-align: right;">{{ collection.records.count|intcomma }}</td>
     <td>{% for child in collection.children.all %}
             <a href="{% url data-collection-manage child.id, child.name %}">{{ child.title }}</a><br />

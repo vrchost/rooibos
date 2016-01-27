@@ -638,7 +638,7 @@ def manage_collection(request, id=None, name=None):
 
         class Meta:
             model = Collection
-            fields = ('title', 'hidden', 'owner', 'description', 'agreement', 'children')
+            fields = ('title', 'hidden', 'owner', 'description', 'agreement', 'children', 'order')
 
     if request.method == "POST":
         if request.POST.get('delete-collection'):

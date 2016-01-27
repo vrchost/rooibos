@@ -10,10 +10,16 @@ def get_model_id(model):
     return ContentType.objects.get_for_model(model).id
 
 def get_model_key(model):
-    return '%smodel_cache_version_%d' % (KEY_PREFIX, get_model_id(model))
+    try:
+        return '%smodel_cache_version_%d' % (KEY_PREFIX, get_model_id(model))
+    except:
+        # South migrations don't have a ContentType entry and cause an exception
+        return None
 
 def incr_model_version(model):
     key = get_model_key(model)
+    if not key:
+        return 1
     try:
         version = cache.incr(key)
     except ValueError:
@@ -45,7 +51,8 @@ m2m_changed.connect(incr_model_version_post_event_m2m)
 
 
 def get_model_version(model):
-    return cache.get(get_model_key(model)) or incr_model_version(model)
+    key = get_model_key(model)
+    return (key and cache.get(key)) or incr_model_version(model)
 
 def key_suffix(models):
     return ''.join('$%d.%d' % (get_model_id(model), get_model_version(model))

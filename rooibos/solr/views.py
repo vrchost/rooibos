@@ -818,7 +818,7 @@ def overview(request):
     collections = filter_by_access(request.user, Collection)
     collections = apply_collection_visibility_preferences(
         request.user, collections)
-    collections = collections.order_by('title').annotate(
+    collections = collections.annotate(
         num_records=Count('records'))
 
     return render_to_response(
