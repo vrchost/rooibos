@@ -11,6 +11,8 @@ from django import forms
 from django.forms.formsets import formset_factory
 from django.db.models import Q
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from . import SolrIndex
 from pysolr import SolrError
 from rooibos.access import filter_by_access
@@ -819,6 +821,30 @@ def overview(request):
             'collections': collections,
         },
         context_instance=RequestContext(request))
+
+
+@login_required
+def terms(request):
+
+    if not getattr(settings, 'SHOW_TERMS', False):
+        raise Http404()
+
+    s = SolrIndex()
+    terms = []
+    maxfreq = 0
+
+    for term, freq in s.terms().iteritems():
+        terms.append([term, freq])
+        if freq > maxfreq:
+            maxfreq = freq
+
+    for term in terms:
+        term[1] = term[1] * 6 / maxfreq
+
+    return render_to_response('terms.html', {
+        'terms': sorted(terms, key=lambda t: t[0]),
+    },
+    context_instance=RequestContext(request))
 
 
 def fieldvalue_autocomplete(request):

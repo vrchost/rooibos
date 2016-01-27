@@ -153,10 +153,11 @@ class Solr(object):
             self.host, self.port = netloc
         self.path = path.rstrip('/')
 
-    def _select(self, params):
+    def _select(self, params, method='select'):
         # encode the query as utf-8 so urlencode can handle it
-        params['q'] = params['q'].encode('utf-8')
-        path = '%s/select/?%s' % (self.path, urlencode(params, True))
+        if 'q' in params:
+            params['q'] = params['q'].encode('utf-8')
+        path = '%s/%s/?%s' % (self.path, method, urlencode(params, True))
         conn = HTTPConnection(self.host, self.port)
         conn.request('GET', path)
         return conn.getresponse()
@@ -324,6 +325,33 @@ class Solr(object):
                             facets[field.get('name')] = f
 
         return Results(results, hits, facets)
+
+    def terms(self, fields=None, sort='count', limit=500, mincount=1, minlength=None):
+        params = {
+            'terms.sort': sort,
+            'terms.limit': limit,
+            'terms.mincount': mincount,
+        }
+        if fields:
+            params['terms.fl'] = ','.join(fields)
+        if minlength:
+            params['terms.regex'] = '.{%d,}' % minlength
+
+        response = self._select(params, method='terms')
+        if response.status != 200:
+            raise SolrError(self._extract_error(response))
+
+        et = ET.parse(response)
+        result = {}
+        for lst in et.findall('lst'):
+            if lst.get('name') == 'terms':
+                for field in lst.findall('lst'):
+                    t = {}
+                    for i in field.findall('int'):
+                        t[i.get('name')] = int(i.text)
+                    result[field.get('name')] = t
+
+        return result
 
     def add(self, docs, commit=True):
         """Adds or updates documents. For now, docs is a list of dictionaies
