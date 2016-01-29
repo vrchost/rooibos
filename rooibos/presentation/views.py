@@ -288,7 +288,8 @@ def browse(request, manage=False):
         qv = Presentation.published_Q()
         presentations = filter_by_access(request.user, Presentation)
 
-    presentations = presentations.select_related('owner').filter(q, qp, qk, qv).order_by(sortby)
+    presentations = presentations.select_related('owner').filter(q, qp, qk, qv)
+    presentations = presentations.order_by('-' + sortby if sortby != 'title' else sortby)
 
     if request.method == "POST":
 
