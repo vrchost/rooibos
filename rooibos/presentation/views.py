@@ -230,6 +230,9 @@ def browse(request, manage=False):
 
     presenter = request.GET.get('presenter')
     tags = filter(None, request.GET.getlist('t'))
+    sortby = request.GET.get('sortby')
+    if not sortby in ('title', 'created', 'modified'):
+        sortby = 'title'
     untagged = 1 if request.GET.get('ut') else 0
     if untagged:
         tags = []
@@ -285,7 +288,7 @@ def browse(request, manage=False):
         qv = Presentation.published_Q()
         presentations = filter_by_access(request.user, Presentation)
 
-    presentations = presentations.select_related('owner').filter(q, qp, qk, qv).order_by('title')
+    presentations = presentations.select_related('owner').filter(q, qp, qk, qv).order_by(sortby)
 
     if request.method == "POST":
 
@@ -367,6 +370,7 @@ def browse(request, manage=False):
                            'presentations': presentations,
                            'presenters': presenters if len(presenters) > 1 else None,
                            'keywords': keywords,
+                           'sortby': sortby,
                            },
                           context_instance=RequestContext(request))
 
