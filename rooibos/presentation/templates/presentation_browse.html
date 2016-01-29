@@ -39,7 +39,9 @@
 {% endif %}
 
 {% var as refine %}
-{ "url": "{{ request.path }}?{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}" }
+{
+    "url": "{{ request.path }}?sort={{ sortby }}&{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}"
+}
 {% endvar %}
 
 {% if active_presenter %}
@@ -134,6 +136,12 @@
 
 {% autopaginate presentations 50 %}
 
+{% var as refine %}
+{
+    "sorturl": "{{ request.path }}?{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}sortby="
+}
+{% endvar %}
+
 <h1>{{ manage|yesno:"Manage,Browse" }} Presentations</h1>
 
 
@@ -148,6 +156,15 @@
 {% endwith %}
 
 {% if manage %}
+
+<li><span class="dropdown-anchor">Sort by <img src="{% url static 'images/down_arrow.png' %}" /></span>
+  <div class="dropdown">
+    <a href="{{ refine.sorturl }}title">Title</a><br />
+    <a href="{{ refine.sorturl }}created">Created</a><br />
+    <a href="{{ refine.sorturl }}modified">Modified</a><br />
+  </div>
+</li>
+
 {% if perms.presentation.publish_presentations %}
 <li><input type="submit" name="hide" value="Hide" /></li>
 <li><input type="submit" name="unhide" value="Show" /></li>
@@ -235,7 +252,7 @@
         </td>
         <td class="item-actions">
             {% if manage %}
-            <a href="{% url presentation-edit presentation.id, presentation.name %}" class="nocopylink item-action-important">Edit</a>
+            <a href="{% url presentation-edit presentation.id, presentation.name %}" class="nocopylink item-action-important">Edit</a>&nbsp;
             <input type="submit" name="add-selected-items-{{ presentation.id }}" value="Add selected items" class=" item-action-important" />
             {% endif %}
             {% if not presentation.password or presentation.unlocked or presentation.owner == request.user %}
