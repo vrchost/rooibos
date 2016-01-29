@@ -13,8 +13,8 @@ class PowerPointExportViewer(Viewer):
 
     templates = [
         (template[:-5], template[:-5])
-        for template in os.listdir(os.path.join(os.path.dirname(__file__),
-                                   'pptx_templates'))
+        for template in sorted(os.listdir(os.path.join(os.path.dirname(__file__),
+                                   'pptx_templates')))
         if template.endswith('.pptx')
     ]
 
