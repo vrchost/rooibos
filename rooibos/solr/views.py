@@ -358,8 +358,15 @@ def run_search(user,
 
     fields = _get_facet_fields()
 
+    full_facets = getattr(settings, 'FULL_FACETS', ())
+
     search_facets = [SearchFacet('tag', 'Tags')] + [
-        SearchFacet(field.name + '_t', field.label) for field in fields]
+        SearchFacet(
+                field.name + ('_t' if not field.label in full_facets else '_w'),
+                field.label
+        )
+        for field in fields
+    ]
     search_facets.append(
         StorageSearchFacet('resolution', 'Image size', available_storage))
     search_facets.append(
