@@ -209,7 +209,6 @@ YAHOO_APPLICATION_ID = ""
 HARD_VIDEO_DELIVERY_LINKS = False
 
 
-<<<<<<< HEAD
 # List of facets to permanently hide in Explore screen
 # Comparison is made on effective (shown) label
 HIDE_FACETS = ()
