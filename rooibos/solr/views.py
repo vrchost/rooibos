@@ -384,6 +384,8 @@ def run_search(user,
                                 .exclude(label='').values_list('field__name', 'label')):
         if name + '_t' in search_facets:
             search_facets[name + '_t'].label = label
+        elif name + '_w' in search_facets:
+            search_facets[name + '_w'].label = label
 
     query = _generate_query(search_facets, user, collection, criteria,
                             keywords, selected, remove)
