@@ -22,35 +22,89 @@
             });
         $(".advanced-switch").show();
         $(".orderinput").hide();
+
+        var reorder = function () {
+            $("#fieldvalues .fieldvalue-edit:even").removeClass('altrow');
+            $("#fieldvalues .fieldvalue-edit:odd").addClass('altrow');
+            $(".orderinput input").each(function(i, element) {
+                // only set order if a field is selected
+                element = $(element);
+                var id = element.attr('id');
+                if ($('#' + id.substring(0, id.length - 5) + "field").val()) {
+                    element.val(i + 1);
+                }
+            });
+        };
+
         $("#fieldvalues").css("cursor", "move").sortable({
             axis: 'y',
             stop: function(event, ui) {
-                $("#fieldvalues .fieldvalue-edit:even").removeClass('altrow');
-                $("#fieldvalues .fieldvalue-edit:odd").addClass('altrow');
-                $(".orderinput input").each(function(i) {
-                    // only set order if a field is selected
-                    if ($('#' + this.id.substring(0, this.id.length - 5) + "field").val())
-                        $(this).val(i + 1);
-                });
+                reorder();
             },
             start: function(event, ui) {
                 ui.helper.removeClass('altrow');
             },
             });
-        $(".autocomplete :input").each(function() {
-            var f = $('#' + this.id.substring(0, this.id.length - 5) + "field");
-            $(this).autocomplete('{% url api-solr-autocomplete %}', {
-                extraParams: {field: function() { return f.val(); }},
+
+        var autocomplete = function(element) {
+            var f = $('#' + element.id.substring(0, element.id.length - 5) + "field");
+            $(element).autocomplete('{% url api-solr-autocomplete %}', {
+                extraParams: {field: function(a,b,c) { return f.val(); }},
                 formatItem: function(row, pos, num, query) { return decodeURIComponent(row); },
                 formatResult: function(row, pos, num) { return decodeURIComponent(row); },
                 });
+            };
+
+        $(".autocomplete :input").each(function() {
+                autocomplete(this);
             });
+
         $("form.delete-record-form").submit(function() {
             return confirm("Are you sure you want to delete this record?");
         });
         $("form.delete-media-form").submit(function() {
             return confirm("Are you sure you want to delete this media?");
         });
+
+
+        var addRow = function (event) {
+            event.preventDefault();
+            var total_forms = $("#id_fv-TOTAL_FORMS");
+            var num = parseInt(total_forms.val());
+            total_forms.val(num + 1);
+            var source = $(event.target).closest(".fieldvalue-edit");
+            var copy = source.clone(true).insertAfter(source);
+            copy.find("input,textarea,select,label").each(function (i, element) {
+                element = $(element);
+                var name = element.attr('name'),
+                    id = element.attr('id'),
+                    for_ = element.attr('for');
+                if (name) {
+                    element.attr('name', name.replace(/^fv-\d+/, 'fv-' + num));
+                    if (name.substring(name.length - 3) === "-id") {
+                        element.val('');
+                    }
+                }
+                if (id) {
+                    element.attr('id', id.replace(/^id_fv-\d+/, 'id_fv-' + num));
+                }
+                if (for_) {
+                    element.attr('for', for_.replace(/^fv-\d+/, 'fv-' + num));
+                }
+            });
+            reorder();
+
+            // remove all event handlers (get rid of autocomplete, which is tied to source element)
+            var textarea = $("textarea", copy).val("");
+            var parent = textarea.parent();
+            textarea.remove().appendTo(parent);
+            // re-add autocomplete
+            autocomplete(textarea[0]);
+        };
+
+        $(".fieldvalue-edit").append("<button class='addrow'> + </button>");
+        $(".fieldvalue-edit button.addrow").live('click', addRow);
+
     });
 </script>
 
