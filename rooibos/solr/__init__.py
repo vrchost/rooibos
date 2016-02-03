@@ -263,6 +263,7 @@ class SolrIndex():
             for cf, cfe in core_fields.iteritems():
                 if v.field == cf or v.field in cfe:
                     doc.setdefault(cf.name + '_t', []).append(clean_value)
+                    doc.setdefault(cf.name + '_w', []).append(clean_value)
                     if not cf.name + '_sort' in doc:
                         doc[cf.name + '_sort'] = clean_value
                     required_fields.pop(cf.name, None)

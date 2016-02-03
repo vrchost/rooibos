@@ -157,6 +157,14 @@
       </analyzer>
     </fieldType>
 
+    <fieldType name="wholeTextFacet" class="solr.TextField" positionIncrementGap="100" >
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="solr.PatternReplaceFilterFactory" pattern="(^[0-9-]+$)" replacement="" replace="all" />
+        <filter class="solr.LengthFilterFactory" min="2" max="100" />
+      </analyzer>
+    </fieldType>
+
     <!-- This is an example of using the KeywordTokenizer along
          With various TokenFilterFactories to produce a sortable field
          that does not include some properties of the source text
@@ -289,6 +297,7 @@
    <dynamicField name="*_dt" type="date"    indexed="true"  stored="true" multiValued="true"/>
 
    <dynamicField name="*_t"  type="textFacet" indexed="true"  stored="true" multiValued="true"/>
+   <dynamicField name="*_w"  type="wholeTextFacet" indexed="true"  stored="false" multiValued="true"/>
    <dynamicField name="*_sort"  type="alphaNumericOnlySort" />
 
    <field name="tag"  type="string"  indexed="true"  stored="true" multiValued="true"/>
