@@ -371,6 +371,8 @@ class SolrIndex():
                         doc.setdefault(
                             cf.name + '.' + v.refinement + '_t', []
                         ).append(clean_value)
+                        if v.refinement == 'IsPartOf':
+                            doc.setdefault('work', []).append(clean_value)
                     break
             else:
                 if (v.field == self.system_field and
