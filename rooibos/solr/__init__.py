@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.db import reset_queries
 from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, Collection, Field, FieldValue, \
-    CollectionItem, standardfield
+    CollectionItem, standardfield, get_system_field
 from rooibos.storage.models import Media
 from rooibos.util.models import OwnedWrapper
 from pysolr import Solr
@@ -50,6 +50,7 @@ class SolrIndex():
     def __init__(self):
         self._clean_string_re = re.compile('[\x00-\x08\x0b\x0c\x0e-\x1f]')
         self._record_type = int(ContentType.objects.get_for_model(Record).id)
+        self.system_field = get_system_field()
 
     def search(self, q, sort=None, start=None, rows=None, facets=None,
                facet_limit=-1, facet_mincount=0, fields=None):
@@ -372,10 +373,16 @@ class SolrIndex():
                         ).append(clean_value)
                     break
             else:
-                doc.setdefault(v.field.name + '_t', []).append(clean_value)
-                # also make sortable
-                if not v.field.name + '_sort' in doc:
-                    doc[v.field.name + '_sort'] = clean_value
+                if (v.field == self.system_field and
+                        v.label == 'primary-work-record'):
+                    doc.setdefault(
+                        'primary_work_record', []
+                    ).append(v.value)
+                else:
+                    doc.setdefault(v.field.name + '_t', []).append(clean_value)
+                    # also make sortable
+                    if not v.field.name + '_sort' in doc:
+                        doc[v.field.name + '_sort'] = clean_value
             # For exact retrieval through browsing
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
         for f in required_fields:

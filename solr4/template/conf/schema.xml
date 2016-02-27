@@ -284,6 +284,7 @@
    <!-- Image/Work records -->
    <field name="related_works_count" type="long" indexed="true" stored="true" multiValued="false" />
    <field name="related_images_count" type="long" indexed="true" stored="true" multiValued="false" />
+   <field name="primary_work_record" type="string" indexed="true" stored="true" multiValued="true" />
 
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
         will be used if the name matches any of the patterns.

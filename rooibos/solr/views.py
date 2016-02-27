@@ -131,6 +131,15 @@ class RelatedToSearchFacet(SearchFacet):
             return '-1'
 
 
+class PrimaryWorkRecordSearchFacet(SearchFacet):
+
+    def federated_search_query(self, value):
+        return ''
+
+    def or_available(self):
+        return False
+
+
 class StorageSearchFacet(SearchFacet):
 
     _storage_facet_re = re.compile(r'^s(\d+)-(.+)$')
@@ -409,6 +418,7 @@ def run_search(user,
     search_facets.append(RelatedImagesSearchFacet('related_images_count', 'Images for Work'))
     search_facets.append(RelatedWorksSearchFacet('related_works_count', 'Works for Image'))
     search_facets.append(SearchFacet('relation.IsPartOf_t', 'Part of Work'))
+    search_facets.append(PrimaryWorkRecordSearchFacet('primary_work_record', 'Primary Work Record'))
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)
 
