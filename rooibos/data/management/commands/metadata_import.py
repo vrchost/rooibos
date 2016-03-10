@@ -77,6 +77,9 @@ class Command(BaseCommand):
         order = dict(
             (m['field'], int(m['order'])) for m in mappings
         )
+        refinements = dict(
+            (m['field'], m['refinement']) for m in mappings
+        )
 
         filename = "".join(random.sample(string.letters + string.digits, 32))
         full_path = os.path.join(_get_scratch_dir(), 'cmdline=' + filename)
@@ -100,6 +103,7 @@ class Command(BaseCommand):
                     labels=labels,
                     order=order,
                     hidden=hidden,
+                    refinements=refinements,
                 )
             )
         )
