@@ -44,7 +44,7 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
                     owner=None,
                     context_type=None,
                     hidden=False,
-                ).values_list('field', 'value')
+                ).order_by('-order', '-id').values_list('field', 'value')
             )
             extra = [
                 (field, values[field]) for field in extra_fields if field in values
