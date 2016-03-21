@@ -1,0 +1,402 @@
+{% extends request.master_template|default:"master.html" %}
+
+{% block javascript %}
+{{ block.super }}
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
+
+<script>
+
+angular.module('clientApp', [])
+
+.controller('MainController', [
+    '$scope', '$http', '$timeout',
+    function ($scope, $http, $timeout) {
+
+        $scope.search = {
+            onlyFindWorks: true, //false,
+            keyword: '',
+            work: '',
+            loading: false
+        };
+
+        $scope.formatting = {
+            fullThumbs: false
+        };
+
+        $scope.metadata = [];
+
+        var timeoutPromise;
+
+        $scope.$watch('search', function () {
+            console.log('watch');
+            $timeout.cancel(timeoutPromise);
+            timeoutPromise = $timeout(function () {
+                $scope.results = {
+                    hits: 0,
+                    records: []
+                };
+                $scope.loadMore();
+            }, 500);
+        }, true);
+
+        $scope.loadMore = function () {
+            console.log('loadMore');
+            $scope.loading = true;
+            var pageSize = 50;
+            var page = ($scope.results.records.length / pageSize) + 1;
+            var args = [
+                'ps=' + pageSize,
+                'page=' + page,
+                'kw=' + encodeURIComponent($scope.search.keyword)
+            ];
+            if ($scope.search.work) {
+                args.push('c=relation.IsPartOf_t:' + encodeURIComponent($scope.search.work));
+            }
+            if ($scope.search.onlyFindWorks) {
+                args.push('c=primary_work_record:*');
+            }
+            var url = '/works/search/' +
+                '?callback=JSON_CALLBACK&' + args.join('&');
+            console.log('requesting', url);
+            $http.jsonp(
+                url
+            ).success(function (data) {
+                angular.forEach(data.records, function (record) {
+                    record.largeThumb = 'https://thumbs-a.vrchost.com/vrchost/archivision/large-thumb/' + record.identifier + '.jpg';
+                    record.largeThumbUrl = 'url(\'' + record.largeThumb + '\')';
+                });
+                $scope.results.hits = data.hits;
+                $scope.results.records = $scope.results.records.concat(data.records);
+                $scope.loading = false;
+                console.log('success', $scope, data);
+            }).error(function () {
+                $scope.loading = false;
+                console.log('error');
+            });
+
+        };
+
+        var populateMetadataBox = function (html) {
+            if ($scope.metadataBox) {
+                $scope.metadataBox.html('Loading...');
+                $scope.metadataBox = undefined;
+            }
+            $timeout(function () {
+                console.log('A');
+                $scope.metadataBox = angular
+                    .element('.work.selected ~ .metadata')
+                    .filter(':visible:first')
+                    .html(html);
+                console.log('B');
+
+                console.log($scope.metadataBox);
+
+                var $window = angular.element(window);
+                var windowTop = $window.scrollTop();
+                var windowBottom = windowTop + $window.height();
+                var boxTop = $scope.metadataBox.position().top;
+                var boxBottom = boxTop + $scope.metadataBox.outerHeight();
+                var recordTop = boxTop - 310;
+                if (recordTop < windowTop) {
+                    angular.element('html, body')
+                        .animate({ scrollTop: recordTop + 'px' });
+                } else if (boxBottom > windowBottom) {
+                    var newTop = Math.max(
+                        recordTop,
+                        boxBottom - $window.height()
+                    );
+                    angular.element('html, body')
+                        .animate({ scrollTop: newTop + 'px' });
+                }
+
+            });
+        };
+
+        $scope.select = function ($event, record) {
+            var selected = record.selected;
+            if ($scope.selectedRecord) {
+                $scope.selectedRecord.selected = false;
+                $scope.selectedRecord = undefined;
+            }
+            record.selected = !selected;
+            if (record.selected) {
+                $scope.selectedRecord = record;
+                populateMetadataBox('Loading...');
+                $http.jsonp(
+                    '/works/metadata/' + record.id + '/' +
+                    '?callback=JSON_CALLBACK'
+                ).success(function (data) {
+                    console.log('metadata', data);
+                    $scope.metadata = data.data;
+                    $timeout(function () {
+                        populateMetadataBox(
+                            angular.element('.metadata-renderer').html()
+                        );
+                    });
+                }).error(function () {
+                    populateMetadataBox('An error occurred loading metadata');
+                });
+
+            }
+        };
+
+        angular.element(window).on('resize', function () {
+            if ($scope.metadataBox && !$scope.metadataBox.is(':visible')) {
+                populateMetadataBox($scope.metadataBox.html());
+            }
+        });
+    }
+])
+;
+
+</script>
+{% endblock %}
+
+{% block stylesheets %}
+{{ block.super }}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" crossorigin="anonymous">
+
+<style>
+
+.work {
+    display: block;
+    padding: 2px;
+    height: 250px;
+}
+
+.work.selected-row {
+    margin-bottom: 250px;
+}
+
+.max-width .work {
+    max-width: 250px;
+}
+
+.work-inner {
+    background: url("../../images/spinner.gif") center no-repeat;
+    background-size: cover;
+    background-position: center top;
+    height: 100%;
+}
+
+.full-thumbs .work-inner,
+.work:hover .work-inner {
+    background-size: contain;
+    background-position: center center;
+    background-color: #cccccc;
+}
+
+.work-title {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    background-color: rgba(50, 50, 50, .5);
+    color: white;
+    font-weight: bold;
+    padding: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.work:hover .work-title {
+    background-color: rgba(50, 50, 50, .8);
+    white-space: normal;
+    max-height: 180px;
+}
+
+.record-work-image-count {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+.record-work-image-count .badge {
+    background-color: rgba(50, 50, 50, .5);
+    cursor: pointer;
+}
+
+.record-work-image-count .badge:hover {
+    background-color: rgba(50, 50, 50, .8);
+}
+
+.work-metadata {
+    left: 260px;
+    right: 10px;
+    height: 240px;
+    background-color: yellow;
+    position: absolute;
+}
+
+.work.selected .metadata-arrow-box {
+  position: relative;
+  background: #88b7d5;
+}
+
+.work.selected:focus {
+  outline: none;
+}
+
+.work.selected .metadata-arrow-box:after {
+  top: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-color: rgba(136, 183, 213, 0);
+  border-top-color: #88b7d5;
+  border-width: 22px;
+  margin-left: -22px;
+}
+
+.metadata {
+  background-color: white;
+  padding: 10px;
+  border: solid 4px #88b7d5;
+  border-radius: 5px;
+  min-height: 300px;
+  margin: 27px 0 15px 0;
+}
+
+.metadata-sidebar {
+    float: right;
+}
+
+.metadata-sidebar img {
+    height: 300px;
+}
+
+.metadata-label {
+    font-weight: bold;
+}
+
+.metadata:nth-child(2n) {
+  display: none;
+}
+.work.selected ~ .metadata:nth-child(4n) {
+  display: block;
+}
+.work.selected ~ .metadata:nth-child(4n) ~ .metadata { /* specificity 5 */
+  display: none;
+}
+
+
+@media (min-width: 768px) {
+  .work.selected ~ .metadata:nth-child(4n) {
+    display: none;
+  }
+  .work.selected ~ .metadata.s1:nth-child(6n) {
+    display: block;
+  }
+  .work.selected ~ .metadata.s1:nth-child(6n) ~ .metadata {
+    display: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .work.selected ~ .metadata.s1:nth-child(6n) {
+    display: none;
+  }
+  .work.selected ~ .metadata.s1.s2:nth-child(8n) {
+    display: block;
+  }
+  .work.selected ~ .metadata.s1.s2:nth-child(8n) ~ .metadata {
+    display: none;
+  }
+}
+
+@media (min-width: 1200px) {
+  .work.selected ~ .metadata.s1.s2:nth-child(8n) {
+    display: none;
+  }
+  .work.selected ~ .metadata.s1.s2.s3:nth-child(12n) {
+    display: block;
+  }
+  .work.selected ~ .metadata.s1.s2.s3:nth-child(12n) ~ .metadata {
+    display: none;
+  }
+}
+
+.work.selected ~ .metadata:last-child {
+  display: block;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block sidebar %}
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<h1>Works</h1>
+
+<div ng-app="clientApp" ng-controller="MainController">
+
+
+<div class="container-fluid with-navbar">
+
+    <div class="row" ng-class="{'full-thumbs': formatting.fullThumbs, 'max-width': formatting.maxWidth}">
+
+        <div ng-repeat-start="record in results.records"
+             class="col-lg-2 col-md-3 col-sm-4 col-xs-6 work"
+             ng-class="{'selected': record.selected}"
+             ng-click="select($event, record)"
+                >
+
+            <div class="work-inner"
+                 ng-style="{'background-image': record.largeThumbUrl}">
+            </div>
+
+            <div class="work-title" ng-bind="record.title">
+            </div>
+
+            <div class="record-work-image-count" ng-show="record.work_images && search.work != record.works[0]">
+                <span class="badge" ng-bind="record.work_images"
+                      ng-click="search.work=record.works[0] || record.identifier;search.onlyFindWorks=false">
+                </span>
+            </div>
+
+            <div class="metadata-arrow-box">
+
+            </div>
+
+        </div>
+
+        <div ng-repeat-end="record in results.records"
+             class="col-lg-12 col-md-12 col-sm-12 col-xs-12 metadata s1 s2 s3"
+                >
+            Loading...
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="metadata-renderer" style="display: none">
+    <div class="metadata-sidebar">
+        <img ng-src="{% templatetag openvariable %}selectedRecord.largeThumb{% templatetag closevariable %}" />
+        <br />
+        <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">Work images</a>
+    </div>
+    <div ng-repeat="item in metadata">
+        <span ng-bind="item.label" class="metadata-label"></span>:
+        <span ng-bind="item.value" class="metadata-value"></span>
+    </div>
+</div>
+
+
+</div>
+
+{% endblock %}

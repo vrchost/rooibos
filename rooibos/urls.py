@@ -78,6 +78,7 @@ urls = [
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^shared/', include('rooibos.federatedsearch.shared.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),
+    (r'^works/', include('rooibos.works.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
     (r'^megazine/', include('rooibos.megazine.urls')),
     (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
