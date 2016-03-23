@@ -1,7 +1,6 @@
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, get_list_or_404, render_to_response
+from django.http import Http404, HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ObjectDoesNotExist
@@ -11,7 +10,8 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from models import AccessControl
-from . import check_access, get_effective_permissions_and_restrictions, get_accesscontrols_for_object
+from . import check_access, get_effective_permissions_and_restrictions, \
+    get_accesscontrols_for_object
 from rooibos.statistics.models import Activity
 import re
 
@@ -36,7 +36,8 @@ def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
     except ValueError:
         # Certain values in the database password field can cause a ValueError
         # in that case, return a redirect back to the login page
-        return HttpResponseRedirect((login_url or reverse('login')) + '?' + request.GET.urlencode())
+        return HttpResponseRedirect(
+            (login_url or reverse('login')) + '?' + request.GET.urlencode())
     if type(response) == HttpResponseRedirect:
         # Successful login, add user to IP based groups
         Activity.objects.create(event='login',
@@ -52,7 +53,8 @@ def logout(request, *args, **kwargs):
                                   {},
                                   context_instance=RequestContext(request))
     else:
-        kwargs['next_page'] = request.GET.get('next', kwargs.get('next_page', settings.LOGOUT_URL))
+        kwargs['next_page'] = request.GET.get(
+            'next', kwargs.get('next_page', settings.LOGOUT_URL))
         return dj_logout(request, *args, **kwargs)
 
 
@@ -69,9 +71,11 @@ def effective_permissions(request, app_label, model, id, name):
         acluser = User.objects.filter(username=username)
         if acluser:
             acluser = acluser[0]
-            acl = get_effective_permissions_and_restrictions(acluser, object, assume_authenticated=True)
+            acl = get_effective_permissions_and_restrictions(
+                acluser, object, assume_authenticated=True)
         else:
-            request.user.message_set.create(message="No user with username '%s' exists." % username)
+            request.user.message_set.create(
+                message="No user with username '%s' exists." % username)
             acl = None
     else:
         acluser = None
@@ -102,24 +106,42 @@ def modify_permissions(request, app_label, model, id, name):
         return None if value == 'None' else value == 'True'
 
     class ACForm(forms.Form):
-        read = forms.TypedChoiceField(choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')), coerce=tri_state)
-        write = forms.TypedChoiceField(choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')), coerce=tri_state)
-        manage = forms.TypedChoiceField(choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')), coerce=tri_state)
-        restrictions = forms.CharField(widget=forms.Textarea(attrs={'style': 'max-height: 100px;'}), required=False)
+        read = forms.TypedChoiceField(
+            choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            coerce=tri_state
+        )
+        write = forms.TypedChoiceField(
+            choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            coerce=tri_state
+        )
+        manage = forms.TypedChoiceField(
+            choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            coerce=tri_state
+        )
+        restrictions = forms.CharField(
+            widget=forms.Textarea(attrs={'style': 'max-height: 100px;'}),
+            required=False
+        )
 
         def clean_restrictions(self):
             r = unicode(self.cleaned_data['restrictions'])
             if not r:
                 return None
             try:
-                return dict(map(unicode.strip, kv.split('=', 1)) for kv in filter(None, map(unicode.strip, r.splitlines())))
-            except Exception, e:
-                raise forms.ValidationError('Please enter one key=value per line')
+                return dict(
+                    map(unicode.strip, kv.split('=', 1))
+                    for kv in filter(None, map(unicode.strip, r.splitlines()))
+                )
+            except Exception:
+                raise forms.ValidationError(
+                    'Please enter one key=value per line')
 
     if request.method == "POST":
-        acobjects = AccessControl.objects.filter(id__in=request.POST.getlist('ac'),
-                                             content_type=contenttype,
-                                             object_id=id)
+        acobjects = AccessControl.objects.filter(
+            id__in=request.POST.getlist('ac'),
+            content_type=contenttype,
+            object_id=id
+        )
         if request.POST.get('delete'):
             acobjects.delete()
             return HttpResponseRedirect(request.get_full_path())
@@ -140,25 +162,44 @@ def modify_permissions(request, app_label, model, id, name):
                 if username:
                     try:
                         user = User.objects.get(username=username)
-                        ac = AccessControl.objects.filter(user=user, content_type=contenttype, object_id=id)
+                        ac = AccessControl.objects.filter(
+                            user=user, content_type=contenttype, object_id=id)
                         if ac:
                             set_ac(ac[0])
                         else:
-                            set_ac(AccessControl(user=user, content_type=contenttype, object_id=id))
+                            set_ac(AccessControl(
+                                user=user,
+                                content_type=contenttype,
+                                object_id=id
+                            ))
                     except User.DoesNotExist:
-                        request.user.message_set.create(message="No user with username '%s' exists." % username)
+                        request.user.message_set.create(
+                            message="No user with username '%s' exists." %
+                                    username
+                        )
 
                 groupname = request.POST.get('addgroup')
                 if groupname:
                     try:
                         group = Group.objects.get(name=groupname)
-                        ac = AccessControl.objects.filter(usergroup=group, content_type=contenttype, object_id=id)
+                        ac = AccessControl.objects.filter(
+                            usergroup=group,
+                            content_type=contenttype,
+                            object_id=id
+                        )
                         if ac:
                             set_ac(ac[0])
                         else:
-                            set_ac(AccessControl(usergroup=group, content_type=contenttype, object_id=id))
+                            set_ac(AccessControl(
+                                usergroup=group,
+                                content_type=contenttype,
+                                object_id=id
+                            ))
                     except Group.DoesNotExist:
-                        request.user.message_set.create(message="No group with name '%s' exists." % groupname)
+                        request.user.message_set.create(
+                            message="No group with name '%s' exists." %
+                                    groupname
+                        )
 
                 return HttpResponseRedirect(request.get_full_path())
     else:

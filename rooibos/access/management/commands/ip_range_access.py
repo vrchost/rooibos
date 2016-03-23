@@ -2,18 +2,26 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Collection
 from rooibos.storage.models import Storage
-from rooibos.access.models import ExtendedGroup, Subnet, AccessControl, ContentType
+from rooibos.access.models import ExtendedGroup, Subnet, AccessControl, \
+    ContentType
 
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--name', '-n', dest='usergroup',
-                    help='Name of user group to be managed'),
-        make_option('--subnet', '-s', dest='subnet',
-                    help='Subnet for user group, e.g. 192.168.0.0/255.255.0.0'),
+        make_option(
+            '--name',
+            '-n',
+            dest='usergroup',
+            help='Name of user group to be managed'
+        ),
+        make_option(
+            '--subnet',
+            '-s',
+            dest='subnet',
+            help='Subnet for user group, e.g. 192.168.0.0/255.255.0.0'
+        ),
     )
     help = "Creates or updates IP address based extended user group "
-
 
     def handle(self, *args, **kwargs):
 
@@ -27,7 +35,8 @@ class Command(BaseCommand):
             print "--subnet is a required parameter"
             return
 
-        group, created = ExtendedGroup.objects.get_or_create(name=usergroup, type='I')
+        group, created = ExtendedGroup.objects.get_or_create(
+            name=usergroup, type='I')
 
         if created:
             print "Created new",
@@ -54,7 +63,9 @@ class Command(BaseCommand):
                 )
             )
 
-        for storage in Storage.objects.filter(system__in=('local', 'cloudfiles')):
+        # TODO: remove hardcoded storage type
+        for storage in Storage.objects.filter(
+                system__in=('local', 'cloudfiles')):
             print "Setting read access to storage %s" % storage.name
             AccessControl.objects.get_or_create(
                 content_type=ContentType.objects.get_for_model(Storage),
