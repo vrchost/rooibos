@@ -13,6 +13,10 @@ angular.module('clientApp', [])
     '$scope', '$http', '$timeout',
     function ($scope, $http, $timeout) {
 
+        $scope.isLoading = function () {
+           return $http.pendingRequests.length !== 0;
+        };
+
         $scope.search = {
             onlyFindWorks: true, //false,
             keyword: '',
@@ -394,6 +398,15 @@ angular.module('clientApp', [])
         <span ng-bind="item.label" class="metadata-label"></span>:
         <span ng-bind="item.value" class="metadata-value"></span>
     </div>
+</div>
+
+
+<div ng-show="isLoading()">
+    <i>Loading...</i>
+</div>
+
+<div ng-hide="isLoading() || results.records.length">
+    No works found.
 </div>
 
 
