@@ -409,6 +409,10 @@ angular.module('clientApp', [])
     No works found.
 </div>
 
+<div ng-show="!isLoading() && results.records.length < results.hits">
+    <button ng-click="loadMore()">Load more works</button>
+</div>
+
 
 </div>
 
