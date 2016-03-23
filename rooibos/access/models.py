@@ -152,10 +152,6 @@ class AttributeValue(models.Model):
     value = models.CharField(max_length=255)
 
 
-# Signal handlers for Shibboleth
-
-from django_shibboleth.signals import shib_logon_done
-
 
 SEPARATOR = ' :: '
 
@@ -194,5 +190,12 @@ def post_shibboleth_login(sender, **kwargs):
         update_membership_by_attributes(user, attributes)
 
 
-shib_logon_done.connect(post_shibboleth_login,
-                        dispatch_uid='post_shibboleth_login')
+# Signal handlers for Shibboleth
+
+try:
+    from django_shibboleth.signals import shib_logon_done
+
+    shib_logon_done.connect(post_shibboleth_login,
+                            dispatch_uid='post_shibboleth_login')
+except ImportError:
+    pass

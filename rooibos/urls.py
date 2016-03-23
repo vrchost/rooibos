@@ -110,9 +110,16 @@ urls = [
     ),
 
     url(r'^exception/$', raise_exception),
-
-    (r'^shibboleth/', include('django_shibboleth.urls')),
 ]
+
+try:
+    import django_shibboleth
+    urls.append(
+        (r'^shibboleth/', include('django_shibboleth.urls')),
+    )
+except ImportError:
+    pass
+
 
 if getattr(settings, 'CAS_SERVER_URL', None):
     urls += [
