@@ -56,7 +56,6 @@ angular.module('clientApp', [])
         }, true);
 
         $scope.loadMore = function () {
-            console.log('loadMore');
             $scope.loading = true;
             var pageSize = 50;
             var page = ($scope.results.records.length / pageSize) + 1;
