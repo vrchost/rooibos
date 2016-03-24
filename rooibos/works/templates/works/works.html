@@ -10,8 +10,19 @@
 angular.module('clientApp', [])
 
 .controller('MainController', [
-    '$scope', '$http', '$timeout',
-    function ($scope, $http, $timeout) {
+    '$scope', '$http', '$timeout', '$window',
+    function ($scope, $http, $timeout, $window) {
+
+        var getKeyword = function () {
+            var args = window.location.search.split(/[&?]/);
+            var result = '';
+            angular.forEach(args, function (arg) {
+                if (arg.substring(0, 3) === 'kw=') {
+                    result = decodeURIComponent(arg.substring(3));
+                }
+            });
+            return result;
+        };
 
         $scope.isLoading = function () {
            return $http.pendingRequests.length !== 0;
@@ -19,7 +30,7 @@ angular.module('clientApp', [])
 
         $scope.search = {
             onlyFindWorks: true, //false,
-            keyword: '',
+            keyword: getKeyword(),
             work: '',
             loading: false
         };
