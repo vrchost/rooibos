@@ -40,9 +40,6 @@
 {% if user.is_superuser %}
     <li><a href="{% url shared-manage %}"><img src="{% url static 'images/icons/folder-remote.png' %}" alt="Manage Shared Collections" /> Manage Shared Collections</a></li>    
 {% endif %}
-{% if collection_write and storage_write %}
-    <li><a href="{% url converters-powerpoint %}"><img src="{% url static 'images/icons/kpresenter.png' %}" alt="Import PowerPoint" /> Import PowerPoint</a></li>
-{% endif %}
 <li><a href="{% url workers-jobs %}"><img src="{% url static 'images/icons/kcmsystem.png' %}" alt="Manage Jobs" /> Manage Jobs</a></li>
 </ul>
 
