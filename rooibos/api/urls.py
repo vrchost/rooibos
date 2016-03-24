@@ -1,8 +1,12 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 
-from views import *
+from views import collections, login, logout, api_search, record, \
+    presentations_for_current_user, presentation_detail, keep_alive, \
+    autocomplete_group, autocomplete_user
 
-urlpatterns = patterns('',
+
+urlpatterns = patterns(
+    '',
     url(r'^collection/(?P<id>\d+)/$', collections),
     url(r'^collections/$', collections),
     url(r'^login/$', login),
@@ -11,8 +15,11 @@ urlpatterns = patterns('',
     url(r'^search(/(?P<id>\d+)/(?P<name>[\w-]+))?/$', api_search),
     url(r'^record/(?P<id>\d+)/(?P<name>[-\w]+)/$', record, name='api-record'),
     url(r'^presentations/currentuser/$', presentations_for_current_user),
-    url(r'^presentation/(?P<id>\d+)/$', presentation_detail, name='api-presentation-detail'),
+    url(r'^presentation/(?P<id>\d+)/$', presentation_detail,
+        name='api-presentation-detail'),
     url(r'^keepalive/$', keep_alive, name='api-keepalive'),
-    url(r'^autocomplete/user/$', autocomplete_user, name='api-autocomplete-user'),
-    url(r'^autocomplete/group/$', autocomplete_group, name='api-autocomplete-group'),
+    url(r'^autocomplete/user/$', autocomplete_user,
+        name='api-autocomplete-user'),
+    url(r'^autocomplete/group/$', autocomplete_group,
+        name='api-autocomplete-group'),
 )
