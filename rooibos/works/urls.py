@@ -5,5 +5,5 @@ urlpatterns = patterns(
     '',
     url(r'^search/$', search),
     url(r'^metadata/(?P<record_id>\d+)/$', metadata),
-    url(r'^works/$', works),
+    url(r'^works/$', works, name='works'),
 )
