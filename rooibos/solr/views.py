@@ -66,6 +66,16 @@ class SearchFacet(object):
         return True
 
 
+class WorkSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def display_value(self, value):
+        record = Record.get_primary_work_record(value)
+        return record.title if record else value
+
+
 class RecordDateSearchFacet(SearchFacet):
 
     def or_available(self):
@@ -417,7 +427,7 @@ def run_search(user,
     # Image/Work facets
     search_facets.append(RelatedImagesSearchFacet('related_images_count', 'Images for Work'))
     search_facets.append(RelatedWorksSearchFacet('related_works_count', 'Works for Image'))
-    search_facets.append(SearchFacet('work', 'Part of Work'))
+    search_facets.append(WorkSearchFacet('work', 'Part of Work'))
     search_facets.append(PrimaryWorkRecordSearchFacet('primary_work_record', 'Primary Work Record'))
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)

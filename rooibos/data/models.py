@@ -438,6 +438,33 @@ class Record(models.Model):
             refinement='IsPartOf',
         ).values('record')
 
+    @staticmethod
+    def get_primary_work_record(work):
+        record_ids = FieldValue.objects.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+            value=work,
+            index_value=work[:32],
+        ).values_list('record', flat=True)
+
+        if not record_ids:
+            return None
+
+        primary = FieldValue.objects.filter(
+            label='primary-work-record',
+            field__standard__prefix='dc',
+            field__name='system-value',
+            record__in=record_ids,
+        ).values_list('record', flat=True)
+
+        if primary:
+            primary = primary[0]
+        else:
+            primary = record_ids[0]
+
+        return Record.objects.get(id=primary)
+
 
 class MetadataStandardManager(models.Manager):
     def get_by_natural_key(self, prefix):
