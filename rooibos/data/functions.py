@@ -14,6 +14,7 @@ import logging
 
 COLLECTION_VISIBILITY_PREFERENCES = 'data_collection_visibility_prefs'
 
+
 def get_collection_visibility_preferences(user):
     setting = load_settings(user, COLLECTION_VISIBILITY_PREFERENCES).get(
         COLLECTION_VISIBILITY_PREFERENCES, ['show:']
@@ -26,11 +27,13 @@ def get_collection_visibility_preferences(user):
         ids = []
     return mode, ids
 
+
 def set_collection_visibility_preferences(user, mode, ids):
     value = '%s:%s' % (mode, ','.join(ids))
     return store_settings(user,
                           COLLECTION_VISIBILITY_PREFERENCES,
                           value)
+
 
 def apply_collection_visibility_preferences(user, queryset):
     mode, ids = get_collection_visibility_preferences(user)

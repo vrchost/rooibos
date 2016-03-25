@@ -1,20 +1,20 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
-from rooibos.data.models import Record, FieldValue, standardfield
+from rooibos.data.models import FieldValue, standardfield
 from rooibos.util.progressbar import ProgressBar
 
 from django.template.defaultfilters import slugify
 
+
 class Command(BaseCommand):
     help = 'Resets the name property of all Record objects'
-
 
     def handle(self, *args, **kwargs):
 
         updated = 0
 
         id_fields = standardfield('identifier', equiv=True)
-        titles = FieldValue.objects.select_related('record').filter(field__in=id_fields)
+        titles = FieldValue.objects.select_related('record').filter(
+            field__in=id_fields)
         pb = ProgressBar(titles.count())
 
         for count, title in enumerate(titles):

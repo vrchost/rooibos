@@ -1,11 +1,10 @@
 from django import template
 from django.template.loader import render_to_string
-from django.utils.html import escape
-from django.template.loader import get_template
-from django.template import Context, Variable
+from django.template import Variable
 from rooibos.data.forms import get_collection_visibility_prefs_form
 from rooibos.data.functions import get_collection_visibility_preferences
 from rooibos.access.functions import filter_by_access
+
 
 register = template.Library()
 
@@ -18,16 +17,25 @@ class MetaDataNode(template.Node):
 
     def render(self, context):
         record = self.record.resolve(context)
-        fieldvalues = list(record.get_fieldvalues(owner=context['request'].user,
-                                                  fieldset=self.fieldset.resolve(context) if self.fieldset else None))
+        fieldset = self.fieldset.resolve(context) if self.fieldset else None
+        fieldvalues = list(
+            record.get_fieldvalues(
+                owner=context['request'].user,
+                fieldset=fieldset
+            )
+        )
         if fieldvalues:
             fieldvalues[0].subitem = False
         for i in range(1, len(fieldvalues)):
-            fieldvalues[i].subitem = (fieldvalues[i].field == fieldvalues[i - 1].field and
-                                      fieldvalues[i].group == fieldvalues[i - 1].group and
-                                      fieldvalues[i].resolved_label == fieldvalues[i - 1].resolved_label)
+            fieldvalues[i].subitem = (
+                fieldvalues[i].field == fieldvalues[i - 1].field and
+                fieldvalues[i].group == fieldvalues[i - 1].group and
+                fieldvalues[i].resolved_label ==
+                fieldvalues[i - 1].resolved_label
+            )
 
-        collections = filter_by_access(context['request'].user, record.collection_set.all())
+        collections = filter_by_access(
+            context['request'].user, record.collection_set.all())
 
         return render_to_string('data_metadata.html',
                                 dict(
@@ -47,7 +55,9 @@ def metadata(parser, token):
             tag_name, record = token.split_contents()
             fieldset = None
         except ValueError:
-            raise template.TemplateSyntaxError, "%r tag requires exactly one or two arguments" % token.contents.split()[0]
+            raise template.TemplateSyntaxError, \
+                "%r tag requires exactly one or two arguments" % \
+                token.contents.split()[0]
     return MetaDataNode(record, fieldset)
 
 

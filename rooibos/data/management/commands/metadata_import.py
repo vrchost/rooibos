@@ -1,9 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from rooibos.data.models import Collection, Field
-from rooibos.data.functions import collection_dump
+from rooibos.data.models import Field
 from optparse import make_option
-from django.conf import settings
 from rooibos.workers.models import JobInfo
 import csv
 import random
@@ -18,15 +16,20 @@ class Command(BaseCommand):
     help = 'Command line metadata import tool'
 
     option_list = BaseCommand.option_list + (
-        make_option('--mapping', '-m', dest='mapping_file',
-                    help='Mapping CSV file'),
-        make_option('--data', '-d', dest='data_file',
-                    help='Data CSV file'),
-        make_option('--collection', '-c', dest='collections',
-                   action='append',
-                    help='Collection identifier (multiple allowed)'),
+        make_option(
+            '--mapping', '-m', dest='mapping_file',
+            help='Mapping CSV file'
+        ),
+        make_option(
+            '--data', '-d', dest='data_file',
+            help='Data CSV file'
+        ),
+        make_option(
+            '--collection', '-c', dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)'
+        ),
     )
-
 
     def handle(self, *args, **kwargs):
 
@@ -82,20 +85,23 @@ class Command(BaseCommand):
         JobInfo.objects.create(
             owner=User.objects.get(username='admin'),
             func='csvimport',
-            arg=simplejson.dumps(dict(
-                file='cmdline=' + filename,
-                separator=';',
-                collections=collections,
-                update=True,
-                add=True,
-                test=False,
-                personal=False,
-                fieldset=None,
-                mapping=mapping,
-                separate_fields=separate_fields,
-                labels=labels,
-                order=order,
-                hidden=hidden,
-                )))
+            arg=simplejson.dumps(
+                dict(
+                    file='cmdline=' + filename,
+                    separator=';',
+                    collections=collections,
+                    update=True,
+                    add=True,
+                    test=False,
+                    personal=False,
+                    fieldset=None,
+                    mapping=mapping,
+                    separate_fields=separate_fields,
+                    labels=labels,
+                    order=order,
+                    hidden=hidden,
+                )
+            )
+        )
 
         print "Job submitted"

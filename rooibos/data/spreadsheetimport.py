@@ -25,7 +25,7 @@ class SpreadsheetImport(object):
         self._identifier_ids = list(
             self._dcidentifier.get_equivalent_fields().values_list(
                 'id', flat=True)
-            ) + [self._dcidentifier.id]
+        ) + [self._dcidentifier.id]
         self.csv_file = csv_file
         self.separator = separator
         self.analyzed = False
@@ -64,7 +64,6 @@ class SpreadsheetImport(object):
         try:
             value = unicode(value, 'utf8')
         except UnicodeDecodeError:
-            #print "split error"
             self.decode_error = True
             value = ''
         if (self.separator and split):
@@ -105,7 +104,7 @@ class SpreadsheetImport(object):
                 else:
                     # exact match with non-standard field
                     score = 1
-                if not score in scores:
+                if score not in scores:
                     scores[score] = standard_field
 
         return scores[max(scores.keys())] if scores else None
@@ -216,7 +215,7 @@ class SpreadsheetImport(object):
                             CollectionItem.objects.get_or_create(
                                 record=record,
                                 collection=collection
-                                )
+                            )
                     self.added += 1
                     for func in self.on_added:
                         func(ids)
@@ -289,7 +288,7 @@ class SpreadsheetImport(object):
                     for key, values in row.iteritems():
                         v = last_row.get(key) or []
                         for value in (values or []):
-                            if not value in v:
+                            if value not in v:
                                 v.append(value)
                         last_row[key] = v
                     for func in self.on_continuation:
@@ -302,4 +301,3 @@ class SpreadsheetImport(object):
                 process_row(last_row)
         finally:
             resume_record_indexing()
-

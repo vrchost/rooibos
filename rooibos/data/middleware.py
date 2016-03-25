@@ -1,6 +1,6 @@
 from django.core.exceptions import MiddlewareNotUsed
-import logging
 from models import get_system_field
+
 
 class DataOnStart:
 
