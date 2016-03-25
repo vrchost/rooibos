@@ -55,11 +55,6 @@ def _fetch_url(url, username, password, timeout=10):
     return response
 
 
-def _getShared(name):
-    shared_collections = getattr(settings, 'SHARED_COLLECTIONS', {})
-    return shared_collections.get(name)
-
-
 class SharedSearch(FederatedSearch):
 
     @classmethod
@@ -117,8 +112,8 @@ class SharedSearch(FederatedSearch):
             defaults=dict(
                 hits=0,
                 valid_until=datetime.datetime.now() + datetime.timedelta(1)
-                )
             )
+        )
         if not created and cached.results:
             return simplejson.loads(cached.results)
 
@@ -136,14 +131,14 @@ class SharedSearch(FederatedSearch):
                             kwargs={'id': self.shared.id,
                                     'name': self.shared.name}),
                     urllib.urlencode([('url', record['thumbnail'])])
-                    )
+                )
             if 'image' in record and '://' not in record['image']:
                 record['image'] = '%s?%s' % (
                     reverse('shared-proxy-image',
                             kwargs={'id': self.shared.id,
                                     'name': self.shared.name}),
                     urllib.urlencode([('url', record['image'])])
-                    )
+                )
 
         cached.results = simplejson.dumps(data, separators=(',', ':'))
         cached.save()
@@ -156,8 +151,8 @@ class SharedSearch(FederatedSearch):
                 title=self.get_label(),
                 hidden=True,
                 description='Local copies of shared collection images',
-                )
             )
+        )
         if created:
             sync_access(self.shared, collection)
         return collection
@@ -170,8 +165,8 @@ class SharedSearch(FederatedSearch):
                 system='local',
                 base=os.path.join(settings.AUTO_STORAGE_DIR,
                                   self.get_source_id())
-                )
             )
+        )
         if created:
             sync_access(self.shared, storage)
         return storage
@@ -190,7 +185,7 @@ class SharedSearch(FederatedSearch):
 
         title = data['record']['title']
         image_url = data['record']['image']
-        if not '://' in image_url:
+        if '://' not in image_url:
             image_url = server + image_url
 
         record = Record.objects.create(name=title,
@@ -256,17 +251,19 @@ def search(request, id, name):
     next_page_url = ("?" + urlencode((('q', query), ('p', page + 1)))
                      if page < pages else None)
 
-    return render_to_response('federatedsearch/shared/results.html', {
-        'shared': shared.shared,
-        'query': query,
-        'results': results,
-        'page': page,
-        'failure': failure,
-        'pages': pages,
-        'prev_page': prev_page_url,
-        'next_page': next_page_url,
+    return render_to_response(
+        'federatedsearch/shared/results.html', {
+            'shared': shared.shared,
+            'query': query,
+            'results': results,
+            'page': page,
+            'failure': failure,
+            'pages': pages,
+            'prev_page': prev_page_url,
+            'next_page': next_page_url,
         },
-        context_instance=RequestContext(request))
+        context_instance=RequestContext(request)
+    )
 
 
 @login_required

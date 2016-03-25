@@ -9,6 +9,7 @@ from StringIO import StringIO
 import logging
 import requests
 
+
 @register_worker('shared_download_media')
 def shared_download_media(job):
 
@@ -45,7 +46,7 @@ def shared_download_media(job):
             storage=storage,
             name=record.name,
             mimetype=mimetype,
-            )
+        )
         media.save_file(record.name + guess_extension(mimetype), file)
         jobinfo.complete('Complete', 'File downloaded')
 
