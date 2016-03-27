@@ -1,13 +1,15 @@
 from django.contrib import admin
-from rooibos.data.models import FieldSet
-from models import Presentation, PresentationItem, PresentationItemInfo
+from models import Presentation, PresentationItem
 
-class PresentationItem_inline(admin.StackedInline):
+
+class PresentationItemInline(admin.StackedInline):
     model = PresentationItem
     extra = 1
 
+
 class PresentationAdmin(admin.ModelAdmin):
-    list_display = ('title', 'slides', 'owner', 'created', 'modified', 'hidden', 'hide_default_data')
+    list_display = ('title', 'slides', 'owner', 'created', 'modified',
+                    'hidden', 'hide_default_data')
     list_filter = ('hidden', 'hide_default_data')
     search_fields = ['title', 'name']
     ordering = ('created', 'modified')
@@ -15,7 +17,7 @@ class PresentationAdmin(admin.ModelAdmin):
     date_hierarchy = ('created')
     readonly_fields = ('name', 'created', 'modified')
     inlines = [
-        PresentationItem_inline,
+        PresentationItemInline,
     ]
 
     def slides(self, obj):
@@ -23,4 +25,3 @@ class PresentationAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Presentation, PresentationAdmin)
-

@@ -1,10 +1,11 @@
 from django.db import models, connection
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes import generic
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, standardfield_ids
+from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, \
+    standardfield_ids
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
 from rooibos.access import filter_by_access
@@ -26,18 +27,35 @@ class Presentation(models.Model):
     ownedwrapper = generic.GenericRelation('util.OwnedWrapper')
 
     def save(self, **kwargs):
-        unique_slug(self, slug_source='title', slug_field='name', check_current_slug=kwargs.get('force_insert'))
+        unique_slug(
+            self,
+            slug_source='title',
+            slug_field='name',
+            check_current_slug=kwargs.get('force_insert')
+        )
         super(Presentation, self).save(kwargs)
 
     def get_absolute_url(self, edit=False):
-        return reverse(edit and 'presentation-edit' or 'presentation-view', kwargs={'id': self.id, 'name': self.name})
+        return reverse(
+            edit and 'presentation-edit' or 'presentation-view',
+            kwargs={
+                'id': self.id,
+                'name': self.name
+            }
+        )
 
     def override_dates(self, created=None, modified=None):
         cursor = connection.cursor()
         if created and self.id:
-            cursor.execute("UPDATE %s SET created=%%s WHERE id=%%s" % self._meta.db_table, [created, self.id])
+            cursor.execute(
+                "UPDATE %s SET created=%%s WHERE id=%%s" %
+                self._meta.db_table, [created, self.id]
+            )
         if modified and self.id:
-            cursor.execute("UPDATE %s SET modified=%%s WHERE id=%%s" % self._meta.db_table, [modified, self.id])
+            cursor.execute(
+                "UPDATE %s SET modified=%%s WHERE id=%%s" %
+                self._meta.db_table, [modified, self.id]
+            )
 
     def cached_items(self):
         if not hasattr(self, '_cached_items'):
@@ -67,37 +85,53 @@ class Presentation(models.Model):
     @staticmethod
     def check_passwords(passwords):
         if passwords:
-            q = reduce(lambda a,b: a|b, (Q(id=id, password=password) for id, password in passwords.iteritems()))
+            q = reduce(
+                lambda a, b: a | b,
+                (
+                    Q(id=id, password=password)
+                    for id, password in passwords.iteritems()
+                )
+            )
             return Presentation.objects.filter(q).values_list('id', flat=True)
         else:
             return []
 
     def verify_password(self, request):
-        self.unlocked = (self.owner == request.user) or (not self.password) or (request.session.get('passwords', dict()).get(self.id) == self.password)
+        self.unlocked = (
+            (self.owner == request.user) or
+            (not self.password) or
+            (request.session.get('passwords', dict()).get(self.id) ==
+             self.password)
+        )
         return self.unlocked
 
     @staticmethod
-    def published_Q(owner=None):
-        publish_permission = Permission.objects.get(codename='publish_presentations')
-        valid_publishers = User.objects.filter(Q(id__in=publish_permission.user_set.all()) |
-                                               Q(groups__id__in=publish_permission.group_set.all()) |
-                                               Q(is_superuser=True))
+    def published_q(owner=None):
+        publish_permission = Permission.objects.get(
+            codename='publish_presentations')
+        valid_publishers = User.objects.filter(
+            Q(id__in=publish_permission.user_set.all()) |
+            Q(groups__id__in=publish_permission.group_set.all()) |
+            Q(is_superuser=True)
+        )
         q = Q(owner__in=valid_publishers) & Q(hidden=False)
         if owner and not owner.is_anonymous():
-            return q | Q(id__in=filter_by_access(owner, Presentation, manage=True))
+            return q | Q(id__in=filter_by_access(
+                owner, Presentation, manage=True))
         else:
             return q
 
     @staticmethod
     def get_by_id_for_request(id, request):
         p = (filter_by_access(request.user, Presentation)
-             .filter(Presentation.published_Q(request.user), id=id))
+             .filter(Presentation.published_q(request.user), id=id))
         return p[0] if p and p[0].verify_password(request) else None
 
     class Meta:
         permissions = (
             ("publish_presentations", "Can publish presentations"),
         )
+
 
 class PresentationItem(models.Model):
 
@@ -119,16 +153,19 @@ class PresentationItem(models.Model):
         return self.title_from_fieldvalues(self.get_fieldvalues())
 
     def _annotation_filter(self):
-        return dict(owner=self.presentation.owner,
-                    context_id=self.id,
-                    context_type=ContentType.objects.get_for_model(PresentationItem),
-                    field=standardfield('description'),
-                    record=self.record)
+        return dict(
+            owner=self.presentation.owner,
+            context_id=self.id,
+            context_type=ContentType.objects.get_for_model(PresentationItem),
+            field=standardfield('description'),
+            record=self.record
+        )
 
     def annotation_getter(self):
         if self.id:
             try:
-                return FieldValue.objects.get(**self._annotation_filter()).value
+                return FieldValue.objects.get(
+                    **self._annotation_filter()).value
             except FieldValue.DoesNotExist:
                 return None
         elif hasattr(self, '_saved_annotation'):
@@ -149,7 +186,8 @@ class PresentationItem(models.Model):
                     fv.save()
             else:
                 try:
-                    FieldValue.objects.get(**self._annotation_filter()).delete()
+                    FieldValue.objects.get(
+                        **self._annotation_filter()).delete()
                 except FieldValue.DoesNotExist:
                     pass
         else:
@@ -172,14 +210,17 @@ class PresentationItem(models.Model):
         dup.annotation = self.annotation
         return dup
 
-    def get_fieldvalues(self, owner=None, hidden=False, include_context_owner=True, q=None):
-        return self.record.get_fieldvalues(owner=owner,
-                                           context=self.presentation,
-                                           fieldset=self.presentation.fieldset,
-                                           hidden=hidden,
-                                           include_context_owner=include_context_owner,
-                                           hide_default_data=self.presentation.hide_default_data,
-                                           q=q)
+    def get_fieldvalues(self, owner=None, hidden=False,
+                        include_context_owner=True, q=None):
+        return self.record.get_fieldvalues(
+            owner=owner,
+            context=self.presentation,
+            fieldset=self.presentation.fieldset,
+            hidden=hidden,
+            include_context_owner=include_context_owner,
+            hide_default_data=self.presentation.hide_default_data,
+            q=q
+        )
 
     class Meta:
         ordering = ['order']

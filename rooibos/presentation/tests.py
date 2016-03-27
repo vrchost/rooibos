@@ -33,7 +33,7 @@ class PackagePresentationTestCase(unittest.TestCase):
         self.collection.delete()
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
-    def testSizeAccess(self):
+    def test_size_access(self):
         Media.objects.filter(record=self.record).delete()
         media = Media.objects.create(
             record=self.record, name='tiff', mimetype='image/tiff',
@@ -97,39 +97,51 @@ class PublishPermissionsTestCase(unittest.TestCase):
         self.group.user_set.add(self.user)
         self.presentation = Presentation.objects.create(
             name='PublishPermissionsTestCase', owner=self.user, hidden=False)
-        self.permission = Permission.objects.get(codename='publish_presentations')
+        self.permission = Permission.objects.get(
+            codename='publish_presentations')
 
     def tearDown(self):
         self.presentation.delete()
         self.group.delete()
         self.user.delete()
 
-    def assertNotPublished(self):
-        presentations = Presentation.objects.filter(Presentation.published_Q(), owner=self.user)
-        self.assertEqual(0,presentations.count())
+    def assert_not_published(self):
+        presentations = Presentation.objects.filter(
+            Presentation.published_q(), owner=self.user)
+        self.assertEqual(0, presentations.count())
 
-    def assertPublished(self):
-        presentations = Presentation.objects.filter(Presentation.published_Q(), owner=self.user)
+    def assert_published(self):
+        presentations = Presentation.objects.filter(
+            Presentation.published_q(), owner=self.user)
         self.assertEqual(1, presentations.count())
         self.assertEqual(self.presentation.id, presentations[0].id)
 
-    def reloadUser(self):
+    def reload_user(self):
         self.user = User.objects.get(id=self.user.id)
 
-    def testNoPublishPermission(self):
-        self.assertNotPublished()
+    def test_no_publish_permission(self):
+        self.assert_not_published()
 
-    def testUserPublishPermission(self):
-        self.assertNotPublished()
+    def test_user_publish_permission(self):
+        self.assert_not_published()
         self.user.user_permissions.add(self.permission)
         self.assertEqual([], list(self.user.get_group_permissions()))
-        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_all_permissions()))
-        self.assertPublished()
+        self.assertEqual(
+            ['presentation.publish_presentations'],
+            list(self.user.get_all_permissions())
+        )
+        self.assert_published()
 
-    def testGroupPublishPermission(self):
-        self.assertNotPublished()
+    def test_group_publish_permission(self):
+        self.assert_not_published()
         self.group.permissions.add(self.permission)
-        self.reloadUser()
-        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_group_permissions()))
-        self.assertEqual(['presentation.publish_presentations'], list(self.user.get_all_permissions()))
-        self.assertPublished()
+        self.reload_user()
+        self.assertEqual(
+            ['presentation.publish_presentations'],
+            list(self.user.get_group_permissions())
+        )
+        self.assertEqual(
+            ['presentation.publish_presentations'],
+            list(self.user.get_all_permissions())
+        )
+        self.assert_published()
