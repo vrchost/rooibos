@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import Count
 from django.core.cache import cache
 from django.shortcuts import render_to_response, get_object_or_404
@@ -81,7 +80,7 @@ class RecordDateSearchFacet(SearchFacet):
             return "Within last %s day%s" % (
                 match.group(1),
                 's' if int(match.group(1)) != 1 else '',
-                )
+            )
         else:
             return value
 
@@ -145,7 +144,7 @@ class StorageSearchFacet(SearchFacet):
         criteria = '|'.join('s*-%s' % s for s in criteria.split('|'))
         return user.is_superuser and criteria or '(%s) AND (%s)' % (
             ' '.join('s%s-*' % s for s in self.available_storage), criteria
-            )
+        )
 
     def set_result(self, facets):
         result = {}
@@ -234,7 +233,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
         fname = f.rsplit(' ', 1)[-1]
 
         # create exact match criteria on the fly if needed
-        if fname.endswith('_s') and not fname in search_facets:
+        if fname.endswith('_s') and fname not in search_facets:
             search_facets[fname] = ExactValueSearchFacet(fname)
 
         if fname in search_facets:
@@ -294,7 +293,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             # access through record ACL
             groups = ' '.join(
                 'g%d' % id for id in user.groups.values_list('id', flat=True)
-                )
+            )
             if groups:
                 groups = '((%s) AND NOT (%s)) OR ' % (groups, groups.upper())
             c.append('acl_read:((%su%d) AND NOT U%d)' % (
@@ -312,7 +311,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
         query += ' AND %sallcollections:(%s)' % (
             '-' if mode == 'show' else '',
             ' '.join(map(str, ids)),
-            )
+        )
 
     return query
 
@@ -362,8 +361,8 @@ def run_search(user,
 
     search_facets = [SearchFacet('tag', 'Tags')] + [
         SearchFacet(
-                field.name + ('_t' if not field.label in full_facets else '_w'),
-                field.label
+            field.name + ('_t' if field.label not in full_facets else '_w'),
+            field.label
         )
         for field in fields
     ]
@@ -380,8 +379,10 @@ def run_search(user,
     search_facets = dict((f.name, f) for f in search_facets)
 
     # check for overridden facet labels
-    for name, label in (FieldSetField.objects.filter(fieldset__name='facet-fields')
-                                .exclude(label='').values_list('field__name', 'label')):
+    for name, label in (
+            FieldSetField.objects.filter(fieldset__name='facet-fields')
+            .exclude(label='').values_list('field__name', 'label')
+    ):
         if name + '_t' in search_facets:
             search_facets[name + '_t'].label = label
         elif name + '_w' in search_facets:
@@ -542,7 +543,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                 label=search_facets[f].label,
                 negated=negated,
                 or_available=not negated and search_facets[f].or_available(),
-                )
+            )
         else:
             return dict(
                 facet=c,
@@ -550,7 +551,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                 label='Unknown criteria',
                 negated=negated,
                 or_available=False,
-                )
+            )
 
     def reduce_federated_search_query(q, c):
         (f, o) = c.split(':', 1)
@@ -580,41 +581,45 @@ def search(request, id=None, name=None, selected=False, json=False):
         reduce_federated_search_query, criteria, keywords)
     federated_search = sidebar_api_raw(
         request, federated_search_query, cached_only=True
-        ) if federated_search_query else None
+    ) if federated_search_query else None
 
-    return render_to_response('results.html', {
-        'criteria': map(readable_criteria, criteria),
-        'query': query,
-        'keywords': keywords,
-        'hiddenfields': hiddenfields,
-        'records': records,
-        'hits': hits,
-        'page': page,
-        'pages': (hits - 1) / pagesize + 1,
-        'pagesize': pagesize,
-        'prev_page': prev_page_url,
-        'next_page': next_page_url,
-        'reset_url': url,
-        'form_url': form_url,
-        'limit_url': limit_url,
-        'limit_url_orquery': limit_url_orquery,
-        'facets': facets,
-        'facets_url': facets_url,
-        'orfacet': orfacet,
-        'orquery': orquery,
-        'sort': sort,
-        'random': random.random(),
-        'viewmode': viewmode,
-        'federated_sources': bool(available_federated_sources(request.user)),
-        'federated_search': federated_search,
-        'federated_search_query': federated_search_query,
-        'pagination_helper': [None] * hits,
-        'has_record_created_criteria': any(
-            f.startswith('created:') for f in criteria),
-        'has_last_modified_criteria': any(
-            f.startswith('modified:') for f in criteria),
+    return render_to_response(
+        'results.html',
+        {
+            'criteria': map(readable_criteria, criteria),
+            'query': query,
+            'keywords': keywords,
+            'hiddenfields': hiddenfields,
+            'records': records,
+            'hits': hits,
+            'page': page,
+            'pages': (hits - 1) / pagesize + 1,
+            'pagesize': pagesize,
+            'prev_page': prev_page_url,
+            'next_page': next_page_url,
+            'reset_url': url,
+            'form_url': form_url,
+            'limit_url': limit_url,
+            'limit_url_orquery': limit_url_orquery,
+            'facets': facets,
+            'facets_url': facets_url,
+            'orfacet': orfacet,
+            'orquery': orquery,
+            'sort': sort,
+            'random': random.random(),
+            'viewmode': viewmode,
+            'federated_sources': bool(
+                available_federated_sources(request.user)),
+            'federated_search': federated_search,
+            'federated_search_query': federated_search_query,
+            'pagination_helper': [None] * hits,
+            'has_record_created_criteria': any(
+                f.startswith('created:') for f in criteria),
+            'has_last_modified_criteria': any(
+                f.startswith('modified:') for f in criteria),
         },
-        context_instance=RequestContext(request))
+        context_instance=RequestContext(request)
+    )
 
 
 @json_view
@@ -659,11 +664,12 @@ def search_facets(request, id=None, name=None, selected=False):
     limit_url = "%s?%s%s" % (url, qurl, qurl and '&' or '')
 
     # sort facets by specified order, if any, then by label
-    ordered_facets = (FieldSetField.objects
-                      .filter(fieldset__name='facet-fields')
-                      .values_list('field__name', flat=True)
-                      .order_by('order', 'label', 'field__label', 'field__name')
-                      )
+    ordered_facets = (
+        FieldSetField.objects
+        .filter(fieldset__name='facet-fields')
+        .values_list('field__name', flat=True)
+        .order_by('order', 'label', 'field__label', 'field__name')
+    )
     facets = []
     for of in ordered_facets:
         try:
@@ -732,7 +738,8 @@ def _get_browse_fields(collection_id):
         # check if fieldset for browsing exists
         fieldset = None
         try:
-            fieldset = FieldSet.objects.get(name='browse-collection-%s' % collection_id)
+            fieldset = FieldSet.objects.get(
+                name='browse-collection-%s' % collection_id)
         except FieldSet.DoesNotExist:
             try:
                 fieldset = FieldSet.objects.get(name='browse-collections')
@@ -740,8 +747,10 @@ def _get_browse_fields(collection_id):
                 pass
         query = FieldValue.objects.filter(record__collection=collection_id)
         if fieldset:
-            query = query.filter(field__in=list(fieldset.fields.values_list('id', flat=True)))
-        ids = list(query.order_by().distinct().values_list('field_id', flat=True))
+            query = query.filter(
+                field__in=list(fieldset.fields.values_list('id', flat=True)))
+        ids = list(
+            query.order_by().distinct().values_list('field_id', flat=True))
         fields = list(Field.objects.filter(id__in=ids))
         cache.set('browse_fields_%s' % collection_id,
                   [f.id for f in fields], 60)
@@ -856,10 +865,13 @@ def terms(request):
     for term in terms:
         term[1] = term[1] * 6 / maxfreq
 
-    return render_to_response('terms.html', {
-        'terms': sorted(terms, key=lambda t: t[0]),
-    },
-    context_instance=RequestContext(request))
+    return render_to_response(
+        'terms.html',
+        {
+            'terms': sorted(terms, key=lambda t: t[0]),
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 def fieldvalue_autocomplete(request):
@@ -912,7 +924,7 @@ def search_form(request):
         return [('', 'Any')] + [
             (g, [(f.id, f.label) for f in grouped[g]])
             for g in sorted(grouped, _cmp)
-            ]
+        ]
 
     class SearchForm(forms.Form):
         TYPE_CHOICES = (('t', 'in'), ('T', 'not in'))
@@ -938,11 +950,11 @@ def search_form(request):
             widget=forms.CheckboxSelectMultiple,
             required=False)
 
-    SearchFormFormSet = formset_factory(form=SearchForm, extra=5)
+    search_form_formset = formset_factory(form=SearchForm, extra=5)
 
     if request.method == "POST":
         collectionform = CollectionForm(request.POST, prefix='coll')
-        formset = SearchFormFormSet(request.POST, prefix='crit')
+        formset = search_form_formset(request.POST, prefix='crit')
         if formset.is_valid() and collectionform.is_valid():
             core_fields = dict(
                 (f, f.get_equivalent_fields())
@@ -977,7 +989,7 @@ def search_form(request):
                 return HttpResponseRedirect(reverse('solr-search') + '?' + qs)
     else:
         collectionform = CollectionForm(prefix='coll')
-        formset = SearchFormFormSet(prefix='crit')
+        formset = search_form_formset(prefix='crit')
 
     return render_to_response('search.html',
                               {'collectionform': collectionform,

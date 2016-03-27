@@ -34,6 +34,7 @@ def delay_record_indexing():
     logger.debug('Delaying record indexing for 60 seconds')
     cache.set(DELAY_INDEXING_CACHE_KEY, True, 60)
 
+
 def resume_record_indexing():
     logger.debug('Resuming record indexing')
     cache.set(DELAY_INDEXING_CACHE_KEY, False)

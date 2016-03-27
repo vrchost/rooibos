@@ -1,5 +1,4 @@
 import re
-import logging
 from threading import Thread
 from django.conf import settings
 from django.db.models import Q
@@ -18,6 +17,7 @@ import sys
 
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
 
+
 logger = logging.getLogger("rooibos_solr")
 
 
@@ -26,7 +26,7 @@ def object_acl_to_solr(obj):
     acl = AccessControl.objects.filter(
         content_type=content_type,
         object_id=obj.id,
-        ).values_list('user_id', 'usergroup_id', 'read', 'write', 'manage')
+    ).values_list('user_id', 'usergroup_id', 'read', 'write', 'manage')
     result = dict(read=[], write=[], manage=[])
     for user, group, read, write, manage in acl:
         acct = 'u%d' % user if user else 'g%d' % group if group else 'anon'
@@ -55,9 +55,9 @@ class SolrIndex():
                facet_limit=-1, facet_mincount=0, fields=None):
         if not fields:
             fields = []
-        if not 'id' in fields:
+        if 'id' not in fields:
             fields.append('id')
-        if not 'presentations' in fields:
+        if 'presentations' not in fields:
             fields.append('presentations')
         conn = Solr(settings.SOLR_URL)
         result = conn.search(q, sort=sort, start=start, rows=rows,
@@ -75,8 +75,8 @@ class SolrIndex():
 
     def terms(self):
         conn = Solr(settings.SOLR_URL)
-        return conn.terms(fields=['text'], mincount=2, minlength=4).get('text', {})
-
+        return conn.terms(
+            fields=['text'], mincount=2, minlength=4).get('text', {})
 
     def clear(self):
         from models import SolrIndexUpdates
@@ -138,10 +138,14 @@ class SolrIndex():
                     mod = sys.modules[module]
                     return getattr(mod, function)
                 except Exception, ex:
-                    logging.debug("Could not import custom Solr record indexer %s: %s",
-                            s, ex)
+                    logging.debug(
+                        "Could not import custom Solr record indexer %s: %s",
+                        s, ex
+                    )
+
             def i(doc, **kwargs):
                 return doc
+
             return i
 
         custom_doc_processor = get_custom_doc_processor()
@@ -177,10 +181,14 @@ class SolrIndex():
                             record, core_fields, groups.get(record.id, []),
                             fieldvalues.get(record.id, []),
                             media.get(record.id, []))
-                        doc = custom_doc_processor(doc, record=record, core_fields=core_fields,
-                                     groups=groups.get(record.id, []),
-                                     fieldvalues=fieldvalues.get(record.id, []),
-                                     media=media.get(record.id, []))
+                        doc = custom_doc_processor(
+                            doc,
+                            record=record,
+                            core_fields=core_fields,
+                            groups=groups.get(record.id, []),
+                            fieldvalues=fieldvalues.get(record.id, []),
+                            media=media.get(record.id, [])
+                        )
                         docs.append(doc)
                     conn.add(docs)
                 return process
@@ -268,7 +276,8 @@ class SolrIndex():
                         doc[cf.name + '_sort'] = clean_value
                     required_fields.pop(cf.name, None)
                     if cf.full_name != cf.name:
-                        doc.setdefault(cf.full_name + '_t', []).append(clean_value)
+                        doc.setdefault(
+                            cf.full_name + '_t', []).append(clean_value)
                     break
             else:
                 doc.setdefault(v.field.name + '_t', []).append(clean_value)
@@ -335,7 +344,7 @@ class SolrIndex():
             (1600, 'moderate'),
             (800, 'medium'),
             (400, 'small'),
-            )
+        )
         r = max(width, height)
         if not r:
             return 'unknown'
@@ -352,4 +361,4 @@ class SolrIndex():
         for collection in Collection.objects.all():
             self.parent_groups[collection.id] = [
                 g.id for g in collection.all_parent_collections
-                ]
+            ]

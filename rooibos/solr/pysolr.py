@@ -13,10 +13,14 @@ For now, we can only index python dictionaries. Each key in the dictionary
 will correspond to a field in Solr.
 
 >>> docs = [
-...     {'id': 'testdoc.1', 'order_i': 1, 'name': 'document 1', 'text': u'Paul Verlaine'},
-...     {'id': 'testdoc.2', 'order_i': 2, 'name': 'document 2', 'text': u'Владимир Маякoвский'},
-...     {'id': 'testdoc.3', 'order_i': 3, 'name': 'document 3', 'text': u'test'},
-...     {'id': 'testdoc.4', 'order_i': 4, 'name': 'document 4', 'text': u'test'}
+...     {'id': 'testdoc.1', 'order_i': 1, 'name': 'document 1',
+...      'text': u'Paul Verlaine'},
+...     {'id': 'testdoc.2', 'order_i': 2, 'name': 'document 2',
+...      'text': u'Владимир Маякoвский'},
+...     {'id': 'testdoc.3', 'order_i': 3, 'name': 'document 3',
+...      'text': u'test'},
+...     {'id': 'testdoc.4', 'order_i': 4, 'name': 'document 4',
+...      'text': u'test'}
 ... ]
 
 
@@ -53,7 +57,8 @@ document 3
 To update documents, we just use the add method.
 
 >>> docs = [
-...     {'id': 'testdoc.4', 'order_i': 4, 'name': 'document 4', 'text': u'blah'}
+...     {'id': 'testdoc.4', 'order_i': 4, 'name': 'document 4',
+...      'text': u'blah'}
 ... ]
 >>> conn.add(docs)
 
@@ -77,8 +82,10 @@ Docs can also have multiple values for any particular key. This lets us use
 Solr's multiValue fields.
 
 >>> docs = [
-...     {'id': 'testdoc.5', 'cat': ['poetry', 'science'], 'name': 'document 5', 'text': u''},
-...     {'id': 'testdoc.6', 'cat': ['science-fiction',], 'name': 'document 6', 'text': u''},
+...     {'id': 'testdoc.5', 'cat': ['poetry', 'science'], 'name': 'document 5',
+...      'text': u''},
+...     {'id': 'testdoc.6', 'cat': ['science-fiction',], 'name': 'document 6',
+...      'text': u''},
 ... ]
 
 >>> conn.add(docs)
@@ -109,25 +116,28 @@ from datetime import datetime, date
 from time import strptime
 try:
     # for python 2.5
-    from xml.etree import cElementTree as ET
+    from xml.etree import cElementTree as ElementTree
 except ImportError:
     try:
         # use etree from lxml if it is installed
-        from lxml import etree as ET
+        from lxml import etree as ElementTree  # noqa
     except ImportError:
         try:
             # use cElementTree if available
-            import cElementTree as ET
+            import cElementTree as ElementTree
         except ImportError:
             try:
-                from elementtree import ElementTree as ET
+                from elementtree import ElementTree as ElementTree
             except ImportError:
-                raise ImportError("No suitable ElementTree implementation was found.")
+                raise ImportError(
+                    "No suitable ElementTree implementation was found.")
 
 __all__ = ['Solr']
 
+
 class SolrError(Exception):
     pass
+
 
 class Results(object):
     def __init__(self, docs, hits, facets):
@@ -140,6 +150,7 @@ class Results(object):
 
     def __iter__(self):
         return iter(self.docs)
+
 
 class Solr(object):
     def __init__(self, url):
@@ -189,9 +200,9 @@ class Solr(object):
         soup = BeautifulSoup(response_content)
         tag = soup.find('pre') or soup.find('h1')
         if tag:
-          return tag.string
+            return tag.string
         else:
-          return response_content
+            return response_content
 
     # Converters #############################################################
 
@@ -248,10 +259,12 @@ class Solr(object):
         return parse(value)
         if value[-1] == 'Z':
             # Solr 1.3.0 returns dates differently
-            return datetime(*strptime(value[:-1] + ' +0000', "%Y-%m-%dT%H:%M:%S %Z")[0:6])
+            return datetime(
+                *strptime(value[:-1] + ' +0000', "%Y-%m-%dT%H:%M:%S %Z")[0:6])
         else:
-        # this throws away fractions of a second
-            return datetime(*strptime(value[:value.find('.')], "%Y-%m-%dT%H:%M:%S")[0:6])
+            # this throws away fractions of a second
+            return datetime(
+                *strptime(value[:value.find('.')], "%Y-%m-%dT%H:%M:%S")[0:6])
 
     def float_to_python(self, value):
         """
@@ -269,12 +282,13 @@ class Solr(object):
 
     # API Methods ############################################################
 
-    def search(self, q, sort=None, start=None, rows=None, facets=None, facet_limit=-1, facet_mincount=0, fields=None):
+    def search(self, q, sort=None, start=None, rows=None, facets=None,
+               facet_limit=-1, facet_mincount=0, fields=None):
         """Performs a search and returns the results."""
         params = {'q': q}
         if start:
             params['start'] = start
-        if rows != None:
+        if rows is not None:
             params['rows'] = rows
         if sort:
             params['sort'] = sort
@@ -292,7 +306,7 @@ class Solr(object):
 
         # TODO: make result retrieval lazy and allow custom result objects
         # also, this has become rather ugly and definitely needs some cleanup.
-        et = ET.parse(response)
+        et = ElementTree.parse(response)
         result = et.find('result')
         hits = int(result.get('numFound'))
         docs = result.findall('doc')
@@ -326,7 +340,8 @@ class Solr(object):
 
         return Results(results, hits, facets)
 
-    def terms(self, fields=None, sort='count', limit=500, mincount=1, minlength=None):
+    def terms(self, fields=None, sort='count', limit=500, mincount=1,
+              minlength=None):
         params = {
             'terms.sort': sort,
             'terms.limit': limit,
@@ -341,7 +356,7 @@ class Solr(object):
         if response.status != 200:
             raise SolrError(self._extract_error(response))
 
-        et = ET.parse(response)
+        et = ElementTree.parse(response)
         result = {}
         for lst in et.findall('lst'):
             if lst.get('name') == 'terms':
@@ -357,9 +372,9 @@ class Solr(object):
         """Adds or updates documents. For now, docs is a list of dictionaies
         where each key is the field name and each value is the value to index.
         """
-        message = ET.Element('add')
+        message = ElementTree.Element('add')
         for doc in docs:
-            d = ET.Element('doc')
+            d = ElementTree.Element('doc')
             for key, value in doc.items():
                 if key == 'boost':
                     d.set('boost', str(value))
@@ -367,26 +382,29 @@ class Solr(object):
                 # handle lists, tuples, and other iterabes
                 if hasattr(value, '__iter__'):
                     for v in value:
-                        f = ET.Element('field', name=key)
+                        f = ElementTree.Element('field', name=key)
                         f.text = self._from_python(v)
                         d.append(f)
                 # handle strings and unicode
                 else:
-                    f = ET.Element('field', name=key)
+                    f = ElementTree.Element('field', name=key)
                     f.text = self._from_python(value)
                     d.append(f)
             message.append(d)
-        m = ET.tostring(message, 'utf-8')
+        m = ElementTree.tostring(message, 'utf-8')
         response = self._update(m)
         if response.status != 200:
             raise SolrError(self._extract_error(response))
-        # TODO: Supposedly, we can put a <commit /> element in the same post body
-        # as the add element. That isn't working for some reason, and it would save us
+        # TODO: Supposedly, we can put a <commit /> element
+        # in the same post body
+        # as the add element. That isn't working for some reason,
+        # and it would save us
         # an extra trip to the server. This works for now.
         if commit:
             self.commit()
 
-    def delete(self, id=None, q=None, commit=True, fromPending=True, fromCommitted=True):
+    def delete(self, id=None, q=None, commit=True, from_pending=True,
+               from_committed=True):
         """Deletes documents."""
         if id is None and q is None:
             raise ValueError('You must specify "id" or "q".')
@@ -399,8 +417,10 @@ class Solr(object):
         response = self._update(m)
         if response.status != 200:
             raise SolrError(self._extract_error(response))
-        # TODO: Supposedly, we can put a <commit /> element in the same post body
-        # as the delete element. That isn't working for some reason, and it would save us
+        # TODO: Supposedly, we can put a <commit /> element
+        # in the same post body
+        # as the delete element. That isn't working for some reason,
+        # and it would save us
         # an extra trip to the server. This works for now.
         if commit:
             self.commit()
@@ -414,6 +434,7 @@ class Solr(object):
         response = self._update('<optimize />')
         if response.status != 200:
             raise SolrError(self._extract_error(response))
+
 
 if __name__ == "__main__":
     import doctest
