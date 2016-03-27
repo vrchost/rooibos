@@ -1,6 +1,12 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
 from views import content
 
-urlpatterns = patterns('',
-    url(r'^(?P<presentation_id>[\d]+)/[-\w]+/content/$', content, name='megazine-content'),
+
+urlpatterns = patterns(
+    '',
+    url(
+        r'^(?P<presentation_id>[\d]+)/[-\w]+/content/$',
+        content,
+        name='megazine-content'
+    ),
 )
