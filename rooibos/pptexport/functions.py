@@ -45,18 +45,27 @@ class PowerPointGenerator:
 
     @staticmethod
     def get_templates():
-        return filter(lambda f: f.endswith('.pptx'), os.listdir(os.path.join(os.path.dirname(__file__), 'pptx_templates')))
+        return filter(
+            lambda f: f.endswith('.pptx'),
+            os.listdir(
+                os.path.join(os.path.dirname(__file__), 'pptx_templates')
+            )
+        )
 
     def generate(self, template, outfile):
         if len(self.items) == 0:
             return False
         if not template.endswith('.pptx'):
             template += '.pptx'
-        template = ZipFile(os.path.join(os.path.dirname(__file__), 'pptx_templates', template), mode='r')
+        template = ZipFile(
+            os.path.join(
+                os.path.dirname(__file__), 'pptx_templates', template),
+            mode='r'
+        )
         outfile = ZipFile(outfile, mode='w', compression=ZIP_DEFLATED)
         for name in template.namelist():
             content = template.read(name)
-            if PROCESS_FILES.has_key(name):
+            if name in PROCESS_FILES:
                 p = getattr(self, '_' + PROCESS_FILES[name])
                 p(name, content, outfile)
             else:
@@ -68,7 +77,8 @@ class PowerPointGenerator:
         self._process_slides(outfile)
         self._process_content_types(outfile)
         for name in self.media:
-            if name != self.placeholder_image or not self.remove_placeholder_image:
+            if name != self.placeholder_image or \
+                    not self.remove_placeholder_image:
                 outfile.writestr(name, self.media[name])
         outfile.close()
         return True
@@ -88,38 +98,46 @@ class PowerPointGenerator:
             if fieldvalues:
                 fieldvalues[0]._subitem = False
             for i in range(1, len(fieldvalues)):
-                fieldvalues[i]._subitem = (fieldvalues[i].field == fieldvalues[i - 1].field and
-                                          fieldvalues[i].group == fieldvalues[i - 1].group)
+                fieldvalues[i]._subitem = (
+                    fieldvalues[i].field == fieldvalues[i - 1].field and
+                    fieldvalues[i].group == fieldvalues[i - 1].group
+                )
 
             body = xn.getElementsByTagName('p:txBody').item(0)
 
-            def appendText(text):
+            def append_text(text):
                 ap1 = xn.createElement('a:p')
                 ar = xn.createElement('a:r')
-                arPr = xn.createElement('a:rPr')
-                arPr.setAttribute('dirty','0')
-                arPr.setAttribute('lang','en-US')
-                arPr.setAttribute('smtClean','0')
+                ar_pr = xn.createElement('a:rPr')
+                ar_pr.setAttribute('dirty', '0')
+                ar_pr.setAttribute('lang', 'en-US')
+                ar_pr.setAttribute('smtClean', '0')
                 at = xn.createElement('a:t')
                 txt = xn.createTextNode(text)
                 at.appendChild(txt)
-                ar.appendChild(arPr)
+                ar.appendChild(ar_pr)
                 ar.appendChild(at)
                 ap1.appendChild(ar)
                 body.appendChild(ap1)
 
             for value in fieldvalues:
-                appendText('%s%s: %s' % (
-                      value._subitem and 'sub' or '',
-                      value.resolved_label,
-                      value.value or ''))
+                append_text(
+                    '%s%s: %s' % (
+                        value._subitem and 'sub' or '',
+                        value.resolved_label,
+                        value.value or ''
+                    )
+                )
 
             annotation = item.annotation
             if annotation:
-                appendText('Annotation: %s' % annotation)
+                append_text('Annotation: %s' % annotation)
 
             # update the slide number in notes
-            e = filter(lambda e: e.getAttribute('type') == 'slidenum', xn.getElementsByTagName('a:fld'))[0]
+            e = filter(
+                lambda e: e.getAttribute('type') == 'slidenum',
+                xn.getElementsByTagName('a:fld')
+            )[0]
             e.getElementsByTagName('a:t').item(0).firstChild.nodeValue = n
 
             # insert title
@@ -143,13 +161,18 @@ class PowerPointGenerator:
                 with file(image, 'rb') as f:
                     content = f.read()
                 name = 'image%s.jpg' % n
-                self.additional_content_types.setdefault('image/jpeg;jpg', None)
+                self.additional_content_types.setdefault(
+                    'image/jpeg;jpg', None)
                 outfile.writestr('ppt/media/' + name, content)
 
                 # find image placeholder
-                e = filter(lambda e: e.getAttribute('descr') == 'image', x.getElementsByTagName('p:cNvPr'))[0]
+                e = filter(
+                    lambda e: e.getAttribute('descr') == 'image',
+                    x.getElementsByTagName('p:cNvPr')
+                )[0]
                 e = e.parentNode.parentNode
-                embedId = e.getElementsByTagName('a:blip')[0].getAttribute('r:embed')
+                embed_id = e.getElementsByTagName(
+                    'a:blip')[0].getAttribute('r:embed')
 
                 try:
                     width, height = Image.open(image).size
@@ -183,50 +206,88 @@ class PowerPointGenerator:
                     extent.setAttribute('cy', str(new_h))
 
                     # add image to slide relation
-                    rel = filter(lambda e: e.getAttribute('Id') == embedId, xr.getElementsByTagName('Relationship'))[0]
-                    self.placeholder_image = 'ppt' + rel.getAttribute('Target')[2:]
+                    rel = filter(
+                        lambda e: e.getAttribute('Id') == embed_id,
+                        xr.getElementsByTagName('Relationship')
+                    )[0]
+                    self.placeholder_image = 'ppt' + rel.getAttribute(
+                        'Target')[2:]
                     rel.setAttribute('Target', '../media/' + name)
 
                     # add notes to slide relation
-                    rel2 = filter(lambda e: e.getAttribute('Type') ==
-                                  "http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide",
-                                  xr.getElementsByTagName('Relationship'))[0]
-                    rel2.setAttribute('Target', '../notesSlides/notesSlide%s.xml' % n)
+                    rel2 = filter(
+                        lambda e: e.getAttribute('Type') ==
+                        "http://schemas.openxmlformats.org/officeDocument/"
+                        "2006/relationships/notesSlide",
+                        xr.getElementsByTagName('Relationship')
+                    )[0]
+                    rel2.setAttribute(
+                        'Target', '../notesSlides/notesSlide%s.xml' % n)
 
                     # add slide to notes relation
-                    rel3 = filter(lambda e: e.getAttribute('Type') ==
-                                  "http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide",
-                                  xnr.getElementsByTagName('Relationship'))[0]
+                    rel3 = filter(
+                        lambda e: e.getAttribute('Type') ==
+                        "http://schemas.openxmlformats.org/officeDocument/"
+                        "2006/relationships/slide",
+                        xnr.getElementsByTagName('Relationship')
+                    )[0]
                     rel3.setAttribute('Target', '../slides/slide%s.xml' % n)
             else:
                 self.remove_placeholder_image = False
 
-            outfile.writestr('ppt/slides/slide%s.xml' % n, standalone(x.toxml(encoding="UTF-8")))
-            outfile.writestr('ppt/slides/_rels/slide%s.xml.rels' % n, standalone(xr.toxml(encoding="UTF-8")))
-            outfile.writestr('ppt/notesSlides/notesSlide%s.xml' % n, standalone(xn.toxml(encoding="UTF-8")))
-            outfile.writestr('ppt/notesSlides/_rels/notesSlide%s.xml.rels' % n, standalone(xnr.toxml(encoding="UTF-8")))
+            outfile.writestr(
+                'ppt/slides/slide%s.xml' % n,
+                standalone(x.toxml(encoding="UTF-8"))
+            )
+            outfile.writestr(
+                'ppt/slides/_rels/slide%s.xml.rels' % n,
+                standalone(xr.toxml(encoding="UTF-8"))
+            )
+            outfile.writestr(
+                'ppt/notesSlides/notesSlide%s.xml' % n,
+                standalone(xn.toxml(encoding="UTF-8"))
+            )
+            outfile.writestr(
+                'ppt/notesSlides/_rels/notesSlide%s.xml.rels' % n,
+                standalone(xnr.toxml(encoding="UTF-8"))
+            )
 
     def _process_content_types(self, outfile):
         x = xml.dom.minidom.parseString(self.content_types)
         for n in range(3, len(self.items) + 2):
             e = x.createElement('Override')
             e.setAttribute('PartName', '/ppt/slides/slide%s.xml' % n)
-            e.setAttribute('ContentType', 'application/vnd.openxmlformats-officedocument.presentationml.slide+xml')
+            e.setAttribute(
+                'ContentType',
+                'application/vnd.openxmlformats-officedocument.'
+                'presentationml.slide+xml'
+            )
             x.firstChild.appendChild(e)
             e = x.createElement('Override')
             e.setAttribute('PartName', '/ppt/notesSlides/notesSlide%s.xml' % n)
-            e.setAttribute('ContentType', 'application/vnd.openxmlformats-officedocument.presentationml.notesSlide+xml')
+            e.setAttribute(
+                'ContentType',
+                'application/vnd.openxmlformats-officedocument.'
+                'presentationml.notesSlide+xml'
+            )
             x.firstChild.appendChild(e)
         for e in x.getElementsByTagName('Default'):
             # remove additional content types that already exist
-            self.additional_content_types.pop('%s;%s' % (e.getAttribute('ContentType'), e.getAttribute('Extension')), None)
+            self.additional_content_types.pop(
+                '%s;%s' % (
+                    e.getAttribute('ContentType'),
+                    e.getAttribute('Extension')
+                ),
+                None
+            )
         for c in self.additional_content_types:
             e = x.createElement('Default')
             ct, ex = c.split(';')
             e.setAttribute('ContentType', ct)
             e.setAttribute('Extension', ex)
             x.firstChild.appendChild(e)
-        outfile.writestr('[Content_Types].xml', standalone(x.toxml(encoding="UTF-8")))
+        outfile.writestr(
+            '[Content_Types].xml', standalone(x.toxml(encoding="UTF-8")))
 
     def _title_slide(self, name, content, outfile):
         x = xml.dom.minidom.parseString(content)
@@ -258,11 +319,19 @@ class PowerPointGenerator:
     def _presentation(self, name, content, outfile):
         x = xml.dom.minidom.parseString(content)
         p = x.getElementsByTagName('p:sldIdLst')[0]
-        maxid = max(map(lambda e: int(e.getAttribute('id')), p.getElementsByTagName('p:sldId')))
+        maxid = max(map(
+            lambda e: int(e.getAttribute('id')),
+            p.getElementsByTagName('p:sldId')
+        ))
         for n in range(3, len(self.items) + 2):
             e = x.createElement('p:sldId')
             e.setAttribute('id', str(maxid + n))
-            e.setAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'r:id', 'rooibosId%s' % n)
+            e.setAttributeNS(
+                'http://schemas.openxmlformats.org/officeDocument/'
+                '2006/relationships',
+                'r:id',
+                'rooibosId%s' % n
+            )
             p.appendChild(e)
         outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))
 
@@ -272,7 +341,11 @@ class PowerPointGenerator:
         for n in range(3, len(self.items) + 2):
             e = x.createElement('Relationship')
             e.setAttribute('Id', 'rooibosId%s' % n)
-            e.setAttribute('Type', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slide')
+            e.setAttribute(
+                'Type',
+                'http://schemas.openxmlformats.org/officeDocument/'
+                '2006/relationships/slide'
+            )
             e.setAttribute('Target', 'slides/slide%s.xml' % n)
             p.appendChild(e)
         outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))

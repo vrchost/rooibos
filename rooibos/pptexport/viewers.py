@@ -13,25 +13,32 @@ class PowerPointExportViewer(Viewer):
 
     templates = [
         (template[:-5], template[:-5])
-        for template in sorted(os.listdir(os.path.join(os.path.dirname(__file__),
-                                   'pptx_templates')))
+        for template in sorted(
+            os.listdir(os.path.join(
+                os.path.dirname(__file__), 'pptx_templates'))
+        )
         if template.endswith('.pptx')
     ]
 
     def get_options_form(self):
         class OptionsForm(forms.Form):
-            template = forms.ChoiceField(choices=self.templates,
-                help_text="Select the PowerPoint template to use.")
+            template = forms.ChoiceField(
+                choices=self.templates,
+                help_text="Select the PowerPoint template to use."
+            )
         return OptionsForm
 
     def embed_code(self, request, options):
-        return render_to_string("pptexport_download.html", {
-            'viewer': self,
-            'obj': self.obj,
-            'options': options,
-            'default_template': self.templates and self.templates[0][0],
-            'request': request,
-        })
+        return render_to_string(
+            "pptexport_download.html",
+            {
+                'viewer': self,
+                'obj': self.obj,
+                'options': options,
+                'default_template': self.templates and self.templates[0][0],
+                'request': request,
+            }
+        )
 
 
 @register_viewer('powerpointexportviewer', PowerPointExportViewer)

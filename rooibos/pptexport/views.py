@@ -7,13 +7,16 @@ from rooibos.presentation.models import Presentation
 import os
 
 
-
 def thumbnail(request, template):
-    filename = os.path.join(os.path.dirname(__file__), 'pptx_templates', template + '.pptx')
+    filename = os.path.join(
+        os.path.dirname(__file__), 'pptx_templates', template + '.pptx')
     if not os.path.isfile(filename):
         raise Http404()
     template = ZipFile(filename, mode='r')
-    return HttpResponse(content=template.read('docProps/thumbnail.jpeg'), mimetype='image/jpg')
+    return HttpResponse(
+        content=template.read('docProps/thumbnail.jpeg'),
+        mimetype='image/jpg'
+    )
 
 
 def download(request, id, template):
@@ -28,9 +31,13 @@ def download(request, id, template):
     try:
         g.generate(template, filename)
         with open(filename, mode="rb") as f:
-            response = HttpResponse(content=f.read(),
-                mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
-        response['Content-Disposition'] = 'attachment; filename=%s.pptx' % presentation.name
+            response = HttpResponse(
+                content=f.read(),
+                mimetype='application/vnd.openxmlformats-officedocument'
+                '.presentationml.presentation'
+            )
+        response['Content-Disposition'] = \
+            'attachment; filename=%s.pptx' % presentation.name
         return response
     finally:
         try:
