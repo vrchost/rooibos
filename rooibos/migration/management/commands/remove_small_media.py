@@ -8,11 +8,20 @@ from rooibos.util.progressbar import ProgressBar
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
-        make_option('--check', '-c', dest='check', action='store_true', help='Check for unneeded media'),
-        make_option('--remove', '-r', dest='remove', action='store_true', help='Remove unneeded media'),
+        make_option(
+            '--check', '-c',
+            dest='check',
+            action='store_true',
+            help='Check for unneeded media'
+        ),
+        make_option(
+            '--remove', '-r',
+            dest='remove',
+            action='store_true',
+            help='Remove unneeded media'
+        ),
     )
     help = "Removes unneeded media objects migrated from MDID 2"
-
 
     def handle(self, check, remove, *args, **options):
         if check == remove:
@@ -27,14 +36,21 @@ class Command(BaseCommand):
         print "Checking..."
 
         content_type = ContentType.objects.get_for_model(Media)
-        migrated = set(ObjectHistory.objects.filter(content_type=content_type).values_list('object_id', flat=True))
-        full = set(Media.objects.filter(url__startswith="full\\").values_list('id', flat=True))
-        medium = set(Media.objects.filter(url__startswith="medium\\").values_list('id', flat=True))
-        thumb = set(Media.objects.filter(url__startswith="thumb\\").values_list('id', flat=True))
+        migrated = set(ObjectHistory.objects.filter(
+            content_type=content_type).values_list('object_id', flat=True))
+        full = set(Media.objects.filter(
+            url__startswith="full\\").values_list('id', flat=True))
+        medium = set(Media.objects.filter(
+            url__startswith="medium\\").values_list('id', flat=True))
+        thumb = set(Media.objects.filter(
+            url__startswith="thumb\\").values_list('id', flat=True))
 
-        full_records = set(Media.objects.filter(url__startswith="full\\").values_list('record', flat=True))
-        medium_records = set(Media.objects.filter(url__startswith="medium\\").values_list('record', flat=True))
-        thumb_records = set(Media.objects.filter(url__startswith="thumb\\").values_list('record', flat=True))
+        full_records = set(Media.objects.filter(
+            url__startswith="full\\").values_list('record', flat=True))
+        medium_records = set(Media.objects.filter(
+            url__startswith="medium\\").values_list('record', flat=True))
+        thumb_records = set(Media.objects.filter(
+            url__startswith="thumb\\").values_list('record', flat=True))
 
         print "Found %d migrated media objects - these are ok" % len(migrated)
         print "Found %d full media objects" % len(full)
@@ -56,7 +72,6 @@ class Command(BaseCommand):
         print "Found %d records with three sizes of media" % len(common)
 
         return common
-
 
     def remove(self):
 
