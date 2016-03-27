@@ -1,5 +1,5 @@
 from django_extensions.management.jobs import DailyJob
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 from rooibos.statistics.functions import accumulate
 from rooibos.statistics.models import AccumulatedActivity
 
@@ -16,4 +16,3 @@ class Job(DailyJob):
             from_date = None
 
         accumulate(from_date=from_date)
-        

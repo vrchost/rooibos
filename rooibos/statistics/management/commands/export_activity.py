@@ -11,10 +11,17 @@ class Command(BaseCommand):
     args = 'command'
 
     option_list = BaseCommand.option_list + (
-        make_option('--type', '-t', dest='content_type',
-                    help='Export activity for this content type (e.g. record, media, user)'),
-        make_option('--year', '-y', dest='year',
-                    help='Export activity for given year only')
+        make_option(
+            '--type', '-t',
+            dest='content_type',
+            help='Export activity for this content type '
+            '(e.g. record, media, user)'
+        ),
+        make_option(
+            '--year', '-y',
+            dest='year',
+            help='Export activity for given year only'
+        )
     )
 
     def handle(self, *args, **kwargs):
@@ -61,10 +68,14 @@ class Command(BaseCommand):
         while processed < count:
             activities = rows[processed:processed + 1000]
             for activity in activities:
+                if activity.content_object:
+                    description = get_description(activity.content_object)
+                else:
+                    description = ''
                 row = {
                     'type': content_type,
                     'id': activity.object_id,
-                    'description': get_description(activity.content_object) if activity.content_object else '',
+                    'description': description,
                     'date': activity.date,
                     'event': activity.event,
                     'count': activity.count,
