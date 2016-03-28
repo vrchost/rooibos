@@ -1,11 +1,7 @@
-import os
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from django.contrib.auth.models import User
 from optparse import make_option
-import rooibos.contrib.djangologging.middleware # does not get loaded otherwise
 from rooibos.userprofile.views import load_settings
-import logging
 import sys
 import json
 
@@ -17,7 +13,7 @@ class Command(BaseCommand):
         make_option('--user', '-u', dest='user',
                     help='User name'),
     )
-    
+
     def handle(self, *args, **kwargs):
 
         username = kwargs.get('user')
