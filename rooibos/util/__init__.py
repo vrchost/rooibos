@@ -1,5 +1,4 @@
 from django.contrib.sites.models import Site
-from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import simplejson
 from django.core.mail import mail_admins
@@ -13,15 +12,19 @@ import logging
 import os
 import hashlib
 
+
 # Decorator to solve issues with IE/SSL/Flash caching
 def must_revalidate(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
-        response["Cache-Control"] = "bogus"  #"no-cache, must-revalidate, no-store"
-        response["Pragma"] = "bogus"  #"no-cache"
+        # "no-cache, must-revalidate, no-store"
+        response["Cache-Control"] = "bogus"
+        # "no-cache"
+        response["Pragma"] = "bogus"
         return response
     return wrapper
+
 
 def json_view(func):
     # http://www.djangosnippets.org/snippets/622/
@@ -48,7 +51,7 @@ def json_view(func):
             message = 'Traceback:\n%s\n\nRequest:\n%s' % (
                 '\n'.join(traceback.format_exception(*exc_info)),
                 request_repr,
-                )
+            )
             mail_admins(subject, message, fail_silently=True)
             logging.error(message)
 
@@ -56,22 +59,26 @@ def json_view(func):
             if hasattr(e, 'message'):
                 msg = e.message
             else:
-                msg = _('Internal error')+': '+str(e)
+                msg = _('Internal error') + ': ' + str(e)
             response = {'result': 'error',
                         'text': msg}
 
         json = simplejson.dumps(response)
-        return HttpResponse(json, mimetype='text/plain') # mimetype='application/json')
+        # mimetype='application/json'
+        return HttpResponse(json, mimetype='text/plain')
     return wrap
 
 
-def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name', id_field='id', check_current_slug=False):
-    """Ensures a unique slug field by appending an integer counter to duplicate slugs.
+def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name',
+                id_field='id', check_current_slug=False):
+    """Ensures a unique slug field by appending an integer counter to duplicate
+    slugs.
 
     Source: http://www.djangosnippets.org/snippets/512/
     Modified by Andreas Knab, 10/14/2008
 
-    The item's slug field is first prepopulated by slugify-ing the source field.
+    The item's slug field is first prepopulated by slugify-ing the source
+    field.
     If that value already exists, a counter is appended to the slug, and the
     counter incremented upward until the value is unique.
 
@@ -81,43 +88,58 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name', id
 
     Call from within a model's custom save() method like so:
     unique_slug(item, slug_source='field1', slug_field='field2')
-    where the value of field slug_source will be used to prepopulate the value of slug_field.
+    where the value of field slug_source will be used to prepopulate the value
+    of slug_field.
 
     If slug_source does not exist, it will be used as a literal string.
     """
-    if check_current_slug or not getattr(item, slug_field) or not getattr(item, id_field): # if it's already got a slug, do nothing.
+    if check_current_slug or not getattr(item, slug_field) or \
+            not getattr(item, id_field):
+        # if it's already got a slug, do nothing.
         from django.template.defaultfilters import slugify
-        itemModel = item.__class__
-        max_length = itemModel._meta.get_field(slug_field).max_length
+        item_model = item.__class__
+        max_length = item_model._meta.get_field(slug_field).max_length
         if check_current_slug and getattr(item, slug_field):
             slug = slugify(getattr(item, slug_field))
         else:
-            slug = slugify(slug_source and getattr(item, slug_source, slug_literal) or slug_literal)
+            slug = slugify(
+                slug_source and
+                getattr(item, slug_source, slug_literal) or
+                slug_literal
+            )
         slug = slug[:max_length]
-        slug_check = slug[:min(len(slug), max_length-len(str(sys.maxint)))]
+        slug_check = slug[:min(len(slug), max_length - len(str(sys.maxint)))]
 
-        query = itemModel.objects.complex_filter({'%s__startswith' % slug_field: slug_check})
+        query = item_model.objects.complex_filter(
+            {'%s__startswith' % slug_field: slug_check})
 
-        # check to see if slug needs to be unique together with another field only
-        unique_together = filter(lambda f: slug_field in f, itemModel._meta.unique_together)
-        # only handle simple case of one unique_together with one additional field
+        # check to see if slug needs to be unique together
+        # with another field only
+        unique_together = filter(
+            lambda f: slug_field in f, item_model._meta.unique_together)
+        # only handle simple case of one unique_together with
+        # one additional field
         if len(unique_together) == 1 and len(unique_together[0]) == 2:
             l = list(unique_together[0])
             l.remove(slug_field)
             unique_with = l[0]
-            query = query & itemModel.objects.complex_filter({unique_with: getattr(item, unique_with)})
+            query = query & item_model.objects.complex_filter(
+                {unique_with: getattr(item, unique_with)})
 
-        # don't find ourselves to avoid conflict if our slug is already the same
+        # don't find ourselves to avoid conflict if our slug is already
+        # the same
         if getattr(item, id_field):
-            query = query & itemModel.objects.complex_filter(~Q(**{id_field: getattr(item, id_field)}))
+            query = query & item_model.objects.complex_filter(
+                ~Q(**{id_field: getattr(item, id_field)}))
 
-        allSlugs = [getattr(i, slug_field) for i in query]
+        all_slugs = [getattr(i, slug_field) for i in query]
 
-        if slug in allSlugs:
+        if slug in all_slugs:
             counter = 2
             uniqueslug = slug
-            while uniqueslug in allSlugs:
-                uniqueslug = "%s-%i" % (slug[:max_length - 1 - len(str(counter))], counter)
+            while uniqueslug in all_slugs:
+                uniqueslug = "%s-%i" % (
+                    slug[:max_length - 1 - len(str(counter))], counter)
                 counter += 1
             slug = uniqueslug
         setattr(item, slug_field, slug)
@@ -173,9 +195,9 @@ def calculate_hash(*args):
     return hash.hexdigest()
 
 
-
 class IterableLazyObject(SimpleLazyObject):
 
     def __iter__(self):
-        if self._wrapped is None: self._setup()
+        if self._wrapped is None:
+            self._setup()
         return self._wrapped.__iter__()
