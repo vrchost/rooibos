@@ -40,15 +40,19 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
                 create_link(self.get_absolute_file_path(media), symlink,
                     hard=getattr(settings, 'HARD_VIDEO_DELIVERY_LINKS', False))
 
-            Activity.objects.create(event='media-delivery-url',
-                    content_object=media,
-                    data=dict(symlink=symlink))
+            Activity.objects.create(
+                event='media-delivery-url',
+                content_object=media,
+                data=dict(symlink=symlink)
+            )
 
             return self.storage.urlbase % dict(filename=filename)
         elif self.storage.urlbase:
             # Return a link based on the configured urlbase
-            Activity.objects.create(event='media-delivery-url',
-                    content_object=media)
+            Activity.objects.create(
+                event='media-delivery-url',
+                content_object=media
+            )
 
             return self.storage.urlbase % dict(filename=media.url)
         else:

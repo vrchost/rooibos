@@ -3,6 +3,7 @@ from django.db import reset_queries
 from rooibos.storage.models import Media
 from rooibos.util.progressbar import ProgressBar
 
+
 class Command(BaseCommand):
     help = 'Removes given prefix from all media objects'
     args = 'prefix'
@@ -15,7 +16,7 @@ class Command(BaseCommand):
             total = Media.objects.count()
             pb = ProgressBar(total)
             for i in range(0, total, 100):
-                for media in Media.objects.all()[i:i+100]:
+                for media in Media.objects.all()[i:i + 100]:
                     if media.url.startswith(prefix):
                         media.url = media.url[len(prefix):]
                         media.save()

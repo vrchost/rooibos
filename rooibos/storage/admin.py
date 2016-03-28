@@ -1,6 +1,7 @@
 from django.contrib import admin
 from models import Storage, Media, ProxyUrl, TrustedSubnet
 
+
 class StorageAdmin(admin.ModelAdmin):
     # hide the derivative fields since it can cause data loss
     # see storage.models.Storage.derivative
@@ -10,16 +11,22 @@ class StorageAdmin(admin.ModelAdmin):
 
 
 class MediaAdmin(admin.ModelAdmin):
-    list_display = ('name', 'record',  'master', 'storage', 'mimetype')
+    list_display = ('name', 'record', 'master', 'storage', 'mimetype')
     fieldsets = (
         (None, {
             'fields': ('name', 'record', 'master')
         }),
         ('Media File info', {
-            'fields': ('media_file_path', 'delivery_url', 'width', 'height', 'mimetype', 'bitrate')
+            'fields': (
+                'media_file_path', 'delivery_url', 'width', 'height',
+                'mimetype', 'bitrate'
+            )
         }),
     )
-    readonly_fields = ['delivery_url', 'media_file_path', 'mimetype', 'width', 'height', 'bitrate']
+    readonly_fields = [
+        'delivery_url', 'media_file_path', 'mimetype', 'width',
+        'height', 'bitrate'
+    ]
 
     def delivery_url(self, obj):
         return obj.get_delivery_url()
@@ -30,6 +37,7 @@ class MediaAdmin(admin.ModelAdmin):
 
 class ProxyUrlAdmin(admin.ModelAdmin):
     pass
+
 
 class TrustedSubnetAdmin(admin.ModelAdmin):
     pass

@@ -1,8 +1,9 @@
-from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse
 from backends.rackspace import CloudFilesStorage
+from models import Media
 import os
 import random
+
 
 class CloudFilesStorageSystem(CloudFilesStorage):
 
@@ -10,18 +11,28 @@ class CloudFilesStorageSystem(CloudFilesStorage):
         super(CloudFilesStorageSystem, self).__init__(container=base)
 
     def get_absolute_media_url(self, storage, media):
-        return reverse('storage-retrieve', kwargs={'recordid': media.record.id,
-                                                   'record': media.record.name,
-                                                   'mediaid': media.id,
-                                                   'media': media.name})
+        return reverse(
+            'storage-retrieve',
+            kwargs={
+                'recordid': media.record.id,
+                'record': media.record.name,
+                'mediaid': media.id,
+                'media': media.name
+            }
+        )
 
     def _create_local_copy(self, storage, media, derivative=None):
-        m = derivative or Media.objects.create(record=media.record,
-                                               storage=storage.get_derivative_storage(),
-                                               mimetype=media.mimetype,
-                                               master=media,
-                                               name='-local-copy')
-        m.save_file('%s-local-copy' + os.path.splitext(media.url)[1], media.load_file())
+        m = derivative or Media.objects.create(
+            record=media.record,
+            storage=storage.get_derivative_storage(),
+            mimetype=media.mimetype,
+            master=media,
+            name='-local-copy'
+        )
+        m.save_file(
+            '%s-local-copy' + os.path.splitext(media.url)[1],
+            media.load_file()
+        )
 
     def get_absolute_file_path(self, storage, media):
         try:
@@ -45,10 +56,10 @@ class CloudFilesStorageSystem(CloudFilesStorage):
         return name
 
     def save(self, name, content):
-        #todo need to create unique name, not random
-        name = name or self.get_available_name("file-%s" % random.randint(1000000, 9999999))
+        # TODO: need to create unique name, not random
+        name = name or self.get_available_name(
+            "file-%s" % random.randint(1000000, 9999999))
         return super(CloudFilesStorageSystem, self).save(name, content)
 
     def is_local(self):
         return False
-    

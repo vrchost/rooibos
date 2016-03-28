@@ -4,20 +4,18 @@ import tempfile
 import os.path
 import Image
 import shutil
-from threading import Thread
 from StringIO import StringIO
 from django.test.client import Client
-from django.core.files import File
 from django.utils import simplejson
 from django.conf import settings
-from rooibos.data.models import *
+from django.contrib.auth.models import User
+from rooibos.data.models import Collection, Record, CollectionItem, \
+    FieldValue, standardfield
 from rooibos.storage.models import Media, ProxyUrl, Storage, TrustedSubnet
-from localfs import LocalFileSystemStorageSystem
-from rooibos.storage import get_thumbnail_for_record, get_media_for_record, get_image_for_record, match_up_media, analyze_records, analyze_media
+from rooibos.storage import get_thumbnail_for_record, get_media_for_record, \
+    get_image_for_record, match_up_media, analyze_records, analyze_media
 from rooibos.access.models import AccessControl
-from rooibos.access import get_effective_permissions
-from rooibos.presentation.models import Presentation, PresentationItem
-from sqlite3 import OperationalError
+from rooibos.presentation.models import Presentation
 
 
 class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
@@ -25,9 +23,11 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='Test')
-        self.storage = Storage.objects.create(title='Test', name='test', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='Test', name='test', system='local', base=self.tempdir)
         self.record = Record.objects.create(name='monalisa')
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
         AccessControl.objects.create(content_object=self.storage, read=True)
         AccessControl.objects.create(content_object=self.collection, read=True)
 
@@ -39,7 +39,8 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
     def test_save_and_retrieve_file(self):
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='image', storage=self.storage)
+        media = Media.objects.create(
+            record=self.record, name='image', storage=self.storage)
         content = StringIO('hello world')
         media.save_file('test.txt', content)
 
@@ -52,11 +53,13 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
     def test_save_over_existing_file(self):
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='image', storage=self.storage)
+        media = Media.objects.create(
+            record=self.record, name='image', storage=self.storage)
         content = StringIO('hello world')
         media.save_file('test.txt', content)
 
-        media2 = Media.objects.create(record=self.record, name='image', storage=self.storage)
+        media2 = Media.objects.create(
+            record=self.record, name='image', storage=self.storage)
 
         content2 = StringIO('hallo welt')
         media2.save_file('test.txt', content2)
@@ -66,11 +69,17 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         self.assertEqual('hello world', media.load_file().read())
         self.assertEqual('hallo welt', media2.load_file().read())
 
-
     def test_thumbnail(self):
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
-        with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='image/tiff',
+            storage=self.storage
+        )
+        filename = os.path.join(
+            os.path.dirname(__file__), 'test_data', 'dcmetro.tif')
+        with open(filename, 'rb') as f:
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record)
@@ -80,12 +89,18 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
         media.delete()
 
-
     def test_crop_to_square(self):
 
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
-        with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='image/tiff',
+            storage=self.storage
+        )
+        filename = os.path.join(
+            os.path.dirname(__file__), 'test_data', 'dcmetro.tif')
+        with open(filename, 'rb') as f:
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record, crop_to_square=True)
@@ -95,66 +110,97 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
 
         media.delete()
 
-
     def test_derivative_permissions(self):
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
-        with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='image/tiff',
+            storage=self.storage
+        )
+        filename = os.path.join(
+            os.path.dirname(__file__), 'test_data', 'dcmetro.tif')
+        with open(filename, 'rb') as f:
             media.save_file('dcmetro.tif', f)
 
         user1 = User.objects.create(username='test1890723589075')
         user2 = User.objects.create(username='test2087358972359')
 
-        AccessControl.objects.create(content_object=self.collection, user=user1, read=True)
-        AccessControl.objects.create(content_object=self.collection, user=user2, read=True)
+        AccessControl.objects.create(
+            content_object=self.collection, user=user1, read=True)
+        AccessControl.objects.create(
+            content_object=self.collection, user=user2, read=True)
 
-        AccessControl.objects.create(content_object=self.storage, user=user1, read=True)
-        AccessControl.objects.create(content_object=self.storage, user=user2, read=True,
-                                     restrictions=dict(width=200, height=200))
+        AccessControl.objects.create(
+            content_object=self.storage, user=user1, read=True)
+        AccessControl.objects.create(
+            content_object=self.storage,
+            user=user2,
+            read=True,
+            restrictions=dict(width=200, height=200)
+        )
 
-        result1 = get_image_for_record(self.record, width=400, height=400, user=user1)
-        result2 = get_image_for_record(self.record, width=400, height=400, user=user2)
+        result1 = get_image_for_record(
+            self.record, width=400, height=400, user=user1)
+        result2 = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
 
         self.assertEqual(400, Image.open(result1).size[0])
         self.assertEqual(200, Image.open(result2).size[0])
 
-        result3 = get_image_for_record(self.record, width=400, height=400, user=user2)
+        result3 = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(result2, result3)
 
         media.delete()
 
-
     def test_access_through_presentation(self):
         Media.objects.filter(record=self.record).delete()
-        media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
-        with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='image/tiff',
+            storage=self.storage
+        )
+        filename = os.path.join(
+            os.path.dirname(__file__), 'test_data', 'dcmetro.tif')
+        with open(filename, 'rb') as f:
             media.save_file('dcmetro.tif', f)
 
         user1 = User.objects.create(username='test3097589074404')
         user2 = User.objects.create(username='test4589570974047')
 
-        AccessControl.objects.create(content_object=self.collection, user=user1, read=True)
-        storage_acl = AccessControl.objects.create(content_object=self.storage, user=user1, read=True)
+        AccessControl.objects.create(
+            content_object=self.collection, user=user1, read=True)
+        AccessControl.objects.create(
+            content_object=self.storage, user=user1, read=True)
 
-        presentation = Presentation.objects.create(title='test47949074', owner=user1)
+        presentation = Presentation.objects.create(
+            title='test47949074', owner=user1)
         presentation.items.create(record=self.record, order=1)
 
-        # user2 has no access to storage or collection, so should not get result
-        result = get_image_for_record(self.record, width=400, height=400, user=user2)
+        # user2 has no access to storage or collection,
+        # so should not get result
+        result = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(None, result)
 
         # give access to presentation
-        AccessControl.objects.create(content_object=presentation, user=user2, read=True)
+        AccessControl.objects.create(
+            content_object=presentation, user=user2, read=True)
 
         # user2 has no access to storage yet, so still should not get result
-        result = get_image_for_record(self.record, width=400, height=400, user=user2)
+        result = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(None, result)
 
         # give user2 access to storage
-        user2_storage_acl = AccessControl.objects.create(content_object=self.storage, user=user2, read=True)
+        user2_storage_acl = AccessControl.objects.create(
+            content_object=self.storage, user=user2, read=True)
 
         # now user2 should get the image
-        result = get_image_for_record(self.record, width=400, height=400, user=user2)
+        result = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(400, Image.open(result).size[0])
 
         # limit user2 image size
@@ -162,36 +208,50 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         user2_storage_acl.save()
 
         # we should now get a smaller image
-        result = get_image_for_record(self.record, width=400, height=400, user=user2)
+        result = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(200, Image.open(result).size[0])
 
         # password protect the presentation
-        presentation.password='secret'
+        presentation.password = 'secret'
         presentation.save()
 
-        # user2 has not provided presentation password, so should not get result
-        result = get_image_for_record(self.record, width=400, height=400, user=user2)
+        # user2 has not provided presentation password,
+        # so should not get result
+        result = get_image_for_record(
+            self.record, width=400, height=400, user=user2)
         self.assertEqual(None, result)
 
         # with presentation password, image should be returned
-        result = get_image_for_record(self.record, width=400, height=400, user=user2,
-                                      passwords={presentation.id: 'secret'})
+        result = get_image_for_record(
+            self.record,
+            width=400,
+            height=400,
+            user=user2,
+            passwords={presentation.id: 'secret'}
+        )
         self.assertEqual(200, Image.open(result).size[0])
 
+    def test_delivery_url(self):
+        s = Storage.objects.create(
+            title='TestDelivery',
+            system='local',
+            base='t:/streaming/directory',
+            urlbase='rtmp://streaming:80/videos/mp4:test/%(filename)s'
+        )
 
-    def testDeliveryUrl(self):
-        s = Storage.objects.create(title='TestDelivery',
-                                   system='local',
-                                   base='t:/streaming/directory',
-                                   urlbase='rtmp://streaming:80/videos/mp4:test/%(filename)s')
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='video/mp4',
+            storage=s,
+            url='test.mp4'
+        )
 
-        media = Media.objects.create(record=self.record,
-                                     name='tiff',
-                                     mimetype='video/mp4',
-                                     storage=s,
-                                     url='test.mp4')
-
-        self.assertEqual('rtmp://streaming:80/videos/mp4:test/test.mp4', media.get_delivery_url())
+        self.assertEqual(
+            'rtmp://streaming:80/videos/mp4:test/test.mp4',
+            media.get_delivery_url()
+        )
 
 
 class ImageCompareTest(unittest.TestCase):
@@ -199,15 +259,14 @@ class ImageCompareTest(unittest.TestCase):
     def test_compare(self):
         from rooibos.storage import _imgsizecmp
 
-        class image:
+        class Image:
             def __init__(self, w, h):
                 self.width = w
                 self.height = h
 
-        data = [image(w, h) for w in (10, None, 20) for h in (15, 5, None)]
+        data = [Image(w, h) for w in (10, None, 20) for h in (15, 5, None)]
 
         data = sorted(data, _imgsizecmp)[::-1]
-
 
         self.assertEqual(data[0].width, 20)
         self.assertEqual(data[0].height, 15)
@@ -230,14 +289,28 @@ class ProxyUrlTest(unittest.TestCase):
         self.user.save()
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='Test')
-        self.storage = Storage.objects.create(title='Test', name='test', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='Test', name='test', system='local', base=self.tempdir)
         self.record = Record.objects.create(name='monalisa')
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
-        AccessControl.objects.create(content_object=self.storage, user=self.user, read=True,
-                                     restrictions=dict(width=50, height=50))
-        AccessControl.objects.create(content_object=self.collection, user=self.user, read=True)
-        media = Media.objects.create(record=self.record, name='tiff', mimetype='image/tiff', storage=self.storage)
-        with open(os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif'), 'rb') as f:
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
+        AccessControl.objects.create(
+            content_object=self.storage,
+            user=self.user,
+            read=True,
+            restrictions=dict(width=50, height=50)
+        )
+        AccessControl.objects.create(
+            content_object=self.collection, user=self.user, read=True)
+        media = Media.objects.create(
+            record=self.record,
+            name='tiff',
+            mimetype='image/tiff',
+            storage=self.storage
+        )
+        filename = os.path.join(
+            os.path.dirname(__file__), 'test_data', 'dcmetro.tif')
+        with open(filename, 'rb') as f:
             media.save_file('dcmetro.tif', f)
 
     def tearDown(self):
@@ -262,9 +335,14 @@ class ProxyUrlTest(unittest.TestCase):
 
         TrustedSubnet.objects.create(subnet='127.0.0.1')
 
-        response = c.post('/media/proxy/create/',
-                          {'url': self.record.get_thumbnail_url(), 'context': '_1_2'},
-                          HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        response = c.post(
+            '/media/proxy/create/',
+            {
+                'url': self.record.get_thumbnail_url(),
+                'context': '_1_2'
+            },
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
         self.assertEqual(200, response.status_code)
         data = simplejson.loads(response.content)
         self.assertEqual('ok', data['result'])
@@ -282,13 +360,15 @@ class ProxyUrlTest(unittest.TestCase):
         width, height = image.size
         self.assertEqual(50, width)
 
-
     def test_duplicate_proxy_url(self):
 
         TrustedSubnet.objects.create(subnet='127.0.0.1')
-        proxy_url = ProxyUrl.create_proxy_url('/some/url', 'ctx1', '127.0.0.1', self.user)
-        proxy_url2 = ProxyUrl.create_proxy_url('/some/url', 'ctx2', '127.0.0.1', self.user)
-        proxy_url3 = ProxyUrl.create_proxy_url('/some/url', 'ctx1', '127.0.0.1', self.user)
+        proxy_url = ProxyUrl.create_proxy_url(
+            '/some/url', 'ctx1', '127.0.0.1', self.user)
+        proxy_url2 = ProxyUrl.create_proxy_url(
+            '/some/url', 'ctx2', '127.0.0.1', self.user)
+        proxy_url3 = ProxyUrl.create_proxy_url(
+            '/some/url', 'ctx1', '127.0.0.1', self.user)
         self.assertEqual(proxy_url.uuid, proxy_url3.uuid)
         self.assertNotEqual(proxy_url.uuid, proxy_url2.uuid)
 
@@ -297,9 +377,11 @@ class OnlineStorageSystemTestCase(unittest.TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(title='Test')
-        self.storage = Storage.objects.create(title='Test', name='test', system='online')
+        self.storage = Storage.objects.create(
+            title='Test', name='test', system='online')
         self.record = Record.objects.create(name='monalisa')
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
         AccessControl.objects.create(content_object=self.storage, read=True)
         AccessControl.objects.create(content_object=self.collection, read=True)
 
@@ -309,8 +391,17 @@ class OnlineStorageSystemTestCase(unittest.TestCase):
         self.collection.delete()
 
     def test_retrieval(self):
-        url = "file:///" + os.path.join(os.path.dirname(__file__), 'test_data', 'dcmetro.tif').replace('\\', '/')
-        media = Media.objects.create(record=self.record, storage=self.storage, url=url, mimetype='image/tiff')
+        url = "file:///" + os.path.join(
+            os.path.dirname(__file__),
+            'test_data',
+            'dcmetro.tif'
+        ).replace('\\', '/')
+        media = Media.objects.create(
+            record=self.record,
+            storage=self.storage,
+            url=url,
+            mimetype='image/tiff'
+        )
         thumbnail = get_thumbnail_for_record(self.record)
         width, height = Image.open(thumbnail).size
         self.assertTrue(width == 100)
@@ -324,14 +415,17 @@ class PseudoStreamingStorageSystemTestCase(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='Test')
-        self.storage = Storage.objects.create(title='Test',
-                                              name='test',
-                                              system='pseudostreaming',
-                                              base=self.tempdir,
-                                              urlbase='file:///' + self.tempdir.replace('\\', '/'))
+        self.storage = Storage.objects.create(
+            title='Test',
+            name='test',
+            system='pseudostreaming',
+            base=self.tempdir,
+            urlbase='file:///' + self.tempdir.replace('\\', '/'))
         self.record = Record.objects.create(name='record')
-        self.media = Media.objects.create(record=self.record, name='image', storage=self.storage)
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
+        self.media = Media.objects.create(
+            record=self.record, name='image', storage=self.storage)
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
         AccessControl.objects.create(content_object=self.storage, read=True)
         AccessControl.objects.create(content_object=self.collection, read=True)
 
@@ -342,12 +436,12 @@ class PseudoStreamingStorageSystemTestCase(unittest.TestCase):
         self.collection.delete()
 
     def test_pseudostreaming(self):
-        TEST_STRING = 'Hello world'
-        content = StringIO(TEST_STRING)
+        test_string = 'Hello world'
+        content = StringIO(test_string)
         self.media.save_file('test.txt', content)
         c = Client()
         response = c.get(self.media.get_absolute_url())
-        self.assertEqual(TEST_STRING, response.content)
+        self.assertEqual(test_string, response.content)
 
 
 class ProtectedContentDownloadTestCase(unittest.TestCase):
@@ -355,14 +449,24 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='ProtectedTest')
-        self.storage = Storage.objects.create(title='ProtectedTest', name='protectedtest', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='ProtectedTest',
+            name='protectedtest',
+            system='local',
+            base=self.tempdir
+        )
         self.record = Record.objects.create(name='protected')
-        self.user = User.objects.create_user('protectedtest', 'test@example.com', 'test')
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
-        AccessControl.objects.create(content_object=self.storage, user=self.user, read=True)
-        AccessControl.objects.create(content_object=self.collection, user=self.user, read=True)
+        self.user = User.objects.create_user(
+            'protectedtest', 'test@example.com', 'test')
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
+        AccessControl.objects.create(
+            content_object=self.storage, user=self.user, read=True)
+        AccessControl.objects.create(
+            content_object=self.collection, user=self.user, read=True)
         Media.objects.filter(record=self.record).delete()
-        self.media = Media.objects.create(record=self.record, name='protectedimage', storage=self.storage)
+        self.media = Media.objects.create(
+            record=self.record, name='protectedimage', storage=self.storage)
         content = StringIO('hello world')
         self.media.save_file('test.txt', content)
 
@@ -376,7 +480,10 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
 
     def test_save_and_retrieve_file(self):
 
-        if not any(map(lambda c: c.endswith('.auth.middleware.BasicAuthenticationMiddleware'), settings.MIDDLEWARE_CLASSES)):
+        if not any(map(
+                lambda c:
+                c.endswith('.auth.middleware.BasicAuthenticationMiddleware'),
+                settings.MIDDLEWARE_CLASSES)):
             return
 
         c = Client()
@@ -385,8 +492,11 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         self.assertEqual(401, response.status_code)
 
         # with basic auth
-        response = c.get(self.media.get_absolute_url(),
-                         HTTP_AUTHORIZATION='basic %s' % 'protectedtest:test'.encode('base64').strip())
+        response = c.get(
+            self.media.get_absolute_url(),
+            HTTP_AUTHORIZATION='basic %s' %
+            'protectedtest:test'.encode('base64').strip()
+        )
         self.assertEqual(200, response.status_code)
         self.assertEqual('hello world', response.content)
 
@@ -401,8 +511,10 @@ class AutoConnectMediaTestCase(unittest.TestCase):
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         os.mkdir(os.path.join(self.tempdir, 'sub'))
-        self.collection = Collection.objects.create(title='AutoconnectMediaTest')
-        self.storage = Storage.objects.create(title='AutoconnectMediaTest', system='local', base=self.tempdir)
+        self.collection = Collection.objects.create(
+            title='AutoconnectMediaTest')
+        self.storage = Storage.objects.create(
+            title='AutoconnectMediaTest', system='local', base=self.tempdir)
         self.records = []
         self.create_file('id_1')
         self.create_file('id_2')
@@ -417,8 +529,10 @@ class AutoConnectMediaTestCase(unittest.TestCase):
 
     def create_record(self, id):
         record = Record.objects.create(name='id')
-        CollectionItem.objects.create(collection=self.collection, record=record)
-        FieldValue.objects.create(record=record, field=standardfield('identifier'), value=id)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record)
+        FieldValue.objects.create(
+            record=record, field=standardfield('identifier'), value=id)
         self.records.append(record)
         return record
 
@@ -440,7 +554,7 @@ class AutoConnectMediaTestCase(unittest.TestCase):
     def test_connect_files(self):
         r1 = self.create_record('id_1')
         r2 = self.create_record('id_2')
-        r3 = self.create_record('id_3')
+        self.create_record('id_3')
         Media.objects.create(record=r1, storage=self.storage, url='id_1.txt')
 
         matches = list(match_up_media(self.storage, self.collection))
@@ -458,8 +572,10 @@ class AnalyzeTestCase(unittest.TestCase):
         self.tempdir = tempfile.mkdtemp()
         os.mkdir(os.path.join(self.tempdir, 'sub'))
         self.collection = Collection.objects.create(title='AnalyzeTest')
-        self.storage = Storage.objects.create(title='AnalyzeTest', system='local', base=self.tempdir)
-        self.other_storage = Storage.objects.create(title='OtherAnalyzeTest', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='AnalyzeTest', system='local', base=self.tempdir)
+        self.other_storage = Storage.objects.create(
+            title='OtherAnalyzeTest', system='local', base=self.tempdir)
         self.records = []
         self.create_file('id_1')
         self.create_file('id_2')
@@ -467,7 +583,8 @@ class AnalyzeTestCase(unittest.TestCase):
         self.create_record('id_1', 'id_1')
         self.create_record('id_missing', 'id_missing')
         self.create_record('id_no_media', None)
-        self.create_record('id_missing_other', 'id_missing_other', self.other_storage)
+        self.create_record(
+            'id_missing_other', 'id_missing_other', self.other_storage)
 
     def tearDown(self):
         for record in self.records:
@@ -478,12 +595,16 @@ class AnalyzeTestCase(unittest.TestCase):
 
     def create_record(self, id, media, storage=None):
         record = Record.objects.create(name='id')
-        CollectionItem.objects.create(collection=self.collection, record=record)
-        FieldValue.objects.create(record=record, field=standardfield('identifier'), value=id)
-        FieldValue.objects.create(record=record, field=standardfield('title'), value=id)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record)
+        FieldValue.objects.create(
+            record=record, field=standardfield('identifier'), value=id)
+        FieldValue.objects.create(
+            record=record, field=standardfield('title'), value=id)
         self.records.append(record)
         if media:
-            record.media_set.create(storage=storage or self.storage, url='%s.txt' % media)
+            record.media_set.create(
+                storage=storage or self.storage, url='%s.txt' % media)
         return record
 
     def create_file(self, id):
@@ -491,7 +612,7 @@ class AnalyzeTestCase(unittest.TestCase):
         file.write('test')
         file.close()
 
-    def testAnalyzeCollection(self):
+    def test_analyze_collection(self):
 
         empty = analyze_records(self.collection, self.storage)
 
@@ -500,7 +621,7 @@ class AnalyzeTestCase(unittest.TestCase):
         self.assertEqual('id_missing_other', titles[0])
         self.assertEqual('id_no_media', titles[1])
 
-    def testAnalyzeMedia(self):
+    def test_analyze_media(self):
 
         broken, extra = analyze_media(self.storage)
 
@@ -513,34 +634,60 @@ class AnalyzeTestCase(unittest.TestCase):
         self.assertEqual(os.path.join('sub', 'id_99.txt'), extra[1])
 
 
-
 class GetMediaForRecordTestCase(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
         self.collection = Collection.objects.create(title='GetMediaTest')
-        self.storage = Storage.objects.create(title='GetMediaTest', name='getmediatest', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='GetMediaTest',
+            name='getmediatest',
+            system='local',
+            base=self.tempdir
+        )
         self.record = Record.objects.create(name='monalisa')
-        self.record.media_set.create(name='getmediatest', url='getmediatest', storage=self.storage)
-        CollectionItem.objects.create(collection=self.collection, record=self.record)
+        self.record.media_set.create(
+            name='getmediatest',
+            url='getmediatest',
+            storage=self.storage
+        )
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
         self.user = User.objects.create(username='getmediatest1')
         self.owner_can_read = User.objects.create(username='getmediatest2')
         self.owner_cant_read = User.objects.create(username='getmediatest3')
-        AccessControl.objects.create(user=self.owner_can_read, content_object=self.collection, read=True)
-        self.record_standalone = Record.objects.create(name='no_collection', owner=self.owner_can_read)
-        self.record_standalone.media_set.create(name='getmediatest', url='getmediatest', storage=self.storage)
-        self.presentation_ok = Presentation.objects.create(title='GetMediaTest1', owner=self.owner_can_read)
-        self.presentation_ok.items.create(record=self.record, order=1)
-        self.presentation_hidden = Presentation.objects.create(title='GetMediaTest5', owner=self.owner_can_read, hidden=True)
-        self.presentation_hidden.items.create(record=self.record, order=1)
-        self.presentation_broken = Presentation.objects.create(title='GetMediaTest2', owner=self.owner_cant_read)
-        self.presentation_broken.items.create(record=self.record, order=1)
-        self.presentation_password = Presentation.objects.create(title='GetMediaTest3', owner=self.owner_can_read, password='test')
+        AccessControl.objects.create(
+            user=self.owner_can_read,
+            content_object=self.collection,
+            read=True
+        )
+        self.record_standalone = Record.objects.create(
+            name='no_collection', owner=self.owner_can_read)
+        self.record_standalone.media_set.create(
+            name='getmediatest', url='getmediatest', storage=self.storage)
+        self.presentation_ok = Presentation.objects.create(
+            title='GetMediaTest1', owner=self.owner_can_read)
+        self.presentation_ok.items.create(
+            record=self.record, order=1)
+        self.presentation_hidden = Presentation.objects.create(
+            title='GetMediaTest5', owner=self.owner_can_read, hidden=True)
+        self.presentation_hidden.items.create(
+            record=self.record, order=1)
+        self.presentation_broken = Presentation.objects.create(
+            title='GetMediaTest2', owner=self.owner_cant_read)
+        self.presentation_broken.items.create(
+            record=self.record, order=1)
+        self.presentation_password = Presentation.objects.create(
+            title='GetMediaTest3', owner=self.owner_can_read, password='test')
         self.presentation_password.items.create(record=self.record, order=1)
-        self.presentation_no_record = Presentation.objects.create(title='GetMediaTest4', owner=self.owner_can_read)
-        self.presentation_standalone_record = Presentation.objects.create(title='GetMediaTest6', owner=self.owner_can_read)
-        self.presentation_standalone_record.items.create(record=self.record_standalone, order=1)
-        AccessControl.objects.create(user=self.user, content_object=self.storage, read=True)
+        self.presentation_no_record = Presentation.objects.create(
+            title='GetMediaTest4', owner=self.owner_can_read)
+        self.presentation_standalone_record = Presentation.objects.create(
+            title='GetMediaTest6', owner=self.owner_can_read)
+        self.presentation_standalone_record.items.create(
+            record=self.record_standalone, order=1)
+        AccessControl.objects.create(
+            user=self.user, content_object=self.storage, read=True)
 
     def tearDown(self):
         self.presentation_ok.delete()
@@ -556,55 +703,91 @@ class GetMediaForRecordTestCase(unittest.TestCase):
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
     def test_direct_access(self):
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.collection, read=True)
-        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user, content_object=self.collection, read=True)
+        self.assertEqual(1, get_media_for_record(
+            self.record, user=self.user).count())
         AccessControl.objects.filter(user=self.user).delete()
 
     def test_simple_presentation_access(self):
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_broken, read=True)
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_ok, read=True)
-        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user, content_object=self.presentation_broken, read=True)
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user, content_object=self.presentation_ok, read=True)
+        self.assertEqual(1, get_media_for_record(
+            self.record, user=self.user).count())
         AccessControl.objects.filter(user=self.user).delete()
 
     def test_password_access(self):
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_password, read=True)
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user,
+            content_object=self.presentation_password,
+            read=True
+        )
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
         passwords = dict(((self.presentation_password.id, 'test'),))
-        self.assertEqual(1, get_media_for_record(self.record, user=self.user, passwords=passwords).count())
+        self.assertEqual(1, get_media_for_record(
+            self.record, user=self.user, passwords=passwords).count())
         AccessControl.objects.filter(user=self.user).delete()
 
     def test_presentation_must_contain_record(self):
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_no_record, read=True)
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user,
+            content_object=self.presentation_no_record,
+            read=True
+        )
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
         AccessControl.objects.filter(user=self.user).delete()
 
     def test_hidden_presentation_access(self):
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_hidden, read=True)
-        self.assertEqual(0, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user, content_object=self.presentation_hidden, read=True)
+        self.assertEqual(0, get_media_for_record(
+            self.record, user=self.user).count())
         self.presentation_hidden.hidden = False
         self.presentation_hidden.save()
-        self.assertEqual(1, get_media_for_record(self.record, user=self.user).count())
+        self.assertEqual(1, get_media_for_record(
+            self.record, user=self.user).count())
         AccessControl.objects.filter(user=self.user).delete()
         self.presentation_hidden.hidden = True
         self.presentation_hidden.save()
 
     def test_standalone_record_access(self):
-        self.assertEqual(0, get_media_for_record(self.record_standalone, user=self.user).count())
-        AccessControl.objects.create(user=self.user, content_object=self.presentation_standalone_record, read=True)
-        self.assertEqual(1, get_media_for_record(self.record_standalone, user=self.user).count())
+        self.assertEqual(0, get_media_for_record(
+            self.record_standalone, user=self.user).count())
+        AccessControl.objects.create(
+            user=self.user,
+            content_object=self.presentation_standalone_record,
+            read=True
+        )
+        self.assertEqual(1, get_media_for_record(
+            self.record_standalone, user=self.user).count())
 
 
 class MediaNameTestCase(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
-        self.storage = Storage.objects.create(title='MediaNameTest', name='medianametest', system='local', base=self.tempdir)
+        self.storage = Storage.objects.create(
+            title='MediaNameTest',
+            name='medianametest',
+            system='local',
+            base=self.tempdir
+        )
         self.record = Record.objects.create()
 
     def tearDown(self):
@@ -612,15 +795,16 @@ class MediaNameTestCase(unittest.TestCase):
         self.storage.delete()
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
-    def testDefaultMediaName(self):
+    def test_default_media_name(self):
         media = self.record.media_set.create(storage=self.storage)
         self.assertTrue(media.name.startswith('m-'))
 
-    def testMediaNameFromUrl(self):
-        media = self.record.media_set.create(url='test.txt', storage=self.storage)
+    def test_media_name_from_url(self):
+        media = self.record.media_set.create(
+            url='test.txt', storage=self.storage)
         self.assertEqual('test', media.name)
 
-    def testMediaNameFromSave(self):
+    def test_media_name_from_save(self):
         media = self.record.media_set.create(storage=self.storage)
         self.assertTrue(media.name.startswith('m-'))
 

@@ -17,7 +17,7 @@ def _pdfthumbnail(infile, outfile):
     print "Starting"
     doc = gfx.open("pdf", infile)
     img = gfx.ImageList()
-    img.setparameter("antialise", "1") # turn on antialising
+    img.setparameter("antialise", "1")  # turn on antialising
     page1 = doc.getPage(1)
     img.startpage(page1.width, page1.height)
     page1.render(img)
