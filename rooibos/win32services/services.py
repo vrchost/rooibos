@@ -3,13 +3,14 @@ import sys
 import win32serviceutil
 import win32service
 import win32event
-import win32api
 import servicemanager
-
-install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..'))
-if not install_dir in sys.path: sys.path.append(install_dir)
-
 from rooibos import settings
+
+
+install_dir = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), '..', '..'))
+if install_dir not in sys.path:
+    sys.path.append(install_dir)
 
 
 class Service(win32serviceutil.ServiceFramework):
@@ -29,22 +30,30 @@ class Service(win32serviceutil.ServiceFramework):
     def log(self, msg):
         servicemanager.LogInfoMsg(str(msg))
 
-    def SvcDoRun(self):
+    def SvcDoRun(self):  # noqa
         self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         try:
             self.ReportServiceStatus(win32service.SERVICE_RUNNING)
             from django.core.management import execute_manager
             execute_manager(settings)
-            win32event.WaitForSingleObject(self.stop_event, win32event.INFINITE)
+            win32event.WaitForSingleObject(
+                self.stop_event, win32event.INFINITE)
         except Exception, ex:
             self.log('Exception: %s' % ex)
             self.SvcStop()
 
-    def SvcStop(self):
+    def SvcStop(self):  # noqa
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.stop_event)
         self.ReportServiceStatus(win32service.SERVICE_STOPPED)
 
     @classmethod
     def get_class_string(cls):
-        return '%s.%s' % (os.path.splitext(os.path.abspath(sys.modules[cls.__module__].__file__))[0], cls.__name__)
+        return '%s.%s' % (
+            os.path.splitext(
+                os.path.abspath(
+                    sys.modules[cls.__module__].__file__
+                )
+            )[0],
+            cls.__name__
+        )
