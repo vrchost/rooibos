@@ -2,7 +2,7 @@ from __future__ import with_statement
 import unittest
 import tempfile
 import os.path
-import Image
+from PIL import Image
 import shutil
 from StringIO import StringIO
 from django.test.client import Client
