@@ -24,7 +24,8 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
     options_form_cls = viewer.get_options_form()
     if options_form_cls:
         options_form = options_form_cls(request.GET)
-        options = options_form.cleaned_data if options_form.is_valid() else viewer.default_options
+        options = options_form.cleaned_data \
+            if options_form.is_valid() else viewer.default_options
     else:
         options_form = None
         options = viewer.default_options
@@ -62,12 +63,17 @@ def viewer_script(request, viewer, objid):
 
 # Handler for legacy URL for videos embedded using previous versions of MDID3
 def legacy_embedded_video(request, record, media):
-    return redirect(reverse(
-        'viewers-viewer-script',
-        args=('mediaplayer', record)) + '?' +
-        'id=player-%(record)s-%(media)s&media=%(media)s&autoplay=%(autoplay)s' %
-        {
+    return redirect(
+        reverse(
+            'viewers-viewer-script',
+            args=(
+                'mediaplayer',
+                record
+            )
+        ) + '?id=player-%(record)s-%(media)s&media=%(media)s&'
+        'autoplay=%(autoplay)s' % {
             'record': record,
             'media': media,
-            'autoplay': request.GET.has_key('autoplay'),
-        })
+            'autoplay': 'autoplay' in request.GET,
+        }
+    )
