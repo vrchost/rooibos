@@ -1,7 +1,7 @@
 from django import forms
-from django.utils import simplejson
-from django.shortcuts import render_to_response, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseNotAllowed
+from django.shortcuts import render_to_response
+from django.http import HttpResponse, HttpResponseRedirect, \
+    HttpResponseNotAllowed
 from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
@@ -20,7 +20,6 @@ from rooibos.contrib.tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper
 from rooibos.solr.views import run_search
 from rooibos.context_processors import selected_records as ctx_selected_records
-from rooibos.presentation.models import Presentation
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.ui.alternate_password import set_alternate_password
 import random
@@ -33,6 +32,7 @@ def css(request, stylesheet):
                               {},
                               context_instance=RequestContext(request),
                               mimetype='text/css')
+
 
 @csrf_protect
 def main(request):
@@ -79,21 +79,24 @@ def select_record(request):
     rc = RequestContext(request)
 
     return dict(
-        basket=render_to_string('ui_basket.html', context, context_instance=rc),
-        header=render_to_string('ui_basket_header.html', context, context_instance=rc),
-        )
+        basket=render_to_string(
+            'ui_basket.html', context, context_instance=rc),
+        header=render_to_string(
+            'ui_basket_header.html', context, context_instance=rc),
+    )
 
 
 @login_required
 def add_tags(request, type, id):
-    if request.method <> 'POST':
+    if request.method != 'POST':
         return HttpResponseNotAllowed(['POST'])
     tags = request.POST.get('tags')
     if '"' in tags:
         new_tags = parse_tag_input(tags)
     else:
         new_tags = filter(None, map(lambda s: s.strip(), tags.split(',')))
-    ownedwrapper = OwnedWrapper.objects.get_for_object(user=request.user, type=type, object_id=id)
+    ownedwrapper = OwnedWrapper.objects.get_for_object(
+        user=request.user, type=type, object_id=id)
     for tag in new_tags:
         Tag.objects.add_tag(ownedwrapper, '"%s"' % tag)
     return HttpResponseRedirect(request.GET.get('next') or '/')
@@ -103,20 +106,33 @@ def add_tags(request, type, id):
 def remove_tag(request, type, id):
     tag = request.GET.get('tag')
     if request.method == 'POST':
-        ownedwrapper = OwnedWrapper.objects.get_for_object(user=request.user, type=type, object_id=id)
-        Tag.objects.update_tags(ownedwrapper,  ' '.join(map(lambda s: '"%s"' % s,
-            Tag.objects.get_for_object(ownedwrapper).exclude(name=tag).values_list('name'))))
+        ownedwrapper = OwnedWrapper.objects.get_for_object(
+            user=request.user, type=type, object_id=id)
+        Tag.objects.update_tags(
+            ownedwrapper, ' '.join(
+                map(
+                    lambda s: '"%s"' % s,
+                    Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
+                    .values_list('name')
+                )
+            )
+        )
         if request.is_ajax():
-            return HttpResponse(simplejson.dumps(dict(result='ok')), content_type='application/javascript')
+            return HttpResponse(
+                simplejson.dumps(
+                    dict(result='ok')
+                ),
+                content_type='application/javascript'
+            )
         else:
-            request.user.message_set.create(message="Tag removed successfully.")
+            request.user.message_set.create(
+                message="Tag removed successfully.")
             return HttpResponseRedirect(request.GET.get('next') or '/')
 
     return render_to_response('ui_tag_remove.html',
                               {'tag': tag,
                                'next': request.GET.get('next')},
                               context_instance=RequestContext(request))
-
 
 
 @json_view
@@ -138,18 +154,25 @@ def upload_progress(request):
 @login_required
 def manage(request):
 
-    storage_manage = filter_by_access(request.user, Storage, manage=True).count() > 0
-    storage_write = filter_by_access(request.user, Storage, write=True).count() > 0
-    collection_write = filter_by_access(request.user, Collection, write=True).count() > 0
-    collection_manage = filter_by_access(request.user, Collection, manage=True).count() > 0
+    storage_manage = filter_by_access(
+        request.user, Storage, manage=True).count() > 0
+    storage_write = filter_by_access(
+        request.user, Storage, write=True).count() > 0
+    collection_write = filter_by_access(
+        request.user, Collection, write=True).count() > 0
+    collection_manage = filter_by_access(
+        request.user, Collection, manage=True).count() > 0
 
-    return render_to_response('ui_management.html',
-                              {'storage_manage': storage_manage,
-                               'storage_write': storage_write,
-                               'collection_write': collection_write,
-                               'collection_manage': collection_manage,
-                              },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'ui_management.html',
+        {
+            'storage_manage': storage_manage,
+            'storage_write': storage_write,
+            'collection_write': collection_write,
+            'collection_manage': collection_manage,
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 @login_required
@@ -160,36 +183,55 @@ def options(request):
     )
 
     class UserInterfaceForm(forms.Form):
-        basket_thumbnails = forms.ChoiceField(choices=[('square', 'Square'), ('normal', 'Normal'),],
-                                              label='Basket and lighttable thumbnails')
-        alternate_password = forms.CharField(required=False, help_text='<small>Alternate Password for e.g. Desktop MediaViewer login</small>')
+        basket_thumbnails = forms.ChoiceField(
+            choices=[('square', 'Square'), ('normal', 'Normal')],
+            label='Basket and lighttable thumbnails'
+        )
+        alternate_password = forms.CharField(
+            required=False,
+            help_text='<small>Alternate Password for e.g. Desktop '
+            'MediaViewer login</small>'
+        )
 
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)
         if ui_form.is_valid():
             for key in option_defaults.keys():
-                store_settings(request.user, 'options_%s' % key, ui_form.cleaned_data[key])
+                store_settings(
+                    request.user,
+                    'options_%s' % key,
+                    ui_form.cleaned_data[key]
+                )
             if ui_form.cleaned_data['alternate_password'] != '[unchanged]':
-                set_alternate_password(request.user, ui_form.cleaned_data['alternate_password'])
-            request.user.message_set.create(message="Updated settings have been saved.")
+                set_alternate_password(
+                    request.user, ui_form.cleaned_data['alternate_password'])
+            request.user.message_set.create(
+                message="Updated settings have been saved.")
             return HttpResponseRedirect(request.get_full_path())
     else:
         initial = option_defaults.copy()
-        initial.update(dict((key[8:], val[0])
-            for (key, val) in load_settings(request.user, filter='options_').iteritems()))
+        initial.update(dict(
+            (key[8:], val[0])
+            for (key, val) in load_settings(
+                request.user, filter='options_'
+            ).iteritems()
+        ))
         initial['alternate_password'] = '[unchanged]'
         ui_form = UserInterfaceForm(initial)
 
-    return render_to_response('ui_options.html',
-                              {
-                                'ui_form': ui_form,
-                              },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'ui_options.html',
+        {
+            'ui_form': ui_form,
+        },
+        context_instance=RequestContext(request)
+    )
 
 
 def clear_selected_records(request):
     request.session['selected_records'] = ()
-    return HttpResponseRedirect(request.GET.get('next', reverse('solr-search')))
+    return HttpResponseRedirect(
+        request.GET.get('next', reverse('solr-search')))
 
 
 @login_required
@@ -203,20 +245,27 @@ def delete_selected_records(request):
 
     if request.method == 'POST':
         for record in deletable_items:
-            if record.id in selected: selected.remove(record.id)
+            if record.id in selected:
+                selected.remove(record.id)
             record.delete()
         request.session['selected_records'] = selected
 
         from rooibos.middleware import HistoryMiddleware
         return HttpResponseRedirect(
-            request.GET.get('next',
+            request.GET.get(
+                'next',
                 HistoryMiddleware.go_back(
                     request,
                     to_before=reverse('ui-delete-selected'),
-                    default=reverse('solr-selected'))))
+                    default=reverse('solr-selected')
+                )
+            )
+        )
 
-    return render_to_response('ui_delete_selected.html',
-                              {
-                                'items': deletable_items,
-                              },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'ui_delete_selected.html',
+        {
+            'items': deletable_items,
+        },
+        context_instance=RequestContext(request)
+    )
