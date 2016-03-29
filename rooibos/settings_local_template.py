@@ -281,6 +281,10 @@ INSTALLED_APPS = ()
 FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
 
 
+PPTEXPORT_WIDTH = 800
+PPTEXPORT_HEIGHT = 600
+
+
 additional_settings = [
 #    'apps.jmutube.settings_local',
 #    'apps.svohp.settings_local',
