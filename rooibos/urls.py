@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import url, handler404, patterns, include
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
@@ -19,9 +19,11 @@ apps_showcases = list(s[5:].replace('.', '-') + '-showcase.html' for s in apps)
 # Cache static files
 serve = cache_control(max_age=365 * 24 * 3600)(serve)
 
+
 def handler500_with_context(request):
     template = loader.get_template('500.html')
     return HttpResponseServerError(template.render(RequestContext(request)))
+
 
 handler404 = getattr(settings, 'HANDLER404', handler404)
 handler500 = getattr(settings, 'HANDLER500', handler500_with_context)
@@ -39,7 +41,6 @@ urls = [
                                              'template': 'showcases.html',
                                              'extra_context': {'applications': apps_showcases}}, name='showcases'),
 
-#    url(r'^admin/(.*)', admin.site.root, {'SSL': True}, name='admin'),
     (r'^admin/', include(admin.site.urls)),
 
     # Legacy URL for presentation viewer in earlier version
@@ -57,7 +58,6 @@ urls = [
     (r'^api/', include('rooibos.api.urls')),
     (r'^profile/', include('rooibos.userprofile.urls')),
     (r'^federated/', include('rooibos.federatedsearch.urls')),
-#    (r'^nasa/', include('rooibos.federatedsearch.nasa.urls')),
     (r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^shared/', include('rooibos.federatedsearch.shared.urls')),
@@ -67,9 +67,30 @@ urls = [
     (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
     (r'^pptexport/', include('rooibos.pptexport.urls')),
 
-    url(r'^favicon.ico$', serve, {'document_root': settings.STATIC_DIR, 'path': 'images/favicon.ico'}),
-    url(r'^robots.txt$', serve, {'document_root': settings.STATIC_DIR, 'path': 'robots.txt'}),
-    url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_DIR}, name='static'),
+    url(
+        r'^favicon.ico$',
+        serve,
+        {
+            'document_root': settings.STATIC_DIR,
+            'path': 'images/favicon.ico'
+        }
+    ),
+    url(
+        r'^robots.txt$',
+        serve,
+        {
+            'document_root': settings.STATIC_DIR,
+            'path': 'robots.txt'
+        }
+    ),
+    url(
+        r'^static/(?P<path>.*)$',
+        serve,
+        {
+            'document_root': settings.STATIC_DIR
+        },
+        name='static'
+    ),
 
     url(r'^exception/$', raise_exception),
 
@@ -89,7 +110,8 @@ else:
     ]
 
 for app in apps:
-    if not '.' in app[5:]:
+    if '.' not in app[5:]:
         urls.append(url(r'^%s/' % app[5:], include('%s.urls' % app)))
+
 
 urlpatterns = patterns('', *urls)

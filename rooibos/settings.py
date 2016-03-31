@@ -5,11 +5,14 @@
 import os
 import sys
 
+
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 lib_dir = os.path.join(install_dir, 'rooibos', 'contrib')
 
-if not install_dir in sys.path: sys.path.append(install_dir)
-if not lib_dir in sys.path: sys.path.append(lib_dir)
+if install_dir not in sys.path:
+    sys.path.append(install_dir)
+if lib_dir not in sys.path:
+    sys.path.append(lib_dir)
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -39,13 +42,11 @@ MEDIA_URL = ''
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.load_template_source',
     'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.auth",
     "django.core.context_processors.debug",
-#    "django.core.context_processors.i18n",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
     "rooibos.context_processors.settings",
@@ -108,7 +109,6 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch',
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
-#    'rooibos.federatedsearch.nasa',
     'rooibos.federatedsearch.shared',
     'rooibos.contrib.tagging',
     'rooibos.workers',
@@ -127,12 +127,12 @@ INSTALLED_APPS = (
 STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
-    'pseudostreaming': 'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
+    'pseudostreaming':
+        'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
     's3': 'rooibos.storage.s3.S3StorageSystem',
 }
 
 GROUP_MANAGERS = {
- #   'nasaimageexchange': 'rooibos.federatedsearch.nasa.nix.NasaImageExchange',
 }
 
 AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
@@ -157,7 +157,8 @@ TEMPLATE_DIRS = (
 
 STATIC_DIR = os.path.join(install_dir, 'rooibos', 'static')
 
-FFMPEG_EXECUTABLE = os.path.join(install_dir, 'dist', 'windows', 'ffmpeg', 'bin', 'ffmpeg.exe')
+FFMPEG_EXECUTABLE = os.path.join(
+    install_dir, 'dist', 'windows', 'ffmpeg', 'bin', 'ffmpeg.exe')
 
 PDF_PAGESIZE = 'letter'  # 'A4'
 
@@ -183,14 +184,15 @@ EXPOSE_TO_CONTEXT = (
     'SHOW_TERMS',
     'SHIB_ENABLED',
     'SHIB_LOGOUT_URL',
-    )
+)
 
 
 additional_settings = [
     'settings_local',
 ]
 
-additional_settings.extend(filter(None, os.environ.get('ROOIBOS_ADDITIONAL_SETTINGS', '').split(';')))
+additional_settings.extend(
+    filter(None, os.environ.get('ROOIBOS_ADDITIONAL_SETTINGS', '').split(';')))
 
 # Load settings for additional applications
 
@@ -200,7 +202,7 @@ while additional_settings:
     module = __import__(settings, globals(), locals(), 'rooibos')
     for setting in dir(module):
         if setting == setting.upper():
-            if locals().has_key(setting):
+            if setting in locals():
                 if isinstance(locals()[setting], dict):
                     locals()[setting].update(getattr(module, setting))
                 elif isinstance(locals()[setting], tuple):

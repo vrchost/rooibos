@@ -4,6 +4,7 @@ from rooibos.util import IterableLazyObject
 from rooibos.data.models import Record
 from rooibos.ui.functions import fetch_current_presentation
 
+
 def settings(request):
     """
     Returns selected context variables based on application settings
@@ -15,9 +16,10 @@ def settings(request):
         'SECONDARY_COLOR',
         'CUSTOM_TRACKER_HTML'
     )
-    return dict((var, getattr(_settings, var, ''))
-        for var in getattr(_settings, 'EXPOSE_TO_CONTEXT', old_vars))
-
+    return dict(
+        (var, getattr(_settings, var, ''))
+        for var in getattr(_settings, 'EXPOSE_TO_CONTEXT', old_vars)
+    )
 
 
 def selected_records(request):
@@ -30,7 +32,7 @@ def selected_records(request):
         # put records back in correct order
         records = []
         for rid in selected:
-            if unsorted_records.has_key(rid):
+            if rid in unsorted_records:
                 records.append(unsorted_records[rid])
     else:
         records = None
@@ -43,11 +45,15 @@ def selected_records(request):
 
 def current_presentation(request):
 
-    presentation = SimpleLazyObject(lambda: fetch_current_presentation(request.user))
+    presentation = SimpleLazyObject(
+        lambda: fetch_current_presentation(request.user))
 
     def get_presentation_records():
         try:
-            return list(presentation.items.values_list('record_id', flat=True).distinct())
+            return list(
+                presentation.items.values_list('record_id', flat=True)
+                .distinct()
+            )
         except AttributeError:
             return []
 
