@@ -57,7 +57,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.http.ConditionalGetMiddleware',
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
-#    'rooibos.profile_middleware.ProfileMiddleware',
     'rooibos.sslredirect.SSLRedirect',
     'django.middleware.common.CommonMiddleware',
     'rooibos.util.stats_middleware.StatsMiddleware',
