@@ -4,10 +4,11 @@
 {{ block.super }}
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
+<script src="https://rawgit.com/brantwills/Angular-Paging/v2.2.0/dist/paging.min.js"></script>
 
 <script>
 
-angular.module('clientApp', [])
+angular.module('clientApp', ['bw.paging'])
 
 .controller('MainController', [
     '$scope', '$http', '$timeout', '$window',
@@ -29,6 +30,8 @@ angular.module('clientApp', [])
         };
 
         $scope.search = {
+            page: 1,
+            pageSize: 50,
             onlyFindWorks: true, //false,
             keyword: getKeyword(),
             work: '',
@@ -43,7 +46,7 @@ angular.module('clientApp', [])
 
         var timeoutPromise;
 
-        $scope.$watch('search', function () {
+        $scope.$watch('search.keyword', function () {
             console.log('watch');
             $timeout.cancel(timeoutPromise);
             timeoutPromise = $timeout(function () {
@@ -55,10 +58,16 @@ angular.module('clientApp', [])
             }, 500);
         }, true);
 
-        $scope.loadMore = function () {
+        $scope.loadMore = function (goToPage, clear) {
             $scope.loading = true;
-            var pageSize = 50;
-            var page = ($scope.results.records.length / pageSize) + 1;
+            if (clear) {
+                $scope.results = {
+                    hits: 0,
+                    records: []
+                };
+            }
+            var pageSize = $scope.search.pageSize;
+            var page = goToPage || $scope.search.page;
             var args = [
                 'ps=' + pageSize,
                 'page=' + page,
@@ -76,6 +85,7 @@ angular.module('clientApp', [])
             $http.jsonp(
                 url
             ).success(function (data) {
+                $scope.search.page = page;
                 angular.forEach(data.records, function (record) {
                     record.largeThumb = 'https://thumbs-a.vrchost.com/vrchost/archivision/large-thumb/' + record.identifier + '.jpg';
                     record.largeThumbUrl = 'url(\'' + record.largeThumb + '\')';
@@ -364,9 +374,15 @@ angular.module('clientApp', [])
 
 {% block content %}
 
-<h1>Works</h1>
 
 <div ng-app="clientApp" ng-controller="MainController">
+
+<h1>
+    Works
+    <span ng-show="search.keyword">
+        (<span ng-bind="search.keyword"></span>)
+    </span>
+</h1>
 
 
 <div class="container-fluid with-navbar">
@@ -415,7 +431,7 @@ angular.module('clientApp', [])
         <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">
             <img ng-src="{% templatetag openvariable %}selectedRecord.image + '400x400/'{% templatetag closevariable %}" />
             <br />
-            All work images
+            All images for this work
         </a>
     </div>
     <div class="metadata-values">
@@ -435,10 +451,20 @@ angular.module('clientApp', [])
     No works found.
 </div>
 
-<div ng-show="!isLoading() && results.records.length < results.hits">
-    <button ng-click="loadMore()">Load more works</button>
+<div ng-hide="isLoading()" style="text-align: right;">
+    <div paging
+         page="search.page"
+         page-size="search.pageSize"
+         total="results.hits"
+         paging-action="loadMore(page,1)"
+         ng-show="results.hits>0"
+    ></div>
+    <button ng-click="loadMore(search.page + 1)"
+            ng-show="search.page * search.pageSize < results.hits"
+            class="btn btn-primary btn-lg">
+        Load more works
+    </button>
 </div>
-
 
 </div>
 
