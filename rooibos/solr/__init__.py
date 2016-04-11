@@ -129,22 +129,31 @@ class SolrIndex():
         if verbose:
             pb = ProgressBar(total_count)
 
+        def get_method(method):
+            module, _, function = method.rpartition('.')
+            try:
+                __import__(module)
+                mod = sys.modules[module]
+                return getattr(mod, function)
+            except Exception, ex:
+                logging.debug(
+                    "Could not import custom Solr record indexer %s: %s",
+                    method, ex)
+
         def get_custom_doc_processor():
-            s = getattr(settings, 'SOLR_RECORD_INDEXER', None)
-            if s:
-                module, _, function = s.rpartition('.')
-                try:
-                    __import__(module)
-                    mod = sys.modules[module]
-                    return getattr(mod, function)
-                except Exception, ex:
-                    logging.debug("Could not import custom Solr record indexer %s: %s",
-                            s, ex)
-            def i(doc, **kwargs):
-                return doc
-            return i
+            method = getattr(settings, 'SOLR_RECORD_INDEXER', None)
+            if method:
+                method = get_method(method)
+            return method or (lambda doc, **kwargs: doc)
+
+        def get_custom_doc_pre_processor():
+            method = getattr(settings, 'SOLR_RECORD_PRE_INDEXER', None)
+            if method:
+                method = get_method(method)
+            return method or (lambda **kwargs: None)
 
         custom_doc_processor = get_custom_doc_processor()
+        custom_doc_pre_processor = get_custom_doc_pre_processor()
 
         while True:
             if verbose:
@@ -173,14 +182,26 @@ class SolrIndex():
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
+                        g = groups.get(record.id, [])
+                        fv = fieldvalues.get(record.id, [])
+                        m = media.get(record.id, [])
+                        custom_doc_pre_processor(
+                            record=record,
+                            core_fields=core_fields,
+                            groups=g,
+                            fieldvalues=fv,
+                            media=m,
+                        )
                         doc = self._record_to_solr(
-                            record, core_fields, groups.get(record.id, []),
-                            fieldvalues.get(record.id, []),
-                            media.get(record.id, []))
-                        doc = custom_doc_processor(doc, record=record, core_fields=core_fields,
-                                     groups=groups.get(record.id, []),
-                                     fieldvalues=fieldvalues.get(record.id, []),
-                                     media=media.get(record.id, []))
+                            record, core_fields, g, fv, m)
+                        doc = custom_doc_processor(
+                            doc,
+                            record=record,
+                            core_fields=core_fields,
+                            groups=g,
+                            fieldvalues=fv,
+                            media=m,
+                        )
                         docs.append(doc)
                     conn.add(docs)
                 return process
