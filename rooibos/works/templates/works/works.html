@@ -296,7 +296,11 @@ angular.module('clientApp', ['bw.paging'])
 
 .metadata-sidebar {
     float: right;
-    text-align: right;
+    text-align: center;
+}
+
+.metadata-sidebar .btn {
+    margin-top: 10px;
 }
 
 .metadata-values {
@@ -431,7 +435,9 @@ angular.module('clientApp', ['bw.paging'])
         <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">
             <img ng-src="{% templatetag openvariable %}selectedRecord.image + '400x400/'{% templatetag closevariable %}" />
             <br />
-            All images for this work
+            <span class="btn btn-info">
+                All images for this work
+            </span>
         </a>
     </div>
     <div class="metadata-values">
