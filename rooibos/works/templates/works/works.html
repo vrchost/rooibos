@@ -315,6 +315,11 @@ angular.module('clientApp', ['bw.paging'])
     background-color: #f3f3ff;
 }
 
+.all-images {
+    background-color: rgb(136, 183, 213);
+    border-color: rgb(136, 183, 213);
+}
+
 .metadata:nth-child(2n) {
   display: none;
 }
@@ -436,7 +441,7 @@ angular.module('clientApp', ['bw.paging'])
         <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">
             <img ng-src="{% templatetag openvariable %}selectedRecord.image + '400x400/'{% templatetag closevariable %}" />
             <br />
-            <span class="btn btn-info">
+            <span class="btn btn-primary all-images">
                 All images for this work
             </span>
         </a>
