@@ -19,7 +19,7 @@ angular.module('clientApp', ['bw.paging'])
             var result = '';
             angular.forEach(args, function (arg) {
                 if (arg.substring(0, 3) === 'kw=') {
-                    result = decodeURIComponent(arg.substring(3).replace('+', ' '));
+                    result = decodeURIComponent(arg.substring(3).replace(/\+/g, ' '));
                 }
             });
             return result;
