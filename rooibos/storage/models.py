@@ -70,18 +70,18 @@ class Storage(models.Model):
 
     def get_absolute_media_url(self, media):
         storage = self.storage_system
-        return storage and storage.get_absolute_media_url(self, media) or None
+        return storage and storage.get_absolute_media_url(media) or None
 
     def get_delivery_media_url(self, media):
         storage = self.storage_system
         url = None
         if hasattr(storage, 'get_delivery_media_url'):
-            url = storage.get_delivery_media_url(self, media)
+            url = storage.get_delivery_media_url(media)
         return url or self.get_absolute_media_url(media)
 
     def get_absolute_file_path(self, media):
         storage = self.storage_system
-        return storage and storage.get_absolute_file_path(self, media) or None
+        return storage and storage.get_absolute_file_path(media) or None
 
     def save_file(self, name, content):
         storage = self.storage_system
