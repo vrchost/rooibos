@@ -11,8 +11,9 @@ from rooibos.statistics.models import Activity
 
 class LocalFileSystemStorageSystem(FileSystemStorage):
 
-    def __init__(self, base=None):
+    def __init__(self, base=None, storage=None):
         FileSystemStorage.__init__(self, location=base, base_url=None)
+        self.storage = storage
 
     def get_absolute_media_url(self, storage, media):
         return reverse('storage-retrieve', kwargs={'recordid': media.record.id,
@@ -79,3 +80,6 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
                 path = path[len(os.path.sep):]
             result.extend(os.path.normcase(os.path.join(path, file)) for file in files)
         return result
+
+    def load_file(self, media):
+        return self.open(media.url)
