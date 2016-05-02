@@ -292,7 +292,6 @@ class AccessTestCase(unittest.TestCase):
         self.assertFalse('width' in restrictions)
 
 
-
 class ExtendedGroupTestCase(unittest.TestCase):
 
     def test_attribute_based(self):
@@ -365,7 +364,7 @@ class ExtendedGroupTestCase(unittest.TestCase):
 
 class ShibbolethAttributesTestCase(unittest.TestCase):
 
-    def testProcess(self):
+    def test_process(self):
         attributes = dict(
             name='John Doe',
             member='staff;alumni;faculty',

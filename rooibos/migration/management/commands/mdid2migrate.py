@@ -355,8 +355,12 @@ class MigrateModel(object):
 class MigrateUsers(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateUsers, self).__init__(cursor=cursor, model=User,
-                                           query="SELECT ID,Login,Password,Name,FirstName,Email,Administrator,LastAuthenticated FROM users")
+        super(MigrateUsers, self).__init__(
+            cursor=cursor,
+            model=User,
+            query="SELECT ID,Login,Password,Name,FirstName,Email,"
+            "Administrator,LastAuthenticated FROM users"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -388,8 +392,11 @@ class MigrateUsers(MigrateModel):
 class MigrateGroups(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateGroups, self).__init__(cursor=cursor, model=Group,
-                                            query="SELECT ID,Title,Type FROM usergroups")
+        super(MigrateGroups, self).__init__(
+            cursor=cursor,
+            model=Group,
+            query="SELECT ID,Title,Type FROM usergroups"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -406,8 +413,11 @@ class MigrateSubnet(MigrateModel):
 
     def __init__(self, cursor):
         self.usergroups = MigrateModel.instance_maps['group']
-        super(MigrateSubnet, self).__init__(cursor=cursor, model=Subnet,
-                                            query="SELECT GroupID,Subnet,Mask FROM usergroupipranges")
+        super(MigrateSubnet, self).__init__(
+            cursor=cursor,
+            model=Subnet,
+            query="SELECT GroupID,Subnet,Mask FROM usergroupipranges"
+        )
 
     def key(self, row):
         return '%s %s %s' % (row.GroupID, row.Subnet, row.Mask)
@@ -428,8 +438,12 @@ class MigrateAttribute(MigrateModel):
 
     def __init__(self, cursor):
         self.usergroups = MigrateModel.instance_maps['group']
-        super(MigrateAttribute, self).__init__(cursor=cursor, model=AttributeValue,
-                                               query="SELECT GroupID,Attribute,AttributeValueInstance,AttributeValue FROM usergroupattributes")
+        super(MigrateAttribute, self).__init__(
+            cursor=cursor,
+            model=AttributeValue,
+            query="SELECT GroupID,Attribute,AttributeValueInstance,"
+            "AttributeValue FROM usergroupattributes"
+        )
 
     def key(self, row):
         return '%s %s %s' % (
@@ -461,8 +475,13 @@ class MigrateMembers(MigrateModel):
     def __init__(self, cursor):
         self.usergroups = MigrateModel.instance_maps['group']
         self.users = MigrateModel.instance_maps['user']
-        super(MigrateMembers, self).__init__(cursor=cursor, model=Group, m2m_model=User, label='Group Members',
-                                             query="SELECT UserID,GroupID FROM usergroupmembers")
+        super(MigrateMembers, self).__init__(
+            cursor=cursor,
+            model=Group,
+            m2m_model=User,
+            label='Group Members',
+            query="SELECT UserID,GroupID FROM usergroupmembers"
+        )
 
     def key(self, row):
         return '%s %s' % (row.UserID, row.GroupID)
@@ -489,8 +508,13 @@ class MigrateMembers(MigrateModel):
 class MigrateCollectionGroups(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateCollectionGroups, self).__init__(cursor=cursor, model=Collection, label='Collection Groups', type='group',
-                                                      query="SELECT ID,Title FROM collectiongroups")
+        super(MigrateCollectionGroups, self).__init__(
+            cursor=cursor,
+            model=Collection,
+            label='Collection Groups',
+            type='group',
+            query="SELECT ID,Title FROM collectiongroups"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -503,8 +527,12 @@ class MigrateCollectionGroups(MigrateModel):
 class MigrateCollections(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateCollections, self).__init__(cursor=cursor, model=Collection,
-                                                 query="SELECT ID,Title,Type,Description,UsageAgreement FROM collections")
+        super(MigrateCollections, self).__init__(
+            cursor=cursor,
+            model=Collection,
+            query="SELECT ID,Title,Type,Description,UsageAgreement "
+            "FROM collections"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -519,8 +547,12 @@ class MigrateCollections(MigrateModel):
 class MigrateStorages(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateStorages, self).__init__(cursor=cursor, model=Storage,
-                                              query="SELECT ID,Title,ResourcePath FROM collections WHERE Type IN ('I', 'N', 'R')")
+        super(MigrateStorages, self).__init__(
+            cursor=cursor,
+            model=Storage,
+            query="SELECT ID,Title,ResourcePath FROM collections "
+            "WHERE Type IN ('I', 'N', 'R')"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -537,8 +569,11 @@ class MigrateStorages(MigrateModel):
 class MigrateFieldSets(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateFieldSets, self).__init__(cursor=cursor, model=FieldSet,
-                                               query="SELECT ID,Title FROM collections")
+        super(MigrateFieldSets, self).__init__(
+            cursor=cursor,
+            model=FieldSet,
+            query="SELECT ID,Title FROM collections"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -552,8 +587,13 @@ class MigrateCollectionParents(MigrateModel):
 
     def __init__(self, cursor):
         self.collections = MigrateModel.instance_maps['collection']
-        super(MigrateCollectionParents, self).__init__(cursor=cursor, model=Collection, m2m_model=Collection, label='Collection Hierarchy',
-                                                       query="SELECT ID,GroupID FROM collections WHERE GroupID>0")
+        super(MigrateCollectionParents, self).__init__(
+            cursor=cursor,
+            model=Collection,
+            m2m_model=Collection,
+            label='Collection Hierarchy',
+            query="SELECT ID,GroupID FROM collections WHERE GroupID>0"
+        )
 
     def key(self, row):
         return '%s %s' % (row.ID, row.GroupID)
@@ -578,8 +618,12 @@ class MigrateCollectionParents(MigrateModel):
 class MigrateControlledLists(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateControlledLists, self).__init__(cursor=cursor, model=Vocabulary,
-                                                     query="SELECT ID,Title,Description,Standard,Origin FROM controlledlists")
+        super(MigrateControlledLists, self).__init__(
+            cursor=cursor,
+            model=Vocabulary,
+            query="SELECT ID,Title,Description,Standard,Origin "
+            "FROM controlledlists"
+        )
         self.need_instance_map = True
 
     def hash(self, row):
@@ -596,8 +640,12 @@ class MigrateControlledLists(MigrateModel):
 class MigrateControlledListItems(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateControlledListItems, self).__init__(cursor=cursor, model=VocabularyTerm,
-                                                         query="SELECT ID,ControlledListID,ItemValue FROM controlledlistvalues")
+        super(MigrateControlledListItems, self).__init__(
+            cursor=cursor,
+            model=VocabularyTerm,
+            query="SELECT ID,ControlledListID,ItemValue "
+            "FROM controlledlistvalues"
+        )
         self.vocabularies = MigrateModel.instance_maps['vocabulary']
 
     def hash(self, row):
@@ -616,8 +664,12 @@ class MigrateControlledListItems(MigrateModel):
 class MigrateRecords(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateRecords, self).__init__(cursor=cursor, model=Record,
-                                             query="SELECT ID,Resource,Created,Modified,RemoteID,CachedUntil,Expires,UserID,Flags FROM images")
+        super(MigrateRecords, self).__init__(
+            cursor=cursor,
+            model=Record,
+            query="SELECT ID,Resource,Created,Modified,RemoteID,CachedUntil,"
+            "Expires,UserID,Flags FROM images"
+        )
         self.need_instance_map = True
         self.collections = MigrateModel.instance_maps['collection']
         self.users = MigrateModel.instance_maps['user']
@@ -649,8 +701,11 @@ class MigrateCollectionItems(MigrateModel):
     def __init__(self, cursor):
         self.collections = MigrateModel.instance_maps['collection']
         self.records = MigrateModel.instance_maps['record']
-        super(MigrateCollectionItems, self).__init__(cursor=cursor, model=CollectionItem,
-                                                     query="SELECT ID,CollectionID,Flags FROM images")
+        super(MigrateCollectionItems, self).__init__(
+            cursor=cursor,
+            model=CollectionItem,
+            query="SELECT ID,CollectionID,Flags FROM images"
+        )
 
     def hash(self, row):
         return content_hash(row.CollectionID, (row.Flags or 0) & IMAGE_SHARED)
@@ -676,8 +731,11 @@ class MigrateMedia(MigrateModel):
     remove_full_prefix = False
 
     def __init__(self, cursor):
-        super(MigrateMedia, self).__init__(cursor=cursor, model=Media,
-                                           query="SELECT ID,Resource,CollectionID FROM images")
+        super(MigrateMedia, self).__init__(
+            cursor=cursor,
+            model=Media,
+            query="SELECT ID,Resource,CollectionID FROM images"
+        )
         self.storages = MigrateModel.instance_maps['storage']
         self.records = MigrateModel.instance_maps['record']
 
@@ -703,8 +761,14 @@ class MigrateMedia(MigrateModel):
 class MigrateRecordSuggestions(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateRecordSuggestions, self).__init__(cursor=cursor, model=TaggedItem, type='suggest', label='Suggested Records',
-                                                       query="SELECT ID,UserID,Flags FROM images WHERE UserID>0 AND Flags&2=2 AND Flags&4=0")
+        super(MigrateRecordSuggestions, self).__init__(
+            cursor=cursor,
+            model=TaggedItem,
+            type='suggest',
+            label='Suggested Records',
+            query="SELECT ID,UserID,Flags FROM images "
+            "WHERE UserID>0 AND Flags&2=2 AND Flags&4=0"
+        )
         self.users = MigrateModel.instance_maps['user']
         self.records = MigrateModel.instance_maps['record']
         self.suggested_tag, created = Tag.objects.get_or_create(
@@ -725,8 +789,13 @@ class MigrateRecordSuggestions(MigrateModel):
 class MigrateFavoriteImages(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateFavoriteImages, self).__init__(cursor=cursor, model=TaggedItem, type='favorite', label='Favorite Records',
-                                                    query="SELECT UserID,ImageID FROM favoriteimages")
+        super(MigrateFavoriteImages, self).__init__(
+            cursor=cursor,
+            model=TaggedItem,
+            type='favorite',
+            label='Favorite Records',
+            query="SELECT UserID,ImageID FROM favoriteimages"
+        )
         self.users = MigrateModel.instance_maps['user']
         self.records = MigrateModel.instance_maps['record']
         self.favorite_tag, created = Tag.objects.get_or_create(name='favorite')
@@ -749,8 +818,13 @@ class MigrateFavoriteImages(MigrateModel):
 class MigrateImageNotes(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateImageNotes, self).__init__(cursor=cursor, model=FieldValue, type='annotate', label='Annotations',
-                                                query="SELECT ImageID,UserID,Annotation FROM imageannotations")
+        super(MigrateImageNotes, self).__init__(
+            cursor=cursor,
+            model=FieldValue,
+            type='annotate',
+            label='Annotations',
+            query="SELECT ImageID,UserID,Annotation FROM imageannotations"
+        )
         self.users = MigrateModel.instance_maps['user']
         self.records = MigrateModel.instance_maps['record']
         self.description_field = Field.objects.get(
@@ -776,8 +850,12 @@ class MigrateImageNotes(MigrateModel):
 class MigratePresentations(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigratePresentations, self).__init__(cursor=cursor, model=Presentation,
-            query="SELECT ID,UserID,Title,Description,AccessPassword,CreationDate,ModificationDate,ArchiveFlag FROM slideshows")
+        super(MigratePresentations, self).__init__(
+            cursor=cursor,
+            model=Presentation,
+            query="SELECT ID,UserID,Title,Description,AccessPassword,"
+            "CreationDate,ModificationDate,ArchiveFlag FROM slideshows"
+        )
         self.users = MigrateModel.instance_maps['user']
         self.need_instance_map = True
 
@@ -807,8 +885,15 @@ class MigratePresentations(MigrateModel):
 class MigratePresentationFolders(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigratePresentationFolders, self).__init__(cursor=cursor, model=TaggedItem, type='folders', label='Presentation Folders',
-                                                         query="SELECT slideshows.ID,slideshows.UserID,folders.Title AS Title FROM slideshows INNER JOIN folders ON FolderID=folders.ID")
+        super(MigratePresentationFolders, self).__init__(
+            cursor=cursor,
+            model=TaggedItem,
+            type='folders',
+            label='Presentation Folders',
+            query="SELECT slideshows.ID,slideshows.UserID,folders.Title "
+            "AS Title FROM slideshows INNER JOIN folders "
+            "ON FolderID=folders.ID"
+        )
         self.users = MigrateModel.instance_maps['user']
         self.presentations = MigrateModel.instance_maps['presentation']
         self.presentation_content_type = ContentType.objects.get_for_model(
@@ -835,8 +920,12 @@ class MigratePresentationFolders(MigrateModel):
 class MigratePresentationItems(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigratePresentationItems, self).__init__(cursor=cursor, model=PresentationItem,
-                                                       query="SELECT ID,SlideshowID,ImageID,DisplayOrder,Scratch,Annotation FROM slides")
+        super(MigratePresentationItems, self).__init__(
+            cursor=cursor,
+            model=PresentationItem,
+            query="SELECT ID,SlideshowID,ImageID,DisplayOrder,Scratch,"
+            "Annotation FROM slides"
+        )
         self.presentations = MigrateModel.instance_maps['presentation']
         self.records = MigrateModel.instance_maps['record']
 
@@ -861,8 +950,11 @@ class MigratePresentationItems(MigrateModel):
 class MigrateFields(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateFields, self).__init__(cursor=cursor, model=Field,
-            query="SELECT ID,Label,Name,ControlledListID FROM fielddefinitions")
+        super(MigrateFields, self).__init__(
+            cursor=cursor,
+            model=Field,
+            query="SELECT ID,Label,Name,ControlledListID FROM fielddefinitions"
+        )
         self.vocabularies = MigrateModel.instance_maps['vocabulary']
         self.need_instance_map = True
         self.force_migration = True
@@ -884,8 +976,15 @@ class MigrateEquivalentFields(MigrateModel):
     # TODO: handle change in hash in m2m migrations
 
     def __init__(self, cursor):
-        super(MigrateEquivalentFields, self).__init__(cursor=cursor, model=Field, m2m_model=Field, type='equiv', label='Equivalent Fields',
-            query="SELECT ID,DCElement,DCRefinement FROM fielddefinitions WHERE DCElement IS NOT NULL")
+        super(MigrateEquivalentFields, self).__init__(
+            cursor=cursor,
+            model=Field,
+            m2m_model=Field,
+            type='equiv',
+            label='Equivalent Fields',
+            query="SELECT ID,DCElement,DCRefinement FROM fielddefinitions "
+            "WHERE DCElement IS NOT NULL"
+        )
         self.fields = MigrateModel.instance_maps['field']
         self.dc_fields = dict(
             (f.name, f) for f in Field.objects.filter(standard__prefix='dc')
@@ -932,8 +1031,12 @@ class MigrateEquivalentFields(MigrateModel):
 class MigrateFieldSetFields(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateFieldSetFields, self).__init__(cursor=cursor, model=FieldSetField,
-            query="SELECT ID,CollectionID,Label,ShortView,MediumView,LongView,DisplayOrder FROM fielddefinitions")
+        super(MigrateFieldSetFields, self).__init__(
+            cursor=cursor,
+            model=FieldSetField,
+            query="SELECT ID,CollectionID,Label,ShortView,MediumView,LongView,"
+            "DisplayOrder FROM fielddefinitions"
+        )
         self.fieldsets = MigrateModel.instance_maps['fieldset']
         self.fields = MigrateModel.instance_maps['field']
 
@@ -956,9 +1059,14 @@ class MigrateFieldSetFields(MigrateModel):
 class MigrateFieldValues(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateFieldValues, self).__init__(cursor=cursor, model=FieldValue,
-            query="SELECT fielddata.ID,ImageID,FieldID,FieldInstance,FieldValue,OriginalValue,Type,Label,DisplayOrder " +
-                  "FROM fielddata INNER JOIN fielddefinitions ON FieldID=fielddefinitions.ID")
+        super(MigrateFieldValues, self).__init__(
+            cursor=cursor,
+            model=FieldValue,
+            query="SELECT fielddata.ID,ImageID,FieldID,FieldInstance,"
+            "FieldValue,OriginalValue,Type,Label,DisplayOrder "
+            "FROM fielddata INNER JOIN fielddefinitions "
+            "ON FieldID=fielddefinitions.ID"
+        )
         self.fields = MigrateModel.instance_maps['field']
         self.records = MigrateModel.instance_maps['record']
 
@@ -981,9 +1089,20 @@ class MigrateFieldValues(MigrateModel):
 class MigrateUserSystemPermissions(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateUserSystemPermissions, self).__init__(cursor=cursor, model=User, m2m_model=Permission, type='system', label='User System Permissions',
-            query="SELECT UserID FROM accesscontrol WHERE ObjectType='O' AND ObjectID=1 AND UserID>0 AND GrantPriv&%s=%s AND DenyPriv&%s=0"
-                    % (P['PublishSlideshow'], P['PublishSlideshow'], P['PublishSlideshow']))
+        super(MigrateUserSystemPermissions, self).__init__(
+            cursor=cursor,
+            model=User,
+            m2m_model=Permission,
+            type='system',
+            label='User System Permissions',
+            query="SELECT UserID FROM accesscontrol WHERE ObjectType='O' "
+            "AND ObjectID=1 AND UserID>0 AND GrantPriv&%s=%s "
+            "AND DenyPriv&%s=0" % (
+                  P['PublishSlideshow'],
+                  P['PublishSlideshow'],
+                  P['PublishSlideshow']
+            )
+        )
         self.users = MigrateModel.instance_maps['user']
         self.publish_permission = Permission.objects.get(
             codename='publish_presentations')
@@ -1012,9 +1131,20 @@ class MigrateUserSystemPermissions(MigrateModel):
 class MigrateUserGroupSystemPermissions(MigrateModel):
 
     def __init__(self, cursor):
-        super(MigrateUserGroupSystemPermissions, self).__init__(cursor=cursor, model=Group, m2m_model=Permission, type='system', label='User System Permissions',
-            query="SELECT GroupID FROM accesscontrol WHERE ObjectType='O' AND ObjectID=1 AND GroupID>0 AND GrantPriv&%s=%s AND DenyPriv&%s=0"
-                    % (P['PublishSlideshow'], P['PublishSlideshow'], P['PublishSlideshow']))
+        super(MigrateUserGroupSystemPermissions, self).__init__(
+            cursor=cursor,
+            model=Group,
+            m2m_model=Permission,
+            type='system',
+            label='User System Permissions',
+            query="SELECT GroupID FROM accesscontrol WHERE ObjectType='O' "
+            "AND ObjectID=1 AND GroupID>0 AND GrantPriv&%s=%s "
+            "AND DenyPriv&%s=0" % (
+                P['PublishSlideshow'],
+                P['PublishSlideshow'],
+                P['PublishSlideshow']
+            )
+        )
         self.usergroups = MigrateModel.instance_maps['group']
         self.publish_permission = Permission.objects.get(
             codename='publish_presentations')
@@ -1044,8 +1174,15 @@ class MigratePermissions(MigrateModel):
 
     def __init__(self, cursor, type, code, instances, query=None, label=None):
         if not query:
-            query = "SELECT ID,ObjectID,UserID,GroupID,GrantPriv,DenyPriv FROM accesscontrol WHERE ObjectType='%s' AND ObjectID>0" % code
-        super(MigratePermissions, self).__init__(cursor=cursor, model=AccessControl, type=type, query=query, label=label)
+            query = "SELECT ID,ObjectID,UserID,GroupID,GrantPriv,DenyPriv "
+            "FROM accesscontrol WHERE ObjectType='%s' AND ObjectID>0" % code
+        super(MigratePermissions, self).__init__(
+            cursor=cursor,
+            model=AccessControl,
+            type=type,
+            query=query,
+            label=label
+        )
         self.users = MigrateModel.instance_maps['user']
         self.user_groups = MigrateModel.instance_maps['group']
         self.instances = MigrateModel.instance_maps[instances]
@@ -1131,8 +1268,18 @@ class MigrateCollectionPermissions(MigratePermissions):
 class MigrateStoragePermissions(MigratePermissions):
 
     def __init__(self, cursor):
-        query = "SELECT accesscontrol.ID,ObjectID,UserID,accesscontrol.GroupID,GrantPriv,DenyPriv,MediumImageHeight,MediumImageWidth FROM accesscontrol INNER JOIN collections ON ObjectID=collections.ID WHERE ObjectType='C' AND ObjectID>0"
-        super(MigrateStoragePermissions, self).__init__(cursor=cursor, type='stor', code='C', instances='storage', query=query, label='Storage Permissions')
+        query = "SELECT accesscontrol.ID,ObjectID,UserID,accesscontrol." \
+            "GroupID,GrantPriv,DenyPriv,MediumImageHeight,MediumImageWidth " \
+            "FROM accesscontrol INNER JOIN collections " \
+            "ON ObjectID=collections.ID WHERE ObjectType='C' AND ObjectID>0"
+        super(MigrateStoragePermissions, self).__init__(
+            cursor=cursor,
+            type='stor',
+            code='C',
+            instances='storage',
+            query=query,
+            label='Storage Permissions'
+        )
 
     def hash(self, row):
         return content_hash(
@@ -1161,8 +1308,19 @@ class MigrateStoragePermissions(MigratePermissions):
 class MigrateVocabularyPermissions(MigratePermissions):
 
     def __init__(self, cursor):
-        query = "SELECT accesscontrol.ID,UserID,GroupID,GrantPriv,DenyPriv,controlledlists.ID as ObjectID FROM accesscontrol INNER JOIN controlledlists ON ObjectID=controlledlists.CollectionID WHERE ObjectType='C' AND ObjectID>0"
-        super(MigrateVocabularyPermissions, self).__init__(cursor=cursor, type='vocab', code='C', instances='vocabulary', query=query, label='Vocabulary Permissions')
+        query = "SELECT accesscontrol.ID,UserID,GroupID,GrantPriv,DenyPriv," \
+            "controlledlists.ID as ObjectID FROM accesscontrol " \
+            "INNER JOIN controlledlists ON " \
+            "ObjectID=controlledlists.CollectionID " \
+            "WHERE ObjectType='C' AND ObjectID>0"
+        super(MigrateVocabularyPermissions, self).__init__(
+            cursor=cursor,
+            type='vocab',
+            code='C',
+            instances='vocabulary',
+            query=query,
+            label='Vocabulary Permissions'
+        )
 
     def update(self, instance, row):
         instance.content_object = self.instances[str(row.ObjectID)]
@@ -1230,7 +1388,8 @@ class Command(BaseCommand):
                 return None
             return conn.cursor()
 
-        row = get_cursor().execute("SELECT Version FROM databaseversion").fetchone()
+        row = get_cursor().execute(
+            "SELECT Version FROM databaseversion").fetchone()
         supported = ("00006", "00007", "00008")
         if row.Version not in supported:
             print "Database version is not supported"

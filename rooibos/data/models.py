@@ -27,7 +27,8 @@ class Collection(models.Model):
 
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50, unique=True, blank=True)
-    children = models.ManyToManyField('self', symmetrical=False, blank=True, serialize=False)
+    children = models.ManyToManyField(
+        'self', symmetrical=False, blank=True, serialize=False)
     records = models.ManyToManyField('Record', through='CollectionItem')
     owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
     hidden = models.BooleanField(default=False, serialize=False)
@@ -94,7 +95,8 @@ class Collection(models.Model):
 
 class CollectionItemManager(models.Manager):
     def get_by_natural_key(self, collection_name, record_name):
-        return self.get(collection__name=collection_name, record__name=record_name)
+        return self.get(
+            collection__name=collection_name, record__name=record_name)
 
 
 class CollectionItem(models.Model):
@@ -256,12 +258,14 @@ class Record(models.Model):
     def _get_thumbnail_url(self, fmt):
         cdn_thumbnails = getattr(settings, 'CDN_THUMBNAILS')
         if cdn_thumbnails:
-            for collection_name in self.collection_set.values_list('name', flat=True):
+            for collection_name in self.collection_set.values_list(
+                    'name', flat=True):
                 for key in cdn_thumbnails:
                     m = re.match(key, collection_name)
                     if m and m.end() == len(collection_name):
                         return cdn_thumbnails[key][fmt] % self.identifier
-        url = reverse('storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
+        url = reverse(
+            'storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
         if fmt == 'square':
             url += '?square'
         return url
@@ -282,7 +286,8 @@ class Record(models.Model):
         return url
 
     def save(self, force_update_name=False, **kwargs):
-        # TODO: update this to use something human readable and/or globally unique
+        # TODO: update this to use something human readable and/or
+        # globally unique
         unique_slug(
             self,
             slug_literal='r-%s' % random.randint(1000000, 9999999),
@@ -456,10 +461,13 @@ class Field(models.Model):
 
     label = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
-    old_name = models.CharField(max_length=100, null=True, blank=True, serialize=False)
+    old_name = models.CharField(
+        max_length=100, null=True, blank=True, serialize=False)
     standard = models.ForeignKey(MetadataStandard, null=True, blank=True)
     equivalent = models.ManyToManyField("self", null=True, blank=True)
-    vocabulary = models.ForeignKey(Vocabulary, null=True, blank=True, serialize=False) # TODO: serialize vocabularies
+    # TODO: serialize vocabularies
+    vocabulary = models.ForeignKey(
+        Vocabulary, null=True, blank=True, serialize=False)
 
     def natural_key(self):
         return (self.standard.prefix if self.standard else '', self.name,)
@@ -575,8 +583,10 @@ class FieldValue(models.Model):
     numeric_value = models.DecimalField(
         max_digits=18, decimal_places=4, null=True, blank=True)
     language = models.CharField(max_length=5, null=True, blank=True)
-    context_type = models.ForeignKey(ContentType, null=True, blank=True, serialize=False)
-    context_id = models.PositiveIntegerField(null=True, blank=True, serialize=False)
+    context_type = models.ForeignKey(
+        ContentType, null=True, blank=True, serialize=False)
+    context_id = models.PositiveIntegerField(
+        null=True, blank=True, serialize=False)
     context = generic.GenericForeignKey('context_type', 'context_id')
 
     def save(self, **kwargs):
@@ -605,6 +615,7 @@ class FieldValue(models.Model):
 
     class Meta:
         ordering = ['order']
+
 
 class DisplayFieldValue(FieldValue):
     """

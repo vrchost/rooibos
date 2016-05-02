@@ -24,13 +24,15 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
     str(cpr)
 
     extra = None
-    extra_template = getattr(settings, 'THUMB_EXTRA_TEMPLATE', 'ui_record_extra.html')
+    extra_template = getattr(
+        settings, 'THUMB_EXTRA_TEMPLATE', 'ui_record_extra.html')
     extra_fields = getattr(settings, 'THUMB_EXTRA_FIELDS', None)
     if extra_fields:
         thumb_extra_fields = cache.get('thumb_extra_fields')
         if not thumb_extra_fields:
             thumb_extra_fields = dict(
-                Field.objects.filter(label__in=extra_fields).values_list('id', 'label')
+                Field.objects.filter(
+                    label__in=extra_fields).values_list('id', 'label')
             )
             cache.set('thumb_extra_fields', thumb_extra_fields)
         if thumb_extra_fields:
@@ -44,7 +46,8 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
                 ).order_by('-order', '-id').values_list('field', 'value')
             )
             extra = [
-                (field, values[field]) for field in extra_fields if field in values
+                (field, values[field])
+                for field in extra_fields if field in values
             ]
 
     return {'record': record,

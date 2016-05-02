@@ -36,10 +36,26 @@ def raise_exception():
 urls = [
     # main page needs SSL because of embedded login form, otherwise CSRF fails
     url(r'^$', main, {'HELP': 'frontpage', 'SSL': True}, name='main'),
-    url(r'^about/', direct_to_template, {'template': 'about.html'}, name='about'),
-    url(r'^showcases/', direct_to_template, {'HELP': 'showcases',
-                                             'template': 'showcases.html',
-                                             'extra_context': {'applications': apps_showcases}}, name='showcases'),
+    url(
+        r'^about/',
+        direct_to_template,
+        {
+            'template': 'about.html'
+        },
+        name='about'
+    ),
+    url(
+        r'^showcases/',
+        direct_to_template,
+        {
+            'HELP': 'showcases',
+            'template': 'showcases.html',
+            'extra_context': {
+                'applications': apps_showcases
+            }
+        },
+        name='showcases'
+    ),
 
     (r'^admin/', include(admin.site.urls)),
 
@@ -95,18 +111,58 @@ urls = [
     url(r'^exception/$', raise_exception),
 
     (r'^shibboleth/', include('django_shibboleth.urls')),
-    ]
+]
 
 if getattr(settings, 'CAS_SERVER_URL', None):
     urls += [
-        url(r'^login/$', 'django_cas.views.login', {'HELP': 'logging-in', 'SSL': True}, name='login'),
-        url(r'^local-login/$', login, {'HELP': 'logging-in', 'SSL': True}, name='local-login'),
-        url(r'^logout/$', 'django_cas.views.logout', {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
+        url(
+            r'^login/$',
+            'django_cas.views.login',
+            {
+                'HELP': 'logging-in',
+                'SSL': True
+            },
+            name='login'
+        ),
+        url(
+            r'^local-login/$',
+            login,
+            {
+                'HELP': 'logging-in',
+                'SSL': True
+            },
+            name='local-login'
+        ),
+        url(
+            r'^logout/$',
+            'django_cas.views.logout',
+            {
+                'HELP': 'logging-out',
+                'next_page': settings.LOGOUT_URL
+            },
+            name='logout'
+        ),
     ]
 else:
     urls += [
-        url(r'^login/$', login, {'HELP': 'logging-in', 'SSL': True}, name='login'),
-        url(r'^logout/$', logout, {'HELP': 'logging-out', 'next_page': settings.LOGOUT_URL}, name='logout'),
+        url(
+            r'^login/$',
+            login,
+            {
+                'HELP': 'logging-in',
+                'SSL': True
+            },
+            name='login'
+        ),
+        url(
+            r'^logout/$',
+            logout,
+            {
+                'HELP': 'logging-out',
+                'next_page': settings.LOGOUT_URL
+            },
+            name='logout'
+        ),
     ]
 
 for app in apps:

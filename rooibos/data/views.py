@@ -1,21 +1,17 @@
 from __future__ import with_statement
-from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
 from django import forms
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core import serializers
 from django.db.models import Q
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
 from django.forms.util import ErrorList
-from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, HttpResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, \
+    HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import simplejson
@@ -26,11 +22,10 @@ from django.core.urlresolvers import reverse
 from models import Record, Collection, FieldSet, FieldSetField, \
     CollectionItem, Field, FieldValue
 from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
-from functions import get_collection_visibility_preferences, \
-    set_collection_visibility_preferences, apply_collection_visibility_preferences, \
-    collection_dump
-from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions
-from rooibos.presentation.models import Presentation
+from functions import set_collection_visibility_preferences, \
+    apply_collection_visibility_preferences, collection_dump
+from rooibos.access import filter_by_access, \
+    get_effective_permissions_and_restrictions
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.workers.models import JobInfo
@@ -907,5 +902,10 @@ def save_collection_visibility_preferences(request):
 
 def collection_dump_view(request, identifier, name):
     response = HttpResponse(mimetype='text/plain')
-    collection_dump(request.user, identifier, stream=response, prefix=request.GET.get('prefix'))
+    collection_dump(
+        request.user,
+        identifier,
+        stream=response,
+        prefix=request.GET.get('prefix')
+    )
     return response

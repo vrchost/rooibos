@@ -49,8 +49,8 @@ class Storage(models.Model):
     # TODO: This field is no longer used, do schema change
     derivative = models.IntegerField(null=True, db_column='derivative_id')
 
-    # Create storage systems only once and hold on to them to increase performace,
-    # especially for cloud based storage systems
+    # Create storage systems only once and hold on to them to increase
+    # performace, especially for cloud based storage systems
     storage_systems = dict()
 
     class Meta:
@@ -71,14 +71,19 @@ class Storage(models.Model):
     @property
     def storage_system(self):
         key = (self.system, self.base)
-        if not Storage.storage_systems.has_key(key) and settings.STORAGE_SYSTEMS.has_key(self.system):
-            (modulename, classname) = settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
+        if (
+            key not in Storage.storage_systems and
+            self.system in settings.STORAGE_SYSTEMS
+        ):
+            (modulename, classname) = \
+                settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
             module = __import__(modulename)
             for c in modulename.split('.')[1:]:
                 module = getattr(module, c)
             try:
                 classobj = getattr(module, classname)
-                Storage.storage_systems[key] = classobj(base=self.base, storage=self)
+                Storage.storage_systems[key] = classobj(
+                    base=self.base, storage=self)
             except Exception:
                 logging.exception(
                     "Could not initialize storage %s" % classname)

@@ -1,13 +1,11 @@
 from rooibos.access.functions import filter_by_access
 from rooibos.userprofile.views import load_settings, store_settings
-from models import Collection, Field, MetadataStandard, FieldValue, Record, CollectionItem
-from django.shortcuts import get_object_or_404
+from models import Collection, Field, MetadataStandard, FieldValue, Record, \
+    CollectionItem
 from django.core import serializers
 from django.core.serializers.json import Serializer as JsonSerializer
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from django.db import DEFAULT_DB_ALIAS, reset_queries
-from django.utils.encoding import smart_unicode
 
 import logging
 
@@ -43,7 +41,6 @@ def apply_collection_visibility_preferences(user, queryset):
         return queryset.filter(id__in=ids)
 
 
-
 class RenamingSerializer(JsonSerializer):
 
     def __init__(self, prefix=None):
@@ -53,12 +50,17 @@ class RenamingSerializer(JsonSerializer):
     def end_object(self, obj):
         if self.prefix:
             if 'record' in self._current:
-                self._current['record'] = (self.prefix + self._current['record'][0],)
+                self._current['record'] = (
+                    self.prefix + self._current['record'][0],
+                )
             if 'collection' in self._current:
-                self._current['collection'] = (self.prefix + self._current['collection'][0],)
+                self._current['collection'] = (
+                    self.prefix + self._current['collection'][0],
+                )
             if str(obj._meta) in ('data.collection', 'data.record'):
                 self._current['name'] = self.prefix + self._current['name']
         return super(RenamingSerializer, self).end_object(obj)
+
 
 def collection_dump(user, identifier, stream=None, prefix=None):
 
@@ -66,7 +68,11 @@ def collection_dump(user, identifier, stream=None, prefix=None):
     collection = filter_by_access(user, Collection).get(id=identifier)
 
     # export collection items and records
-    collectionitems = list(CollectionItem.objects.select_related('record', 'collection').filter(collection__id=identifier))
+    collectionitems = list(
+        CollectionItem.objects
+        .select_related('record', 'collection')
+        .filter(collection__id=identifier)
+    )
     ids = [collectionitem.record_id for collectionitem in collectionitems]
     records = list(Record.filter_by_access(user, *ids).filter(owner=None))
     ids = [record.id for record in records]
@@ -74,7 +80,8 @@ def collection_dump(user, identifier, stream=None, prefix=None):
                        if collectionitem.record_id in ids]
 
     # export all fieldvalues
-    fieldvalues = FieldValue.objects.select_related('record', 'field').filter(record__id__in=ids)
+    fieldvalues = FieldValue.objects.select_related('record', 'field').filter(
+        record__id__in=ids)
 
     used_fields = set(fieldvalue.field_id for fieldvalue in fieldvalues)
 
@@ -84,7 +91,12 @@ def collection_dump(user, identifier, stream=None, prefix=None):
     # export equivalent fields
     more = True
     while more:
-        eq_ids = set(id for field in fields for id in field.equivalent.values_list('id', flat=True) if not id in used_fields)
+        eq_ids = set(
+            id
+            for field in fields
+            for id in field.equivalent.values_list('id', flat=True)
+            if id not in used_fields
+        )
         more = len(eq_ids) > 0
         if more:
             eq_fields = Field.objects.filter(id__in=eq_ids)
@@ -133,7 +145,8 @@ def collection_load(user, json, **options):
                 '' if pk else 'not ',
             ))
         else:
-            logging.debug("%s without natural key" % obj.object._meta.object_name)
+            logging.debug(
+                "%s without natural key" % obj.object._meta.object_name)
 
         obj.object.pk = pk
 
@@ -142,7 +155,8 @@ def collection_load(user, json, **options):
 
         if pk and obj.object._meta.object_name == 'Record':
             # found existing record, remove fieldvalues
-            fieldvalues = obj.object.fieldvalue_set.filter(owner=None, context_type=None, context_id=None)
+            fieldvalues = obj.object.fieldvalue_set.filter(
+                owner=None, context_type=None, context_id=None)
             if fieldvalues:
                 logging.debug("Deleting %d fieldvalues" % len(fieldvalues))
                 fieldvalues.delete()
