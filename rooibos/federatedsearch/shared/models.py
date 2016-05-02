@@ -19,6 +19,10 @@ def set_value(name):
     return f
 
 
+def encrypted_property(name):
+    return property(get_value(name), set_value(name))
+
+
 class SharedCollection(models.Model):
     SALT_SIZE = 8
 
@@ -43,11 +47,8 @@ class SharedCollection(models.Model):
         salt, ciphertext = map(b64decode, ciphertext.split('$'))
         arc4 = ARC4.new(salt + settings.SECRET_KEY)
         plaintext = arc4.decrypt(ciphertext)
-        plaintext = plaintext[3:3+int(plaintext[:3].strip())]
+        plaintext = plaintext[3:3 + int(plaintext[:3].strip())]
         return plaintext.decode('utf8')
-
-    def encrypted_property(name):
-        return property(get_value(name), set_value(name))
 
     class Meta:
         ordering = ['title']

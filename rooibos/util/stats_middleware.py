@@ -4,6 +4,7 @@ from time import time
 from operator import add
 import re
 
+
 class StatsMiddleware(object):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
@@ -20,7 +21,7 @@ class StatsMiddleware(object):
         -moz-opacity: .7; opacity: .7;}
         """
 
-        #This stuff will only happen if debug is already on
+        # This stuff will only happen if debug is already on
         if not settings.DEBUG:
             return None
 
@@ -33,26 +34,26 @@ class StatsMiddleware(object):
         ct = response.get('content-type', None)
         if not (ct and ct.startswith('text/html')):
             return response
-        
-        totTime = time() - start
+
+        tot_time = time() - start
 
         # compute the db time for the queries just run
         queries = len(connection.queries) - n
         if queries:
-            dbTime = reduce(add, [float(q['time'])
-                                  for q in connection.queries[n:]])
+            db_time = reduce(
+                add, [float(q['time']) for q in connection.queries[n:]])
         else:
-            dbTime = 0.0
+            db_time = 0.0
 
         # and backout python time
-        pyTime = totTime - dbTime
+        py_time = tot_time - db_time
 
         stats = {
-            'totTime': totTime,
-            'pyTime': pyTime,
-            'dbTime': dbTime,
+            'totTime': tot_time,
+            'pyTime': py_time,
+            'dbTime': db_time,
             'queries': queries,
-            }
+        }
 
         # replace the comment if found
         if response and response.content:

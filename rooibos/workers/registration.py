@@ -51,7 +51,7 @@ def register_worker(id):
 
 
 def discover_workers():
-    if not '_discovered' in workers:
+    if '_discovered' not in workers:
         for app in settings.INSTALLED_APPS:
             try:
                 __import__(app + ".workers")

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ImageViewerInfo xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="{{ namespace }}">
-  <securelogin>{{ securelogin|lower }}</securelogin>
-  <protocolversion>1</protocolversion>
-  <displaybuild>-1</displaybuild>
-</ImageViewerInfo>

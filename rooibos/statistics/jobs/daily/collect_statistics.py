@@ -12,10 +12,11 @@ class Job(DailyJob):
         now = datetime.now()
         for statistic in get_registered_statistics():
             for model, id, values_dict in statistic():
-                Activity.objects.get_or_create(content_type=ContentType.objects.get_for_model(model),
-                                               object_id=id,
-                                               date=now.date(),
-                                               time=time(0, 0, 0),
-                                               event='daily-statistics',
-                                               defaults={'data': values_dict},
-                                               )
+                Activity.objects.get_or_create(
+                    content_type=ContentType.objects.get_for_model(model),
+                    object_id=id,
+                    date=now.date(),
+                    time=time(0, 0, 0),
+                    event='daily-statistics',
+                    defaults={'data': values_dict},
+                )

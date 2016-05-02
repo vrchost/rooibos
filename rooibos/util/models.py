@@ -1,7 +1,7 @@
 from django.db import models, IntegrityError, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 
 
 # Using race condition fix for get_or_created suggested on
@@ -21,13 +21,17 @@ class OwnedWrapperManager(models.Manager):
             obj, created = self.get_or_create(
                 user=user,
                 object_id=object and object.id or object_id,
-                content_type=object and OwnedWrapper.t(object.__class__) or type)
+                content_type=object and
+                OwnedWrapper.t(object.__class__) or type
+            )
         except IntegrityError:
             transaction.commit()
             obj = self.get(
                 user=user,
                 object_id=object and object.id or object_id,
-                content_type=object and OwnedWrapper.t(object.__class__) or type)
+                content_type=object and
+                OwnedWrapper.t(object.__class__) or type
+            )
         return obj
 
 

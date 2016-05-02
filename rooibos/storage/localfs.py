@@ -26,29 +26,36 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
             # Create a temporary symlink with an unguessable name to the actual
             # file and return a link to that
             name = os.path.split(media.url)[1]
-            # expiration is current time plus four hours rounded down to closest
-            # five minute interval so that calling this method several times in
-            # a short timeframe should return the same name
+            # expiration is current time plus four hours rounded down to
+            # closest five minute interval so that calling this method several
+            # times in a short timeframe should return the same name
             valid_until = hex((int(time() + 4 * 3600)
                                / 300) * 300)[2:]  # cut off 0x prefix
             code = hashlib.md5(
                 valid_until + name + settings.SECRET_KEY[:10]
-                ).hexdigest()[:16]
+            ).hexdigest()[:16]
             filename = '-'.join([valid_until, code, name])
             symlink = os.path.join(self.storage.deliverybase, filename)
             if not os.path.exists(symlink):
-                create_link(self.get_absolute_file_path(media), symlink,
-                    hard=getattr(settings, 'HARD_VIDEO_DELIVERY_LINKS', False))
+                create_link(
+                    self.get_absolute_file_path(media),
+                    symlink,
+                    hard=getattr(settings, 'HARD_VIDEO_DELIVERY_LINKS', False)
+                )
 
-            Activity.objects.create(event='media-delivery-url',
-                    content_object=media,
-                    data=dict(symlink=symlink))
+            Activity.objects.create(
+                event='media-delivery-url',
+                content_object=media,
+                data=dict(symlink=symlink)
+            )
 
             return self.storage.urlbase % dict(filename=filename)
         elif self.storage.urlbase:
             # Return a link based on the configured urlbase
-            Activity.objects.create(event='media-delivery-url',
-                    content_object=media)
+            Activity.objects.create(
+                event='media-delivery-url',
+                content_object=media
+            )
 
             return self.storage.urlbase % dict(filename=media.url)
         else:
@@ -69,10 +76,10 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
         return name
 
     def save(self, name, content):
-        #todo need to create unique name, not random
+        # TODO: need to create unique name, not random
         name = name or self.get_available_name(
             "file-%s" % random.randint(1000000, 9999999)
-            )
+        )
         return FileSystemStorage.save(self, name, content)
 
     def is_local(self):

@@ -27,10 +27,12 @@ def flickr_download_media(job):
         storage = flickr.get_storage()
         file = urllib2.urlopen(url)
         mimetype = file.info().get('content-type')
-        media = Media.objects.create(record=record,
-                             storage=storage,
-                             name=record.name,
-                             mimetype=mimetype)
+        media = Media.objects.create(
+            record=record,
+            storage=storage,
+            name=record.name,
+            mimetype=mimetype
+        )
         # should be done better: loading file into StringIO object to make it
         # seekable
         file = StringIO(file.read())
@@ -38,7 +40,5 @@ def flickr_download_media(job):
         jobinfo.complete('Complete', 'File downloaded')
 
     except Exception, ex:
-
-        logging.exception('flickr_download_media failed for %s (%s)' % (job, ex))
+        logging.exception('flickr_download_media failed for %s' % job)
         jobinfo.update_status('Failed: %s' % ex)
-        

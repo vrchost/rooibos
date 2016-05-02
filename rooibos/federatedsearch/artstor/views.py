@@ -27,19 +27,26 @@ def search(request):
         results = None
         failure = True
 
-
     pages = int(math.ceil(float(results['hits']) / pagesize)) if results else 0
-    prev_page_url = "?" + urlencode((('q', query), ('p', page - 1))) if page > 1 else None
-    next_page_url = "?" + urlencode((('q', query), ('p', page + 1))) if page < pages else None
+    if page > 1:
+        prev_page_url = "?" + urlencode((('q', query), ('p', page - 1)))
+    else:
+        prev_page_url = None
+    if page < pages:
+        next_page_url = "?" + urlencode((('q', query), ('p', page + 1)))
+    else:
+        next_page_url = None
 
-    return render_to_response('artstor-results.html',
-                          {'query': query,
-                           'results': results,
-                           'page': page,
-                           'failure': failure,
-                           'pages': pages,
-                           'prev_page': prev_page_url,
-                           'next_page': next_page_url,
-                           },
-                          context_instance=RequestContext(request))
-
+    return render_to_response(
+        'artstor-results.html',
+        {
+            'query': query,
+            'results': results,
+            'page': page,
+            'failure': failure,
+            'pages': pages,
+            'prev_page': prev_page_url,
+            'next_page': next_page_url,
+        },
+        context_instance=RequestContext(request)
+    )

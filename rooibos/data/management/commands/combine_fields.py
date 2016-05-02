@@ -10,11 +10,13 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option(
             '--execute', action='store_true',
-            help='Combine automatically detected fields'),
+            help='Combine automatically detected fields'
+        ),
         make_option(
             '--ignorevocabs', action='store_true',
-            help='Ignore vocabularies when comparing fields'),
-        )
+            help='Ignore vocabularies when comparing fields'
+        ),
+    )
 
     def handle(self, *commands, **options):
 
@@ -58,7 +60,7 @@ class Command(BaseCommand):
 
         print "\nFound %s unique fields out of %s" % (
             len(unique), Field.objects.count()
-            )
+        )
 
         # for each unique field, determine replacements
 

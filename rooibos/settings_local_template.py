@@ -1,6 +1,6 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-#LOGGING_OUTPUT_ENABLED = True
+# LOGGING_OUTPUT_ENABLED = True
 
 INSTANCE_NAME = ''
 
@@ -11,32 +11,33 @@ MEDIA_ROOT = 'd:/mdid/rooibos/static/'
 
 
 ADMINS = (
-#    ('Your name', 'your@email.example'),
+    # ('Your name', 'your@email.example'),
 )
 
 MANAGERS = ADMINS
 
 # Settings for MySQL
-DATABASE_ENGINE = 'mysql'           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+DATABASE_ENGINE = 'mysql'
 DATABASE_OPTIONS = {
     'use_unicode': True,
     'charset': 'utf8',
 }
 
 # Settings for Microsoft SQL Server (use the appropriate driver setting)
-#DATABASE_ENGINE = 'sql_server.pyodbc'
-#DATABASE_OPTIONS= {
+# DATABASE_ENGINE = 'sql_server.pyodbc'
+# DATABASE_OPTIONS= {
 #    'driver': 'SQL Native Client',             # FOR SQL SERVER 2005
 #    'driver': 'SQL Server Native Client 10.0', # FOR SQL SERVER 2008
 #    'MARS_Connection': True,
-#}
+# }
 
 # Settings for all database systems
-DATABASE_NAME = 'rooibos'             # Or path to database file if using sqlite3.
-DATABASE_USER = 'rooibos'             # Not used with sqlite3.
-DATABASE_PASSWORD = 'rooibos'         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
+DATABASE_NAME = 'rooibos'
+DATABASE_USER = 'rooibos'
+DATABASE_PASSWORD = 'rooibos'
+DATABASE_HOST = ''             # Set to empty string for localhost.
+DATABASE_PORT = ''             # Set to empty string for default.
 
 DEFAULT_CHARSET = 'utf-8'
 DATABASE_CHARSET = 'utf8'
@@ -109,7 +110,7 @@ FLICKR_SECRET = ''
 
 # Set to None if you don't subscribe to ARTstor
 ARTSTOR_GATEWAY = None
-#ARTSTOR_GATEWAY = 'http://sru.artstor.org/SRU/artstor.htm'
+# ARTSTOR_GATEWAY = 'http://sru.artstor.org/SRU/artstor.htm'
 
 OPEN_OFFICE_PATH = 'C:/Program Files/OpenOffice.org 3/program/'
 
@@ -136,7 +137,8 @@ LDAP_AUTH = (
         'version': 2,
         'scope': 1,
         'options': {'OPT_X_TLS_TRY': 1},
-        'attributes': ('sn', 'mail', 'givenName', 'eduPersonPrimaryAffiliation'),
+        'attributes': (
+            'sn', 'mail', 'givenName', 'eduPersonPrimaryAffiliation'),
         'firstname': 'givenname',
         'lastname': 'sn',
         'email': 'mail',
@@ -153,11 +155,11 @@ LDAP_AUTH = (
         'cn': 'sAMAccountName',
         'dn': 'distinguishedName',
         'version': 3,
-        'scope': 2, # ldap.SCOPE_SUBTREE
+        'scope': 2,  # ldap.SCOPE_SUBTREE
         'options': {
             'OPT_X_TLS_TRY': 1,
             'OPT_REFERRALS': 0,
-            },
+        },
         'attributes': ('sn', 'mail', 'givenName', 'eduPersonAffiliation'),
         'firstname': 'givenName',
         'lastname': 'sn',
@@ -212,7 +214,8 @@ FAVICON_URL = None
 COPYRIGHT = None
 TITLE = None
 
-WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your University"
+WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID " \
+    "at Your University"
 
 CUSTOM_TRACKER_HTML = ""
 
@@ -237,8 +240,9 @@ FLOWPLAYER_KEY = ""
 YAHOO_APPLICATION_ID = ""
 
 
-# By default, video delivery links are created as symbolic links. Some streaming
-# servers (e.g. Wowza) don't deliver those, so hard links are required.
+# By default, video delivery links are created as symbolic links. Some
+# streaming servers (e.g. Wowza) don't deliver those, so hard links are
+# required.
 HARD_VIDEO_DELIVERY_LINKS = False
 
 
@@ -254,10 +258,10 @@ PREVIEW_WIDTH = 640
 PREVIEW_HEIGHT = 480
 
 
-# If the JPEGs available to MDID are not compressed properly, loading a presentation
-# may take a very long time, as a lot of large images have to be transferred.  By
-# setting this, presentation images are forces to be reprocessed and compressed to
-# the usual 85% quality
+# If the JPEGs available to MDID are not compressed properly, loading a
+# presentation may take a very long time, as a lot of large images have to be
+# transferred.  By setting this, presentation images are forces to be
+# reprocessed and compressed to the usual 85% quality
 FORCE_SLIDE_REPROCESS = False
 
 
@@ -286,6 +290,4 @@ PPTEXPORT_HEIGHT = 600
 
 
 additional_settings = [
-#    'apps.jmutube.settings_local',
-#    'apps.svohp.settings_local',
 ]

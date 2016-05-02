@@ -1,7 +1,8 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
+from views import search
 
-from views import *
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^artstor/$', search, name='artstor-search'),
 )

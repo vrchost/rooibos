@@ -15,20 +15,50 @@ class Command(BaseCommand):
     help = 'Export presentation as PPTX file'
 
     option_list = BaseCommand.option_list + (
-        make_option('--list', '-l', dest='list', action='store_true',
-                    help='List presentations that would be exported'),
-        make_option('--days', '-d', dest='days', type='int', metavar='N',
-                    help='Export presentations changed in the past N days'),
-        make_option('--output-dir', '-o', dest='output_dir',
-                    help='Target directory for files'),
-        make_option('--id', '-i', dest='id', type='int',
-                    help='Identifier of a specific presentation to export'),
-        make_option('--min-id', '-n', dest='min_id', type='int',
-                    help='Minimum identifier of presentations to export (to batch export)'),
-        make_option('--max-id', '-x', dest='max_id', type='int',
-                    help='Maximum identifier of presentations to export (to batch export)'),
-        make_option('--template', '-t', dest='template', default='black',
-                    help='Template file to use'),
+        make_option(
+            '--list', '-l',
+            dest='list',
+            action='store_true',
+            help='List presentations that would be exported'
+        ),
+        make_option(
+            '--days', '-d',
+            dest='days',
+            type='int',
+            metavar='N',
+            help='Export presentations changed in the past N days'
+        ),
+        make_option(
+            '--output-dir', '-o',
+            dest='output_dir',
+            help='Target directory for files'
+        ),
+        make_option(
+            '--id', '-i',
+            dest='id',
+            type='int',
+            help='Identifier of a specific presentation to export'
+        ),
+        make_option(
+            '--min-id', '-n',
+            dest='min_id',
+            type='int',
+            help='Minimum identifier of presentations to export '
+            '(to batch export)'
+        ),
+        make_option(
+            '--max-id', '-x',
+            dest='max_id',
+            type='int',
+            help='Maximum identifier of presentations to export '
+            '(to batch export)'
+        ),
+        make_option(
+            '--template', '-t',
+            dest='template',
+            default='black',
+            help='Template file to use'
+        ),
     )
 
     def get_admin_user(self):
@@ -56,7 +86,8 @@ class Command(BaseCommand):
         admin = self.get_admin_user()
         template = options.get('template')
 
-        presentations = Presentation.objects.all().select_related('owner').order_by('id')
+        presentations = Presentation.objects.all().select_related(
+            'owner').order_by('id')
 
         if options.get('id'):
             presentations = presentations.filter(id=options['id'])
@@ -64,7 +95,8 @@ class Command(BaseCommand):
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)
-            print >>sys.stderr, "Exporting presentations modified since %s" % since
+            print >>sys.stderr, \
+                "Exporting presentations modified since %s" % since
             presentations = presentations.filter(modified__gte=since)
         if options.get('min_id'):
             presentations = presentations.filter(id__gte=options['min_id'])

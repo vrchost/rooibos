@@ -1,14 +1,14 @@
 from django import template
-from django.utils.html import escape
 from django.core.urlresolvers import reverse
-from django.template.loader import get_template
-from django.template import Context, Variable, Template
 from django.contrib.contenttypes.models import ContentType
 from rooibos.access import get_accesscontrols_for_object, filter_by_access
 
+
 register = template.Library()
 
-@register.inclusion_tag('access_effective_permissions_form.html', takes_context=True)
+
+@register.inclusion_tag(
+    'access_effective_permissions_form.html', takes_context=True)
 def effective_permissions_form(context, object):
     return {'object': object,
             'contenttype': ContentType.objects.get_for_model(object.__class__),
@@ -28,22 +28,29 @@ def permissions_display(context, object, emptymessage=None):
 
 
 class PermissionsModifyUrlNode(template.Node):
+
     def __init__(self, object):
         self.object = template.Variable(object)
+
     def render(self, context):
         try:
             object = self.object.resolve(context)
             ct = ContentType.objects.get_for_model(object.__class__)
-            return reverse('access-modify-permissions', args=(ct.app_label, ct.model, object.id, object.name))
+            return reverse(
+                'access-modify-permissions',
+                args=(ct.app_label, ct.model, object.id, object.name)
+            )
         except template.VariableDoesNotExist:
             return ''
+
 
 @register.tag
 def permissions_modify_url(parser, token):
     try:
         tag_name, object = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires a single argument" % token.contents.split()[0]
+        raise template.TemplateSyntaxError, \
+            "%r tag requires a single argument" % token.contents.split()[0]
     return PermissionsModifyUrlNode(object)
 
 
@@ -54,5 +61,10 @@ def accessible_objects(user, args):
     read = 'r' in access
     write = 'w' in access
     manage = 'm' in access
-    return filter_by_access(user, ContentType.objects.get(app_label=app, model=model).model_class(),
-                            read, write, manage)
+    return filter_by_access(
+        user,
+        ContentType.objects.get(app_label=app, model=model).model_class(),
+        read,
+        write,
+        manage
+    )

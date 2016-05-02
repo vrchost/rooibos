@@ -4,12 +4,14 @@ __author__ = "Stephen Zabel - sjzabel@gmail.com"
 __contributors__ = "Jay Parlar - parlar@gmail.com"
 
 from django.conf import settings
-from django.http import HttpResponseRedirect, HttpResponsePermanentRedirect, get_host
+from django.http import HttpResponsePermanentRedirect, get_host
+
 
 SSL = 'SSL'
 
+
 class SSLRedirect:
-    
+
     def process_view(self, request, view_func, view_args, view_kwargs):
         if SSL in view_kwargs:
             secure = view_kwargs[SSL]
@@ -25,7 +27,8 @@ class SSLRedirect:
         if request.is_secure():
             return True
 
-        #Handle the Webfaction case until this gets resolved in the request.is_secure()
+        # Handle the Webfaction case until this gets resolved in the
+        # request.is_secure()
         if 'HTTP_X_FORWARDED_SSL' in request.META:
             return request.META['HTTP_X_FORWARDED_SSL'] == 'on'
 
@@ -33,10 +36,17 @@ class SSLRedirect:
 
     def _redirect(self, request, secure):
         protocol = secure and "https" or "http"
-        newurl = "%s://%s%s%s" % (protocol,get_host(request).split(':')[0],secure and settings.SSL_PORT or '',request.get_full_path())
+        newurl = "%s://%s%s%s" % (
+            protocol,
+            get_host(request).split(':')[0],
+            secure and settings.SSL_PORT or '',
+            request.get_full_path()
+        )
         if settings.DEBUG and request.method == 'POST':
-            raise RuntimeError, \
-        """Django can't perform a SSL redirect while maintaining POST data.
-           Please structure your views so that redirects only occur during GETs."""
+            raise RuntimeError(
+                'Django can\'t perform a SSL redirect '
+                'while maintaining POST data. Please structure your views '
+                'so that redirects only occur during GETs.'
+            )
 
         return HttpResponsePermanentRedirect(newurl)

@@ -46,18 +46,17 @@ class Viewer(object):
         return None
 
 
-
 _registered_viewers = dict()
 
+
 def discover_viewers():
-    if not _registered_viewers.has_key("__REGISTRATION_COMPLETED__"):
-        _registered_viewers["__REGISTRATION_COMPLETED__"] = lambda obj, request: None
+    if "__REGISTRATION_COMPLETED__" not in _registered_viewers:
+        _registered_viewers["__REGISTRATION_COMPLETED__"] = \
+            lambda obj, request: None
         for app in settings.INSTALLED_APPS:
             try:
-                #logging.debug("Checking for viewers in %s.viewers" % app)
                 __import__(app + ".viewers")
-            except ImportError, ex:
-                #logging.error("Failed to import viewers: %s" % ex)
+            except ImportError:
                 pass
 
 

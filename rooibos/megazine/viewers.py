@@ -1,14 +1,10 @@
 from django import forms
-from django.http import Http404
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
-from django.core.urlresolvers import reverse
-from rooibos.access import get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.presentation.models import Presentation
 from rooibos.storage.models import Media
-import re
 import math
 
 
@@ -21,11 +17,14 @@ class MegazineViewer(Viewer):
     def get_options_form(self):
 
         class OptionsForm(forms.Form):
-            width = forms.IntegerField(max_value=1600, min_value=600, initial=1000,
-                                       help_text="Enter width in pixels between 600 and 1600")
+            width = forms.IntegerField(
+                max_value=1600,
+                min_value=600,
+                initial=1000,
+                help_text="Enter width in pixels between 600 and 1600"
+            )
 
         return OptionsForm
-
 
     def embed_script(self, request):
 
@@ -50,20 +49,25 @@ class MegazineViewer(Viewer):
                                pageheight * pageheight) * 2 - pageheight)
 
         divid = request.GET.get('id', 'unknown')
-        server = (('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
-            '://' + request.META['HTTP_HOST'])
+        server = (
+            ('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
+            '://' + request.META['HTTP_HOST']
+        )
 
-        return render_to_response('megazine_viewer.js',
-                                  {'presentation': self.obj,
-                                   'server_url': server,
-                                   'anchor_id': divid,
-                                   'width': width,
-                                   'height': height,
-                                   'pagewidth': pagewidth,
-                                   'pageheight': pageheight,
-                                   # TODO: pass through pagewidth and pageheight
-                                   },
-                                  context_instance=RequestContext(request))
+        return render_to_response(
+            'megazine_viewer.js',
+            {
+                'presentation': self.obj,
+                'server_url': server,
+                'anchor_id': divid,
+                'width': width,
+                'height': height,
+                'pagewidth': pagewidth,
+                'pageheight': pageheight,
+                # TODO: pass through pagewidth and pageheight
+            },
+            context_instance=RequestContext(request)
+        )
 
 
 @register_viewer('megazine', MegazineViewer)

@@ -12,9 +12,12 @@ Available commands: optimize|index|reindex|rebuild|clean|clear
     args = 'command'
 
     option_list = BaseCommand.option_list + (
-        make_option('--collection', '-c', dest='collections',
-                   action='append',
-                    help='Collection identifier (multiple allowed)'),
+        make_option(
+            '--collection', '-c',
+            dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)'
+        ),
     )
 
     def handle(self, *args, **kwargs):

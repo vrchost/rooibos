@@ -6,7 +6,8 @@ from django.template import RequestContext
 @login_required
 def install(request):
 
-    return render_to_response('mediaviewer_install.html',
-                      {
-                       },
-                      context_instance=RequestContext(request))
+    return render_to_response(
+        'mediaviewer_install.html',
+        {},
+        context_instance=RequestContext(request)
+    )

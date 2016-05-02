@@ -33,12 +33,17 @@ class S3StorageSystem(S3BotoStorage):
         secret_key = getattr(settings, 'AWS_SECRET_KEY', None)
         self.location = base
 
-        super(S3StorageSystem, self).__init__(location=self.location, access_key=access_key, secret_key=secret_key,
-                                              bucket=bucket)
+        super(S3StorageSystem, self).__init__(
+            location=self.location,
+            access_key=access_key,
+            secret_key=secret_key,
+            bucket=bucket
+        )
 
     def _normalize_name(self, name):
         # workaround for bug:
-        # http://code.larlet.fr/django-storages/pull-request/75/fix-s3botostoragelistdir-with-aws_location/diff
+        # http://code.larlet.fr/django-storages/pull-request/75
+        # /fix-s3botostoragelistdir-with-aws_location/diff
         name = super(S3StorageSystem, self)._normalize_name(name)
         return name.rstrip('/')
 
@@ -55,10 +60,14 @@ class S3StorageSystem(S3BotoStorage):
 
     def _create_local_copy(self, media):
         with tempfile.NamedTemporaryFile(
-            mode='wb', prefix='tmp%s-' % media.id, delete=False,
-            dir=self.storage.get_derivative_storage_path()) as localfile:
+            mode='wb',
+            prefix='tmp%s-' % media.id,
+            delete=False,
+            dir=self.storage.get_derivative_storage_path()
+        ) as localfile:
             tempname = localfile.name
-            shutil.copyfileobj(self.open(media.url), localfile, 5 * 1024 * 1024)
+            shutil.copyfileobj(
+                self.open(media.url), localfile, 5 * 1024 * 1024)
         try:
             os.rename(tempname, self._get_local_path(media))
         except Exception:
@@ -86,7 +95,7 @@ class S3StorageSystem(S3BotoStorage):
         return name
 
     def save(self, name, content):
-        #todo need to create unique name, not random
+        # TODO: need to create unique name, not random
         name = name or self.get_available_name(
             "file-%s" % random.randint(1000000, 9999999))
         return super(S3BotoStorage, self).save(name, content)

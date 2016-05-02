@@ -3,7 +3,8 @@ from django.http import Http404
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
-from rooibos.access import get_effective_permissions_and_restrictions, filter_by_access
+from rooibos.access import get_effective_permissions_and_restrictions, \
+    filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.data.models import Record
 from models import Storage
@@ -17,17 +18,19 @@ SUPPORTED_MIMETYPES = (
     'video/x-flv',
     'audio/mpeg',
     'audio/x-aac',
-    )
+)
+
 
 def _supported_media(obj, user):
     return obj.media_set.filter(
-                storage__in=filter_by_access(user, Storage),
-                mimetype__in=SUPPORTED_MIMETYPES,
-                )
+        storage__in=filter_by_access(user, Storage),
+        mimetype__in=SUPPORTED_MIMETYPES,
+    )
 
 
 def _check_playable(user, media):
-    restrictions = get_effective_permissions_and_restrictions(user, media.storage)[3]
+    restrictions = get_effective_permissions_and_restrictions(
+        user, media.storage)[3]
     return not restrictions or restrictions.get('download') != 'only'
 
 
@@ -51,8 +54,13 @@ class MediaPlayer(Viewer):
                                          media.storage.title)
 
         def media_choices():
-            return (('', 'default'),) + tuple((media.id, media_label(media))
-                for media in _supported_media(self.obj, self.user))
+            return (
+                (('', 'default'),) +
+                tuple(
+                    (media.id, media_label(media))
+                    for media in _supported_media(self.obj, self.user)
+                )
+            )
 
         class OptionsForm(forms.Form):
             media = forms.ChoiceField(choices=media_choices(), required=False)
@@ -78,31 +86,37 @@ class MediaPlayer(Viewer):
         streaming_server = None
         streaming_media = None
 
-        server = (('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
-            '://' + request.META['HTTP_HOST'])
+        server = (
+            ('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
+            '://' + request.META['HTTP_HOST']
+        )
 
         if delivery_url.startswith('rtmp://'):
             try:
-                streaming_server, prot, streaming_media = re.split('/(mp[34]:)', delivery_url)
+                streaming_server, prot, streaming_media = \
+                    re.split('/(mp[34]:)', delivery_url)
                 streaming_media = prot + re.sub(r'\.mp3$', '', streaming_media)
             except ValueError:
                 pass
-        if not '://' in delivery_url:
+        if '://' not in delivery_url:
             delivery_url = server + delivery_url
 
-        return render_to_response('storage_mediaplayer.js',
-                                  {'record': self.obj,
-                                   'selectedmedia': selectedmedia,
-                                   'delivery_url': delivery_url,
-                                   'streaming_server': streaming_server,
-                                   'streaming_media': streaming_media,
-                                   'audio': selectedmedia.mimetype.startswith('audio/'),
-                                   'server_url': server,
-                                   'autoplay': autoplay,
-                                   'flowplayer_key': getattr(settings, "FLOWPLAYER_KEY", None),
-                                   'anchor_id': divid,
-                                   },
-                                  context_instance=RequestContext(request))
+        return render_to_response(
+            'storage_mediaplayer.js',
+            {
+                'record': self.obj,
+                'selectedmedia': selectedmedia,
+                'delivery_url': delivery_url,
+                'streaming_server': streaming_server,
+                'streaming_media': streaming_media,
+                'audio': selectedmedia.mimetype.startswith('audio/'),
+                'server_url': server,
+                'autoplay': autoplay,
+                'flowplayer_key': getattr(settings, "FLOWPLAYER_KEY", None),
+                'anchor_id': divid,
+            },
+            context_instance=RequestContext(request)
+        )
 
 
 @register_viewer('mediaplayer', MediaPlayer)
@@ -116,4 +130,5 @@ def mediaplayer(obj, request, objid=None):
         except Http404:
             return None
     media = _supported_media(obj, request.user)
-    return MediaPlayer(obj, request.user) if any(_check_playable(request.user, m) for m in media) else None
+    return MediaPlayer(obj, request.user) if any(
+        _check_playable(request.user, m) for m in media) else None

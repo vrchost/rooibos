@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.storage.models import Media
 from rooibos.util.progressbar import ProgressBar
@@ -6,9 +5,9 @@ from rooibos.util.progressbar import ProgressBar
 import os
 from django.template.defaultfilters import slugify
 
+
 class Command(BaseCommand):
     help = 'Resets the name property of all Media objects'
-
 
     def handle(self, *args, **kwargs):
 

@@ -1,7 +1,8 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import patterns, url
+from views import sidebar_api
 
-from views import *
 
-urlpatterns = patterns('',
+urlpatterns = patterns(
+    '',
     url(r'^api/sidebar/$', sidebar_api, name='federatedsearch-sidebar-api'),
 )

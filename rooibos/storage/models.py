@@ -10,9 +10,10 @@ import uuid
 from rooibos.contrib.ipaddr import IP
 from rooibos.util import unique_slug
 from rooibos.data.models import Record
-from rooibos.access import sync_access, get_effective_permissions_and_restrictions, check_access
+from rooibos.access import get_effective_permissions_and_restrictions, \
+    check_access
 import multimedia
-from functions import extractTextFromPdfStream
+from functions import extract_text_from_pdf_stream
 
 import logging
 
@@ -21,29 +22,47 @@ class Storage(models.Model):
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
     system = models.CharField(max_length=50)
-    base = models.CharField(max_length=1024, null=True,
-                            help_text="Absolute path to server directory containing files.")
-    urlbase = models.CharField(max_length=1024, null=True, blank=True, verbose_name='URL base',
-                               help_text="URL at which stored file is available, e.g. through streaming. " +
-                               "May contain %(filename)s placeholder, which will be replaced with the media url property.")
-    deliverybase = models.CharField(db_column='serverbase', max_length=1024,
-                                    null=True, blank=True, verbose_name='server base',
-                                    help_text="Absolute path to server directory in which a temporary symlink " +
-                                    "to the actual file should be created when the file is requested e.g. for " +
-                                    "streaming.")
-    # This field is no longer used
-    #derivative = models.OneToOneField('self', null=True, related_name='master')
+    base = models.CharField(
+        max_length=1024,
+        null=True,
+        help_text="Absolute path to server directory containing files."
+    )
+    urlbase = models.CharField(
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name='URL base',
+        help_text="URL at which stored file is available, e.g. through "
+        "streaming. May contain %(filename)s placeholder, which will be "
+        "replaced with the media url property."
+    )
+    deliverybase = models.CharField(
+        db_column='serverbase',
+        max_length=1024,
+        null=True,
+        blank=True,
+        verbose_name='server base',
+        help_text="Absolute path to server directory in which a temporary "
+        "symlink to the actual file should be created when the file is "
+        "requested e.g. for streaming."
+    )
+    # TODO: This field is no longer used, do schema change
     derivative = models.IntegerField(null=True, db_column='derivative_id')
 
-    # Create storage systems only once and hold on to them to increase performace,
-    # especially for cloud based storage systems
+    # Create storage systems only once and hold on to them to increase
+    # performace, especially for cloud based storage systems
     storage_systems = dict()
 
     class Meta:
         verbose_name_plural = 'storage'
 
     def save(self, **kwargs):
-        unique_slug(self, slug_source='title', slug_field='name', check_current_slug=kwargs.get('force_insert'))
+        unique_slug(
+            self,
+            slug_source='title',
+            slug_field='name',
+            check_current_slug=kwargs.get('force_insert')
+        )
         super(Storage, self).save(kwargs)
 
     def __unicode__(self):
@@ -52,16 +71,22 @@ class Storage(models.Model):
     @property
     def storage_system(self):
         key = (self.system, self.base)
-        if not Storage.storage_systems.has_key(key) and settings.STORAGE_SYSTEMS.has_key(self.system):
-            (modulename, classname) = settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
+        if (
+            key not in Storage.storage_systems and
+            self.system in settings.STORAGE_SYSTEMS
+        ):
+            (modulename, classname) = \
+                settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
             module = __import__(modulename)
             for c in modulename.split('.')[1:]:
                 module = getattr(module, c)
             try:
                 classobj = getattr(module, classname)
-                Storage.storage_systems[key] = classobj(base=self.base, storage=self)
+                Storage.storage_systems[key] = classobj(
+                    base=self.base, storage=self)
             except Exception:
-                logging.exception("Could not initialize storage %s" % classname)
+                logging.exception(
+                    "Could not initialize storage %s" % classname)
                 return None
         return Storage.storage_systems.get(key)
 
@@ -110,7 +135,8 @@ class Storage(models.Model):
             try:
                 os.makedirs(sp)
             except:
-                # check if directory exists now, if so another process may have created it
+                # check if directory exists now, if so another process
+                # may have created it
                 if not os.path.exists(sp):
                     # still does not exist, raise error
                     raise
@@ -121,12 +147,16 @@ class Storage(models.Model):
 
     def get_files(self):
         storage = self.storage_system
-        return storage.get_files() if storage and hasattr(storage, 'get_files') else []
+        if storage and hasattr(storage, 'get_files'):
+            return storage.get_files()
+        else:
+            return []
 
     def get_upload_limit(self, user):
         if user.is_superuser:
             return 0
-        r, w, m, restrictions = get_effective_permissions_and_restrictions(user, self)
+        r, w, m, restrictions = get_effective_permissions_and_restrictions(
+            user, self)
         if restrictions:
             try:
                 return int(restrictions['uploadlimit'])
@@ -155,18 +185,35 @@ class Media(models.Model):
         return self.url
 
     def save(self, force_update_name=False, **kwargs):
-        unique_slug(self, slug_literal=os.path.splitext(os.path.basename(self.url))[0] if self.url else "m-%s" % random.randint(1000000, 9999999),
-                    slug_field='name', check_current_slug=kwargs.get('force_insert') or force_update_name)
+        if self.url:
+            slug_literal = os.path.splitext(os.path.basename(self.url))[0]
+        else:
+            slug_literal = "m-%s" % random.randint(1000000, 9999999)
+        unique_slug(
+            self,
+            slug_literal=slug_literal,
+            slug_field='name',
+            check_current_slug=kwargs.get('force_insert') or force_update_name
+        )
         super(Media, self).save(kwargs)
 
     def get_absolute_url(self):
-        return self.storage and self.storage.get_absolute_media_url(self) or self.url
+        if self.storage:
+            return self.storage.get_absolute_media_url(self)
+        else:
+            return self.url
 
     def get_delivery_url(self):
-        return self.storage and self.storage.get_delivery_media_url(self) or self.url
+        if self.storage:
+            return self.storage.get_delivery_media_url(self)
+        else:
+            return self.url
 
     def get_absolute_file_path(self):
-        return self.storage and self.storage.get_absolute_file_path(self) or None
+        if self.storage:
+            return self.storage.get_absolute_file_path(self)
+        else:
+            return None
 
     def save_file(self, name, content):
         if not hasattr(content, 'name'):
@@ -175,7 +222,7 @@ class Media(models.Model):
             content.mode = 'r'
         if not hasattr(content, 'size') and hasattr(content, 'len'):
             content.size = content.len
-        if not content is File:
+        if not isinstance(content, File):
             content = File(content)
         name = self.storage and self.storage.save_file(name, content) or None
         if name:
@@ -201,7 +248,10 @@ class Media(models.Model):
 
     def delete_file(self):
         self.clear_derivatives()
-        return self.storage and self.storage.storage_system.delete(self.url) or False
+        if self.storage:
+            return self.storage.storage_system.delete(self.url)
+        else:
+            return False
 
     def identify(self, save=True, lazy=False):
         if lazy and (self.width or self.height or self.bitrate):
@@ -217,7 +267,8 @@ class Media(models.Model):
             if save:
                 self.save()
         elif type in ('video', 'audio'):
-            width, height, bitrate = multimedia.identify(self.get_absolute_file_path())
+            width, height, bitrate = multimedia.identify(
+                self.get_absolute_file_path())
             self.width = width
             self.height = height
             self.bitrate = bitrate
@@ -233,24 +284,27 @@ class Media(models.Model):
         return self.storage and self.storage.is_local()
 
     def is_downloadable_by(self, user, original=True):
-        r, w, m, restrictions = get_effective_permissions_and_restrictions(user, self.storage)
-        # if size or download restrictions exist, no direct download of a media file is allowed
+        r, w, m, restrictions = get_effective_permissions_and_restrictions(
+            user, self.storage)
+        # if size or download restrictions exist, no direct download of a
+        # media file is allowed
         if (restrictions and
-                ((original and restrictions.has_key('width')) or
-                 (original and restrictions.has_key('height')) or
+                ((original and 'width' in restrictions) or
+                 (original and 'height' in restrictions) or
                  restrictions.get('download', 'yes') == 'no')):
             return False
         else:
             return r
 
     def editable_by(self, user):
-        return self.record.editable_by(user) and check_access(user, self.storage, write=True)
+        return self.record.editable_by(user) and check_access(
+            user, self.storage, write=True)
 
     def extract_text(self):
         if self.mimetype == 'text/plain':
             return self.load_file().read()
         elif self.mimetype == 'application/pdf':
-            return extractTextFromPdfStream(self.load_file())
+            return extract_text_from_pdf_stream(self.load_file())
         else:
             return ''
 
@@ -260,6 +314,7 @@ class TrustedSubnet(models.Model):
 
     def __unicode__(self):
         return "TrustedSubnet (%s)" % self.subnet
+
 
 class ProxyUrl(models.Model):
     uuid = models.CharField(max_length=36, unique=True)
@@ -271,7 +326,8 @@ class ProxyUrl(models.Model):
     last_access = models.DateTimeField(null=True, blank=True)
 
     def __unicode__(self):
-        return 'ProxyUrl %s: %s (Ctx %s, Usr %s, Sbn %s)' % (self.uuid, self.url, self.context, self.user, self.subnet)
+        return 'ProxyUrl %s: %s (Ctx %s, Usr %s, Sbn %s)' % (
+            self.uuid, self.url, self.context, self.user, self.subnet)
 
     def get_absolute_url(self):
         return reverse('storage-proxyurl', kwargs=dict(uuid=self.uuid))
@@ -289,20 +345,22 @@ class ProxyUrl(models.Model):
         else:
             backend = None
         proxy_url, created = ProxyUrl.objects.get_or_create(
-                                            subnet=subnet,
-                                            url=url,
-                                            context=context,
-                                            user=user,
-                                            user_backend=backend,
-                                            defaults=dict(uuid=str(uuid.uuid4())))
+            subnet=subnet,
+            url=url,
+            context=context,
+            user=user,
+            user_backend=backend,
+            defaults=dict(uuid=str(uuid.uuid4()))
+        )
         return proxy_url
 
     def get_additional_url(self, url):
         proxy_url, created = ProxyUrl.objects.get_or_create(
-                                            subnet=self.subnet,
-                                            url=url,
-                                            context=self.context,
-                                            user=self.user,
-                                            user_backend=self.user_backend,
-                                            defaults=dict(uuid=str(uuid.uuid4())))
+            subnet=self.subnet,
+            url=url,
+            context=self.context,
+            user=self.user,
+            user_backend=self.user_backend,
+            defaults=dict(uuid=str(uuid.uuid4()))
+        )
         return proxy_url

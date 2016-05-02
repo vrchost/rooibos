@@ -3,18 +3,23 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, post_delete, m2m_changed
 from django.conf import settings
 
+
 TIMEOUT = 10 * 60  # 10 minutes
 KEY_PREFIX = getattr(settings, "CACHE_KEY_PREFIX", "")
 
+
 def get_model_id(model):
     return ContentType.objects.get_for_model(model).id
+
 
 def get_model_key(model):
     try:
         return '%smodel_cache_version_%d' % (KEY_PREFIX, get_model_id(model))
     except:
-        # South migrations don't have a ContentType entry and cause an exception
+        # South migrations don't have a ContentType entry and
+        # cause an exception
         return None
+
 
 def incr_model_version(model):
     key = get_model_key(model)
@@ -34,11 +39,14 @@ def incr_model_version(model):
 
 invalidate_model_cache = incr_model_version
 
+
 def incr_model_version_post_event(sender, **kwargs):
     incr_model_version(sender)
 
+
 post_save.connect(incr_model_version_post_event)
 post_delete.connect(incr_model_version_post_event)
+
 
 def incr_model_version_post_event_m2m(sender, **kwargs):
     if not kwargs['action'].startswith('post'):
@@ -54,36 +62,51 @@ def get_model_version(model):
     key = get_model_key(model)
     return (key and cache.get(key)) or incr_model_version(model)
 
+
 def key_suffix(models):
     return ''.join('$%d.%d' % (get_model_id(model), get_model_version(model))
                    for model in models) if models else ''
 
+
 def version_cache_key(key, models):
     return KEY_PREFIX + key + key_suffix(models)
+
 
 def cache_get(key, model_dependencies=None, default=None):
     return cache.get(version_cache_key(key, model_dependencies), default)
 
+
 def cache_set(key, value, model_dependencies=None):
-    cache.set(version_cache_key(key, model_dependencies), value, timeout=TIMEOUT)
+    cache.set(
+        version_cache_key(key, model_dependencies), value, timeout=TIMEOUT)
+
 
 def cache_get_many(keys, model_dependencies=None):
-    values = cache.get_many(version_cache_key(key, model_dependencies) for key in keys)
+    values = cache.get_many(
+        version_cache_key(key, model_dependencies)
+        for key in keys
+    )
     prefix_length = len(KEY_PREFIX)
-    suffix_length = -len(key_suffix(model_dependencies)) if model_dependencies else None
+    suffix_length = -len(key_suffix(model_dependencies)) \
+        if model_dependencies else None
     return dict((key[prefix_length:suffix_length], value)
                 for (key, value) in values.iteritems())
 
-def cache_set_many(values, model_dependencies=None):
-    cache.set_many(dict((version_cache_key(key, model_dependencies), value)
-                        for (key, value) in values.iteritems()), timeout=TIMEOUT)
 
+def cache_set_many(values, model_dependencies=None):
+    cache.set_many(
+        dict(
+            (version_cache_key(key, model_dependencies), value)
+            for (key, value) in values.iteritems()
+        ),
+        timeout=TIMEOUT
+    )
 
 
 def get_cached_value(key, func, model_dependencies=None):
     value = cache_get(key, model_dependencies)
-    if value == None:
+    if value is None:
         value = func()
-        if value != None:
+        if value is not None:
             cache_set(key, value, model_dependencies)
     return value

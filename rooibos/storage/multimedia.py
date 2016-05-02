@@ -8,8 +8,9 @@ import logging
 from django.utils import simplejson
 from StringIO import StringIO
 from subprocess import Popen, PIPE
-from rooibos.data.models import FieldValue, get_system_field
+from rooibos.data.models import get_system_field
 from PIL import Image
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ def _seconds_to_timestamp(seconds):
     seconds = seconds % 60
     return '%02d:%02d:%02d' % (hours, minutes, seconds)
 
+
 def _run_ffmpeg(parameters, infile, outfile_ext):
     if not settings.FFMPEG_EXECUTABLE:
         return None
@@ -29,7 +31,12 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         cmd = 'ffmpeg -i "%s" %s -y "%s"' % (infile, parameters, filename)
         logging.debug('_run_ffmpeg: %s' % cmd)
         cmd = [p.strip('"') for p in cmd.split()]
-        ffmpeg = Popen(cmd, executable=settings.FFMPEG_EXECUTABLE, stdout=PIPE, stderr=PIPE)
+        ffmpeg = Popen(
+            cmd,
+            executable=settings.FFMPEG_EXECUTABLE,
+            stdout=PIPE,
+            stderr=PIPE
+        )
         (output, errors) = ffmpeg.communicate()
         file = open(filename, 'rb')
         result = StringIO(file.read())
@@ -40,6 +47,7 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         return None, None, None
     finally:
         os.remove(filename)
+
 
 def _which(program):
     def is_exe(fpath):
@@ -55,12 +63,13 @@ def _which(program):
                 return exe_file
     return None
 
+
 def _pdfthumbnail(infile):
     logger.debug('Creating PDF thumbnail for %s' % infile)
     handle, filename = tempfile.mkstemp('.jpg')
     os.close(handle)
     try:
-        executable=_which('python.exe') or _which('python') or 'python'
+        executable = _which('python.exe') or _which('python') or 'python'
         cmd = [
             executable,
             os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
@@ -85,14 +94,20 @@ def _pdfthumbnail(infile):
 def identify(file):
     try:
         cmd = 'ffmpeg -i "%s"' % (file)
-        ffmpeg = Popen(cmd, executable=settings.FFMPEG_EXECUTABLE, stdout=PIPE, stderr=PIPE)
+        ffmpeg = Popen(
+            cmd,
+            executable=settings.FFMPEG_EXECUTABLE,
+            stdout=PIPE,
+            stderr=PIPE
+        )
         (output, errors) = ffmpeg.communicate()
         match = re.search(r'bitrate: (\d+) kb/s', errors)
         bitrate = int(match.group(1)) if match else None
         match = re.search(r'Video: .+ (\d+)x(\d+)', errors)
         width = int(match.group(1)) if match else None
         height = int(match.group(2)) if match else None
-        logging.debug('Identified %s: %dx%d %d' % (file, width or 0, height or 0, bitrate or 0))
+        logging.debug('Identified %s: %dx%d %d' % (
+            file, width or 0, height or 0, bitrate or 0))
         return width, height, bitrate
     except Exception, e:
         logging.debug('Error identifying %s: %s' % (file, e))
@@ -101,12 +116,16 @@ def identify(file):
 
 def capture_video_frame(videofile, offset=5):
     logging.debug('capture_video_frame: %s (offset %s)' % (videofile, offset))
-    params = '-r 1 -ss %s -t 00:00:01 -vframes 1 -f image2' % _seconds_to_timestamp(offset)
+    params = '-r 1 -ss %s -t 00:00:01 -vframes 1 -f image2' % \
+        _seconds_to_timestamp(offset)
     frame, output, errors = _run_ffmpeg(params, videofile, '.jpg')
     return frame
 
-def render_audio_waveform(audiofile, basecolor, background, left, top, height, width, max_only):
-    wave_file, output, errors = _run_ffmpeg('-t 00:00:30 -ar 8192 -ac 1', audiofile, '.wav')
+
+def render_audio_waveform(audiofile, basecolor, background, left, top,
+                          height, width, max_only):
+    wave_file, output, errors = _run_ffmpeg(
+        '-t 00:00:30 -ar 8192 -ac 1', audiofile, '.wav')
     if not wave_file:
         return None
     file = wave.open(wave_file, 'rb')
@@ -140,16 +159,28 @@ def render_audio_waveform(audiofile, basecolor, background, left, top, height, w
     output.seek(0)
     return output
 
+
 def render_audio_waveform_by_mimetype(audiofile, mimetype):
-    path = getattr(settings, 'AUDIO_THUMBNAILS', os.path.join(settings.STATIC_DIR, 'images', 'audiothumbs'))
+    path = getattr(
+        settings,
+        'AUDIO_THUMBNAILS',
+        os.path.join(settings.STATIC_DIR, 'images', 'audiothumbs')
+    )
     mimetype = mimetype.split('/')[1]
     formatfile = os.path.join(path, mimetype + '.json')
     if not os.path.isfile(formatfile):
         formatfile = os.path.join(path, 'generic.json')
     format = simplejson.load(open(formatfile, 'r'))
-    return render_audio_waveform(audiofile, format['color'], os.path.join(path, format['background']),
-                                 format['left'], format['top'], format['height'], format['width'],
-                                 format['max_only'])
+    return render_audio_waveform(
+        audiofile,
+        format['color'],
+        os.path.join(path, format['background']),
+        format['left'],
+        format['top'],
+        format['height'],
+        format['width'],
+        format['max_only']
+    )
 
 
 def render_pdf(pdffile):
@@ -158,7 +189,8 @@ def render_pdf(pdffile):
 
 
 def get_image(media):
-    logging.debug('get_image: %s (%s)' % (media.get_absolute_file_path(), media.mimetype))
+    logging.debug('get_image: %s (%s)' % (
+        media.get_absolute_file_path(), media.mimetype))
     image = None
     if media.mimetype.startswith('image/'):
         image = media.load_file()
@@ -169,11 +201,13 @@ def get_image(media):
                 field=get_system_field(),
                 label='thumbnail-offset',
             )[0].value)
-        except IndexError, ValueError:
+        except (IndexError, ValueError):
             offset = 5
-        image = capture_video_frame(media.get_absolute_file_path(), offset=offset)
+        image = capture_video_frame(
+            media.get_absolute_file_path(), offset=offset)
     elif media.mimetype.startswith('audio/'):
-        image = render_audio_waveform_by_mimetype(media.get_absolute_file_path(), media.mimetype)
+        image = render_audio_waveform_by_mimetype(
+            media.get_absolute_file_path(), media.mimetype)
     elif media.mimetype == 'application/pdf':
         image = render_pdf(media.get_absolute_file_path())
     return image
@@ -187,7 +221,8 @@ def overlay_image_with_mimetype_icon(image, mimetype):
     @returns a file-like object with the new image, or the same object if no
     overlay was found
     """
-    path = os.path.join(os.path.dirname(__file__), '..', 'static', 'images', 'overlays')
+    path = os.path.join(
+        os.path.dirname(__file__), '..', 'static', 'images', 'overlays')
     overlay = os.path.join(path, mimetype.replace('/', '_') + ".png")
     if not os.path.exists(overlay):
         overlay = os.path.join(path, mimetype.split('/')[0] + ".png")
@@ -195,7 +230,7 @@ def overlay_image_with_mimetype_icon(image, mimetype):
         return image
 
     if not isinstance(image, Image.Image):
-        original_image = image if img_object else Image.open(image)
+        original_image = Image.open(image)
     else:
         original_image = image
 

@@ -1,11 +1,7 @@
-from django.core.files.uploadhandler import FileUploadHandler, StopUpload
-from django.core.cache import cache
 from django.db.models import signals
 from django.contrib.sites import models as sites_app
 from django.contrib.flatpages import models as flatpages_app
 from django.contrib.auth import models as auth_app
-from django.contrib.comments import models as comments_app
-import logging
 
 
 def create_site_fixtures(*args, **kwargs):
@@ -14,6 +10,7 @@ def create_site_fixtures(*args, **kwargs):
         domain='localhost',
         name='localhost',
     )
+
 
 def create_flatpage_fixtures(*args, **kwargs):
     print "Creating flatpages fixtures"
@@ -27,7 +24,9 @@ def create_flatpage_fixtures(*args, **kwargs):
             enable_comments=0,
         )
     )
-    p.sites.add(sites_app.Site.objects.get(domain='localhost', name='localhost'))
+    p.sites.add(
+        sites_app.Site.objects.get(domain='localhost', name='localhost'))
+
 
 def create_user_fixtures(*args, **kwargs):
     print "Creating auth fixtures"
@@ -43,6 +42,7 @@ def create_user_fixtures(*args, **kwargs):
             email='admin@example.com',
         )
     )
+
 
 signals.post_syncdb.connect(create_site_fixtures, sender=sites_app)
 signals.post_syncdb.connect(create_flatpage_fixtures, sender=flatpages_app)

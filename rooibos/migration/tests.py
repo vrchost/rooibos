@@ -4,7 +4,7 @@ from management.commands.mdid2migrate import MigrateUsers
 
 class UserTestCase(unittest.TestCase):
 
-    def testNoEmail(self):
+    def test_no_email(self):
 
         class DummyRow(object):
             def __init__(self):

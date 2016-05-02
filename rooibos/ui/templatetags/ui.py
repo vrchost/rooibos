@@ -1,22 +1,19 @@
 import re
 from django import template
-from django.utils.html import escape
-from django.template.loader import get_template
-from django.template import Context, Variable, Template
+from django.template import Variable
 from django.contrib.contenttypes.models import ContentType
 from django.utils import simplejson
 from django.conf import settings
 from django.core.cache import cache
 from rooibos.contrib.tagging.models import Tag
-from rooibos.data.models import Record, Collection, Field
-from rooibos.presentation.models import Presentation
+from rooibos.data.models import Field
 from rooibos.util.models import OwnedWrapper
-from rooibos.access import filter_by_access
-from rooibos.userprofile.views import load_settings, store_settings
-from rooibos.ui.functions import fetch_current_presentation, store_current_presentation
+from rooibos.ui.functions import fetch_current_presentation, \
+    store_current_presentation
 from base64 import b32encode, b64encode
 import os
 import glob
+
 
 register = template.Library()
 
@@ -27,13 +24,15 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
     str(cpr)
 
     extra = None
-    extra_template = getattr(settings, 'THUMB_EXTRA_TEMPLATE', 'ui_record_extra.html')
+    extra_template = getattr(
+        settings, 'THUMB_EXTRA_TEMPLATE', 'ui_record_extra.html')
     extra_fields = getattr(settings, 'THUMB_EXTRA_FIELDS', None)
     if extra_fields:
         thumb_extra_fields = cache.get('thumb_extra_fields')
         if not thumb_extra_fields:
             thumb_extra_fields = dict(
-                Field.objects.filter(label__in=extra_fields).values_list('id', 'label')
+                Field.objects.filter(
+                    label__in=extra_fields).values_list('id', 'label')
             )
             cache.set('thumb_extra_fields', thumb_extra_fields)
         if thumb_extra_fields:
@@ -47,13 +46,15 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
                 ).order_by('-order', '-id').values_list('field', 'value')
             )
             extra = [
-                (field, values[field]) for field in extra_fields if field in values
+                (field, values[field])
+                for field in extra_fields if field in values
             ]
 
     return {'record': record,
             'notitle': notitle,
             'selectable': selectable,
-            'selected': record.id in context['request'].session.get('selected_records', ()),
+            'selected': record.id in context['request'].session.get(
+                'selected_records', ()),
             'viewmode': viewmode,
             'request': context['request'],
             'record_in_current_presentation': record.id in cpr,
@@ -61,17 +62,21 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
             'extra_template': extra_template,
             }
 
+
 @register.simple_tag
 def dir2(var):
     return dir(var)
+
 
 @register.filter
 def base32(value, filler='='):
     return b32encode(str(value)).replace('=', filler)
 
+
 @register.filter
 def base64(value, filler='='):
     return b64encode(str(value)).replace('=', filler)
+
 
 @register.filter
 def scale(value, params):
@@ -83,81 +88,101 @@ def scale(value, params):
 
 
 class OwnedTagsForObjectNode(template.Node):
+
     def __init__(self, object, user, var_name, include=True):
         self.object = object
         self.user = user
         self.var_name = var_name
         self.include = include
+
     def render(self, context):
         object = self.object.resolve(context)
         user = self.user.resolve(context)
         if self.include:
             if not user.is_anonymous():
-                ownedwrapper = OwnedWrapper.objects.get_for_object(user, object)
-                context[self.var_name] = Tag.objects.get_for_object(ownedwrapper)
+                ownedwrapper = OwnedWrapper.objects.get_for_object(
+                    user, object)
+                context[self.var_name] = Tag.objects.get_for_object(
+                    ownedwrapper)
         else:
-            qs = OwnedWrapper.objects.filter(object_id=object.id, content_type=OwnedWrapper.t(object.__class__))
+            qs = OwnedWrapper.objects.filter(
+                object_id=object.id,
+                content_type=OwnedWrapper.t(object.__class__)
+            )
             if not user.is_anonymous():
                 qs = qs.exclude(user=user)
             context[self.var_name] = Tag.objects.cloud_for_queryset(qs)
         return ''
+
 
 @register.tag
 def owned_tags_for_object(parser, token):
     try:
         tag_name, arg = token.contents.split(None, 1)
     except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires arguments" % token.contents.split()[0]
+        raise template.TemplateSyntaxError, \
+            "%r tag requires arguments" % token.contents.split()[0]
     m = re.search(r'(.*?) (for|except) (.*?) as (\w+)', arg)
     if not m:
-        raise template.TemplateSyntaxError, "%r tag had invalid arguments" % tag_name
+        raise template.TemplateSyntaxError, \
+            "%r tag had invalid arguments" % tag_name
     object, rule, user, var_name = m.groups()
-    return OwnedTagsForObjectNode(Variable(object), Variable(user), var_name, rule == 'for')
+    return OwnedTagsForObjectNode(
+        Variable(object), Variable(user), var_name, rule == 'for')
 
 
 @register.inclusion_tag('ui_tagging_form.html', takes_context=True)
 def add_tags_form(context, object, tag=None, label=None):
-    return {'object_id': object.id,
-            'object_type': ContentType.objects.get_for_model(object.__class__).id,
-            'tag': tag,
-            'label': label,
-            'request': context['request'],
-            }
+    return {
+        'object_id': object.id,
+        'object_type': ContentType.objects.get_for_model(object.__class__).id,
+        'tag': tag,
+        'label': label,
+        'request': context['request'],
+    }
 
 
 @register.inclusion_tag('ui_tag.html', takes_context=True)
 def tag(context, tag, object=None, removable=False, styles=None):
-    return {'object_id': object and object.id or None,
-            'object_type': object and ContentType.objects.get_for_model(object.__class__).id or None,
-            'tag': tag,
-            'removable': removable,
-            'styles': styles,
-            'request': context['request'],
-            }
+    return {
+        'object_id': object and object.id or None,
+        'object_type': object and ContentType.objects.get_for_model(
+            object.__class__).id or None,
+        'tag': tag,
+        'removable': removable,
+        'styles': styles,
+        'request': context['request'],
+    }
 
 
 # Keep track of most recently edited presentation
 
 class RecentPresentationNode(template.Node):
+
     def __init__(self, user, var_name):
         self.user = user
         self.var_name = var_name
+
     def render(self, context):
         user = self.user.resolve(context)
         context[self.var_name] = fetch_current_presentation(user)
         return ''
+
 
 @register.tag
 def recent_presentation(parser, token):
     try:
         tag_name, arg = token.contents.split(None, 1)
     except ValueError:
-        raise template.TemplateSyntaxError, "%r tag requires arguments" % token.contents.split()[0]
+        raise template.TemplateSyntaxError, \
+            "%r tag requires arguments" % token.contents.split()[0]
     m = re.search(r'(.*?) as (\w+)', arg)
     if not m:
-        raise template.TemplateSyntaxError, "%r tag had invalid arguments" % tag_name
+        raise template.TemplateSyntaxError, \
+            "%r tag had invalid arguments" % tag_name
     user, var_name = m.groups()
     return RecentPresentationNode(Variable(user), var_name)
+
 
 @register.simple_tag
 def store_recent_presentation(user, presentation):
@@ -176,6 +201,7 @@ class VariablesNode(template.Node):
         source = self.nodelist.render(context)
         context[self.var_name] = simplejson.loads(source)
         return ''
+
 
 @register.tag(name='var')
 def do_variables(parser, token):
@@ -196,11 +222,11 @@ def do_variables(parser, token):
     return VariablesNode(nodelist, var_name)
 
 
-
 @register.filter
 def fileversion(file):
     """
-    Takes a given file pattern and finds a matching file in the static directory.
+    Takes a given file pattern and finds a matching file in the static
+    directory.
     Used for including external libraries that have the version number
     in the file name.
 
@@ -218,4 +244,6 @@ def fileversion(file):
     matches = glob.glob(os.path.join(static_dir, file))
     if not matches:
         return file
-    return matches[0][len(os.path.commonprefix([static_dir, matches[0]])):].replace('\\', '/')
+    return matches[0][
+        len(os.path.commonprefix([static_dir, matches[0]])):
+    ].replace('\\', '/')

@@ -4,6 +4,7 @@ from rooibos.data.models import Collection
 from rooibos.data.functions import collection_dump
 from optparse import make_option
 
+
 class Command(BaseCommand):
     help = 'Dump a collection for later loading in another installation'
     option_list = BaseCommand.option_list + (
@@ -12,7 +13,6 @@ class Command(BaseCommand):
         make_option('--prefix', '-p', dest='prefix',
                     help='Prefix for object names, for uniqueness'),
     )
-
 
     def handle(self, *args, **kwargs):
 

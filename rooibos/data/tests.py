@@ -11,10 +11,13 @@ from cStringIO import StringIO
 class FieldValueTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.collection = Collection.objects.create(title='Test Collection', name='test')
+        self.collection = Collection.objects.create(
+            title='Test Collection', name='test')
         self.titleField = Field.objects.create(label='Title', name='title')
-        self.creatorField = Field.objects.create(label='Creator', name='creator')
-        self.locationField = Field.objects.create(label='Location', name='location')
+        self.creatorField = Field.objects.create(
+            label='Creator', name='creator')
+        self.locationField = Field.objects.create(
+            label='Location', name='location')
         self.user = User.objects.create(username='FieldValueTestCase-test')
         self.user2 = User.objects.create(username='FieldValueTestCase-test2')
         self.user3 = User.objects.create(username='FieldValueTestCase-test3')
@@ -28,45 +31,74 @@ class FieldValueTestCase(unittest.TestCase):
         self.user2.delete()
         self.user3.delete()
 
-    def testFieldValueBasicContext(self):
+    def test_field_value_basic_context(self):
         record = Record.objects.create()
-        CollectionItem.objects.create(record=record, collection=self.collection)
+        CollectionItem.objects.create(
+            record=record, collection=self.collection)
 
-        t1 = record.fieldvalue_set.create(field=self.titleField, label='Caption', value='Photograph of Mona Lisa')
-        t2 = record.fieldvalue_set.create(field=self.titleField, value='Photo Lisa')
-        c1 = record.fieldvalue_set.create(field=self.creatorField, label='Photographer', value='John Doe')
-        c2 = record.fieldvalue_set.create(field=self.creatorField, value='John X. Doe', context=self.collection)
-        l1 = record.fieldvalue_set.create(field=self.locationField, value='Harrisonburg', owner=self.user)
+        t1 = record.fieldvalue_set.create(
+            field=self.titleField,
+            label='Caption',
+            value='Photograph of Mona Lisa'
+        )
+        t2 = record.fieldvalue_set.create(
+            field=self.titleField, value='Photo Lisa')
+        record.fieldvalue_set.create(
+            field=self.creatorField, label='Photographer', value='John Doe')
+        record.fieldvalue_set.create(
+            field=self.creatorField,
+            value='John X. Doe',
+            context=self.collection
+        )
+        record.fieldvalue_set.create(
+            field=self.locationField, value='Harrisonburg', owner=self.user)
 
-        self.assertEqual(True, datetime.now() - record.created < timedelta(0, 120))
-        self.assertEqual(True, datetime.now() - record.modified < timedelta(0, 120))
+        self.assertTrue(datetime.now() - record.created < timedelta(0, 120))
+        self.assertTrue(datetime.now() - record.modified < timedelta(0, 120))
 
         self.assertEqual("Caption", t1.resolved_label)
         self.assertEqual("Title", t2.resolved_label)
 
         self.assertEqual(3, len(record.get_fieldvalues()))
-        self.assertEqual(4, len(record.get_fieldvalues(context=self.collection)))
+        self.assertEqual(
+            4, len(record.get_fieldvalues(context=self.collection)))
         self.assertEqual(4, len(record.get_fieldvalues(owner=self.user)))
-        self.assertEqual(5, len(record.get_fieldvalues(owner=self.user, context=self.collection)))
+        self.assertEqual(
+            5, len(record.get_fieldvalues(
+                owner=self.user, context=self.collection)))
 
-    def testPresentationContext(self):
+    def test_presentation_context(self):
         record = Record.objects.create()
-        owned_collection = Collection.objects.create(title='Owned collection', owner=self.user)
+        owned_collection = Collection.objects.create(
+            title='Owned collection', owner=self.user)
 
-        v1 = record.fieldvalue_set.create(field=self.titleField, value='v')
-        v2 = record.fieldvalue_set.create(field=self.titleField, value='v-u1', owner=self.user)
-        v3 = record.fieldvalue_set.create(field=self.titleField, value='v-u2', owner=self.user2)
-        v4 = record.fieldvalue_set.create(field=self.titleField, value='v-u3', owner=self.user3)
-        v5 = record.fieldvalue_set.create(field=self.titleField, value='v-u1-ctx', owner=self.user, context=owned_collection)
+        record.fieldvalue_set.create(field=self.titleField, value='v')
+        record.fieldvalue_set.create(
+            field=self.titleField, value='v-u1', owner=self.user)
+        record.fieldvalue_set.create(
+            field=self.titleField, value='v-u2', owner=self.user2)
+        record.fieldvalue_set.create(
+            field=self.titleField, value='v-u3', owner=self.user3)
+        record.fieldvalue_set.create(
+            field=self.titleField,
+            value='v-u1-ctx',
+            owner=self.user,
+            context=owned_collection
+        )
 
-        values = record.get_fieldvalues(owner=self.user2, context=owned_collection)
+        values = record.get_fieldvalues(
+            owner=self.user2, context=owned_collection)
         expected = ['v', 'v-u2']
         for v in values:
             self.assertTrue(v.value in expected)
             expected.remove(v.value)
         self.assertEqual([], expected)
 
-        values = record.get_fieldvalues(owner=self.user2, context=owned_collection, include_context_owner=True)
+        values = record.get_fieldvalues(
+            owner=self.user2,
+            context=owned_collection,
+            include_context_owner=True
+        )
         expected = ['v', 'v-u1', 'v-u2', 'v-u1-ctx']
         for v in values:
             self.assertTrue(v.value in expected)
@@ -76,7 +108,7 @@ class FieldValueTestCase(unittest.TestCase):
 
 class GroupTestCase(unittest.TestCase):
 
-    def testSubGroups(self):
+    def test_sub_groups(self):
         group_a = Collection.objects.create(title='A', name='a')
         group_b = Collection.objects.create(title='B', name='b')
         group_b1 = Collection.objects.create(title='B1', name='b1')
@@ -93,7 +125,7 @@ class GroupTestCase(unittest.TestCase):
         self.assertEqual(0, len(group_a.all_child_collections))
         self.assertEqual(3, len(group_ab.all_child_collections))
 
-    def testCircularSubGroups(self):
+    def test_circular_sub_groups(self):
         group_c = Collection.objects.create(title='C', name='c')
         group_d = Collection.objects.create(title='D', name='d')
         group_e = Collection.objects.create(title='E', name='e')
@@ -112,7 +144,7 @@ class GroupTestCase(unittest.TestCase):
 
         self.assertEqual(0, len(group_e.all_child_collections))
 
-    def testSubGroupRecords(self):
+    def test_sub_group_records(self):
         group_f = Collection.objects.create(title='F', name='f')
         group_g = Collection.objects.create(title='G', name='g')
         group_h = Collection.objects.create(title='H', name='h')
@@ -120,7 +152,7 @@ class GroupTestCase(unittest.TestCase):
         group_f.children.add(group_g)
         group_f.save()
 
-        record = Record.objects.create()
+        Record.objects.create()
         self.assertEqual(0, len(group_f.all_records))
 
         record = Record.objects.create()
@@ -140,7 +172,7 @@ class GroupTestCase(unittest.TestCase):
         CollectionItem.objects.create(record=record, collection=group_g)
         self.assertEqual(3, len(group_f.all_records))
 
-    def testGetTitle(self):
+    def test_get_title(self):
         record1 = Record.objects.create()
         self.assertEqual(None, record1.title)
 
@@ -155,19 +187,22 @@ class GroupTestCase(unittest.TestCase):
         self.assertEqual('Another title', record2.title)
 
 
-
 csv_file = """ID,Filename,Title,Creator,Location,Unused
 A001,a001.jpg,Test,"Knab, Andreas","Harrisonburg, VA"
 A002,a002.jpg,Another Test,Andreas Knab;John Doe,Virginia
 """
 
+
 class CsvImportTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.collection = Collection.objects.create(title='Test Collection', name='test')
+        self.collection = Collection.objects.create(
+            title='Test Collection', name='test')
         self.titleField = Field.objects.create(label='Title', name='title')
-        self.creatorField = Field.objects.create(label='Creator', name='creator')
-        self.locationField = Field.objects.create(label='Location', name='location')
+        self.creatorField = Field.objects.create(
+            label='Creator', name='creator')
+        self.locationField = Field.objects.create(
+            label='Location', name='location')
         self.user = User.objects.create(username='CsvImportTestCase-test')
         self.records = []
 
@@ -180,7 +215,7 @@ class CsvImportTestCase(unittest.TestCase):
         self.locationField.delete()
         self.user.delete()
 
-    def testAnalyze(self):
+    def test_analyze(self):
 
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
 
@@ -219,33 +254,31 @@ class CsvImportTestCase(unittest.TestCase):
         self.assertEqual(None, testimport.get_identifier_field())
 
         # Map the ID field and try again
-        testimport.mapping['ID'] = Field.objects.get(name='identifier', standard__prefix='dc')
+        testimport.mapping['ID'] = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         self.assertEqual('ID', testimport.get_identifier_field())
 
-
-    def testImport(self):
+    def test_import(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
-
         self.assertFalse(testimport.analyzed)
-
-        data = testimport.analyze()
-
+        testimport.analyze()
         self.assertTrue(testimport.analyzed)
 
-
-    def testFindDuplicateIdentifiers(self):
+    def test_find_duplicate_identifiers(self):
         testimport = SpreadsheetImport(StringIO(), [self.collection])
 
         dup = testimport.find_duplicate_identifiers()
         self.assertEqual(0, len(dup))
 
-        dcidentifier = Field.objects.get(name='identifier', standard__prefix='dc')
+        dcidentifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
 
         def create_record(id):
             record = Record.objects.create()
             self.records.append(record)
             record.fieldvalue_set.create(field=dcidentifier, value=id)
-            CollectionItem.objects.create(record=record, collection=self.collection)
+            CollectionItem.objects.create(
+                record=record, collection=self.collection)
 
         create_record('X001')
         create_record('X002')
@@ -255,19 +288,19 @@ class CsvImportTestCase(unittest.TestCase):
         self.assertEqual(1, len(dup))
         self.assertEqual('X002', dup[0])
 
-
-    def testNoIdentifierException(self):
+    def test_no_identifier_exception(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
-        self.assertRaises(SpreadsheetImport.NoIdentifierException, testimport.run)
+        self.assertRaises(
+            SpreadsheetImport.NoIdentifierException, testimport.run)
 
-
-    def testImportSimple(self):
+    def test_import_simple(self):
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
         self.assertEqual(0, self.collection.records.count())
         testimport.analyze()
 
         dc = dict(
-            identifier=Field.objects.get(name='identifier', standard__prefix='dc'),
+            identifier=Field.objects.get(
+                name='identifier', standard__prefix='dc'),
             title=Field.objects.get(name='title', standard__prefix='dc'),
             creator=Field.objects.get(name='creator', standard__prefix='dc'),
             coverage=Field.objects.get(name='coverage', standard__prefix='dc'),
@@ -289,13 +322,16 @@ class CsvImportTestCase(unittest.TestCase):
         self.assertEquals(2, self.collection.records.count())
 
         r1 = self.collection.records.get(name='A001'.lower())
-        self.assertEqual('A001', r1.fieldvalue_set.get(field=dc['identifier']).value)
+        self.assertEqual(
+            'A001', r1.fieldvalue_set.get(field=dc['identifier']).value)
 
-    def testSplitValuesImport(self):
-        testimport = SpreadsheetImport(StringIO("ID,Split,NoSplit\nA999,a;b,a;b"), [self.collection])
+    def test_split_values_import(self):
+        testimport = SpreadsheetImport(
+            StringIO("ID,Split,NoSplit\nA999,a;b,a;b"), [self.collection])
         testimport.analyze()
         dc = dict(
-            identifier=Field.objects.get(name='identifier', standard__prefix='dc'),
+            identifier=Field.objects.get(
+                name='identifier', standard__prefix='dc'),
             title=Field.objects.get(name='title', standard__prefix='dc'),
             creator=Field.objects.get(name='creator', standard__prefix='dc'),
         )
@@ -310,12 +346,23 @@ class CsvImportTestCase(unittest.TestCase):
         }
         testimport.run()
         r = self.collection.records.get(name='A999'.lower())
-        self.assertEqual('a', r.fieldvalue_set.filter(field=testimport.mapping['Split'])[0].value)
-        self.assertEqual('b', r.fieldvalue_set.filter(field=testimport.mapping['Split'])[1].value)
-        self.assertEqual('a;b', r.fieldvalue_set.filter(field=testimport.mapping['NoSplit'])[0].value)
+        self.assertEqual(
+            'a',
+            r.fieldvalue_set.filter(field=testimport.mapping['Split'])[0].value
+        )
+        self.assertEqual(
+            'b',
+            r.fieldvalue_set.filter(field=testimport.mapping['Split'])[1].value
+        )
+        self.assertEqual(
+            'a;b',
+            r.fieldvalue_set.filter(
+                field=testimport.mapping['NoSplit'])[0].value
+        )
 
-    def testOwnedRecordImport(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_owned_record_import(self):
+        identifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
         r1 = Record.objects.create(name='x001')
         CollectionItem.objects.create(record=r1, collection=self.collection)
@@ -326,9 +373,12 @@ class CsvImportTestCase(unittest.TestCase):
         r2.fieldvalue_set.create(field=identifier, value='X002')
         r2.fieldvalue_set.create(field=title, value='Owned')
 
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nX001,NewTitle1\nX002,NewTitle2\nX003,NewTitle3"),
-                                       [self.collection],
-                                       owner=self.user)
+        testimport = SpreadsheetImport(
+            StringIO("Identifier,Title\nX001,NewTitle1\n"
+                     "X002,NewTitle2\nX003,NewTitle3"),
+            [self.collection],
+            owner=self.user
+        )
         testimport.name_field = 'Identifier'
         testimport.run()
 
@@ -348,12 +398,13 @@ class CsvImportTestCase(unittest.TestCase):
         self.assertEqual('NewTitle2', r2.title)
         self.assertEqual('NewTitle3', r3.title)
 
-    def testRecordMultiRowImport(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_record_multi_row_import(self):
         title = Field.objects.get(name='title', standard__prefix='dc')
 
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nY001,Title1\n,Title2"),
-                                       [self.collection])
+        testimport = SpreadsheetImport(
+            StringIO("Identifier,Title\nY001,Title1\n,Title2"),
+            [self.collection]
+        )
         testimport.name_field = 'Identifier'
         testimport.run()
 
@@ -366,8 +417,7 @@ class CsvImportTestCase(unittest.TestCase):
         self.assertEqual('Title1', titles[0].value)
         self.assertEqual('Title2', titles[1].value)
 
-    def testRecordMultiRowImport2(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_record_multi_row_import2(self):
         title = Field.objects.get(name='title', standard__prefix='dc')
 
         testimport = SpreadsheetImport(StringIO("""Identifier,Title
@@ -388,9 +438,12 @@ Z003,Title8"""),
         self.assertEqual(1, testimport.duplicate_in_file_skipped)
         self.assertEqual(1, testimport.no_id_skipped)
 
-        t1 = self.collection.records.get(name='z001').fieldvalue_set.filter(field=title)
-        t2 = self.collection.records.get(name='z002').fieldvalue_set.filter(field=title)
-        t3 = self.collection.records.get(name='z003').fieldvalue_set.filter(field=title)
+        t1 = self.collection.records.get(
+            name='z001').fieldvalue_set.filter(field=title)
+        t2 = self.collection.records.get(
+            name='z002').fieldvalue_set.filter(field=title)
+        t3 = self.collection.records.get(
+            name='z003').fieldvalue_set.filter(field=title)
 
         self.assertEqual('Title2', t1[0].value)
         self.assertEqual('Title3', t1[1].value)
@@ -401,8 +454,9 @@ Z003,Title8"""),
 
         self.assertEqual('Title7', t3[0].value)
 
-    def testSkipUpdates(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_skip_updates(self):
+        identifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
 
         r1 = Record.objects.create(name='q001')
@@ -410,8 +464,10 @@ Z003,Title8"""),
         r1.fieldvalue_set.create(field=identifier, value='Q001')
         r1.fieldvalue_set.create(field=title, value='Title')
 
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nQ002,NewTitle1\nQ001,NewTitle2"),
-                                       [self.collection])
+        testimport = SpreadsheetImport(
+            StringIO("Identifier,Title\nQ002,NewTitle1\nQ001,NewTitle2"),
+            [self.collection]
+        )
         testimport.name_field = 'Identifier'
         testimport.run(update=False)
 
@@ -420,14 +476,17 @@ Z003,Title8"""),
         self.assertEqual(0, testimport.added_skipped)
         self.assertEqual(1, testimport.updated_skipped)
 
-        t1 = self.collection.records.get(name='q001').fieldvalue_set.filter(field=title)
-        t2 = self.collection.records.get(name='q002').fieldvalue_set.filter(field=title)
+        t1 = self.collection.records.get(
+            name='q001').fieldvalue_set.filter(field=title)
+        t2 = self.collection.records.get(
+            name='q002').fieldvalue_set.filter(field=title)
 
         self.assertEqual('Title', t1[0].value)
         self.assertEqual('NewTitle1', t2[0].value)
 
-    def testKeepSystemFieldValues(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_keep_system_field_values(self):
+        identifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
         system = get_system_field()
 
@@ -437,8 +496,10 @@ Z003,Title8"""),
         r1.fieldvalue_set.create(field=title, value='Title')
         r1.fieldvalue_set.create(field=system, value='Keep this')
 
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nS002,NewTitle2\nS001,NewTitle1"),
-                                       [self.collection])
+        testimport = SpreadsheetImport(
+            StringIO("Identifier,Title\nS002,NewTitle2\nS001,NewTitle1"),
+            [self.collection]
+        )
         testimport.name_field = 'Identifier'
         testimport.run(update=True)
 
@@ -447,17 +508,20 @@ Z003,Title8"""),
         self.assertEqual(0, testimport.added_skipped)
         self.assertEqual(0, testimport.updated_skipped)
 
-        t1 = self.collection.records.get(name='s001').fieldvalue_set.filter(field=title)
-        t2 = self.collection.records.get(name='s002').fieldvalue_set.filter(field=title)
-        s = self.collection.records.get(name='s001').fieldvalue_set.filter(field=system)
+        t1 = self.collection.records.get(
+            name='s001').fieldvalue_set.filter(field=title)
+        t2 = self.collection.records.get(
+            name='s002').fieldvalue_set.filter(field=title)
+        s = self.collection.records.get(
+            name='s001').fieldvalue_set.filter(field=system)
 
         self.assertEqual('NewTitle1', t1[0].value)
         self.assertEqual('NewTitle2', t2[0].value)
         self.assertEqual('Keep this', s[0].value)
 
-
-    def testSkipAdds(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_skip_adds(self):
+        identifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
 
         r1 = Record.objects.create(name='r001')
@@ -465,8 +529,10 @@ Z003,Title8"""),
         r1.fieldvalue_set.create(field=identifier, value='R001')
         r1.fieldvalue_set.create(field=title, value='Title')
 
-        testimport = SpreadsheetImport(StringIO("Identifier,Title\nR002,NewTitle1\nR001,NewTitle2"),
-                                       [self.collection])
+        testimport = SpreadsheetImport(
+            StringIO("Identifier,Title\nR002,NewTitle1\nR001,NewTitle2"),
+            [self.collection]
+        )
         testimport.name_field = 'Identifier'
         testimport.run(add=False)
 
@@ -475,14 +541,16 @@ Z003,Title8"""),
         self.assertEqual(1, testimport.added_skipped)
         self.assertEqual(0, testimport.updated_skipped)
 
-        t1 = self.collection.records.get(name='r001').fieldvalue_set.filter(field=title)
+        t1 = self.collection.records.get(
+            name='r001').fieldvalue_set.filter(field=title)
         t2 = self.collection.records.filter(name='r002')
 
         self.assertEqual('NewTitle2', t1[0].value)
         self.assertFalse(t2)
 
-    def testTestOnly(self):
-        identifier = Field.objects.get(name='identifier', standard__prefix='dc')
+    def test_test_only(self):
+        identifier = Field.objects.get(
+            name='identifier', standard__prefix='dc')
         title = Field.objects.get(name='title', standard__prefix='dc')
 
         r1 = Record.objects.create(name='t001')
@@ -512,49 +580,56 @@ T003,Title8"""),
 
         self.assertEqual(1, r.count())
 
-        t1 = self.collection.records.get(name='t001').fieldvalue_set.filter(field=title)
+        t1 = self.collection.records.get(
+            name='t001').fieldvalue_set.filter(field=title)
         self.assertEqual('Title', t1[0].value)
 
+    def test_bom(self):
 
-    def testBOM(self):
+        """Make sure the import can handle the BOM at the beginning
+           of some UTF-8 files"""
 
-        """Make sure the import can handle the BOM at the beginning of some UTF-8 files"""
+        bom = "\xef\xbb\xbf"
+        testimport = SpreadsheetImport(
+            StringIO(bom + csv_file), [self.collection])
+        testimport.analyze()
 
-        BOM = "\xef\xbb\xbf"
-        testimport = SpreadsheetImport(StringIO(BOM + csv_file), [self.collection])
-        data = testimport.analyze()
+        self.assertTrue('ID' in testimport.mapping)
+        self.assertTrue('Filename' in testimport.mapping)
+        self.assertTrue('Unused' in testimport.mapping)
+        self.assertTrue('Title' in testimport.mapping)
+        self.assertTrue('Creator' in testimport.mapping)
+        self.assertTrue('Location' in testimport.mapping)
 
-        self.assertTrue(testimport.mapping.has_key('ID'))
-        self.assertTrue(testimport.mapping.has_key('Filename'))
-        self.assertTrue(testimport.mapping.has_key('Unused'))
-        self.assertTrue(testimport.mapping.has_key('Title'))
-        self.assertTrue(testimport.mapping.has_key('Creator'))
-        self.assertTrue(testimport.mapping.has_key('Location'))
+    def test_no_bom(self):
 
-    def testNoBOM(self):
-
-        """Make sure the import can handle the lack of BOM at the beginning of some UTF-8 files"""
+        """Make sure the import can handle the lack of BOM at the beginning
+           of some UTF-8 files"""
 
         testimport = SpreadsheetImport(StringIO(csv_file), [self.collection])
-        data = testimport.analyze()
+        testimport.analyze()
 
-        self.assertTrue(testimport.mapping.has_key('ID'))
-        self.assertTrue(testimport.mapping.has_key('Filename'))
-        self.assertTrue(testimport.mapping.has_key('Unused'))
-        self.assertTrue(testimport.mapping.has_key('Title'))
-        self.assertTrue(testimport.mapping.has_key('Creator'))
-        self.assertTrue(testimport.mapping.has_key('Location'))
-
+        self.assertTrue('ID' in testimport.mapping)
+        self.assertTrue('Filename' in testimport.mapping)
+        self.assertTrue('Unused' in testimport.mapping)
+        self.assertTrue('Title' in testimport.mapping)
+        self.assertTrue('Creator' in testimport.mapping)
+        self.assertTrue('Location' in testimport.mapping)
 
 
 class RecordAccessTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.collection = Collection.objects.create(title='Test Collection', name='accesstest')
-        self.collection2 = Collection.objects.create(title='Test Collection', name='accesstest2')
-        self.collectionreader = User.objects.create(username='accesstest-reader')
-        self.collectionwriter = User.objects.create(username='accesstest-writer')
-        self.collectionmanager = User.objects.create(username='accesstest-manager')
+        self.collection = Collection.objects.create(
+            title='Test Collection', name='accesstest')
+        self.collection2 = Collection.objects.create(
+            title='Test Collection', name='accesstest2')
+        self.collectionreader = User.objects.create(
+            username='accesstest-reader')
+        self.collectionwriter = User.objects.create(
+            username='accesstest-writer')
+        self.collectionmanager = User.objects.create(
+            username='accesstest-manager')
         self.owner = User.objects.create(username='accesstest-owner')
         self.admin = User.objects.get(username='admin')
         self.user = User.objects.create(username='accesstest-user')
@@ -583,77 +658,107 @@ class RecordAccessTestCase(unittest.TestCase):
         for record in self.records:
             record.delete()
 
-    def createRecord(self):
+    def create_record(self):
         record = Record()
         self.records.append(record)
         return record
 
-    def checkAccess(self, record, reader, writer, manager, owner, admin, user=False):
-        self.assertEqual(reader, Record.filter_by_access(self.collectionreader, record.id).count() == 1)
-        self.assertEqual(writer, Record.filter_by_access(self.collectionwriter, record.id).count() == 1)
-        self.assertEqual(manager, Record.filter_by_access(self.collectionmanager, record.id).count() == 1)
-        self.assertEqual(owner, Record.filter_by_access(self.owner, record.id).count() == 1)
-        self.assertEqual(admin, Record.filter_by_access(self.admin, record.id).count() == 1)
-        self.assertEqual(user, Record.filter_by_access(self.user, record.id).count() == 1)
+    def check_access(self, record, reader, writer, manager, owner, admin,
+                     user=False):
+        self.assertEqual(
+            reader,
+            Record.filter_by_access(
+                self.collectionreader, record.id).count() == 1
+        )
+        self.assertEqual(
+            writer,
+            Record.filter_by_access(
+                self.collectionwriter, record.id).count() == 1
+        )
+        self.assertEqual(
+            manager,
+            Record.filter_by_access(
+                self.collectionmanager, record.id).count() == 1
+        )
+        self.assertEqual(
+            owner,
+            Record.filter_by_access(self.owner, record.id).count() == 1
+        )
+        self.assertEqual(
+            admin,
+            Record.filter_by_access(self.admin, record.id).count() == 1
+        )
+        self.assertEqual(
+            user,
+            Record.filter_by_access(self.user, record.id).count() == 1
+        )
 
-    def testPersonalRecordNotInCollection(self):
-        record = self.createRecord()
+    def test_personal_record_not_in_collection(self):
+        record = self.create_record()
         record.owner = self.owner
         record.save()
-        self.checkAccess(record, False, False, False, True, True)
+        self.check_access(record, False, False, False, True, True)
 
-    def testPersonalRecordInCollectionNotShared(self):
-        record = self.createRecord()
+    def test_personal_record_in_collection_not_shared(self):
+        record = self.create_record()
         record.owner = self.owner
         record.save()
-        CollectionItem.objects.create(collection=self.collection, record=record, hidden=True)
-        self.checkAccess(record, False, False, False, True, True)
-        # Check to make sure result does not change if record is shared in another collection
-        CollectionItem.objects.create(collection=self.collection2, record=record, hidden=False)
-        self.checkAccess(record, False, False, False, True, True)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record, hidden=True)
+        self.check_access(record, False, False, False, True, True)
+        # Check to make sure result does not change if record is shared
+        # in another collection
+        CollectionItem.objects.create(
+            collection=self.collection2, record=record, hidden=False)
+        self.check_access(record, False, False, False, True, True)
 
-    def testPersonalRecordInCollectionShared(self):
-        record = self.createRecord()
+    def test_personal_record_in_collection_shared(self):
+        record = self.create_record()
         record.owner = self.owner
         record.save()
-        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
-        self.checkAccess(record, True, True, True, True, True)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record, hidden=False)
+        self.check_access(record, True, True, True, True, True)
 
-    def testRegularRecordNotInCollection(self):
-        record = self.createRecord()
+    def test_regular_record_not_in_collection(self):
+        record = self.create_record()
         record.save()
-        self.checkAccess(record, False, False, False, False, True)
+        self.check_access(record, False, False, False, False, True)
 
-    def testRegularRecordInCollectionHidden(self):
-        record = self.createRecord()
+    def test_regular_record_in_collection_hidden(self):
+        record = self.create_record()
         record.save()
-        CollectionItem.objects.create(collection=self.collection, record=record, hidden=True)
-        self.checkAccess(record, False, True, True, False, True)
-        # Check to make sure result does not change if record is not hidden in another collection
-        CollectionItem.objects.create(collection=self.collection2, record=record, hidden=False)
-        self.checkAccess(record, False, True, True, False, True)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record, hidden=True)
+        self.check_access(record, False, True, True, False, True)
+        # Check to make sure result does not change if record is not hidden
+        # in another collection
+        CollectionItem.objects.create(
+            collection=self.collection2, record=record, hidden=False)
+        self.check_access(record, False, True, True, False, True)
 
-    def testRegularRecordInCollectionNotHidden(self):
-        record = self.createRecord()
+    def test_regular_record_in_collection_not_hidden(self):
+        record = self.create_record()
         record.save()
-        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
-        self.checkAccess(record, True, True, True, False, True)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record, hidden=False)
+        self.check_access(record, True, True, True, False, True)
 
-
-    def testIndividualRecord(self):
-        record = self.createRecord()
+    def test_individual_record(self):
+        record = self.create_record()
         record.save()
-        self.checkAccess(record, False, False, False, False, True, user=False)
+        self.check_access(record, False, False, False, False, True, user=False)
         AccessControl.objects.create(content_object=record,
                                      user=self.user,
                                      read=True)
-        self.checkAccess(record, False, False, False, False, True, user=True)
+        self.check_access(record, False, False, False, False, True, user=True)
 
-    def testIndividualEditableRecord(self):
-        record = self.createRecord()
+    def test_individual_editable_record(self):
+        record = self.create_record()
         record.save()
         # check through collection
-        CollectionItem.objects.create(collection=self.collection, record=record, hidden=False)
+        CollectionItem.objects.create(
+            collection=self.collection, record=record, hidden=False)
         self.assertFalse(record.editable_by(self.collectionreader))
         self.assertTrue(record.editable_by(self.collectionwriter))
         # create ACL
@@ -669,7 +774,8 @@ class RecordAccessTestCase(unittest.TestCase):
 class RecordNameTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.collection = Collection.objects.create(title='Test Collection', name='test')
+        self.collection = Collection.objects.create(
+            title='Test Collection', name='test')
         self.dcid = standardfield('identifier')
         self.idfield = Field.objects.create(label='My Identifier')
         self.idfield.equivalent.add(self.dcid)
@@ -678,11 +784,11 @@ class RecordNameTestCase(unittest.TestCase):
         self.collection.delete()
         self.idfield.delete()
 
-    def testDefaultRecordName(self):
+    def test_default_record_name(self):
         record = Record.objects.create()
         self.assertTrue(record.name.startswith('r-'))
 
-    def testRecordNameFromIdentifier(self):
+    def test_record_name_from_identifier(self):
         record = Record.objects.create()
         rid = record.id
         self.assertTrue(record.id)
@@ -699,7 +805,7 @@ class RecordNameTestCase(unittest.TestCase):
         record = Record.objects.get(id=rid)
         self.assertEqual('identifier-205', record.name)
 
-    def testRecordNameFromEquivIdentifier(self):
+    def test_record_name_from_equiv_identifier(self):
         record = Record.objects.create()
         rid = record.id
         self.assertTrue(record.id)

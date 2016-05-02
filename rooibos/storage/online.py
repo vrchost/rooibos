@@ -1,9 +1,6 @@
-from django.core.files.storage import FileSystemStorage
-from django.core.urlresolvers import reverse
-import os
-import random
 import urllib2
 import StringIO
+
 
 class OnlineStorageSystem():
 

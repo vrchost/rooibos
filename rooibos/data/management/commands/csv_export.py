@@ -25,7 +25,11 @@ class Command(BaseCommand):
         collections = map(int, kwargs.get('collections') or list())
         separator = kwargs.get('separator')
 
-        fields = list(Field.objects.filter(fieldvalue__record__collection__in=collections).distinct())
+        fields = list(
+            Field.objects
+            .filter(fieldvalue__record__collection__in=collections)
+            .distinct()
+        )
 
         with open(data_file, 'w') as csvfile:
 

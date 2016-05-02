@@ -1,6 +1,5 @@
-from django.views.decorators.cache import cache_control
 from rooibos.util import json_view
-from models import UserProfile, Preference
+from models import UserProfile
 
 
 def load_settings(user, filter=None):
@@ -19,6 +18,7 @@ def load_settings(user, filter=None):
         settings.setdefault(setting.setting, []).append(setting.value)
     return settings
 
+
 def store_settings(user, key, value):
     if not user.is_authenticated():
         return False
@@ -34,6 +34,7 @@ def store_settings(user, key, value):
 
     return False
 
+
 @json_view
 def load_settings_view(request, filter=None):
     if not request.user.is_authenticated():
@@ -45,5 +46,6 @@ def load_settings_view(request, filter=None):
 def store_settings_view(request):
     if not request.user.is_authenticated():
         return dict(error='Not logged in')
-    result = store_settings(request.user, request.POST.get('key'), request.POST.get('value'))
+    result = store_settings(
+        request.user, request.POST.get('key'), request.POST.get('value'))
     return dict(message='Saved' if result else 'No key/value provided')

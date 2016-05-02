@@ -5,13 +5,13 @@ from rooibos.data.models import Collection
 from rooibos.storage import get_thumbnail_for_record
 from rooibos.util.progressbar import ProgressBar
 
+
 class Command(BaseCommand):
     help = 'Pre-builds thumbnails for a collection'
     option_list = BaseCommand.option_list + (
         make_option('--collection', '-c', dest='collection',
                     help='Collection'),
     )
-
 
     def handle(self, *args, **kwargs):
 
@@ -31,7 +31,6 @@ class Command(BaseCommand):
             admin = admins[0]
         else:
             admin = None
-
 
         pb = ProgressBar(collection.records.count())
         for count, record in enumerate(collection.records.all()):

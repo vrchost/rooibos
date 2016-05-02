@@ -25,7 +25,6 @@ class AccessOnStart:
                 logging.debug("done")
         except:
             logging.exception("error running query")
-            #pass
 
         try:
             # Remove IP based group members
@@ -35,7 +34,6 @@ class AccessOnStart:
                 logging.debug("done")
         except:
             logging.exception("error deleting users")
-            #pass
 
         # Only need to run once
         raise MiddlewareNotUsed
@@ -54,8 +52,15 @@ class AnonymousIpGroupMembershipMiddleware():
                     group_ids.append(group.id)
             request.session['_cached_remote_addr'] = current_ip
             request.session['_cached_ip_group_memberships'] = group_ids
-            logging.debug('Detected IP address change to %s, found %s IP based groups (%s)' %
-                          (current_ip, len(group_ids), ','.join(str(g) for g in group_ids)))
+            logging.debug(
+                'Detected IP address change to %s, '
+                'found %s IP based groups (%s)' %
+                (
+                    current_ip,
+                    len(group_ids),
+                    ','.join(str(g) for g in group_ids),
+                )
+            )
         # also attach to request.user object, since request object
         # is not passed around everywhere
         logging.debug('Updating user object with cached IP based groups (%s)' %

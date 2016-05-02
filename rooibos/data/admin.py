@@ -1,5 +1,6 @@
 from django.contrib import admin
-from models import MetadataStandard, Field, FieldSet, FieldSetField, Record, FieldValue, Collection, Vocabulary, VocabularyTerm
+from models import MetadataStandard, Field, FieldSet, FieldSetField, \
+    Record, FieldValue, Collection, Vocabulary, VocabularyTerm
 
 
 class MetadataStandardAdmin(admin.ModelAdmin):
@@ -26,7 +27,6 @@ class FieldSetAdmin(admin.ModelAdmin):
     inlines = [FieldSetFieldInline, ]
     raw_id_fields = ('owner', )
 
-
     def fields_count(self, obj):
         return obj.fields.count()
 
@@ -37,13 +37,18 @@ class FieldValueInline(admin.TabularInline):
 
 
 class RecordAdmin(admin.ModelAdmin):
-    list_display = ('name', 'title', 'owner', 'get_image_url', 'get_absolute_url', 'shared', )
+    list_display = (
+        'name', 'title', 'owner', 'get_image_url', 'get_absolute_url',
+        'shared',
+    )
     inlines = [FieldValueInline, ]
     raw_id_fields = ('owner', )
 
 
 class CollectionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'name', 'records_in_collection', 'owner', 'hidden', )
+    list_display = (
+        'title', 'name', 'records_in_collection', 'owner', 'hidden',
+    )
     raw_id_fields = ('owner', )
 
     def records_in_collection(self, obj):

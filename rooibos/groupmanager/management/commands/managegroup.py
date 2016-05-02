@@ -38,7 +38,6 @@ class Command(BaseCommand):
     help = "Creates groups, manages memberships and optionally creates " + \
            "associated storage and collection"
 
-
     def handle(self, *args, **kwargs):
 
         usergroup = kwargs.get('usergroup')
@@ -53,18 +52,16 @@ class Command(BaseCommand):
         createusers = kwargs.get('createusers')
 
         def message(msg):
-            if kwargs.has_key('output'):
+            if 'output' in kwargs:
                 kwargs['output'].append(msg)
             else:
                 print msg
-
 
         if not usergroup:
             message("--name is a required parameter.")
             return
 
         group, created = Group.objects.get_or_create(name=usergroup)
-
 
         def process_users(users, action, create=True):
             for data in chain(*(u.split(',') for u in users)):
@@ -89,7 +86,6 @@ class Command(BaseCommand):
             process_users(addusers, group.user_set.add)
         if removeusers:
             process_users(removeusers, group.user_set.remove, create=False)
-
 
         if createcollection:
             collection, created = Collection.objects.get_or_create(

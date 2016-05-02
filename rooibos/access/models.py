@@ -17,7 +17,6 @@ class AccessControl(models.Model):
     manage = models.NullBooleanField()
     restrictions_repr = models.TextField(blank=True, default='')
 
-
     class Meta:
         unique_together = ('content_type', 'object_id', 'user', 'usergroup')
 
@@ -28,12 +27,20 @@ class AccessControl(models.Model):
 
     def __unicode__(self):
         def f(flag, char):
-            if flag == True: return char
-            elif flag == False: return char.upper()
-            else: return '-'
-        return '%s [%s%s%s] %s (%s)' % (self.user or self.usergroup or 'AnonymousUser',
-                                 f(self.read, 'r'), f(self.write, 'w'), f(self.manage, 'm'),
-                                 self.content_object, self.content_type)
+            if flag is True:
+                return char
+            elif flag is False:
+                return char.upper()
+            else:
+                return '-'
+        return '%s [%s%s%s] %s (%s)' % (
+            self.user or self.usergroup or 'AnonymousUser',
+            f(self.read, 'r'),
+            f(self.write, 'w'),
+            f(self.manage, 'm'),
+            self.content_object,
+            self.content_type
+        )
 
     def restrictions_get(self):
         if self.restrictions_repr:
@@ -65,12 +72,14 @@ def update_membership_by_attributes(user, info):
 class ExtendedGroupManager(models.Manager):
 
     def get_extra_groups(self, user, assume_authenticated=False):
-        # retrieve membership in special groups such as everyone and authenticated users
-        # membership for those types of groups is not stored explicitly
+        # retrieve membership in special groups such as everyone and
+        # authenticated users membership for those types of groups
+        # is not stored explicitly
         q = Q(type=EVERYBODY_GROUP)
         if assume_authenticated or user.is_authenticated():
             q = q | Q(type=AUTHENTICATED_GROUP)
-        ip_group_memberships = getattr(user, '_cached_ip_group_memberships', [])
+        ip_group_memberships = getattr(
+            user, '_cached_ip_group_memberships', [])
         if ip_group_memberships:
             q = q | Q(id__in=ip_group_memberships)
         return self.filter(q)
@@ -106,18 +115,21 @@ class ExtendedGroup(Group):
     def _check_attributes(self, attributes):
         for attribute in Attribute.objects.filter(group=self):
             values = attributes.get(attribute.attribute, [])
-            for value in attribute.attributevalue_set.all().values_list('value', flat=True):
-                if (hasattr(values, '__iter__') and value in values) or value == values:
+            for value in attribute.attributevalue_set.all().values_list(
+                    'value', flat=True):
+                if (hasattr(values, '__iter__') and value in values) \
+                        or value == values:
                     break
             else:
                 return False
         return True
 
     def _full_type(self):
-        return filter(lambda (a,f): a==self.type, self.TYPE_CHOICES)[0][1]
+        return filter(lambda (a, f): a == self.type, self.TYPE_CHOICES)[0][1]
 
     def __unicode__(self):
         return '%s (%s)' % (self.name, self._full_type())
+
 
 class Subnet(models.Model):
     group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'I'})

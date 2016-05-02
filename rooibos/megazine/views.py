@@ -17,10 +17,13 @@ def content(request, presentation_id):
 
     items = presentation.items.select_related('record').filter(hidden=False)
 
-    return render_to_response('megazine_content.mz3',
-        {'items': items,
-         'licensekey': getattr(settings, 'MEGAZINE_PUBLIC_KEY', None),
-         'width': width / 2 - 100,
-         'height': width - 200,
-         },
-        context_instance=RequestContext(request))
+    return render_to_response(
+        'megazine_content.mz3',
+        {
+            'items': items,
+            'licensekey': getattr(settings, 'MEGAZINE_PUBLIC_KEY', None),
+            'width': width / 2 - 100,
+            'height': width - 200,
+        },
+        context_instance=RequestContext(request)
+    )

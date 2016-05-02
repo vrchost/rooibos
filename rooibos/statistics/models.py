@@ -9,7 +9,8 @@ class Activity(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
     object_id = models.PositiveIntegerField(null=True, db_index=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
-    user_field = models.ForeignKey(User, null=True, blank=True, db_column='user_id')
+    user_field = models.ForeignKey(
+        User, null=True, blank=True, db_column='user_id')
     date = models.DateField(db_index=True)
     time = models.TimeField()
     event = models.CharField(max_length=64, db_index=True)
@@ -18,16 +19,22 @@ class Activity(models.Model):
     def __unicode__(self):
         return "Activity (%s %s) %s" % (self.date, self.time, self.event)
 
-    # Override user property to allow AnonymousUser objects, which otherwise fail
+    # Override user property to allow AnonymousUser objects,
+    # which otherwise fail
     def _user_get(self):
         return self.user_field
+
     def _user_set(self, value):
         self.user_field = value if value and not value.is_anonymous() else None
     user = property(_user_get, _user_set)
 
     # Override data property to take a dict() object
     def _data_get(self):
-        return eval(self.data_field, {"__builtins__": None}, {}) if self.data_field else None
+        if self.data_field:
+            return eval(self.data_field, {"__builtins__": None}, {})
+        else:
+            return None
+
     def _data_set(self, value):
         if not value:
             self.data_field = ''
@@ -38,7 +45,7 @@ class Activity(models.Model):
     data = property(_data_get, _data_set)
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request') if kwargs.has_key('request') else None
+        self.request = kwargs.pop('request') if 'request' in kwargs else None
         super(Activity, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -68,4 +75,5 @@ class AccumulatedActivity(models.Model):
     count = models.IntegerField()
 
     def __unicode__(self):
-        return "AccumulatedActivity (%s) %s %s" % (self.date, self.event, self.count)
+        return "AccumulatedActivity (%s) %s %s" % (
+            self.date, self.event, self.count)

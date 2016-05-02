@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from rooibos.workers.registration import worker_callback, QUEUE_VERSION
 # does not get loaded otherwise:
-import rooibos.contrib.djangologging.middleware
+import rooibos.contrib.djangologging.middleware  # noqa
 import logging
 import pika
 import time
@@ -15,9 +15,7 @@ logging.root.addHandler(logging.StreamHandler())
 class Command(BaseCommand):
     help = 'Starts worker process'
 
-
-    option_list = BaseCommand.option_list + (
-        )
+    option_list = BaseCommand.option_list + ()
 
     def handle(self, *commands, **options):
         queue_name = 'rooibos-%s-jobs-%s' % (
@@ -37,7 +35,11 @@ class Command(BaseCommand):
 
                 consumer = WorkerConsumer(
                     pika.ConnectionParameters(
-                        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='localhost'))
+                        **getattr(
+                            settings,
+                            'RABBITMQ_OPTIONS',
+                            dict(host='localhost')
+                        )
                     ),
                     queue_name,
                     dict(
@@ -59,8 +61,8 @@ class Command(BaseCommand):
 
 class WorkerConsumer(object):
     """
-    This is based on an example consumer that will handle unexpected interactions
-    with RabbitMQ such as channel and connection closures.
+    This is based on an example consumer that will handle unexpected
+    interactions with RabbitMQ such as channel and connection closures.
 
     If RabbitMQ closes the connection, it will reopen it. You should
     look at the output, as there are limited reasons why the connection may
@@ -74,12 +76,14 @@ class WorkerConsumer(object):
     EXCHANGE = 'rooibos-workers'
     EXCHANGE_TYPE = 'direct'
 
-    def __init__(self, connection_params, queue_name, queue_options, routing_key):
+    def __init__(self, connection_params, queue_name, queue_options,
+                 routing_key):
         """
         Create a new instance of the consumer class, passing in the AMQP
         URL used to connect to RabbitMQ.
 
-        :param object connection_params: The connection parameters to connect with
+        :param object connection_params: The connection parameters to
+               connect with
         :param str queue_name: The name of the queue to use
 
         """
@@ -132,8 +136,11 @@ class WorkerConsumer(object):
         if self._closing:
             self._connection.ioloop.stop()
         else:
-            LOGGER.warning('Connection closed, reopening in 5 seconds: (%s) %s',
-                           reply_code, reply_text)
+            LOGGER.warning(
+                'Connection closed, reopening in 5 seconds: (%s) %s',
+                reply_code,
+                reply_text
+            )
             self._connection.add_timeout(5, self.reconnect)
 
     def on_connection_open(self, unused_connection):
@@ -219,7 +226,8 @@ class WorkerConsumer(object):
         """Invoked by pika when RabbitMQ has finished the Exchange.Declare RPC
         command.
 
-        :param pika.Frame.Method unused_frame: Exchange.DeclareOk response frame
+        :param pika.Frame.Method unused_frame: Exchange.DeclareOk response
+               frame
 
         """
         LOGGER.info('Exchange declared')

@@ -64,7 +64,9 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     result = l.search_s(
                         ldap_auth['base'],
                         ldap_auth['scope'],
-                        '(&(objectClass=user)(%s=%s)(memberof=%s))' % (ldap_auth['cn'], username, group),
+                        '(&(objectClass=user)(%s=%s)(memberof=%s))' % (
+                            ldap_auth['cn'], username, group
+                        ),
                     )
                     if len(result) == 1:
                         attributes['_groups'].push(group)
@@ -75,7 +77,8 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                 except User.DoesNotExist:
                     emails = attributes[ldap_auth['email']]
                     if not emails:
-                        email = ldap_auth.get('email_default', '%s@unknown') % username
+                        email = ldap_auth.get(
+                            'email_default', '%s@unknown') % username
                     else:
                         email = emails[0]
                     user = self._create_user(

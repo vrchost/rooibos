@@ -1,8 +1,9 @@
-
 from django.contrib.auth.models import User, check_password, get_hexdigest
 from rooibos.userprofile.views import load_settings, store_settings
 
 import logging
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,12 +31,14 @@ def check_alternate_password(username, password):
         user.backend = 'django.contrib.auth.backends.ModelBackend'
     return user
 
+
 def _get_encoded_password(raw_password):
     import random
     algo = 'sha1'
     salt = get_hexdigest(algo, str(random.random()), str(random.random()))[:5]
     hsh = get_hexdigest(algo, salt, raw_password)
     return '%s$%s$%s' % (algo, salt, hsh)
+
 
 def set_alternate_password(user, password):
     logger.debug('Setting alternate password for "%s"' % user.username)
