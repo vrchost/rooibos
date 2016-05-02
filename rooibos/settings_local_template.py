@@ -41,7 +41,10 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 DEFAULT_CHARSET = 'utf-8'
 DATABASE_CHARSET = 'utf8'
 
+CLOUDFILES_USERNAME = ''
 CLOUDFILES_API_KEY = ''
+
+UPLOAD_LIMIT = 5 * 1024 * 1024
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
