@@ -2,6 +2,8 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 #LOGGING_OUTPUT_ENABLED = True
 
+INSTANCE_NAME = ''
+
 # Needed to enable compression JS and CSS files
 COMPRESS = True
 MEDIA_URL = '/static/'
@@ -39,7 +41,18 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 DEFAULT_CHARSET = 'utf-8'
 DATABASE_CHARSET = 'utf8'
 
+CLOUDFILES_USERNAME = ''
 CLOUDFILES_API_KEY = ''
+
+# S3 settings
+S3_FOLDER_MAPPING = {}
+AWS_STORAGE_BUCKET_NAME = ''
+AWS_ACCESS_KEY = None
+AWS_SECRET_KEY = None
+
+CDN_THUMBNAILS = {}
+
+UPLOAD_LIMIT = 5 * 1024 * 1024
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -74,7 +87,13 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/'
 
-CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+CACHE = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'memcached://127.0.0.1:11211/',
+        'KEY_PREFIX': INSTANCE_NAME,
+    }
+}
 
 INTERNAL_IPS = ('127.0.0.1',)
 
@@ -94,12 +113,16 @@ ARTSTOR_GATEWAY = None
 
 OPEN_OFFICE_PATH = 'C:/Program Files/OpenOffice.org 3/program/'
 
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'rooibos.auth.ldapauth.LdapAuthenticationBackend',
+GEARMAN_SERVERS = ['127.0.0.1']
+
+AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+#    'django_cas.backends.CASBackend',
+#    'rooibos.auth.ldapauth.LdapAuthenticationBackend',
 #    'rooibos.auth.mailauth.ImapAuthenticationBackend',
 #    'rooibos.auth.mailauth.PopAuthenticationBackend',
-)
+
+
+CAS_SERVER_URL = None
 
 MIDDLEWARE_CLASSES = ('rooibos.auth.middleware.BasicAuthenticationMiddleware',)
 
@@ -170,6 +193,14 @@ POP_AUTH = (
 
 SESSION_COOKIE_AGE = 6 * 3600  # in seconds
 
+SHIB_ENABLED = False
+SHIB_ATTRIBUTE_MAP = None
+SHIB_USERNAME = None
+SHIB_EMAIL = None
+SHIB_FIRST_NAME = None
+SHIB_LAST_NAME = None
+SHIB_LOGOUT_URL = None
+
 SSL_PORT = None  # ':443'
 
 # Theme colors for use in CSS
@@ -185,8 +216,10 @@ WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID at Your Univ
 
 CUSTOM_TRACKER_HTML = ""
 
-
 SHOW_FRONTPAGE_LOGIN = 'yes'
+
+EXPOSE_TO_CONTEXT = ('STATIC_DIR', 'PRIMARY_COLOR', 'SECONDARY_COLOR', 'CUSTOM_TRACKER_HTML', 'ADMINS', 'LOGO_URL', 'FAVICON_URL', 'COPYRIGHT', 'CAS_SERVER_URL',)
+
 
 # The Megazine viewer is using a third party component that has commercial
 # licensing requirements.  To enable the component you need to enter your
@@ -233,10 +266,23 @@ FORCE_SLIDE_REPROCESS = False
 PRESENTATION_PERMISSIONS = []
 
 
+# Show extra field values next to thumbnails, specify by field label
+# THUMB_EXTRA_FIELDS = ['Creator', 'Work Type']
+THUMB_EXTRA_TEMPLATE = 'ui_record_extra.html'
+THUMB_EXTRA_FIELDS = []
+
+
 MASTER_TEMPLATE = 'master_root.html'
 
 
 INSTALLED_APPS = ()
+
+
+FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
+
+
+PPTEXPORT_WIDTH = 800
+PPTEXPORT_HEIGHT = 600
 
 
 additional_settings = [

@@ -5,6 +5,10 @@
     <div class="record-title"><a href="{{ record.get_absolute_url }}">{{ record.title }}</a></div>
       {% if viewmode == "metadata" %}
           {% metadata record %}
+      {% else %}
+          {% if viewmode == "thumb" and extra %}
+              {% include extra_template %}
+          {% endif %}
       {% endif %}
     {% endif %}
     {% if selectable %}

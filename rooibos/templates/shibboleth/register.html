@@ -1,0 +1,32 @@
+{% extends "forms.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block breadcrumbs %}
+{% endblock %}
+
+{% block content %}
+
+<h2>Register</h2>
+<form method="post" action=".">{% csrf_token %}
+  <div>
+      <p>By registering for this service:</p>
+      <ul>
+        <li>I consent my Identity Provider to release the following attributes:
+          <ul>
+            {% for name,value in shib_attrs.items %}
+            <li>{{ name }}:     {{ value }}</li>
+            {% endfor %}
+          </ul>
+        </li>
+        </ul>
+
+  </div>
+  <input type="hidden" name="next" value="{{ next }}" />
+  <div class="submit-row">
+    <input type="submit" value="Submit" class="default" />
+  </div>
+</form>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core import serializers
 from django.db.models import Q
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
@@ -21,7 +22,8 @@ from django.views.decorators.http import require_POST
 from models import *
 from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
 from functions import get_collection_visibility_preferences, \
-    set_collection_visibility_preferences, apply_collection_visibility_preferences
+    set_collection_visibility_preferences, apply_collection_visibility_preferences, \
+    collection_dump
 from rooibos.access import filter_by_access, get_effective_permissions_and_restrictions
 from rooibos.presentation.models import Presentation
 from rooibos.storage.models import Media, Storage
@@ -677,3 +679,9 @@ def save_collection_visibility_preferences(request):
 
     next = request.GET.get('next', reverse('main'))
     return HttpResponseRedirect(next)
+
+
+def collection_dump_view(request, identifier, name):
+    response = HttpResponse(mimetype='text/plain')
+    collection_dump(request.user, identifier, stream=response, prefix=request.GET.get('prefix'))
+    return response

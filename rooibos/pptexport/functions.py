@@ -4,6 +4,7 @@ import os
 import xml.dom.minidom
 from rooibos.storage import get_image_for_record
 from PIL import Image
+from django.conf import settings
 
 
 PROCESS_FILES = {
@@ -129,7 +130,12 @@ class PowerPointGenerator:
                 e.firstChild.nodeValue = t
             # insert image if available
             try:
-                image = get_image_for_record(record, self.user, 800, 600)
+                image = get_image_for_record(
+                    record,
+                    self.user,
+                    getattr(settings, 'PPTEXPORT_WIDTH', 800),
+                    getattr(settings, 'PPTEXPORT_HEIGHT', 600)
+                )
             except:
                 image = None
             if image and os.path.isfile(image):

@@ -35,6 +35,10 @@ class Storage(models.Model):
     #derivative = models.OneToOneField('self', null=True, related_name='master')
     derivative = models.IntegerField(null=True, db_column='derivative_id')
 
+    # Create storage systems only once and hold on to them to increase performace,
+    # especially for cloud based storage systems
+    storage_systems = dict()
+
     class Meta:
         verbose_name_plural = 'storage'
 
@@ -47,45 +51,45 @@ class Storage(models.Model):
 
     @property
     def storage_system(self):
-        if settings.STORAGE_SYSTEMS.has_key(self.system):
+        key = (self.system, self.base)
+        if not Storage.storage_systems.has_key(key) and settings.STORAGE_SYSTEMS.has_key(self.system):
             (modulename, classname) = settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
             module = __import__(modulename)
             for c in modulename.split('.')[1:]:
                 module = getattr(module, c)
-            classobj = getattr(module, classname)
             try:
-                return classobj(base=self.base)
+                classobj = getattr(module, classname)
+                Storage.storage_systems[key] = classobj(base=self.base, storage=self)
             except Exception:
                 logging.exception("Could not initialize storage %s" % classname)
                 return None
-        else:
-            return None
+        return Storage.storage_systems.get(key)
 
     def get_absolute_url(self):
         return reverse('storage-manage-storage', args=(self.id, self.name))
 
     def get_absolute_media_url(self, media):
         storage = self.storage_system
-        return storage and storage.get_absolute_media_url(self, media) or None
+        return storage and storage.get_absolute_media_url(media) or None
 
     def get_delivery_media_url(self, media):
         storage = self.storage_system
         url = None
         if hasattr(storage, 'get_delivery_media_url'):
-            url = storage.get_delivery_media_url(self, media)
+            url = storage.get_delivery_media_url(media)
         return url or self.get_absolute_media_url(media)
 
     def get_absolute_file_path(self, media):
         storage = self.storage_system
-        return storage and storage.get_absolute_file_path(self, media) or None
+        return storage and storage.get_absolute_file_path(media) or None
 
     def save_file(self, name, content):
         storage = self.storage_system
         return storage and storage.save(name, content) or None
 
-    def load_file(self, name):
+    def load_file(self, media):
         storage = self.storage_system
-        return storage and storage.open(name) or None
+        return storage and storage.load_file(media) or None
 
     def delete_file(self, name):
         storage = self.storage_system
@@ -128,7 +132,7 @@ class Storage(models.Model):
                 return int(restrictions['uploadlimit'])
             except (ValueError, KeyError):
                 pass
-        return settings.UPLOAD_LIMIT
+        return getattr(settings, 'UPLOAD_LIMIT', 0)
 
 
 class Media(models.Model):
@@ -183,7 +187,7 @@ class Media(models.Model):
             raise IOError("Media file could not be stored")
 
     def load_file(self):
-        return self.storage and self.storage.load_file(self.url) or None
+        return self.storage and self.storage.load_file(self) or None
 
     def file_exists(self):
         return self.storage and self.storage.file_exists(self.url) or False

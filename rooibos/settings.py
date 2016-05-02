@@ -131,7 +131,7 @@ STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
     'online': 'rooibos.storage.online.OnlineStorageSystem',
     'pseudostreaming': 'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
-#    'cloudfiles': 'rooibos.storage.cloudfiles.CloudFilesStorageSystem',
+    's3': 'rooibos.storage.s3.S3StorageSystem',
 }
 
 GROUP_MANAGERS = {
@@ -184,6 +184,8 @@ EXPOSE_TO_CONTEXT = (
     'PREVIEW_WIDTH',
     'PREVIEW_HEIGHT',
     'SHOW_TERMS',
+    'SHIB_ENABLED',
+    'SHIB_LOGOUT_URL',
     )
 
 

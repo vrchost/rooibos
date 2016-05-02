@@ -7,6 +7,8 @@ apps/
 scratch/
 solr/wrapper.*
 solr/wrapper-license.conf
+solr/collection1/data/tlog
+solr/collection1/data/index/_*
 config.xml
 CACHE
 rooibos/static/flowplayer/flowplayer.commercial*

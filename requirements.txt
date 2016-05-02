@@ -29,3 +29,7 @@ pycrypto
 pep8-naming
 flake8-todo
 flake8-docstrings
+django-cas
+boto
+django-storages
+https://github.com/knabar/django-shibboleth/archive/master.zip
