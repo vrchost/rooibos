@@ -183,7 +183,9 @@
                     <li><a href="{% url presentation-browse %}">Experience</a>
                         <ul class="menu">
                             <li><a href="{% url presentation-browse %}">Browse Presentations</a></li>
+                            {% if not HIDE_SHOWCASES %}
                             <li><a href="{% url showcases %}">Showcases</a></li>
+                            {% endif %}
                             {% if user.is_authenticated %}
                             <li><a href="{% url mediaviewer-install %}">MediaViewer</a></li>
                             {% endif %}
