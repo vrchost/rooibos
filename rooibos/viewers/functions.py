@@ -24,8 +24,6 @@ class Viewer(object):
         return reverse('viewers-viewer-%s' % urltype, kwargs=kwargs)
 
     def embed_code(self, request, options):
-        if not self.is_embeddable:
-            return None
         return render_to_string(self.embed_template,
                                 {
                                     'viewer': self,
