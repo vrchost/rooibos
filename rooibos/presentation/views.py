@@ -119,10 +119,14 @@ def create(request):
 def add_selected_items(request, presentation):
     selected = request.session.get('selected_records', ())
     records = Record.filter_by_access(request.user, *selected)
+    # records may have been returned in different order
+    records = dict((r.id, r) for r in records)
     c = presentation.items.count()
-    for record in records:
-        c += 1
-        presentation.items.create(record=record, order=c)
+    for rid in selected:
+        record = records.get(rid)
+        if record:
+            c += 1
+            presentation.items.create(record=record, order=c)
     request.session['selected_records'] = ()
 
 
