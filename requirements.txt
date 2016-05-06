@@ -31,5 +31,5 @@ flake8-todo
 flake8-docstrings
 django-cas
 boto
-django-storages
+django-storages==1.1.8
 https://github.com/knabar/django-shibboleth/archive/master.zip
