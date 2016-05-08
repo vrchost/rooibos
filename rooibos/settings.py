@@ -69,8 +69,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'rooibos.ui.middleware.PageTitles',
     'pagination.middleware.PaginationMiddleware',
-    'djangologging.middleware.LoggingMiddleware',
-    'djangologging.middleware.SuppressLoggingOnAjaxRequestsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',

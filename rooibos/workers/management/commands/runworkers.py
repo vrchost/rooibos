@@ -1,8 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from rooibos.workers.registration import worker_callback, QUEUE_VERSION
-# does not get loaded otherwise:
-import rooibos.contrib.djangologging.middleware  # noqa
 import logging
 import pika
 import time
