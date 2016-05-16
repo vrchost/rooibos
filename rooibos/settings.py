@@ -8,7 +8,7 @@ import sys
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 lib_dir = os.path.join(install_dir, 'rooibos', 'contrib')
 
-if not install_dir in sys.path: sys.path.append(install_dir)
+if not install_dir in sys.path: sys.path.insert(0, install_dir)
 if not lib_dir in sys.path: sys.path.append(lib_dir)
 
 # Language code for this installation. All choices can be found here:
