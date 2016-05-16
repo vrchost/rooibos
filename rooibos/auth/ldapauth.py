@@ -67,7 +67,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                         '(&(objectClass=user)(%s=%s)(memberof=%s))' % (ldap_auth['cn'], username, group),
                     )
                     if len(result) == 1:
-                        attributes['_groups'].push(group)
+                        attributes['_groups'].append(group)
 
                 # process Django user
                 try:
