@@ -344,7 +344,7 @@ class SuppressLoggingOnAjaxRequestsMiddleware(object):
     
     
 if logging_output_enabled:
-    logpath = settings.LOG_DIR
+    logpath = os.path.join(settings.SCRATCH_DIR, 'logs')
     if not os.path.exists(logpath):
         os.makedirs(logpath)
     # Can't do sys.argv since it does not exist when running under PyISAPIe
