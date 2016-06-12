@@ -7,7 +7,6 @@ import time
 
 
 LOGGER = logging.getLogger(__name__)
-logging.root.addHandler(logging.StreamHandler())
 
 
 class Command(BaseCommand):

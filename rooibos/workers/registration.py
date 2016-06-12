@@ -6,7 +6,7 @@ from collections import namedtuple
 from django.db import transaction, close_connection
 
 
-logger = logging.getLogger('rooibos_workers_registration')
+logger = logging.getLogger(__name__)
 
 QUEUE_VERSION = '5'
 

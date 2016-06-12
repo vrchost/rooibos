@@ -18,7 +18,7 @@ import sys
 SOLR_EMPTY_FIELD_VALUE = 'unspecified'
 
 
-logger = logging.getLogger("rooibos_solr")
+logger = logging.getLogger(__name__)
 
 
 def object_acl_to_solr(obj):

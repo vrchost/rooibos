@@ -12,7 +12,7 @@ from django.core.cache import cache
 DELAY_INDEXING_CACHE_KEY = '_solr_delay_record_indexing'
 
 
-logger = logging.getLogger('solr.models')
+logger = logging.getLogger(__name__)
 
 
 class SolrIndexUpdates(models.Model):

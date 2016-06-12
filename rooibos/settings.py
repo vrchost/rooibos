@@ -4,6 +4,7 @@
 
 import os
 import sys
+import re
 
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -214,3 +215,64 @@ while additional_settings:
         elif setting == 'remove_settings':
             for remove_setting in getattr(module, setting):
                 del locals()[remove_setting]
+
+
+# set logging if not already defined (doing this after importing
+# settings_local to be able to refer to the LOG_DIR configured there
+
+def _get_log_handler():
+
+    # Can't do sys.argv since it does not exist when running under PyISAPIe
+    cmdline = getattr(sys, 'argv', [])
+    if len(cmdline) > 1:
+        # only use first command line argument for log file name
+        basename = 'rooibos-%s' % '-'.join(
+            re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:2])
+    else:
+        basename = 'rooibos'
+
+    try:
+        return {
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(LOG_DIR, basename +'.log'),
+                'formatter': 'verbose',
+            },
+        }
+    except NameError:
+        return {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            }
+        }
+
+try:
+    LOGGING
+except NameError:
+    handler = _get_log_handler()
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '[%(name)30.30s]%(levelname)8s %(asctime)s '
+                          '%(process)d %(message)s '
+                          '[%(filename)s:%(lineno)d]'
+            },
+            'simple': {
+                'format': '%(levelname)s %(message)s'
+            },
+        },
+        'handlers': handler,
+        'loggers': {
+            'django': {
+                'handlers': [],
+            },
+            'rooibos': {
+                'handlers': [handler.keys()[0]],
+                'level': 'DEBUG',
+                'propagate': True,
+            },
+        },
+    }
