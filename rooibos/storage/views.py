@@ -19,7 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
 from models import Media, Storage, TrustedSubnet, ProxyUrl
 from rooibos.access import filter_by_access
-from rooibos.contrib.ipaddr import IP
+from ipaddr import IPAddress, IPNetwork
 from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield
 from rooibos.storage import get_media_for_record, get_image_for_record, \
@@ -272,9 +272,9 @@ def create_proxy_url_if_needed(url, request):
 def call_proxy_url(request, uuid):
     context = request.GET.get('context')
 
-    ip = IP(request.META['REMOTE_ADDR'])
+    ip = IPAddress(request.META['REMOTE_ADDR'])
     for subnet in TrustedSubnet.objects.all():
-        if ip in IP(subnet.subnet):
+        if ip in IPNetwork(subnet.subnet):
             break
     else:
         return HttpResponseForbidden()

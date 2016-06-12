@@ -8,7 +8,7 @@ from django.db import reset_queries, IntegrityError
 from optparse import make_option
 from rooibos.access.models import AccessControl, ExtendedGroup, Subnet, \
     AttributeValue, ATTRIBUTE_BASED_GROUP, IP_BASED_GROUP
-from rooibos.contrib.ipaddr import IP
+from ipaddr import IPNetwork
 from tagging.models import Tag, TaggedItem
 from rooibos.data.models import Collection, CollectionItem, Field, \
     FieldValue, Record, FieldSet, FieldSetField, Vocabulary, VocabularyTerm, \
@@ -427,7 +427,9 @@ class MigrateSubnet(MigrateModel):
             group = ExtendedGroup.objects.get(
                 id=self.usergroups[str(row.GroupID)].id, type=IP_BASED_GROUP)
             return Subnet(
-                group=group, subnet=str(IP('%s/%s' % (row.Subnet, row.Mask))))
+                group=group,
+                subnet=str(IPNetwork('%s/%s' % (row.Subnet, row.Mask)))
+            )
         except ExtendedGroup.DoesNotExist:
             return None
         except KeyError:

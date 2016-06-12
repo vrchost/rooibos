@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User, Group
-from rooibos.contrib.ipaddr import IP
+from ipaddr import IPAddress, IPNetwork
 
 
 class AccessControl(models.Model):
@@ -106,9 +106,9 @@ class ExtendedGroup(Group):
                 self.user_set.remove(user)
 
     def _check_subnet(self, address):
-        ip = IP(address)
+        ip = IPAddress(address)
         for subnet in self.subnet_set.values_list('subnet', flat=True):
-            if ip in IP(subnet):
+            if ip in IPNetwork(subnet):
                 return True
         return False
 

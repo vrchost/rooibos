@@ -7,7 +7,7 @@ import random
 from PIL import Image
 import os
 import uuid
-from rooibos.contrib.ipaddr import IP
+from ipaddr import IPAddress, IPNetwork
 from rooibos.util import unique_slug
 from rooibos.data.models import Record
 from rooibos.access import get_effective_permissions_and_restrictions, \
@@ -334,9 +334,9 @@ class ProxyUrl(models.Model):
 
     @staticmethod
     def create_proxy_url(url, context, ip, user):
-        ip = IP(ip)
+        ip = IPAddress(ip)
         for subnet in TrustedSubnet.objects.all():
-            if ip in IP(subnet.subnet):
+            if ip in IPNetwork(subnet.subnet):
                 break
         else:
             return None
