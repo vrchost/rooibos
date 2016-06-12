@@ -266,13 +266,14 @@ except NameError:
         },
         'handlers': handler,
         'loggers': {
-            'django': {
-                'handlers': [],
-            },
             'rooibos': {
                 'handlers': [handler.keys()[0]],
                 'level': 'DEBUG',
-                'propagate': True,
+                'propagate': False,
+            },
+            '': {
+                'handlers': [handler.keys()[0]],
+                'level': 'WARNING',
             },
         },
     }
