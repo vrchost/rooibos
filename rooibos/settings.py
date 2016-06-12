@@ -37,7 +37,7 @@ MEDIA_ROOT = ''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/media-unused/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -90,6 +90,7 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.comments',
     'django.contrib.redirects',
+    'django.contrib.staticfiles',
     'django_extensions',
     'tagging',
     'google_analytics',
@@ -160,7 +161,11 @@ TEMPLATE_DIRS = (
     os.path.join(install_dir, 'rooibos', 'templates'),
 )
 
-STATIC_DIR = os.path.join(install_dir, 'rooibos', 'static')
+STATICFILES_DIRS = [
+    os.path.join(install_dir, 'rooibos', 'static'),
+]
+STATIC_URL = '/static/'
+
 
 FFMPEG_EXECUTABLE = os.path.join(
     install_dir, 'dist', 'windows', 'ffmpeg', 'bin', 'ffmpeg.exe')

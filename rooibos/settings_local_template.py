@@ -5,9 +5,8 @@ INSTANCE_NAME = ''
 
 # Needed to enable compression JS and CSS files
 COMPRESS = True
-MEDIA_URL = '/static/'
-MEDIA_ROOT = 'd:/mdid/rooibos/static/'
 
+STATIC_ROOT = 'd:/mdid/rooibos/static/'
 
 ADMINS = (
     # ('Your name', 'your@email.example'),
