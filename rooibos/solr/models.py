@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models.signals import post_delete, post_save
 from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, CollectionItem
-from rooibos.contrib.tagging.models import TaggedItem
+from tagging.models import TaggedItem
 from rooibos.util.models import OwnedWrapper
 from workers import schedule_solr_index
 import logging

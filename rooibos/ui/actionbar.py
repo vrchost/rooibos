@@ -1,5 +1,5 @@
-from rooibos.contrib.tagging.models import Tag
-from rooibos.contrib.tagging.utils import parse_tag_input
+from tagging.models import Tag
+from tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper
 import base64
 
