@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import url, handler404, patterns, include
 from django.contrib import admin
 from django.conf import settings
-from django.views.generic.simple import direct_to_template
+from django.views.generic.base import TemplateView
 from django.views.static import serve
 from django.views.decorators.cache import cache_control
 from django.http import HttpResponseServerError
@@ -33,27 +33,27 @@ def raise_exception():
     raise Exception()
 
 
+class ShowcasesView(TemplateView):
+
+    def get_context_data(self, **kwargs):
+        context = super(ShowcasesView, self).get_context_data(**kwargs)
+        context.update({
+            'applications': apps_showcases,
+        })
+        return context
+
+
 urls = [
     # main page needs SSL because of embedded login form, otherwise CSRF fails
     url(r'^$', main, {'HELP': 'frontpage', 'SSL': True}, name='main'),
     url(
         r'^about/',
-        direct_to_template,
-        {
-            'template': 'about.html'
-        },
+        TemplateView.as_view(template_name='about.html'),
         name='about'
     ),
     url(
         r'^showcases/',
-        direct_to_template,
-        {
-            'HELP': 'showcases',
-            'template': 'showcases.html',
-            'extra_context': {
-                'applications': apps_showcases
-            }
-        },
+        ShowcasesView.as_view(template_name='showcases.html'),
         name='showcases'
     ),
 

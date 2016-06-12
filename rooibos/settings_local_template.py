@@ -1,14 +1,12 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-# LOGGING_OUTPUT_ENABLED = True
 
 INSTANCE_NAME = ''
 
 # Needed to enable compression JS and CSS files
 COMPRESS = True
-MEDIA_URL = '/static/'
-MEDIA_ROOT = 'd:/mdid/rooibos/static/'
 
+STATIC_ROOT = 'd:/mdid/rooibos/static/'
 
 ADMINS = (
     # ('Your name', 'your@email.example'),
@@ -89,9 +87,9 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_URL = '/'
 
-CACHE = {
+CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': 'memcached://127.0.0.1:11211/',
         'KEY_PREFIX': INSTANCE_NAME,
     }

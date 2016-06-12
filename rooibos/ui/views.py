@@ -15,8 +15,8 @@ from rooibos.util import json_view
 from rooibos.data.models import Record, Collection
 from rooibos.storage.models import Storage
 from rooibos.access import filter_by_access
-from rooibos.contrib.tagging.models import Tag
-from rooibos.contrib.tagging.utils import parse_tag_input
+from tagging.models import Tag
+from tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper
 from rooibos.solr.views import run_search
 from rooibos.context_processors import selected_records as ctx_selected_records

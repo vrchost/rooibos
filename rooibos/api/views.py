@@ -11,7 +11,7 @@ from rooibos.storage.views import create_proxy_url_if_needed
 from rooibos.util import json_view, must_revalidate
 from rooibos.util.models import OwnedWrapper
 from rooibos.data.models import Collection, Record
-from rooibos.contrib.tagging.models import Tag
+from tagging.models import Tag
 from rooibos.ui.alternate_password import check_alternate_password
 
 import logging

@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
+from django.views.generic.base import TemplateView
 from django.views.generic.create_update import create_object, delete_object, \
     update_object
 from django.contrib.comments.models import Comment
@@ -39,10 +39,7 @@ urlpatterns = patterns(
     ),
     url(
         r'^report-problem/$',
-        direct_to_template,
-        {
-            'template': 'ui_report_problem.html'
-        },
+        TemplateView.as_view(template_name='ui_report_problem.html'),
         name='ui-report-problem'
     ),
     url(

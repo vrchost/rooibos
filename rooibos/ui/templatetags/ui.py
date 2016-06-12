@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import simplejson
 from django.conf import settings
 from django.core.cache import cache
-from rooibos.contrib.tagging.models import Tag
+from tagging.models import Tag
 from rooibos.data.models import Field
 from rooibos.util.models import OwnedWrapper
 from rooibos.ui.functions import fetch_current_presentation, \

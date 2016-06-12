@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.db import backend
 from django import forms
 from django.views.decorators.http import require_POST
-from rooibos.contrib.tagging.models import Tag, TaggedItem
+from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
 from rooibos.access import filter_by_access
 from rooibos.data.models import FieldSet, Record

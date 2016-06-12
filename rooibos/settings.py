@@ -4,6 +4,7 @@
 
 import os
 import sys
+import re
 
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -36,7 +37,7 @@ MEDIA_ROOT = ''
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/media-unused/'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -60,7 +61,6 @@ MIDDLEWARE_CLASSES = (
     'rooibos.help.middleware.PageHelp',
     'rooibos.sslredirect.SSLRedirect',
     'django.middleware.common.CommonMiddleware',
-    'rooibos.util.stats_middleware.StatsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,8 +69,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'rooibos.ui.middleware.PageTitles',
     'pagination.middleware.PaginationMiddleware',
-    'djangologging.middleware.LoggingMiddleware',
-    'djangologging.middleware.SuppressLoggingOnAjaxRequestsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
@@ -92,7 +90,9 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.comments',
     'django.contrib.redirects',
+    'django.contrib.staticfiles',
     'django_extensions',
+    'tagging',
     'google_analytics',
     'rooibos.data',
     'rooibos.migration',
@@ -110,7 +110,6 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
     'rooibos.federatedsearch.shared',
-    'rooibos.contrib.tagging',
     'rooibos.workers',
     'rooibos.userprofile',
     'rooibos.mediaviewer',
@@ -123,6 +122,13 @@ INSTALLED_APPS = (
     'compressor',
     'south',
 )
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 
 STORAGE_SYSTEMS = {
     'local': 'rooibos.storage.localfs.LocalFileSystemStorageSystem',
@@ -155,7 +161,11 @@ TEMPLATE_DIRS = (
     os.path.join(install_dir, 'rooibos', 'templates'),
 )
 
-STATIC_DIR = os.path.join(install_dir, 'rooibos', 'static')
+STATICFILES_DIRS = [
+    os.path.join(install_dir, 'rooibos', 'static'),
+]
+STATIC_URL = '/static/'
+
 
 FFMPEG_EXECUTABLE = os.path.join(
     install_dir, 'dist', 'windows', 'ffmpeg', 'bin', 'ffmpeg.exe')
@@ -217,3 +227,65 @@ while additional_settings:
         elif setting == 'remove_settings':
             for remove_setting in getattr(module, setting):
                 del locals()[remove_setting]
+
+
+# set logging if not already defined (doing this after importing
+# settings_local to be able to refer to the LOG_DIR configured there
+
+def _get_log_handler():
+
+    # Can't do sys.argv since it does not exist when running under PyISAPIe
+    cmdline = getattr(sys, 'argv', [])
+    if len(cmdline) > 1:
+        # only use first command line argument for log file name
+        basename = 'rooibos-%s' % '-'.join(
+            re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:2])
+    else:
+        basename = 'rooibos'
+
+    try:
+        return {
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(LOG_DIR, basename +'.log'),
+                'formatter': 'verbose',
+            },
+        }
+    except NameError:
+        return {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            }
+        }
+
+try:
+    LOGGING
+except NameError:
+    handler = _get_log_handler()
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'verbose': {
+                'format': '[%(name)30.30s]%(levelname)8s %(asctime)s '
+                          '%(process)d %(message)s '
+                          '[%(filename)s:%(lineno)d]'
+            },
+            'simple': {
+                'format': '%(levelname)s %(message)s'
+            },
+        },
+        'handlers': handler,
+        'loggers': {
+            'rooibos': {
+                'handlers': [handler.keys()[0]],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            '': {
+                'handlers': [handler.keys()[0]],
+                'level': 'WARNING',
+            },
+        },
+    }

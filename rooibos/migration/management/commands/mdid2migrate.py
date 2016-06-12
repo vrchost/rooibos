@@ -9,7 +9,7 @@ from optparse import make_option
 from rooibos.access.models import AccessControl, ExtendedGroup, Subnet, \
     AttributeValue, ATTRIBUTE_BASED_GROUP, IP_BASED_GROUP
 from rooibos.contrib.ipaddr import IP
-from rooibos.contrib.tagging.models import Tag, TaggedItem
+from tagging.models import Tag, TaggedItem
 from rooibos.data.models import Collection, CollectionItem, Field, \
     FieldValue, Record, FieldSet, FieldSetField, Vocabulary, VocabularyTerm, \
     MetadataStandard
