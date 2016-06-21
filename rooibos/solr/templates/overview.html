@@ -7,24 +7,28 @@
 
 <h1>Collection Overview</h1>
 
-{% for collection in collections %}
+{% for collection, children in collections %}
+{% if collection.num_records or collection.children.count %}
 <div id="collection-overview">
+    <a name="c{{ collection.id }}"></a>
     <h2>{{ collection.title }}</h2>
     <div>{{ collection.description }}</div>
     {% if collection.agreement %}
         <div class="usage-agreement">{{ collection.agreement }}</div>
-    {% endif %}    
+    {% endif %}
+    {% for child in children %}
+        {% if forloop.first %}<div>Child collections: {% endif %}
+        <a href="#c{{ child.id }}">{{ child.title }}</a>{% if not forloop.last %}, {% else %}</div>{% endif %}
+    {% endfor %}
+    {% if collection.num_records %}
     <div>
-        {% if collection.num_records %}
         <a class="related-images" href="{% url solr-search %}?c=allcollections:{{ collection.id }}">Explore {{ collection.num_records|intcomma }}
         record{{ collection.num_records|pluralize }}</a>
         <a href="{% url solr-browse-collection collection.id collection.name %}">Browse</a>
-        {% else %}
-        This collection contains no records.
-        {% endif %}
     </div>
-    
+    {% endif %}
 </div>
+{% endif %}
 {% empty %}
 <div>No collections available.</div>
 {% endfor %}
