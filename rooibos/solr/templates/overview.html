@@ -17,7 +17,7 @@
         <div class="usage-agreement">{{ collection.agreement }}</div>
     {% endif %}
     {% for child in children %}
-        {% if forloop.first %}<div>Child collections: {% endif %}
+        {% if forloop.first %}<div>Sub-collections: {% endif %}
         <a href="#c{{ child.id }}">{{ child.title }}</a>{% if not forloop.last %}, {% else %}</div>{% endif %}
     {% endfor %}
     {% if collection.num_records %}
