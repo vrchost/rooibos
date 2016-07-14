@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django import forms
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect, \
@@ -125,8 +126,11 @@ def remove_tag(request, type, id):
                 content_type='application/javascript'
             )
         else:
-            request.user.message_set.create(
-                message="Tag removed successfully.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Tag removed successfully."
+            )
             return HttpResponseRedirect(request.GET.get('next') or '/')
 
     return render_to_response('ui_tag_remove.html',
@@ -205,8 +209,11 @@ def options(request):
             if ui_form.cleaned_data['alternate_password'] != '[unchanged]':
                 set_alternate_password(
                     request.user, ui_form.cleaned_data['alternate_password'])
-            request.user.message_set.create(
-                message="Updated settings have been saved.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Updated settings have been saved."
+            )
             return HttpResponseRedirect(request.get_full_path())
     else:
         initial = option_defaults.copy()

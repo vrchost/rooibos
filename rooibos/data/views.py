@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
 from django import forms
@@ -43,8 +44,11 @@ def record_delete(request, id, name):
         record = Record.get_or_404(id, request.user)
         if record.editable_by(request.user):
             record.delete()
-            request.user.message_set.create(
-                message="Record deleted successfully.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Record deleted successfully."
+            )
 
             from rooibos.middleware import HistoryMiddleware
             return HttpResponseRedirect(HistoryMiddleware.go_back(
@@ -304,8 +308,11 @@ def record(request, id, name, contexttype=None, contextid=None,
                     if context:
                         instance.context = context
                     instance.save()
-                request.user.message_set.create(
-                    message="Record saved successfully.")
+                    messages.add_message(
+                        request,
+                        messages.INFO,
+                        message="Record saved successfully."
+                    )
 
                 url = reverse(
                     'data-record-edit-customize' if customize
@@ -714,8 +721,11 @@ def data_import_file(request, file):
                     arg=simplejson.dumps(arg)
                 )
                 j.run()
-                request.user.message_set.create(
-                    message='Import job has been submitted.')
+                messages.add_message(
+                    request,
+                    messages.INFO,
+                    message='Import job has been submitted.'
+                )
                 return HttpResponseRedirect(
                     "%s?highlight=%s" % (reverse('workers-jobs'), j.id))
         else:
@@ -850,8 +860,11 @@ def manage_collection(request, id=None, name=None):
                     request.user.is_superuser or
                     request.user == collection.owner):
                 raise HttpResponseForbidden()
-            request.user.message_set.create(
-                message="Collection '%s' has been deleted." % collection.title)
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Collection '%s' has been deleted." % collection.title
+            )
             collection.delete()
             return HttpResponseRedirect(reverse('data-collections-manage'))
         else:
@@ -893,8 +906,11 @@ def save_collection_visibility_preferences(request):
                 request.user,
                 form.cleaned_data['show_or_hide'],
                 form.cleaned_data['collections']):
-            request.user.message_set.create(
-                message="Collection visibility preferences saved.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Collection visibility preferences saved."
+            )
 
     next = request.GET.get('next', reverse('main'))
     return HttpResponseRedirect(next)

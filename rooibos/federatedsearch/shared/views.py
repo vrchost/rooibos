@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -356,9 +357,12 @@ def edit(request, id=None, name=None):
 
     if request.method == "POST":
         if request.POST.get('delete-collection'):
-            request.user.message_set.create(
-                message=("Shared collection '%s' has been removed." %
-                         collection.title))
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Shared collection '%s' has been removed." %
+                    collection.title
+            )
             collection.delete()
             return HttpResponseRedirect(reverse('shared-manage'))
         else:

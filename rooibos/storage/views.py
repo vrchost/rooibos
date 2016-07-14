@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from django.contrib import messages
 from datetime import datetime
 from django import forms
 from django.conf import settings
@@ -171,8 +172,11 @@ def media_upload(request, recordid, record):
 
             limit = storage.get_upload_limit(request.user)
             if limit > 0 and file.size > limit * 1024:
-                request.user.message_set.create(
-                    message="The uploaded file is too large.")
+                messages.add_message(
+                    request,
+                    messages.INFO,
+                    message="The uploaded file is too large."
+                )
                 return HttpResponseRedirect(
                     request.GET.get('next', reverse('main')))
 
@@ -346,8 +350,11 @@ def manage_storage(request, storageid=None, storagename=None):
         if request.POST.get('delete-storage'):
             if not request.user.is_superuser:
                 raise HttpResponseForbidden()
-            request.user.message_set.create(
-                message="Storage '%s' has been deleted." % storage.title)
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Storage '%s' has been deleted." % storage.title
+            )
             storage.delete()
             return HttpResponseRedirect(reverse('storage-manage'))
         else:
@@ -557,7 +564,11 @@ def import_files(request):
                     mimetype='application/json'
                 )
 
-            request.user.message_set.create(message=result)
+            messages.add_message(
+                request,
+                messages.INFO,
+                message=result
+            )
             next = request.GET.get('next', request.get_full_path())
             return HttpResponseRedirect(next)
 
@@ -645,8 +656,11 @@ def match_up_files(request):
             )
             job.run()
 
-            request.user.message_set.create(
-                message='Match up media job has been submitted.')
+            messages.add_message(
+                request,
+                messages.INFO,
+                message='Match up media job has been submitted.'
+            )
             return HttpResponseRedirect(
                 "%s?highlight=%s" % (reverse('workers-jobs'), job.id))
     else:

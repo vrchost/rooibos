@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -75,8 +76,11 @@ def effective_permissions(request, app_label, model, id, name):
             acl = get_effective_permissions_and_restrictions(
                 acluser, object, assume_authenticated=True)
         else:
-            request.user.message_set.create(
-                message="No user with username '%s' exists." % username)
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="No user with username '%s' exists." % username
+            )
             acl = None
     else:
         acluser = None
@@ -174,9 +178,11 @@ def modify_permissions(request, app_label, model, id, name):
                                 object_id=id
                             ))
                     except User.DoesNotExist:
-                        request.user.message_set.create(
+                        messages.add_message(
+                            request,
+                            messages.INFO,
                             message="No user with username '%s' exists." %
-                                    username
+                                username
                         )
 
                 groupname = request.POST.get('addgroup')
@@ -197,9 +203,11 @@ def modify_permissions(request, app_label, model, id, name):
                                 object_id=id
                             ))
                     except Group.DoesNotExist:
-                        request.user.message_set.create(
+                        messages.add_message(
+                            request,
+                            messages.INFO,
                             message="No group with name '%s' exists." %
-                                    groupname
+                                groupname
                         )
 
                 return HttpResponseRedirect(request.get_full_path())

@@ -50,6 +50,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.debug",
     "django.core.context_processors.media",
     "django.core.context_processors.request",
+    "django.contrib.messages.context_processors.messages",
     "rooibos.context_processors.settings",
     "rooibos.context_processors.selected_records",
     "rooibos.context_processors.current_presentation",
@@ -76,6 +77,7 @@ MIDDLEWARE_CLASSES = (
     'rooibos.data.middleware.DataOnStart',
     'rooibos.middleware.HistoryMiddleware',
     'rooibos.access.middleware.AnonymousIpGroupMembershipMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
 )
 
 ROOT_URLCONF = 'rooibos.urls'
@@ -91,6 +93,7 @@ INSTALLED_APPS = (
     'django.contrib.comments',
     'django.contrib.redirects',
     'django.contrib.staticfiles',
+    'django.contrib.messages',
     'django_extensions',
     'tagging',
     'google_analytics',

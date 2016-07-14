@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
@@ -228,8 +229,11 @@ def edit(request, id, name):
                 instance.save()
             # trigger modified date update
             presentation.save()
-            request.user.message_set.create(
-                message="Changes to presentation items saved successfully.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Changes to presentation items saved successfully."
+            )
             return self_page
     else:
         formset = ordering_formset(queryset=queryset)
@@ -261,8 +265,11 @@ def edit(request, id, name):
             presentation.hide_default_data = \
                 form.cleaned_data['hide_default_data']
             presentation.save()
-            request.user.message_set.create(
-                message="Changes to presentation saved successfully.")
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="Changes to presentation saved successfully."
+            )
             return self_page
     else:
         form = PropertiesForm(
