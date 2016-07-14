@@ -293,3 +293,20 @@ except NameError:
             },
         },
     }
+
+
+# Build required DATABASES structure
+try:
+    DATABASES
+except NameError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.' + DATABASE_ENGINE,
+            'NAME': DATABASE_NAME,
+            'USER': DATABASE_USER,
+            'PASSWORD': DATABASE_PASSWORD,
+            'HOST': DATABASE_HOST,
+            'PORT': DATABASE_PORT,
+            'OPTIONS': DATABASE_OPTIONS,
+        }
+    }
