@@ -1,6 +1,8 @@
-from django.contrib.auth.models import User, check_password, get_hexdigest
+from django.contrib.auth.models import User, check_password
+from django.utils.encoding import smart_str
 from rooibos.userprofile.views import load_settings, store_settings
 
+import hashlib
 import logging
 
 
@@ -45,3 +47,23 @@ def set_alternate_password(user, password):
     encoded_password = _get_encoded_password(password) if password else '!'
     logger.debug('Setting password to "%s"' % encoded_password[:5])
     return store_settings(user, 'alternate_password', encoded_password)
+
+
+def get_hexdigest(algorithm, salt, raw_password):
+    """
+    Returns a string of the hexdigest of the given plaintext password and salt
+    using the given algorithm ('md5', 'sha1' or 'crypt').
+    """
+    raw_password, salt = smart_str(raw_password), smart_str(salt)
+    if algorithm == 'crypt':
+        try:
+            import crypt
+        except ImportError:
+            raise ValueError('"crypt" password algorithm not supported in this environment')
+        return crypt.crypt(raw_password, salt)
+
+    if algorithm == 'md5':
+        return hashlib.md5(salt + raw_password).hexdigest()
+    elif algorithm == 'sha1':
+        return hashlib.sha1(salt + raw_password).hexdigest()
+    raise ValueError("Got unknown password algorithm type in password.")
