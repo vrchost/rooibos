@@ -16,7 +16,7 @@
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
 django==1.4.22
-django-tagging==0.3
+django-tagging==0.3.2
 ipaddr==2.1.11
 
 werkzeug
