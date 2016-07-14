@@ -87,7 +87,7 @@ urls = [
         r'^favicon.ico$',
         serve,
         {
-            'document_root': settings.STATIC_DIR,
+            'document_root': settings.STATIC_ROOT,
             'path': 'images/favicon.ico'
         }
     ),
@@ -95,7 +95,7 @@ urls = [
         r'^robots.txt$',
         serve,
         {
-            'document_root': settings.STATIC_DIR,
+            'document_root': settings.STATIC_ROOT,
             'path': 'robots.txt'
         }
     ),
@@ -103,7 +103,7 @@ urls = [
         r'^static/(?P<path>.*)$',
         serve,
         {
-            'document_root': settings.STATIC_DIR
+            'document_root': settings.STATIC_ROOT
         },
         name='static'
     ),
