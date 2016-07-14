@@ -18,6 +18,7 @@
 django==1.4.22
 django-tagging==0.3.2
 ipaddr==2.1.11
+django-extensions==1.4.9
 
 werkzeug
 MySQL-Python
