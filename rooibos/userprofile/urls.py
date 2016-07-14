@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from views import load_settings_view, store_settings_view
 
 urlpatterns = patterns(

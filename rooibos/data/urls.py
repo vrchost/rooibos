@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from views import manage_collections, manage_collection, record_preview, \
     record, record_delete, data_import_file, data_import, \
     save_collection_visibility_preferences, collection_dump_view

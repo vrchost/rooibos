@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from pseudostreaming import retrieve_pseudostream
 from views import retrieve, retrieve_image, media_upload, media_delete, \
     record_thumbnail, create_proxy_url_view, call_proxy_url, manage_storages, \

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import url, handler404, patterns, include
+from django.conf.urls import url, handler404, patterns, include
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.base import TemplateView

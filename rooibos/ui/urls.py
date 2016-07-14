@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.views.generic.base import TemplateView
 from django.views.generic.create_update import create_object, delete_object, \
     update_object

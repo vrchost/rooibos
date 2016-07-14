@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 
 from views import collections, login, logout, api_search, record, \
     presentations_for_current_user, presentation_detail, keep_alive, \
