@@ -283,9 +283,13 @@ except NameError:
                 'level': 'DEBUG',
                 'propagate': False,
             },
-            '': {
+            'pika': {
                 'handlers': [handler.keys()[0]],
                 'level': 'WARNING',
+            },
+            '': {
+                'handlers': [handler.keys()[0]],
+                'level': 'DEBUG',
             },
         },
     }
