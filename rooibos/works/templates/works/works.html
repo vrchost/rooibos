@@ -87,7 +87,6 @@ angular.module('clientApp', ['bw.paging'])
             ).success(function (data) {
                 $scope.search.page = page;
                 angular.forEach(data.records, function (record) {
-                    record.largeThumb = 'https://thumbs-a.vrchost.com/vrchost/archivision/large-thumb/' + record.identifier + '.jpg';
                     record.largeThumbUrl = 'url(\'' + record.largeThumb + '\')';
                 });
                 $scope.results.hits = data.hits;

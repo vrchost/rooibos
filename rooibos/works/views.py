@@ -45,12 +45,16 @@ def search(request):
                         pass
             return dc_mapping_cache.get(field.id)
 
+        largeThumb = record.get_thumbnail_url('large', force_cdn=True) or \
+                     record.get_image_url(width=250, height=250)
+
         return dict(
             id=record.id,
             name=record.name,
             title=record.title,
             identifier=record.identifier,
             thumbnail=process_url(record.get_thumbnail_url()),
+            largeThumb=process_url(largeThumb),
             image=process_url(record.get_image_url()),
             works=list(record.get_works()),
             work_images=record.get_image_records_query().count(),

@@ -255,32 +255,49 @@ class Record(models.Model):
         return reverse(
             'data-record', kwargs={'id': self.id, 'name': self.name})
 
-    def _get_thumbnail_url(self, fmt):
-        cdn_thumbnails = getattr(settings, 'CDN_THUMBNAILS')
+    def _get_thumbnail_url(self, fmt, force_cdn=False):
+        cdn_thumbnails = getattr(settings, 'CDN_THUMBNAILS', None)
         if cdn_thumbnails:
             for collection_name in self.collection_set.values_list(
                     'name', flat=True):
                 for key in cdn_thumbnails:
                     m = re.match(key, collection_name)
                     if m and m.end() == len(collection_name):
-                        return cdn_thumbnails[key][fmt] % self.identifier
+                        if fmt in cdn_thumbnails[key]:
+                            return cdn_thumbnails[key][fmt] % self.identifier
+        if force_cdn:
+            return None
         url = reverse(
             'storage-thumbnail', kwargs={'id': self.id, 'name': self.name})
         if fmt == 'square':
             url += '?square'
         return url
 
-    def get_thumbnail_url(self):
-        return self._get_thumbnail_url('regular')
+    def get_thumbnail_url(self, format='regular', force_cdn=False):
+        return self._get_thumbnail_url(format, force_cdn)
 
     def get_square_thumbnail_url(self):
         return self._get_thumbnail_url('square')
 
-    def get_image_url(self, force_reprocess=False):
-        url = reverse(
-            'storage-retrieve-image-nosize',
-            kwargs={'recordid': self.id, 'record': self.name}
-        )
+    def get_image_url(self, force_reprocess=False, width=None, height=None):
+        if width and height:
+            url = reverse(
+                'storage-retrieve-image',
+                kwargs={
+                    'recordid': self.id,
+                    'record': self.name,
+                    'width': width,
+                    'height': height,
+                }
+            )
+        else:
+            url = reverse(
+                'storage-retrieve-image-nosize',
+                kwargs={
+                    'recordid': self.id,
+                    'record': self.name
+                }
+            )
         if force_reprocess:
             url += '?reprocess'
         return url
