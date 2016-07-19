@@ -153,7 +153,9 @@
                     <li><a href="{% url solr-search %}">Discover</a>
                         <ul class="menu">
                             <li><a href="{% url solr-search %}">Explore</a></li>
+                        {% if WORKS.EXPLORE_MENU %}
                             <li><a href="{% url works %}">Works</a></li>
+                        {% endif %}
                             <!--<li><a href="{% url solr-searchform %}">Advanced Search</a></li>-->
                             <li><a href="{% url solr-browse %}">Browse</a></li>
                             {% if user.is_authenticated and SHOW_TERMS %}
@@ -194,7 +196,11 @@
                         </ul>
                     </li>
                     <li class="search" style="padding-right: 20px;"><span>Search</span>
+                    {%  if WORKS.SEARCH_BOX %}
                         <form method="GET" action="{% url works %}">
+                    {% else %}
+                        <form method="GET" action="{% url solr-search %}">
+                    {% endif %}
                             <input id="quicksearch" name="kw" type="text" title="Search" /><input type="image" src="{% url static 'images/go.png' %}" id="search-go" />
                         </form>
                     </li>
