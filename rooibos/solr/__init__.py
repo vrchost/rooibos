@@ -11,6 +11,7 @@ from rooibos.util.models import OwnedWrapper
 from pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
 from rooibos.access.models import AccessControl
+from .functions import PrimaryWorkRecordManager
 import logging
 import sys
 
@@ -127,6 +128,8 @@ class SolrIndex():
         if to_delete:
             conn.delete(q='id:(%s)' % ' '.join(map(str, to_delete)))
 
+        primary_work_record_manager = PrimaryWorkRecordManager()
+
         if verbose:
             pb = ProgressBar(total_count)
 
@@ -181,6 +184,9 @@ class SolrIndex():
             image_to_works = self._preload_image_to_works(record_id_list)
             work_to_images = self._preload_work_to_images(record_id_list)
 
+            implicit_primary_work_records = primary_work_record_manager \
+                .get_implicit_primary_work_records(record_id_list)
+
             count += len(record_id_list)
 
             # VERY IMPORTANT:  SINCE process_data RUNS IN ANOTHER THREAD, IT
@@ -188,7 +194,8 @@ class SolrIndex():
             # ALWAYS PASS IN ANY NEEDED VARIABLES
 
             def process_data(groups, fieldvalues, media, record_id_list,
-                             image_to_works, work_to_images):
+                             image_to_works, work_to_images,
+                             implicit_primary_work_records):
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
@@ -206,6 +213,7 @@ class SolrIndex():
                             record, core_fields, g, fv, m,
                             image_to_works,
                             work_to_images,
+                            implicit_primary_work_records
                         )
                         doc = custom_doc_processor(
                             doc,
@@ -224,7 +232,8 @@ class SolrIndex():
             process_thread = Thread(
                 target=process_data(groups_dict, fieldvalue_dict,
                                     media_dict, record_id_list,
-                                    image_to_works, work_to_images))
+                                    image_to_works, work_to_images,
+                                    implicit_primary_work_records))
             process_thread.start()
             reset_queries()
 
@@ -354,7 +363,8 @@ class SolrIndex():
         return work_to_images
 
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media,
-                        image_to_works, work_to_images):
+                        image_to_works, work_to_images,
+                        implicit_primary_work_records):
         required_fields = dict((f.name, None) for f in core_fields.keys())
         doc = {'id': str(record.id)}
         for v in fieldvalues:
@@ -439,6 +449,12 @@ class SolrIndex():
         doc['related_works_count'] = len(i2w)
         w2i = work_to_images.get(record.id, [])
         doc['related_images_count'] = len(w2i)
+
+        if record.id in implicit_primary_work_records:
+            doc.setdefault(
+                'primary_work_record', []
+            ).append('Yes')
+
         return doc
 
     def _clean_string(self, s):
