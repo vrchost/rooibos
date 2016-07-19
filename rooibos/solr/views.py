@@ -887,14 +887,15 @@ def browse(request, id=None, name=None):
 
 def overview(request):
 
-    collections = filter_by_access(request.user, Collection)
+    collections = filter_by_access(
+        request.user, Collection.objects.exclude(hidden=True))
     collections = apply_collection_visibility_preferences(
         request.user, collections)
     collections = collections.annotate(
         num_records=Count('records'))
     children = dict()
     for coll in collections:
-        c = filter_by_access(request.user, coll.children.all())
+        c = filter_by_access(request.user, coll.children.exclude(hidden=True))
         c = apply_collection_visibility_preferences(
             request.user, c
         )
