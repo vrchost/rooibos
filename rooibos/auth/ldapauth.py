@@ -30,7 +30,12 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     )
                     if len(result) != 1:
                         continue
-                    dn = result[0][1].get(ldap_auth.get('dn', 'dn'))
+                    dn = result[0][1].get(
+                        ldap_auth.get('dn', 'dn'),
+                        # if dn is not returned in attribute list,
+                        # use first array element as default
+                        result[0][0]
+                    )
                     if type(dn) in (tuple, list):
                         dn = dn[0]
                 else:
@@ -69,7 +74,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                         ),
                     )
                     if len(result) == 1:
-                        attributes['_groups'].push(group)
+                        attributes['_groups'].append(group)
 
                 # process Django user
                 try:

@@ -11,7 +11,7 @@ install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 lib_dir = os.path.join(install_dir, 'rooibos', 'contrib')
 
 if install_dir not in sys.path:
-    sys.path.append(install_dir)
+    sys.path.insert(0, install_dir)
 if lib_dir not in sys.path:
     sys.path.append(lib_dir)
 
