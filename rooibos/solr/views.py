@@ -66,6 +66,16 @@ class SearchFacet(object):
         return True
 
 
+class WorkSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def display_value(self, value):
+        record = Record.get_primary_work_record(value)
+        return record.title if record else value
+
+
 class RecordDateSearchFacet(SearchFacet):
 
     def or_available(self):
@@ -129,6 +139,15 @@ class RelatedToSearchFacet(SearchFacet):
                     .values_list('presentation_id', flat=True)))
         else:
             return '-1'
+
+
+class PrimaryWorkRecordSearchFacet(SearchFacet):
+
+    def federated_search_query(self, value):
+        return ''
+
+    def or_available(self):
+        return False
 
 
 class StorageSearchFacet(SearchFacet):
@@ -215,6 +234,36 @@ class OwnedTagSearchFacet(SearchFacet):
 
     def federated_search_query(self, value):
         return ''
+
+
+class RelatedWorksSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def federated_search_query(self, value):
+        return ''
+
+    def display_value(self, value):
+        return "Number of related works: %s" % value
+
+    def fetch_facet_values(self):
+        return False
+
+
+class RelatedImagesSearchFacet(SearchFacet):
+
+    def or_available(self):
+        return False
+
+    def federated_search_query(self, value):
+        return ''
+
+    def display_value(self, value):
+        return "Number of related images: %s" % value
+
+    def fetch_facet_values(self):
+        return False
 
 
 def _generate_query(search_facets, user, collection, criteria, keywords,
@@ -375,6 +424,11 @@ def run_search(user,
     search_facets.append(RelatedToSearchFacet('presentations', 'Related to'))
     search_facets.append(RecordDateSearchFacet('modified', 'Last modified'))
     search_facets.append(RecordDateSearchFacet('created', 'Record created'))
+    # Image/Work facets
+    search_facets.append(RelatedImagesSearchFacet('related_images_count', 'Images for Work'))
+    search_facets.append(RelatedWorksSearchFacet('related_works_count', 'Works for Image'))
+    search_facets.append(WorkSearchFacet('work', 'Part of Work'))
+    search_facets.append(PrimaryWorkRecordSearchFacet('primary_work_record', 'Primary Work Record'))
     # convert to dictionary
     search_facets = dict((f.name, f) for f in search_facets)
 

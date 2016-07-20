@@ -15,7 +15,9 @@ class SpreadsheetImport(object):
     def __init__(self, csv_file, collections, separator=';',
                  preferred_fieldset=None, owner=None, mapping=None,
                  separate_fields=None, labels=None, order=None,
-                 hidden=None, **kwargs):
+                 hidden=None,
+                 refinements=None,
+                 **kwargs):
         self._fields = (
             preferred_fieldset.fields.select_related('standard').all()
             if preferred_fieldset
@@ -38,6 +40,7 @@ class SpreadsheetImport(object):
         self.labels = labels or dict()
         self.order = order or dict()
         self.hidden = hidden or dict()
+        self.refinements = refinements or dict()
         self.separate_fields = separate_fields or dict()
         self.owner = owner
         self.collections = collections
@@ -180,7 +183,8 @@ class SpreadsheetImport(object):
                             value=value,
                             label=self.labels.get(field),
                             order=self.order.get(field, order),
-                            hidden=self.hidden.get(field, False))
+                            hidden=self.hidden.get(field, False),
+                            refinement=self.refinements.get(field))
 
         reader = self._get_reader()
 

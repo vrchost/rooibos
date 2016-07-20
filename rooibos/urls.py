@@ -78,6 +78,7 @@ urls = [
     (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     (r'^shared/', include('rooibos.federatedsearch.shared.urls')),
     (r'^impersonate/', include('rooibos.contrib.impersonate.urls')),
+    (r'^works/', include('rooibos.works.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
     (r'^megazine/', include('rooibos.megazine.urls')),
     (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
@@ -109,9 +110,16 @@ urls = [
     ),
 
     url(r'^exception/$', raise_exception),
-
-    (r'^shibboleth/', include('django_shibboleth.urls')),
 ]
+
+try:
+    import django_shibboleth
+    urls.append(
+        (r'^shibboleth/', include('django_shibboleth.urls')),
+    )
+except ImportError:
+    pass
+
 
 if getattr(settings, 'CAS_SERVER_URL', None):
     urls += [

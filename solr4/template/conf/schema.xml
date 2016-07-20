@@ -281,6 +281,12 @@
    <field name="acl_write" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="acl_manage" type="string" indexed="true" stored="true" multiValued="true" />
 
+   <!-- Image/Work records -->
+   <field name="related_works_count" type="long" indexed="true" stored="true" multiValued="false" />
+   <field name="related_images_count" type="long" indexed="true" stored="true" multiValued="false" />
+   <field name="primary_work_record" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="work" type="string" indexed="true" stored="true" multiValued="true" />
+
    <!-- Dynamic field definitions.  If a field name is not found, dynamicFields
         will be used if the name matches any of the patterns.
         RESTRICTION: the glob-like pattern in the name attribute must have

@@ -4,6 +4,7 @@ from models import Collection, CollectionItem, Record, Field, FieldValue, \
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
+from rooibos.solr import SolrIndex
 from spreadsheetimport import SpreadsheetImport
 from cStringIO import StringIO
 
@@ -830,3 +831,81 @@ class RecordNameTestCase(unittest.TestCase):
 
         record = Record.objects.get(id=rid)
         self.assertEqual('identifier-407', record.name)
+
+
+class ImageWorkRecordTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.dcid = standardfield('identifier')
+        self.dcrelation = standardfield('relation')
+
+    def tearDown(self):
+        pass
+
+    def testNoRelation(self):
+        record = Record.objects.create()
+        self.assertFalse(record.is_work_record)
+        self.assertFalse(record.is_image_record)
+        self.assertFalse(record.get_work_records().exists())
+        self.assertFalse(record.get_image_records().exists())
+
+    def testRelation(self):
+        work_record = Record.objects.create()
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        work_record.fieldvalue_set.create(field=self.dcid, value='WORK')
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
+
+        self.assertTrue(work_record.is_work_record)
+        self.assertFalse(work_record.is_image_record)
+        self.assertFalse(work_record.get_work_records().exists())
+        self.assertEqual(2, work_record.get_image_records().count())
+
+        self.assertFalse(image_record.is_work_record)
+        self.assertTrue(image_record.is_image_record)
+        self.assertEqual(1, image_record.get_work_records().count())
+        self.assertEqual(1, image_record.get_image_records().count())
+        self.assertFalse(image_record.get_image_records(siblings=False).exists())
+
+    def testSolrIndexing(self):
+        work_record = Record.objects.create()
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        work_record.fieldvalue_set.create(field=self.dcid, value='SOLR')
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+
+        identifiers = [work_record.id, image_record.id, image_record2.id]
+
+        index = SolrIndex()
+        work_to_images = index._preload_work_to_images(identifiers)
+        self.assertEqual(3, len(work_to_images))
+        w2i = work_to_images[work_record.id]
+        self.assertTrue(image_record.id in w2i)
+        self.assertTrue(image_record2.id in w2i)
+
+        image_to_works = index._preload_image_to_works(identifiers)
+        self.assertEqual(2, len(image_to_works))
+        self.assertEqual([work_record.id], image_to_works[image_record.id])
+        self.assertEqual([work_record.id], image_to_works[image_record2.id])
+
+    def testImageRecordsOnlySolrIndexing(self):
+        image_record = Record.objects.create()
+        image_record2 = Record.objects.create()
+
+        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
+        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
+
+        identifiers = [image_record.id, image_record2.id]
+
+        index = SolrIndex()
+        work_to_images = index._preload_work_to_images(identifiers)
+        self.assertEqual(2, len(work_to_images))
+        self.assertEqual([image_record.id], work_to_images[image_record2.id])
+        self.assertEqual([image_record2.id], work_to_images[image_record.id])
+
+        image_to_works = index._preload_image_to_works(identifiers)
+        self.assertEqual(0, len(image_to_works))

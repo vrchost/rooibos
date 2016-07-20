@@ -411,6 +411,60 @@ class Record(models.Model):
     def manageable_by(self, user):
         return self._check_permission_for_user(user, manage=True)
 
+    def get_works(self):
+        values = self.fieldvalue_set.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).values_list('value', flat=True)
+        return values
+
+    def get_image_records_query(self):
+
+        values = self.fieldvalue_set.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).values_list('value', flat=True)
+        index_values = [
+            value[:32] for value in values
+        ]
+
+        q = Q(value__in=values, index_value__in=index_values)
+        return FieldValue.objects.filter(
+            q,
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+        ).values('record')
+
+    @staticmethod
+    def get_primary_work_record(work):
+        record_ids = FieldValue.objects.filter(
+            field__standard__prefix='dc',
+            field__name='relation',
+            refinement='IsPartOf',
+            value=work,
+            index_value=work[:32],
+        ).values_list('record', flat=True)
+
+        if not record_ids:
+            return None
+
+        primary = FieldValue.objects.filter(
+            label='primary-work-record',
+            field__standard__prefix='dc',
+            field__name='system-value',
+            record__in=record_ids,
+        ).values_list('record', flat=True)
+
+        if primary:
+            primary = primary[0]
+        else:
+            primary = record_ids[0]
+
+        return Record.objects.get(id=primary)
+
 
 class MetadataStandardManager(models.Manager):
     def get_by_natural_key(self, prefix):
