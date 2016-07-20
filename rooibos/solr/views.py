@@ -838,11 +838,21 @@ def overview(request):
         request.user, collections)
     collections = collections.annotate(
         num_records=Count('records'))
+    children = dict()
+    for coll in collections:
+        c = filter_by_access(request.user, coll.children.all())
+        c = apply_collection_visibility_preferences(
+            request.user, c
+        )
+        children[coll.id] = c
 
     return render_to_response(
         'overview.html',
         {
-            'collections': collections,
+            'collections': [
+                (coll, children[coll.id])
+                for coll in collections
+            ]
         },
         context_instance=RequestContext(request))
 
