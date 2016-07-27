@@ -10,6 +10,10 @@
 
 angular.module('clientApp', ['bw.paging'])
 
+.filter('encodeURIComponent', function() {
+    return window.encodeURIComponent;
+})
+
 .controller('MainController', [
     '$scope', '$http', '$timeout', '$window',
     function ($scope, $http, $timeout, $window) {
@@ -370,6 +374,9 @@ angular.module('clientApp', ['bw.paging'])
   display: block;
 }
 
+[ng\:cloak], [ng-cloak], .ng-cloak {
+  display: none !important;
+}
 
 </style>
 
@@ -388,13 +395,13 @@ angular.module('clientApp', ['bw.paging'])
 
 <h1>
     Works
-    <span ng-show="search.keyword">
+    <span ng-show="search.keyword" ng-cloak>
         (<span ng-bind="search.keyword"></span>)
     </span>
 </h1>
 
 
-<div class="container-fluid with-navbar">
+<div class="container-fluid with-navbar" ng-cloak>
 
     <div class="row full-thumbs">
 
@@ -412,7 +419,7 @@ angular.module('clientApp', ['bw.paging'])
             </div>
 
             <div class="record-work-image-count">
-                <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">
+                <a ng-href="/explore/explore/?c=work:{% templatetag openvariable %}record.works[0] | encodeURIComponent{% templatetag closevariable %}" target="_blank">
                     <span class="badge" ng-bind="record.work_images">
                     </span>
                 </a>
@@ -437,7 +444,7 @@ angular.module('clientApp', ['bw.paging'])
 
 <div class="metadata-renderer" style="display: none">
     <div class="metadata-sidebar">
-        <a href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0]{% templatetag closevariable %}" target="_blank">
+        <a ng-href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0] | encodeURIComponent{% templatetag closevariable %}" target="_blank">
             <img ng-src="{% templatetag openvariable %}selectedRecord.image + '400x400/'{% templatetag closevariable %}" />
             <br />
             <span class="btn btn-primary all-images">
@@ -458,11 +465,11 @@ angular.module('clientApp', ['bw.paging'])
     <i>Loading...</i>
 </div>
 
-<div ng-hide="isLoading() || results.records.length">
+<div ng-hide="isLoading() || results.records.length" ng-cloak>
     No works found.
 </div>
 
-<div ng-hide="isLoading()" style="text-align: right;">
+<div ng-hide="isLoading()" style="text-align: right;" ng-cloak>
     <div paging
          page="search.page"
          page-size="search.pageSize"
