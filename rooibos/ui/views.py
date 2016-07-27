@@ -72,7 +72,7 @@ def select_record(request):
     if request.method == "POST":
         ids = simplejson.loads(request.POST.get('id', '[]'))
         [selected.remove(id) for id in ids if id in selected]
-        if request.POST.get('checked') == 'true':
+        if request.POST.get('checked') in ('true', 'checked'):
             selected.extend(ids)
         request.session['selected_records'] = selected
 
