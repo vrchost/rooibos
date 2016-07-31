@@ -40,9 +40,6 @@ DATABASE_PORT = ''             # Set to empty string for default.
 DEFAULT_CHARSET = 'utf-8'
 DATABASE_CHARSET = 'utf8'
 
-CLOUDFILES_USERNAME = ''
-CLOUDFILES_API_KEY = ''
-
 # S3 settings
 S3_FOLDER_MAPPING = {}
 AWS_STORAGE_BUCKET_NAME = ''

@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
         # TODO: remove hardcoded storage type
         for storage in Storage.objects.filter(
-                system__in=('local', 'cloudfiles')):
+                system__in=('local',)):
             print "Setting read access to storage %s" % storage.name
             AccessControl.objects.get_or_create(
                 content_type=ContentType.objects.get_for_model(Storage),
