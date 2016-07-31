@@ -8,12 +8,9 @@ import re
 
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-lib_dir = os.path.join(install_dir, 'rooibos', 'contrib')
 
 if install_dir not in sys.path:
     sys.path.insert(0, install_dir)
-if lib_dir not in sys.path:
-    sys.path.append(lib_dir)
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
