@@ -1,8 +1,0 @@
-http://www.python.org/ftp/python/2.5.4/python-2.5.4.msi
-http://effbot.org/downloads/PIL-1.1.6.win32-py2.5.exe
-http://pypi.python.org/packages/2.5/s/setuptools/setuptools-0.6c11.win32-py2.5.exe
-http://pyodbc.googlecode.com/files/pyodbc-2.1.7.win32-py2.5.exe
-http://pypi.python.org/packages/2.5/p/python-ldap/python-ldap-2.3.11.win32-py2.5.exe
-http://download.services.openoffice.org/files/stable/3.2.1/OOo_3.2.1_Win_x86_install-wJRE_en-US.exe
-http://downloads.sourceforge.net/project/mysql-python/mysql-python/1.2.2/MySQL-python-1.2.2.win32-py2.5.exe?use_mirror=iweb
-ftp://ftp.tummy.com/pub/python-memcached/old-releases/python-memcached-1.45.tar.gz
