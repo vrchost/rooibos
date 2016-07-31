@@ -45,3 +45,4 @@ https://github.com/knabar/django-shibboleth/archive/master.zip
 
 gunicorn
 django-compressor==1.6
+south
