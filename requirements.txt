@@ -47,3 +47,4 @@ gunicorn
 django-compressor==1.6
 south
 pypdf
+django-pagination
