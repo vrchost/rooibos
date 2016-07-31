@@ -48,3 +48,5 @@ django-compressor==1.6
 south
 pypdf
 django-pagination
+
+https://github.com/knabar/dj-impersonate/archive/master.zip
