@@ -50,3 +50,5 @@ pypdf
 django-pagination
 
 https://github.com/knabar/dj-impersonate/archive/master.zip
+
+django-pyodbc
