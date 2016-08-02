@@ -10,7 +10,7 @@ from django.db.models.aggregates import Count
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from django.db import backend
+from django.db import backend, connection
 from django import forms
 from django.views.decorators.http import require_POST
 from tagging.models import Tag, TaggedItem
@@ -446,7 +446,7 @@ def browse(request, manage=False):
     active_tags = tags
 
     def col(model, field):
-        qn = backend.DatabaseOperations().quote_name
+        qn = backend.DatabaseOperations(connection).quote_name
         return '%s.%s' % (
             qn(model._meta.db_table),
             qn(model._meta.get_field(field).column)
