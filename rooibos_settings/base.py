@@ -88,6 +88,7 @@ MIDDLEWARE_CLASSES = (
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
     'ssl_redirect.middleware.SSLRedirectMiddleware',
+    'rooibos.middleware.RemoveSSLArgMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',

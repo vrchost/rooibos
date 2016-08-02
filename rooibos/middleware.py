@@ -70,3 +70,13 @@ class HistoryMiddleware:
             if not h.startswith(to_before):
                 return h
         return default
+
+
+# SSLRedirectMiddleware may leave SSL arg, which breaks views that don't
+# expect it
+class RemoveSSLArgMiddleware:
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        if 'SSL' in view_kwargs:
+            del view_kwargs['SSL']
+        return None
