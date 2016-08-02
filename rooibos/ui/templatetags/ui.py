@@ -6,6 +6,7 @@ from django.utils import simplejson
 from django.conf import settings
 from django.core.cache import cache
 from tagging.models import Tag
+from tagging.utils import calculate_cloud
 from rooibos.data.models import Field
 from rooibos.util.models import OwnedWrapper
 from rooibos.ui.functions import fetch_current_presentation, \
@@ -111,7 +112,10 @@ class OwnedTagsForObjectNode(template.Node):
             )
             if not user.is_anonymous():
                 qs = qs.exclude(user=user)
-            context[self.var_name] = Tag.objects.cloud_for_queryset(qs)
+
+            tags = list(Tag.objects.usage_for_queryset(qs, counts=True))
+            context[self.var_name] = calculate_cloud(tags)
+
         return ''
 
 
