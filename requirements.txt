@@ -54,3 +54,5 @@ https://github.com/knabar/dj-impersonate/archive/master.zip
 django-pyodbc
 
 https://github.com/knabar/django-google-analytics/archive/master.zip
+
+django-ssl-redirect
