@@ -7,11 +7,11 @@
 {% block sidebar %}
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url storage-manage %}", "title": "Storage Management"},
-    {"url": "{% url storage-manage-storage storage.id, storage.name %}", "title": "Edit Storage"},
-    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"},
-    {"url": "{% url storage-find-records-without-media %}?storage={{ storage.id }}", "title": "Find Empty Records"}
+    {"url": "{% url "ui-management" %}", "title": "Management"},
+    {"url": "{% url "storage-manage" %}", "title": "Storage Management"},
+    {"url": "{% url "storage-manage-storage" storage.id storage.name %}", "title": "Edit Storage"},
+    {"url": "{% url "storage-match-up-files" %}?storage={{ storage.id }}", "title": "Match Up Media"},
+    {"url": "{% url "storage-find-records-without-media" %}?storage={{ storage.id }}", "title": "Find Empty Records"}
 ]}
 {% endvar %}
 

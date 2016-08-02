@@ -6,9 +6,9 @@
 {% block sidebar %}
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url storage-manage %}", "title": "Storage Management"},
-	{"url": "{% url data-collections-manage %}", "title": "Collection Management"}
+    {"url": "{% url "ui-management" %}", "title": "Management"},
+    {"url": "{% url "storage-manage" %}", "title": "Storage Management"},
+	{"url": "{% url "data-collections-manage" %}", "title": "Collection Management"}
 ]}
 {% endvar %}
 

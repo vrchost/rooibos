@@ -11,7 +11,7 @@
 	<chapter>
 {% for item in items %}
 		<page>
-			<img src="{% url storage-retrieve-image item.record.id, item.record.name, 800, 800 %}" position="center middle" width="{{ width }}" keepar="true" />
+			<img src="{% url "storage-retrieve-image" item.record.id item.record.name 800 800 %}" position="center middle" width="{{ width }}" keepar="true" />
 		</page>
 {% endfor %}
 	</chapter>

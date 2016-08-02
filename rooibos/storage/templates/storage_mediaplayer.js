@@ -1,4 +1,6 @@
 {% load ui %}
+{% load staticfiles %}
+
 (function() {
 {% include "viewers_loadscripts.js" %}
 var clip;

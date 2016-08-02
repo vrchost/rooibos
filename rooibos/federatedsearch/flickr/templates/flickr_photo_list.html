@@ -17,7 +17,7 @@
 
 {{response}}
 <div class="flickr">
-	<form action="{% url flickr-export-photo-frob %}" method="POST" name="upload_form">{% csrf_token %}
+	<form action="{% url "flickr-export-photo-frob" %}" method="POST" name="upload_form">{% csrf_token %}
 		<ul>
 			<li><input type="submit" value="Export to Flickr" style="width:120px;" /></li>
 			{% for photo in selected %}

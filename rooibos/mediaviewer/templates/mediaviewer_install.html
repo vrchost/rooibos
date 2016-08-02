@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% load ui %}
+{% load staticfiles %}
 
 
 {% block stylesheets %}
@@ -25,8 +26,8 @@
 {% block content %}
 
 {% var as air %}
-{"url": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% url static 'dmvinstaller/DesktopMediaViewer.air' %}",
-"server": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% url main %}"}
+{"url": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% static 'dmvinstaller/DesktopMediaViewer.air' %}",
+"server": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% url "main" %}"}
 {% endvar %}
 
 
@@ -49,7 +50,7 @@ var requiredRevision = 115;		// This is Flash Player 9 Update 3
 // -->
 </script>
 
-<script src="{% url static 'dmvinstaller/AC_RunActiveContent.js' %}" type="text/javascript"></script>
+<script src="{% static 'dmvinstaller/AC_RunActiveContent.js' %}" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
 <!--
 // Version check based upon the values entered above in "Globals"
@@ -72,8 +73,8 @@ if (hasReqestedVersion) {
 		'name','badge',
 		'allowscriptaccess','all',
 		'pluginspage','http://www.macromedia.com/go/getflashplayer',
-		'flashvars','appname=Desktop%20MediaViewer&arguments={{ air.server|base64|urlencode }}&appurl={{ air.url }}&airversion=2.0&imageurl={% url static 'dmvinstaller/badgeImage.png' %}',
-		'movie','{% url static 'dmvinstaller/badge' %}' ); //end AC code
+		'flashvars','appname=Desktop%20MediaViewer&arguments={{ air.server|base64|urlencode }}&appurl={{ air.url }}&airversion=2.0&imageurl={% static 'dmvinstaller/badgeImage.png' %}',
+		'movie','{% static 'dmvinstaller/badge' %}' ); //end AC code
 
 } else {  // Flash Player is too old or we can't detect the plugin
 	document.write('<table id="AIRDownloadMessageTable"><tr><td>Download <a href="{{ air.url }}">Desktop MediaViewer</a> now.<br /><br /><span id="AIRDownloadMessageRuntime">This application requires the <a href="');

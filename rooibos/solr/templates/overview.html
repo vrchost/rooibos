@@ -22,9 +22,9 @@
     {% endfor %}
     {% if collection.num_records %}
     <div>
-        <a class="related-images" href="{% url solr-search %}?c=allcollections:{{ collection.id }}">Explore {{ collection.num_records|intcomma }}
+        <a class="related-images" href="{% url "solr-search" %}?c=allcollections:{{ collection.id }}">Explore {{ collection.num_records|intcomma }}
         record{{ collection.num_records|pluralize }}</a>
-        <a href="{% url solr-browse-collection collection.id collection.name %}">Browse</a>
+        <a href="{% url "solr-browse-collection" collection.id collection.name %}">Browse</a>
     </div>
     {% endif %}
 </div>

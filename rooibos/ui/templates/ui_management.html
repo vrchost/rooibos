@@ -1,5 +1,6 @@
 {% extends "master.html" %}
 {% load ui %}
+{% load staticfiles %}
 
 
 {% block sidebar %}
@@ -7,7 +8,7 @@
 {% var as related_pages %}
 {"pages": [
 {% if user.is_staff %}
-    {"url": "{% url admin:index %}", "title": "Administration", "new_window": true}
+    {"url": "{% url "admin:index" %}", "title": "Administration", "new_window": true}
 {% endif %}
 ]}
 {% endvar %}
@@ -25,22 +26,22 @@
 
 <ul id="management">
 {% if user.is_superuser or storage_manage %}
-    <li><a href="{% url storage-manage %}"><img src="{% url static 'images/icons/hdd_unmount.png' %}" alt="Manage Storage" /> Manage Storage</a></li>
+    <li><a href="{% url "storage-manage" %}"><img src="{% static 'images/icons/hdd_unmount.png' %}" alt="Manage Storage" /> Manage Storage</a></li>
 {% endif %}
 {% if collection_write %}
-    <li><a href="{% url data-import %}"><img src="{% url static 'images/icons/applix.png' %}" alt="Import Metadata" /> Import Metadata</a></li>
+    <li><a href="{% url "data-import" %}"><img src="{% static 'images/icons/applix.png' %}" alt="Import Metadata" /> Import Metadata</a></li>
 {% endif %}
 {% if perms.data.add_collection or collection_write %}
-    <li><a href="{% url data-collections-manage %}"><img src="{% url static 'images/icons/bookcase.png' %}" alt="Manage Collections" /> Manage Collections</a></li>
+    <li><a href="{% url "data-collections-manage" %}"><img src="{% static 'images/icons/bookcase.png' %}" alt="Manage Collections" /> Manage Collections</a></li>
 {% endif %}
 {% if storage_write and collection_write %}
-    <li><a href="{% url storage-import %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Import Media Files" /> Import Media Files</a></li>
-    <li><a href="{% url storage-match-up-files %}"><img src="{% url static 'images/icons/multimedia.png' %}" alt="Match Up Media" /> Match Up Media</a></li>
+    <li><a href="{% url "storage-import" %}"><img src="{% static 'images/icons/multimedia.png' %}" alt="Import Media Files" /> Import Media Files</a></li>
+    <li><a href="{% url "storage-match-up-files" %}"><img src="{% static 'images/icons/multimedia.png' %}" alt="Match Up Media" /> Match Up Media</a></li>
 {% endif %}
 {% if user.is_superuser %}
-    <li><a href="{% url shared-manage %}"><img src="{% url static 'images/icons/folder-remote.png' %}" alt="Manage Shared Collections" /> Manage Shared Collections</a></li>    
+    <li><a href="{% url "shared-manage" %}"><img src="{% static 'images/icons/folder-remote.png' %}" alt="Manage Shared Collections" /> Manage Shared Collections</a></li>
 {% endif %}
-<li><a href="{% url workers-jobs %}"><img src="{% url static 'images/icons/kcmsystem.png' %}" alt="Manage Jobs" /> Manage Jobs</a></li>
+<li><a href="{% url "workers-jobs" %}"><img src="{% static 'images/icons/kcmsystem.png' %}" alt="Manage Jobs" /> Manage Jobs</a></li>
 </ul>
 
 {% endblock %}

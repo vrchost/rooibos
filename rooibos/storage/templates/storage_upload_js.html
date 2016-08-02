@@ -1,3 +1,4 @@
+{% load staticfiles %}
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -12,8 +13,8 @@ $(document).ready(function() {
 		file_types_description : "All Files",
 		file_upload_limit : "0",
         file_post_name: "{{ upload_form.file.name }}",
-		flash_url : "{% url static "swfupload/Flash/swfupload.swf" %}",
-		button_image_url : '{% url static "images/upload_button.png" %}',
+		flash_url : "{% static "swfupload/Flash/swfupload.swf" %}",
+		button_image_url : '{% static "images/upload_button.png" %}',
 		button_width : 140,
 		button_height : 26,
 		button_placeholder : $('#upload-button')[0],

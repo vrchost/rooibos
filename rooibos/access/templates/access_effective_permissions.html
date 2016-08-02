@@ -26,7 +26,7 @@
 
 <h1>{% if object.get_absolute_url %}<a href="{{ object.get_absolute_url }}">{{ object.title }}</a>{% else %}{{ object.title }}{% endif %}</h1>
 
-<form style="margin-bottom: 20px;" method="GET" action="{% url access-effective-permissions contenttype.app_label, contenttype.model, object.id, object.name %}">
+<form style="margin-bottom: 20px;" method="GET" action="{% url "access-effective-permissions" contenttype.app_label contenttype.model object.id object.name %}">
 <label for="access_effective_permissions_user">Calculate effective permissions on this object for user:</label>
 <input type="text" name="user" id="access_effective_permissions_user" class="autocomplete-user" value="{{ qsuser }}" />
 <input type="submit" value="Calculate" />

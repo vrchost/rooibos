@@ -1,4 +1,6 @@
 {% load ui %}
+{% load staticfiles %}
+
 {% var as colors %}
 {
     "background":                   "rgb(229, 225, 214)",
@@ -53,7 +55,7 @@
 }
 
 #logo {
-    background: url({% if LOGO_URL %}{{ LOGO_URL }}{% else %}{% url static 'images/mdid_logo.png' %}{% endif %}) no-repeat bottom left;
+    background: url({% if LOGO_URL %}{{ LOGO_URL }}{% else %}{% static 'images/mdid_logo.png' %}{% endif %}) no-repeat bottom left;
     width: 150px;
     height: 50px;
     display: block;
@@ -328,7 +330,7 @@ html.js-enabled #content {
 }
 
 #basket-header {
-    background: url({% url static "images/basket.png" %}) no-repeat;
+    background: url({% static "images/basket.png" %}) no-repeat;
     font-size: 0.6em;
     width: 34px;
     height: 22px;
@@ -365,7 +367,7 @@ html.basket-open #basket-content {
     height: 60px;
     width: 15px;
     visibility: hidden;
-    background: center no-repeat url({% url static "images/basket_left.png" %});
+    background: center no-repeat url({% static "images/basket_left.png" %});
     cursor: pointer;
     margin: 0 5px;
 }
@@ -375,7 +377,7 @@ html.basket-open #basket-content {
     height: 60px;
     width: 15px;
     visibility: hidden;
-    background: center no-repeat url({% url static "images/basket_right.png" %});
+    background: center no-repeat url({% static "images/basket_right.png" %});
     cursor: pointer;
     margin: 0 5px;
 }
@@ -461,7 +463,7 @@ html.basket-open #basket-content {
 .facet-exclude {
     width: 15px;
     height: 15px;
-    background-image: url({% url static 'images/minus_icon.png' %});
+    background-image: url({% static 'images/minus_icon.png' %});
     display: block;
     float: right;
 }
@@ -1065,7 +1067,7 @@ html.js-enabled .info-icon {
 #preview-dialog {
     padding: 10px;
     text-align: center;
-    background: grey center 20px no-repeat url({% url static 'images/loading.gif' %});
+    background: grey center 20px no-repeat url({% static 'images/loading.gif' %});
 }
 
 #preview-dialog .info-icon {
@@ -1116,7 +1118,7 @@ tr.actionrow-selected td.item-actions-menu img, tr.actionrow-open td.item-action
 tr.actionrow-selected td, tr.actionrow-open td {
   border-top: solid 1px  {{ PRIMARY_COLOR }} !important;
   border-bottom: solid 1px  {{ PRIMARY_COLOR }} !important;
-  background: white url({% url static 'images/actionbar-gradient.png' %}) bottom repeat-x;
+  background: white url({% static 'images/actionbar-gradient.png' %}) bottom repeat-x;
 }
 
 td.item-actions-menu div {
@@ -1175,7 +1177,7 @@ ul.actionbar {
   border-right-color: lightgrey;
   height: 28px;
   margin: 0 0 20px 0;
-  background: url({% url static 'images/actionbar-gradient.png' %}) bottom repeat-x white;
+  background: url({% static 'images/actionbar-gradient.png' %}) bottom repeat-x white;
   clear: left;
 }
 

@@ -15,7 +15,7 @@
  '{{ record.get_absolute_url }}',
  {% with record.collection_set.all.0 as collection %}
  '{{ collection.title|escapejs }}',
- '{% if collection %}{% url solr-search-collection collection.id, collection.name %}{% endif %}',
+ '{% if collection %}{% url "solr-search-collection" collection.id collection.name %}{% endif %}',
  {% endwith %}
  ]{% if not forloop.last %},{% endif %}
 {% endfor %}
@@ -84,7 +84,7 @@
         {% with record.title as title %}
         <div class="image-preview-main"{% if not forloop.first %} style="display: none;"{% endif %}>
             <a href="{{ record.get_absolute_url }}">
-                <img src="{% url storage-retrieve-image record.id, record.name, 560, 420 %}" title="{{ title }}" alt="{{ title }}" />
+                <img src="{% url "storage-retrieve-image" record.id record.name 560 420 %}" title="{{ title }}" alt="{{ title }}" />
             </a>
         </div>
         {% endwith %}
@@ -102,7 +102,7 @@
     <div id="image-preview-reload"><a href=".">Load new images</a></div>
     {% with records.0.collection_set.all.0 as collection %}
     <div class="image-title"><a href="{{ records.0.get_absolute_url }}">{{ records.0.title }}</a></div>
-    <div class="image-subtitle"><a href="{% if collection %}{% url solr-search-collection collection.id, collection.name %}{% endif %}">{{ collection.title }}</a></div>
+    <div class="image-subtitle"><a href="{% if collection %}{% url "solr-search-collection" collection.id collection.name %}{% endif %}">{{ collection.title }}</a></div>
     {% endwith %}
 
     {% endif %}
@@ -117,18 +117,18 @@
         <h2>Log in</h2>
 
             {% if SHIB_ENABLED %}
-                <div>Please <a href="{% url shib_login %}">log in using Shibboleth</a></div>
+                <div>Please <a href="{% url "shib_login" %}">log in using Shibboleth</a></div>
             {% else %}
                 {% if CAS_SERVER_URL %}
-                <div>Please <a href="{% url login %}">log in using CAS</a></div>
+                <div>Please <a href="{% url "login" %}">log in using CAS</a></div>
                 {% else %}
-                <form action="{% url login %}" method="post">{% csrf_token %}
+                <form action="{% url "login" %}" method="post">{% csrf_token %}
                     <table summary="Login">
                     <tr><td>{{ login_form.username.label_tag }}</td><td>{{ login_form.username }}</td></tr>
                     <tr><td>{{ login_form.password.label_tag }}</td><td>{{ login_form.password }}
                         <br /><br /><input type="submit" value="Log in" /></td></tr>
                     </table>
-                    <input type="hidden" name="next" value="{% url main %}" />
+                    <input type="hidden" name="next" value="{% url "main" %}" />
                 </form>
                 {% endif %}
             {% endif %}
@@ -143,7 +143,7 @@
 
         <h2>Announcements</h2>
         {% if perms.comments.add_comment %}
-            <div style="margin-bottom: 10px;"><a href="{% url ui-announcement-new %}">Create new announcement</a></div>
+            <div style="margin-bottom: 10px;"><a href="{% url "ui-announcement-new" %}">Create new announcement</a></div>
         {% endif %}
 
         {% get_comment_list for flatpages.flatpage 1 as comments %}
@@ -151,8 +151,8 @@
         {% for comment in comments reversed %}
             {{ comment.comment|safe|linebreaks }}
             <div class="byline">Posted {{ comment.submit_date|naturalday }} by {{ comment.user }}.
-            {% if perms.comments.change_comment %}<a href="{% url ui-announcement-edit comment.id %}">Edit</a>{% endif %}
-            {% if perms.comments.delete_comment %}<a href="{% url ui-announcement-delete comment.id %}">Delete</a>{% endif %}
+            {% if perms.comments.change_comment %}<a href="{ % url ui-announcement-edit comment.id %}">Edit</a>{% endif %}
+            {% if perms.comments.delete_comment %}<a href="{ % url ui-announcement-delete comment.id %}">Delete</a>{% endif %}
             </div>
         {% endfor %}
 

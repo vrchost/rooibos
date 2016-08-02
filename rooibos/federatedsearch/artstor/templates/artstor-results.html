@@ -3,6 +3,7 @@
 {% load help %}
 {% load humanize %}
 {% load solr %}
+{% load staticfiles %}
 
 
 {% block javascript %}
@@ -15,7 +16,7 @@
         if (ids.constructor != Array) ids = [ids];
         ajaxManager.add({
             type: method,
-{#            url: '{% url nasa-nix-select %}',#}
+{#            url: '{% url "nasa-nix-select" %}',#}
             data: {'id': JSON.stringify(ids), 'checked': checked},
             dataType: 'json',
             success: function(r) {
@@ -40,7 +41,7 @@
 
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url solr-search %}?kw={{ query|urlencode }}", "title": "Back to Explore"}
+    {"url": "{% url "solr-search" %}?kw={{ query|urlencode }}", "title": "Back to Explore"}
 ]}
 {% endvar %}
 
@@ -50,7 +51,7 @@
     <div class="facet-header">Keywords</div>
     <div class="facet-body">
         <form method="GET" action=".">
-        <input type="text" id="keywords" name="q" value="{{ query }}"/><input type="image" class="image" src="{% url static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
+        <input type="text" id="keywords" name="q" value="{{ query }}"/><input type="image" class="image" src="{% static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
         </form>
     </div>
   </div>

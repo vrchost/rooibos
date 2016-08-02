@@ -1,4 +1,6 @@
 {% load ui %}
+{% load staticfiles %}
+
 (function() {
 {% include "viewers_loadscripts.js" %}
 
@@ -7,7 +9,7 @@ var flashvars = {
     //basePath: "http://www.example.com/megazine/",
 
     /* Used to pass the name of the xml file to use. Path is RELATIVE to basePath, or, if not set, to the megazine.swf file. */
-    xmlFile: "{{ server_url }}{% url megazine-content presentation.id %}?width={{ width }}"
+    xmlFile: "{{ server_url }}{% url "megazine-content" presentation.id %}?width={{ width }}"
 
     /* When set to true, log messages are printed to the JavaScript console (using the console.log() function) */
     //logToJsConsole: "true"
@@ -33,12 +35,12 @@ var attributes = {
 
 
 function insert_megazine() {
-    swfobject.embedSWF("{{ server_url }}{% url static 'megazine/preloader.swf' %}",
+    swfobject.embedSWF("{{ server_url }}{% static 'megazine/preloader.swf' %}",
                        "{{ anchor_id }}",
                        "{{ width }}",
                        "{{ height }}",
                        "9.0.115",
-                       "{{ server_url }}{% url static 'js/expressInstall.swf' %}",
+                       "{{ server_url }}{% static 'js/expressInstall.swf' %}",
                        flashvars,
                        params,
                        attributes);
@@ -48,9 +50,9 @@ if (typeof(MegaZine) != "undefined") {
     insert_megazine();
 } else {
     load_scripts([
-        "{{ server_url }}{% url static 'megazine/swfobject.js' %}",
-        "{{ server_url }}{% url static 'megazine/swfaddress.js' %}",
-        "{{ server_url }}{% url static 'megazine/megazine.js' %}"
+        "{{ server_url }}{% static 'megazine/swfobject.js' %}",
+        "{{ server_url }}{% static 'megazine/swfaddress.js' %}",
+        "{{ server_url }}{% static 'megazine/megazine.js' %}"
         ], insert_megazine);
 }
 })();

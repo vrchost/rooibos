@@ -4,6 +4,7 @@
 {% load viewers %}
 {% load compress %}
 {% load userprofile %}
+{% load staticfiles %}
 
 {% block javascript %}
 {{ block.super }}
@@ -333,10 +334,10 @@
 {% for form in formset.forms %}
     <tr class="sortable{% cycle "" " altrow" %} framed-thumbnails small middle-align">
         <td class="thumbnail-col">{{ form.id }}{{ form.record }}<a name="s{{ form.instance.id }}" href="{{ form.instance.record.get_absolute_url }}"><img src="{% if format == "square" %}{{ form.instance.record.get_square_thumbnail_url }}{% else %}{{ form.instance.record.get_thumbnail_url }}{% endif %}" alt="{{ form.instance.record.title }}" class="record-anchor" id="item-{{ forloop.counter }}-record-id-{{ form.instance.record.id }}" data-record-id="{{ form.instance.record.id }}" data-record-name="{{ form.instance.record.name }}" /></a></td>
-        <td class="title-col"><a href="{% url data-record form.instance.record.id, form.instance.record.name %}" target="record_view">{{ form.instance.record.title }}</a></td>
+        <td class="title-col"><a href="{% url "data-record" form.instance.record.id form.instance.record.name %}" target="record_view">{{ form.instance.record.title }}</a></td>
         <td class="order-col"><span class="orderinput">{{ form.order }} {{ form.order.errors }}</span></td>
         <td class="annotation-col">{{ form.annotation }}<br />
-            <a class="customize" href="{% url data-record-edit-context form.instance.record.id, form.instance.record.name, contenttype, presentation.id, presentation.name %}?next={{ request.get_full_path|urlencode }}%23s{{ form.instance.id }}">Customize record for this presentation</a></td>
+            <a class="customize" href="{% url "data-record-edit-context" form.instance.record.id form.instance.record.name contenttype presentation.id presentation.name %}?next={{ request.get_full_path|urlencode }}%23s{{ form.instance.id }}">Customize record for this presentation</a></td>
         <td class="controls">{{ form.hidden }}</td>
         <td class="controls delete">{{ form.DELETE }}</td>
     </tr>
@@ -359,7 +360,7 @@
 <h2 id="properties" style="padding-top: 60px;">Properties</h2>
 
 
-<form action="{% url presentation-edit presentation.id, presentation.name %}" method="POST">{% csrf_token %}
+<form action="{% url "presentation-edit" presentation.id presentation.name %}" method="POST">{% csrf_token %}
 
 <div class="vertical" style="margin-top: 20px;">
 
@@ -403,7 +404,7 @@
 
 <div class="row">
 <input type="submit" name="update-properties" value="Update" />
-<a href="{% url presentation-manage %}">Cancel</a>
+<a href="{% url "presentation-manage" %}">Cancel</a>
 </div>
 
 </div>
@@ -420,7 +421,7 @@
 
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url presentation-manage %}", "title": "Presentations"}
+    {"url": "{% url "presentation-manage" %}", "title": "Presentations"}
 ]}
 {% endvar %}
 
@@ -432,7 +433,7 @@
         {% list_viewers presentation request.get_full_path "<br />" %}
         <br />
         <br />
-        <form action="{% url presentation-duplicate presentation.id, presentation.name %}" method="POST">{% csrf_token %}
+        <form action="{% url "presentation-duplicate" presentation.id presentation.name %}" method="POST">{% csrf_token %}
         <input type="submit" name="duplicate-presentation" value="Duplicate presentation" />
         </form>
     </div>
@@ -440,7 +441,7 @@
 
 
   <div class="facet active-facet" id="presentation_sidebar_permissions">
-    <div class="facet-header">Permissions <a href="{% permissions_modify_url presentation %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url presentation %}"><img src="{% static 'images/edit.png' %}" class="facet-button" /></a></div>
     <div class="facet-body">
         {% permissions_display presentation %}
     </div>

@@ -7,7 +7,7 @@
 {% if terms %}
 <div style="text-align: center;">
     {% for term, size in terms %}
-        <a href="{% url solr-search %}?kw={{ term|urlencode }}" class="term-size-{{ size }}">{{ term }}</a>
+        <a href="{% url "solr-search" %}?kw={{ term|urlencode }}" class="term-size-{{ size }}">{{ term }}</a>
     {% endfor %}
 </div>
 {% else %}

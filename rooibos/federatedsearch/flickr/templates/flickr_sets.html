@@ -28,7 +28,7 @@ function jsonFlickrApi(rsp){
 			var photoset = rsp.photosets.photoset[i];
 			var li = document.createElement("li");
 			var backlink = document.createElement("a");
-			backlink.setAttribute("href", "{% url flickr-set %}"+photoset.id);
+			backlink.setAttribute("href", "{% url "flickr-set" %}"+photoset.id);
 			backlink.appendChild(document.createTextNode(photoset.title._content));
 			li.appendChild(backlink);
 			ul.appendChild(li);

@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <div class="permission-list">
 {% for ac in permissions %}
 {% if ac_selectable %}
@@ -8,9 +10,9 @@
 <span class="{{ ac.manage|yesno:"a,d,u" }}">M</span>
 <span class="{{ ac.restrictions|yesno:"a,u,u" }}"{% if ac.restrictions %} title="{% for k,v in ac.restrictions.iteritems %}{{ k }}={{ v }}
 {% endfor %}"{% endif %}>&reg;</span>
-{% if ac.user %}<img src="{% url static 'images/user.png' %}" alt="User" class="user-icon" />
-<a href="{% url access-effective-permissions contenttype.app_label, contenttype.model, object.id, object.name %}?user={{ ac.user.username|urlencode }}">{{ ac.user.username }}</a>
-{% else %}{% if ac.usergroup %}<img src="{% url static 'images/group.png' %}" alt="Group" class="user-icon" /> {{ ac.usergroup.name }}{% else %}Anonymous Users{% endif %}{% endif %}<br />
+{% if ac.user %}<img src="{% static 'images/user.png' %}" alt="User" class="user-icon" />
+<a href="{% url "access-effective-permissions" contenttype.app_label contenttype.model object.id object.name %}?user={{ ac.user.username|urlencode }}">{{ ac.user.username }}</a>
+{% else %}{% if ac.usergroup %}<img src="{% static 'images/group.png' %}" alt="Group" class="user-icon" /> {{ ac.usergroup.name }}{% else %}Anonymous Users{% endif %}{% endif %}<br />
 {% empty %}
 {{ emptymessage|default:"No permissions set." }}
 {% endfor %}

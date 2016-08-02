@@ -1,3 +1,5 @@
+{% load staticfiles %}
+
 <html lang="en">
 
 <!-- 
@@ -13,7 +15,7 @@ Learn more about Flex at http://flex.org
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>MDID{% if presentation.title %} - {{ presentation.title }}{% endif %}</title>
-<script src="{% url static 'mediaviewer/AC_OETags.js' %}" language="javascript"></script>
+<script src="{% static 'mediaviewer/AC_OETags.js' %}" language="javascript"></script>
 <style>
 body { margin: 0px; overflow:hidden }
 </style>
@@ -54,7 +56,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
     var MMdoctitle = document.title;
 
 	AC_FL_RunContent(
-		"src", "{% url static 'mediaviewer/playerProductInstall' %}",
+		"src", "{% static 'mediaviewer/playerProductInstall' %}",
 		"FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
 		"width", "100%",
 		"height", "100%",
@@ -71,8 +73,8 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 	// if we've detected an acceptable version
 	// embed the Flash Content SWF when all tests are passed
 	AC_FL_RunContent(
-			"src", "{% url static 'mediaviewer/WebMediaViewer' %}",
-			"FlashVars", "version=mdid3&amp;presentationUrl={% url api-presentation-detail presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url api-keepalive %}&amp;returnToUrl={{ return_url|urlencode }}",
+			"src", "{% static 'mediaviewer/WebMediaViewer' %}",
+			"FlashVars", "version=mdid3&amp;presentationUrl={% url "api-presentation-detail" presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url "api-keepalive" %}&amp;returnToUrl={{ return_url|urlencode }}",
 			"width", "100%",
 			"height", "100%",
 			"align", "middle",
@@ -97,13 +99,13 @@ if ( hasProductInstall && !hasRequestedVersion ) {
   	<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"
 			id="WebMediaViewer" width="100%" height="100%"
 			codebase="http://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab">
-			<param name="movie" value="{% url static 'mediaviewer/WebMediaViewer.swf' %}" />
+			<param name="movie" value="{% static 'mediaviewer/WebMediaViewer.swf' %}" />
 			<param name="quality" value="high" />
 			<param name="bgcolor" value="#000000" />
 			<param name="allowFullScreen" value="true" />
-			<param name="flashVars" value="version=mdid3&amp;presentationUrl={% url api-presentation-detail presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url api-keepalive %}&amp;returnToUrl={{ return_url|urlencode }}"/>
+			<param name="flashVars" value="version=mdid3&amp;presentationUrl={% url "api-presentation-detail" presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url "api-keepalive" %}&amp;returnToUrl={{ return_url|urlencode }}"/>
 			<param name="allowScriptAccess" value="sameDomain" />
-			<embed src="{% url static 'mediaviewer/WebMediaViewer.swf' %}" quality="high" bgcolor="#000000"
+			<embed src="{% static 'mediaviewer/WebMediaViewer.swf' %}" quality="high" bgcolor="#000000"
 				width="100%" height="100%" name="WebMediaViewer" align="middle"
 				play="true"
 				loop="false"
@@ -112,7 +114,7 @@ if ( hasProductInstall && !hasRequestedVersion ) {
 				allowScriptAccess="sameDomain"
 				type="application/x-shockwave-flash"
 				pluginspage="http://www.adobe.com/go/getflashplayer"
-				flashVars="version=mdid3&amp;presentationUrl={% url api-presentation-detail presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url api-keepalive %}&amp;returnToUrl={{ return_url|urlencode }}">
+				flashVars="version=mdid3&amp;presentationUrl={% url "api-presentation-detail" presentation.id %}%3Fflash=1&amp;keepAliveUrl={% url "api-keepalive" %}&amp;returnToUrl={{ return_url|urlencode }}">
 			</embed>
 	</object>
 </noscript>

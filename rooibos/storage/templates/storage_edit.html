@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load access_control %}
 {% load ui %}
+{% load staticfiles %}
 
 
 {% block javascript %}
@@ -19,12 +20,12 @@
 {% block sidebar %}
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url storage-manage %}", "title": "Storage Management"}
+    {"url": "{% url "ui-management" %}", "title": "Management"},
+    {"url": "{% url "storage-manage" %}", "title": "Storage Management"}
     {% if storage.id %},
-    {"url": "{% url storage-match-up-files %}?storage={{ storage.id }}", "title": "Match Up Media"},
-    {"url": "{% url storage-analyze storage.id, storage.name %}", "title": "Analyze"},
-    {"url": "{% url storage-find-records-without-media %}?storage={{ storage.id }}", "title": "Find Empty Records"}
+    {"url": "{% url "storage-match-up-files" %}?storage={{ storage.id }}", "title": "Match Up Media"},
+    {"url": "{% url "storage-analyze" storage.id storage.name %}", "title": "Analyze"},
+    {"url": "{% url "storage-find-records-without-media" %}?storage={{ storage.id }}", "title": "Find Empty Records"}
     {% endif %}
 ]}
 {% endvar %}
@@ -43,7 +44,7 @@
   </div>
 
   <div class="facet active-facet" id="storage_sidebar_permissions">
-    <div class="facet-header">Permissions <a href="{% permissions_modify_url storage %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url storage %}"><img src="{% static 'images/edit.png' %}" class="facet-button" /></a></div>
     <div class="facet-body">
         {% permissions_display storage %}
     </div>
@@ -87,7 +88,7 @@
       <td>
       </td>
       <td>
-        <input type="Submit" value="Submit changes" /> <a href="{% url storage-manage %}">Cancel</a>
+        <input type="Submit" value="Submit changes" /> <a href="{% url "storage-manage" %}">Cancel</a>
       </td>
     </tr>
 </table>

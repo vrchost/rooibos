@@ -10,7 +10,7 @@
 $(document).ready(function() {
     $("#criteria :text").each(function() {
             var f = $('#' + this.id.substring(0, this.id.length - 8) + "field");
-            $(this).autocomplete('{% url api-solr-autocomplete %}', {
+            $(this).autocomplete('{% url "api-solr-autocomplete" %}', {
                 extraParams: {
                     field: function() { return f.val(); },
                     collections: function() {

@@ -1,4 +1,6 @@
 {% load ui %}
+{% load staticfiles %}
+
 (function() {
 {% include "viewers_loadscripts.js" %}
 
@@ -15,7 +17,7 @@ if (typeof(PDFObject) != "undefined") {
     insert_pdfviewer();
 } else {
     load_scripts([
-        "{{ server_url }}{% url static 'pdf/pdfobject.js' %}",
+        "{{ server_url }}{% static 'pdf/pdfobject.js' %}",
         ], insert_pdfviewer);
 }
 })();

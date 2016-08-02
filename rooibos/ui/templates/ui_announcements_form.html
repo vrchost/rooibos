@@ -34,7 +34,7 @@ Date: {{ form.submit_date }} {{ form.submit_date.errors }}
 <input type="hidden" name="site" value="{{ site }}" />
 <input type="hidden" name="is_public" value="checked" />
 
-<input type="submit" value="Save" /> <a href="{% url main %}">Cancel</a>
+<input type="submit" value="Save" /> <a href="{% url "main" %}">Cancel</a>
 
 </form>
 

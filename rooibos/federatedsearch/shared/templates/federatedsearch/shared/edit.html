@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load access_control %}
 {% load ui %}
+{% load staticfiles %}
 
 
 {% block javascript %}
@@ -20,8 +21,8 @@
 {% block sidebar %}
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url shared-manage %}", "title": "Shared Collection Management"}
+    {"url": "{% url "ui-management" %}", "title": "Management"},
+    {"url": "{% url "shared-manage" %}", "title": "Shared Collection Management"}
 ]}
 {% endvar %}
 
@@ -29,7 +30,7 @@
 
 {% if collection.id %}
   <div class="facet active-facet" id="collection_sidebar_permissions">
-    <div class="facet-header">Permissions <a href="{% permissions_modify_url collection %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url collection %}"><img src="{% static 'images/edit.png' %}" class="facet-button" /></a></div>
     <div class="facet-body">
         {% permissions_display collection %}
     </div>
@@ -74,7 +75,7 @@
 <div class="row">
     <br />
     <input type="submit" value="{% if collection.id %}Update{% else %}Create{% endif %}" />
-    <a href="{% url shared-manage %}">Cancel</a>
+    <a href="{% url "shared-manage" %}">Cancel</a>
 </div>
 
 </form>

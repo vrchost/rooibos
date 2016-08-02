@@ -18,9 +18,9 @@
 <div>{{response|safe}} </div>
 <div>
 	<ul>
-    	<li><a href="{% url flickr-people %}">Find flickr users</a></li>
+    	<li><a href="{% url "flickr-people" %}">Find flickr users</a></li>
     </ul>
-    <form action="{% url flickr-photo-search %}" method="post">{% csrf_token %}
+    <form action="{% url "flickr-photo-search" %}" method="post">{% csrf_token %}
         Search: <input name="search_string" type="text_field" value="" />
         <input type="submit" value="Search" />
     </form>

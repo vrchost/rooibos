@@ -5,6 +5,7 @@
 {% load solr %}
 {% load access_control %}
 {% load pagination_tags %}
+{% load staticfiles %}
 
 
 {% block javascript %}
@@ -16,7 +17,7 @@
 
     // preload facet loading image
     var img = new Image();
-    img.src = '{% url static 'images/loading.gif' %}';
+    img.src = '{% static 'images/loading.gif' %}';
 
     function selectAllOnPage(s) {
         ids = Array();
@@ -35,11 +36,11 @@
         $("#sort_dropdown, #viewmode_dropdown").change(function() { $("#explore-form").submit(); })
         $("#sort_go_button").hide();
     {% if not federated_search.cache_hit %}
-        $("#external-results").html("<div style='text-align: center;'>Loading <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>");
+        $("#external-results").html("<div style='text-align: center;'>Loading <img src='{% static 'images/loading.gif' %}' alt='Loading' /><\/div>");
     {% endif %}
         $("#external-results").show();
     {% if not facets %}
-        $("#facets").html("<div style='text-align: center;'>Loading facets <img src='{% url static 'images/loading.gif' %}' alt='Loading' /><\/div>").show();
+        $("#facets").html("<div style='text-align: center;'>Loading facets <img src='{% static 'images/loading.gif' %}' alt='Loading' /><\/div>").show();
     {% else %}
         process_facets();
         $("#facets").show();
@@ -96,7 +97,7 @@
         {% if not federated_search.cache_hit and federated_search_query %}
         ajaxManager.add({
             type: 'GET',
-            url: '{% url federatedsearch-sidebar-api %}?q={{ federated_search_query|urlencode }}',
+            url: '{% url "federatedsearch-sidebar-api" %}?q={{ federated_search_query|urlencode }}',
             dataType: 'json',
             success: function(r) {
                 $("#external-results").html(r.html);
@@ -127,15 +128,15 @@
   <div class="facet active-facet" id="results_sidebar_keywords">
     <div class="facet-header">Keywords</div>
     <div class="facet-body">
-        <input type="text" id="keywords" name="kw" value="{{ keywords }}"/><input type="image" class="image" src="{% url static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
+        <input type="text" id="keywords" name="kw" value="{{ keywords }}"/><input type="image" class="image" src="{% static 'images/med_go_button.png' %}" value="Go" id="keywords-go" />
     </div>
   </div>
 
 {% for c in criteria %}
   <div class="facet active-facet">
-    <div class="facet-header"><a href="{{ limit_url }}rem={{ c.facet|urlencode }}" class="icon remove-icon" title="Remove this criteria"><img src="{% url static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-button" /></a>{{ c.label }}</div>
+    <div class="facet-header"><a href="{{ limit_url }}rem={{ c.facet|urlencode }}" class="icon remove-icon" title="Remove this criteria"><img src="{% static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-button" /></a>{{ c.label }}</div>
     <div class="facet-body">{% if c.negated %}not {% endif %}{{ c.term }}
-        {% if c.or_available %}<a href="{{ limit_url }}or={{ c.facet|urlencode }}" class="icon or-icon" title="Add additional term"><img src="{% url static 'images/or_icon.png' %}" alt="Or" title="Or" /></a>{% endif %}
+        {% if c.or_available %}<a href="{{ limit_url }}or={{ c.facet|urlencode }}" class="icon or-icon" title="Add additional term"><img src="{% static 'images/or_icon.png' %}" alt="Or" title="Or" /></a>{% endif %}
     </div>
   </div>
 {% endfor %}
@@ -204,7 +205,7 @@
 {% if hits > -1 %}
 <li>{{ hits|intcomma }} hit{{ hits|pluralize }}</li>
 {% if hits > 0 %}
-<li><span class="dropdown-anchor">Display <img src="{% url static 'images/down_arrow.png' %}" /></span>
+<li><span class="dropdown-anchor">Display <img src="{% static 'images/down_arrow.png' %}" /></span>
   <div class="dropdown">
         View:
     <select name="v" id="viewmode_dropdown">
@@ -235,12 +236,12 @@
 
 
 {% if user.is_authenticated %}
-<li><span class="dropdown-anchor">Selected Items <img src="{% url static 'images/down_arrow.png' %}" /></span>
+<li><span class="dropdown-anchor">Selected Items <img src="{% static 'images/down_arrow.png' %}" /></span>
   <div class="dropdown">
   {% if user|accessible_objects:"data.Collection,m"|length %}
-  <a href="{% url ui-delete-selected %}">Delete</a><br />
+  <a href="{% url "ui-delete-selected" %}">Delete</a><br />
   {% endif %}
-  <a href="{% url presentation-manage %}">Add to Presentation</a><br />
+  <a href="{% url "presentation-manage" %}">Add to Presentation</a><br />
   </div>
 </li>
 {% endif %}

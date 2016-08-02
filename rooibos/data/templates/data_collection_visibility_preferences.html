@@ -2,7 +2,7 @@
 
 <h2>Collection Visibility</h2>
 
-<form action="{% url data-save-collection-visibility-preferences %}?next={{ request.get_full_path|urlencode }}" method="post" class="vertical">{% csrf_token %}
+<form action="{% url "data-save-collection-visibility-preferences" %}?next={{ request.get_full_path|urlencode }}" method="post" class="vertical">{% csrf_token %}
 
     <div class="vertical">
         {{ form.show_or_hide.label }}<br />{{ form.show_or_hide }}

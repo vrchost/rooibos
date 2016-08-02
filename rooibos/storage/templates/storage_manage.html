@@ -22,7 +22,7 @@ td.limitwidth + td.limitwidth {
 <h1>Storage Management</h1>
 
 {% if user.is_superuser %}
-<a href="{% url storage-create-storage %}">Create new storage area</a>
+<a href="{% url "storage-create-storage" %}">Create new storage area</a>
 {% endif %}
 
 {% if storages %}
@@ -41,12 +41,12 @@ td.limitwidth + td.limitwidth {
 
 {% for storage in storages %}
 <tr class="{% cycle "" "altrow" %}">
-    <td><a href="{% url storage-manage-storage storage.id, storage.name %}">{{ storage.title }}</a></td>
+    <td><a href="{% url "storage-manage-storage" storage.id storage.name %}">{{ storage.title }}</a></td>
     <td>{{ storage.system }}</td>
     <td class="limitwidth" title="{{ storage.base|default:"" }}">{{ storage.base|default:"" }}</td>
     <td class="limitwidth" title="{{ storage.urlbase|default:"" }}">{{ storage.urlbase|default:"" }}</td>
     <td class="limitwidth" title="{{ storage.deliverybase|default:"" }}">{{ storage.deliverybase|default:"" }}</td>
-    <td>{% if storage.analysis_available %}<a href="{% url storage-analyze storage.id, storage.name %}">Analyze</a>{% endif %}</td>
+    <td>{% if storage.analysis_available %}<a href="{% url "storage-analyze" storage.id storage.name %}">Analyze</a>{% endif %}</td>
 </tr>
 {% endfor %}
 

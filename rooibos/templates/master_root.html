@@ -5,6 +5,7 @@
 {% load compress %}
 {% load userprofile %}
 {% load access_control %}
+{% load staticfiles %}
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -21,13 +22,13 @@
         var custom_process_facets = false;
     </script>
     <title>{% if TITLE %}{{ TITLE|safe }}{% else %}MDID{% endif %}{% block title %}{% endblock %}</title>
-    <link rel="shortcut icon" href="{% if FAVICON_URL %}{{ FAVICON_URL }}{% else %}{% url static 'images/favicon.ico' %}{% endif %}" />
+    <link rel="shortcut icon" href="{% if FAVICON_URL %}{{ FAVICON_URL }}{% else %}{% static 'images/favicon.ico' %}{% endif %}" />
 {% block stylesheets %}
 {% compress css %}
-    <link href="{% url static 'css/reset.css' %}" rel="stylesheet" type="text/css" media="screen">
-    <link href="{% url static 'css/typography.css' %}" rel="stylesheet" type="text/css" media="screen">
-    <link href="{% url static 'jquery/jquery.autocomplete.css' %}" rel="stylesheet" type="text/css" media="screen">
-    <link href="{% url static 'jquery/jquery-ui-1.8.11.custom.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% static 'css/reset.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% static 'css/typography.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% static 'jquery/jquery.autocomplete.css' %}" rel="stylesheet" type="text/css" media="screen">
+    <link href="{% static 'jquery/jquery-ui-1.8.11.custom.css' %}" rel="stylesheet" type="text/css" media="screen">
     {% include "master.css" %}
 {% endcompress %}
 <!--[if IE]>
@@ -107,29 +108,29 @@
             <li>Welcome{% if user.first_name %}, {{ user.first_name }}{% endif %}</li>
             {% if SHIB_ENABLED %}
                 {% if SHIB_LOGOUT_URL %}
-                    <li><a href="{% url logout %}?next={{ SHIB_LOGOUT_URL|urlencode }}">Log out</a></li>
+                    <li><a href="{% url "logout" %}?next={{ SHIB_LOGOUT_URL|urlencode }}">Log out</a></li>
                 {% endif %}
             {% else %}
-                <li><a href="{% url logout %}?next={% url main %}">Log out</a></li>
+                <li><a href="{% url "logout" %}?next={% url "main" %}">Log out</a></li>
             {% endif %}
-            <li><a href="{% url ui-options %}">Options</a></li>
-            <li><a href="{% url ui-management %}">Management</a></li>
+            <li><a href="{% url "ui-options" %}">Options</a></li>
+            <li><a href="{% url "ui-management" %}">Management</a></li>
             {% else %}
                 {% if SHIB_ENABLED %}
-                    <li><a href="{% url shib_login %}?next={{ request.get_full_path }}">Log in</a></li>
-                    <li><a href="{% url login %}?next={{ request.get_full_path }}">Local login</a></li>
+                    <li><a href="{% url "shib_login" %}?next={{ request.get_full_path }}">Log in</a></li>
+                    <li><a href="{% url "login" %}?next={{ request.get_full_path }}">Local login</a></li>
                 {% else %}
                     {% if CAS_SERVER_URL %}
-                    <li><a href="{% url login %}?next={{ request.get_full_path }}">CAS Login</a></li>
-                    <li><a href="{% url local-login %}?next={{ request.get_full_path }}">Local Login</a></li>
+                    <li><a href="{% url "login" %}?next={{ request.get_full_path }}">CAS Login</a></li>
+                    <li><a href="{% url "local-login" %}?next={{ request.get_full_path }}">Local Login</a></li>
                     {% else %}
-                    <li><a href="{% url login %}?next={{ request.get_full_path }}">Login</a></li>
+                    <li><a href="{% url "login" %}?next={{ request.get_full_path }}">Login</a></li>
                     {% endif %}
                 {% endif %}
             {% endif %}
             <li>{% with request.pagehelp|default:"" as help %}{% pagehelp help %}{% endwith %}</li>
             {% if ADMINS %}
-            <li><a href="{% url ui-report-problem %}">Report a Problem</a></li>
+            <li><a href="{% url "ui-report-problem" %}">Report a Problem</a></li>
             {% endif %}
         </ul>
         <span id="javascriptwarning">You have JavaScript disabled.  MDID works better with JavaScript enabled.</span>
@@ -138,70 +139,70 @@
     <div id="header-bar">
         <div class="spacer">
             <div id="header">
-                <a href="{% url main %}" id="logo"></a>
+                <a href="{% url "main" %}" id="logo"></a>
                 <ul style="float: right;">
                     <li><div id="basket-header">{% include "ui_basket_header.html" %}</div>
                         <ul class="menu">
                             <li><a id="basket-toggle" href="#">Hide</a></li>
-                            <li><a href="{% url solr-selected %}">Explore</a></li>
-                            <li><a href="{% url ui-clear-selected %}?next={{ request.get_full_path|urlencode }}">Clear</a></li>
+                            <li><a href="{% url "solr-selected" %}">Explore</a></li>
+                            <li><a href="{% url "ui-clear-selected" %}?next={{ request.get_full_path|urlencode }}">Clear</a></li>
                         </ul>
                     </li>
                 </ul>
 
                 <ul>
-                    <li><a href="{% url solr-search %}">Discover</a>
+                    <li><a href="{% url "solr-search" %}">Discover</a>
                         <ul class="menu">
-                            <li><a href="{% url solr-search %}">Explore</a></li>
+                            <li><a href="{% url "solr-search" %}">Explore</a></li>
                         {% if WORKS.EXPLORE_MENU %}
-                            <li><a href="{% url works %}">Works</a></li>
+                            <li><a href="{% url "works" %}">Works</a></li>
                         {% endif %}
-                            <!--<li><a href="{% url solr-searchform %}">Advanced Search</a></li>-->
-                            <li><a href="{% url solr-browse %}">Browse</a></li>
+                            <!--<li><a href="{% url "solr-searchform" %}">Advanced Search</a></li>-->
+                            <li><a href="{% url "solr-browse" %}">Browse</a></li>
                             {% if user.is_authenticated and SHOW_TERMS %}
-                            <li><a href="{% url solr-terms %}">Top Terms</a></li>
+                            <li><a href="{% url "solr-terms" %}">Top Terms</a></li>
                             {% endif %}
-                            <li><a href="{% url solr-overview %}">Overview</a></li>
+                            <li><a href="{% url "solr-overview" %}">Overview</a></li>
                         </ul>
                     </li>
                     {% if user.is_authenticated %}
-                    <li><a href="{% url presentation-manage %}">Organize</a>
+                    <li><a href="{% url "presentation-manage" %}">Organize</a>
                         <ul class="menu">
                             {% if current_presentation.id %}
-                            <li><a href="{% url presentation-edit current_presentation.id, current_presentation.name %}">Edit {{ current_presentation.title }}</a></li>
+                            <li><a href="{% url "presentation-edit" current_presentation.id current_presentation.name %}">Edit {{ current_presentation.title }}</a></li>
                             {% endif %}
-                            <li><a href="{% url presentation-manage %}">Your Presentations</a></li>
-                            <li><a href="{% url solr-search %}?c=ownedtag:{{ user.id }}-favorite">Your Favorites</a></li>
-                            <li><a href="{% url solr-search %}?c=owner:{{ user.id }}">Your Content</a></li>
+                            <li><a href="{% url "presentation-manage" %}">Your Presentations</a></li>
+                            <li><a href="{% url "solr-search" %}?c=ownedtag:{{ user.id }}-favorite">Your Favorites</a></li>
+                            <li><a href="{% url "solr-search" %}?c=owner:{{ user.id }}">Your Content</a></li>
                             {% if user|accessible_objects:"data.Collection,r"|length %}
-                            <li><a href="{% url data-record-new-personal %}">Create Item</a></li>
+                            <li><a href="{% url "data-record-new-personal" %}">Create Item</a></li>
                             {% endif %}
                             {% if user|accessible_objects:"data.Collection,rw"|length %}
-                            <li><a href="{% url data-record-new %}">Create Collection Item</a></li>
+                            <li><a href="{% url "data-record-new" %}">Create Collection Item</a></li>
                             {% endif %}
-                            <li><a href="{% url presentation-create %}">Create Presentation</a></li>
+                            <li><a href="{% url "presentation-create" %}">Create Presentation</a></li>
                         </ul>
                     </li>
                     {% endif %}
-                    <li><a href="{% url presentation-browse %}">Experience</a>
+                    <li><a href="{% url "presentation-browse" %}">Experience</a>
                         <ul class="menu">
-                            <li><a href="{% url presentation-browse %}">Browse Presentations</a></li>
+                            <li><a href="{% url "presentation-browse" %}">Browse Presentations</a></li>
                             {% if not HIDE_SHOWCASES %}
-                            <li><a href="{% url showcases %}">Showcases</a></li>
+                            <li><a href="{% url "showcases" %}">Showcases</a></li>
                             {% endif %}
                             {% if user.is_authenticated %}
-                            <li><a href="{% url mediaviewer-install %}">MediaViewer</a></li>
+                            <li><a href="{% url "mediaviewer-install" %}">MediaViewer</a></li>
                             {% endif %}
-                            <li><a href="{% url about %}">About</a></li>
+                            <li><a href="{% url "about" %}">About</a></li>
                         </ul>
                     </li>
                     <li class="search" style="padding-right: 20px;"><span>Search</span>
                     {%  if WORKS.SEARCH_BOX %}
-                        <form method="GET" action="{% url works %}">
+                        <form method="GET" action="{% url "works" %}">
                     {% else %}
-                        <form method="GET" action="{% url solr-search %}">
+                        <form method="GET" action="{% url "solr-search" %}">
                     {% endif %}
-                            <input id="quicksearch" name="kw" type="text" title="Search" /><input type="image" src="{% url static 'images/go.png' %}" id="search-go" />
+                            <input id="quicksearch" name="kw" type="text" title="Search" /><input type="image" src="{% static 'images/go.png' %}" id="search-go" />
                         </form>
                     </li>
                 </ul>
@@ -236,18 +237,18 @@
 
 {% block javascript %}
 {% compress js %}
-    <script type="text/javascript" src="{% url static 'jquery/jquery-1.7.2.min.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery-ui-1.8.11.custom.min.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.cookie.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.hoverIntent.minified.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.ajaxmanager.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.autocomplete.pack.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.scrollTo-1.4.2-min.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.multicheckbox.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'swfupload/swfupload.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'swfupload/plugins/swfupload.cookies.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/jquery.swfupload.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'jquery/qtip/jquery.qtip-1.0.0-rc3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery-1.7.2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery-ui-1.8.11.custom.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.cookie.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.hoverIntent.minified.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.ajaxmanager.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.autocomplete.pack.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.scrollTo-1.4.2-min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.multicheckbox.js' %}"></script>
+    <script type="text/javascript" src="{% static 'swfupload/swfupload.js' %}"></script>
+    <script type="text/javascript" src="{% static 'swfupload/plugins/swfupload.cookies.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.swfupload.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/qtip/jquery.qtip-1.0.0-rc3.min.js' %}"></script>
     <script type="text/javascript">
         var ajaxManager = $.manageAjax.create('defaultQueue', { queue: true });
         var ajaxInteractionManager = $.manageAjax.create('interactionQueue', { queue: true });
@@ -282,9 +283,9 @@
             }
         });
     </script>
-    <script type="text/javascript" src="{% url static 'scripts/ui-scripts.js' %}"></script>
-    <script type="text/javascript" src="{% url static 'scripts/json2.js' %}"></script>
-    <!--<script type="text/javascript" src="{% url static 'scripts/related-images-bar.js' %}"></script>-->
+    <script type="text/javascript" src="{% static 'scripts/ui-scripts.js' %}"></script>
+    <script type="text/javascript" src="{% static 'scripts/json2.js' %}"></script>
+    <!--<script type="text/javascript" src="{% static 'scripts/related-images-bar.js' %}"></script>-->
     <!--<script type="text/javascript" src="/jsi18n/"></script>-->
 
     <script type="text/javascript">
@@ -304,7 +305,7 @@
             ids = $.map(ids, function(e) { return parseInt(e); });
             ajaxInteractionManager.add({
                 type: method,
-                url: '{% url ui-api-select-record %}',
+                url: '{% url "ui-api-select-record" %}',
                 data: {'id': JSON.stringify(ids), 'checked': checked},
                 dataType: 'json',
                 success: function(r) {
@@ -331,7 +332,7 @@
                 id = id.substring(id.lastIndexOf('-') + 1);
                 anchor.qtip({
                     content: {
-                        url: '{% url data-record-preview 0 %}'.replace('/0/', '/' + id + '/')
+                        url: '{% url "data-record-preview" 0 %}'.replace('/0/', '/' + id + '/')
                     },
                     show: {
                         delay: 1000,
@@ -433,7 +434,7 @@
         function store_profile_setting(key, value) {
             ajaxInteractionManager.add({
                 type: 'POST',
-                url: '{% url userprofile-store %}',
+                url: '{% url "userprofile-store" %}',
                 data: {'key': key, 'value': value},
                 dataType: 'json'
             });
@@ -488,7 +489,7 @@
             if (!item.attr('href') || item.hasClass('nocopylink')) return;
             var host = window.location.href.substring(0, window.location.href.length - window.location.pathname.length - window.location.search.length);
             var url = host + item.attr('href').replace(/\?.+/, '');
-            var link = $("<img class='item-action-link' src='{% url static 'images/link.png' %}' />");
+            var link = $("<img class='item-action-link' src='{% static 'images/link.png' %}' />");
             link.qtip({
                 content: "Copy and paste this URL to link to this item:<br /><input type='text' style='width: 285px;' readonly='readonly' value='" + url + "' />",
                 show: {
@@ -674,16 +675,16 @@
             // end basket features
 
             if (!custom_process_facets) process_facets();
-            $(".autocomplete-user").autocomplete('{% url api-autocomplete-user %}', {});
-            $(".autocomplete-group").autocomplete('{% url api-autocomplete-group %}', {});
-            $(".impersonation-autocomplete").autocomplete('{% url impersonation-autocomplete-user %}', {});
+            $(".autocomplete-user").autocomplete('{% url "api-autocomplete-user" %}', {});
+            $(".autocomplete-group").autocomplete('{% url "api-autocomplete-group" %}', {});
+            $(".impersonation-autocomplete").autocomplete('{% url "impersonation-autocomplete-user" %}', {});
 
             setTimeout(function() { $("#messages").css('visibility', 'hidden'); }, 8000);
 
             // convert list of actions to row drop-down menu
             $("table.itemactions tr+tr").each(function() {
                 var r = $(this);
-                var c = $("<td class='item-actions-menu'><img src='{% url static 'images/down_arrow.png' %}' /><" + "/td>");
+                var c = $("<td class='item-actions-menu'><img src='{% static 'images/down_arrow.png' %}' /><" + "/td>");
                 var u = $("<ul><" + "/ul>");
                 $("td.item-actions a, td.item-actions input", r).each(function() {
                     var item = $(this);
@@ -821,7 +822,7 @@
     <script type="text/javascript">
 
         // pop-up preview
-         var media_url = "{% url storage-retrieve-image 0, 0, PREVIEW_WIDTH|default:640, PREVIEW_HEIGHT|default:480 %}";
+         var media_url = "{% url "storage-retrieve-image" 0 0 PREVIEW_WIDTH|default:640 PREVIEW_HEIGHT|default:480 %}";
          var preview_width = {{ PREVIEW_WIDTH|default:640 }};
          var preview_height = {{ PREVIEW_HEIGHT|default:480 }};
 
@@ -857,7 +858,7 @@
                  width: preview_width + 60
              });
 
-             var info = $('<img src="{% url static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" />');
+             var info = $('<img src="{% static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" />');
              info.attr('id', 'preview-record-id-' + id);
              add_metadata_popup(dialog.append(info));
          }

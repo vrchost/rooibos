@@ -2,6 +2,7 @@
 {% load humanize %}
 {% load access_control %}
 {% load ui %}
+{% load staticfiles %}
 
 
 {% block javascript %}
@@ -20,11 +21,11 @@
 {% block sidebar %}
 {% var as related_pages %}
 {"pages": [
-    {"url": "{% url ui-management %}", "title": "Management"},
-    {"url": "{% url data-collections-manage %}", "title": "Collection Management"}
+    {"url": "{% url "ui-management" %}", "title": "Management"},
+    {"url": "{% url "data-collections-manage" %}", "title": "Collection Management"}
     {% if collection.id %},
-    {"url": "{% url storage-match-up-files %}?collection={{ collection.id }}", "title": "Match Up Media"},
-    {"url": "{% url storage-find-records-without-media %}?collection={{ collection.id }}", "title": "Find Empty Records"}
+    {"url": "{% url "storage-match-up-files" %}?collection={{ collection.id }}", "title": "Match Up Media"},
+    {"url": "{% url "storage-find-records-without-media" %}?collection={{ collection.id }}", "title": "Find Empty Records"}
     {% endif %}
 ]}
 {% endvar %}
@@ -46,14 +47,14 @@
     <div class="facet-header">Child Collections</div>
     <div class="facet-body">
         {% for child in collection.children.all %}
-        <a href="{% url data-collection-manage child.id, child.name %}">{{ child.title }}</a><br />
+        <a href="{% url "data-collection-manage" child.id child.name %}">{{ child.title }}</a><br />
         {% endfor %}
     </div>
   </div>
 {% endif %}
 
   <div class="facet active-facet" id="collection_sidebar_permissions">
-    <div class="facet-header">Permissions <a href="{% permissions_modify_url collection %}"><img src="{% url static 'images/edit.png' %}" class="facet-button" /></a></div>
+    <div class="facet-header">Permissions <a href="{% permissions_modify_url collection %}"><img src="{% static 'images/edit.png' %}" class="facet-button" /></a></div>
     <div class="facet-body">
         {% permissions_display collection %}
     </div>
@@ -102,7 +103,7 @@
 <div class="row">
     <br />
     <input type="submit" value="{% if collection.id %}Update{% else %}Create{% endif %}" />
-    <a href="{% url data-collections-manage %}">Cancel</a>
+    <a href="{% url "data-collections-manage" %}">Cancel</a>
 </div>
 
 </form>

@@ -22,7 +22,7 @@
 {% endif %}
 
 <div>
-    <a href="{% url solr-search-collection id=collection.id, name=collection.name %}">Explore this collection</a>
+    <a href="{% url "solr-search-collection" id=collection.id name=collection.name %}">Explore this collection</a>
 </div>
 
 {% endblock %}

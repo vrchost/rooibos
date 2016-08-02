@@ -1,4 +1,6 @@
 {% load humanize %}
+{% load staticfiles %}
+
 <div class='metadata'>
 
 {% if COMPACT_METADATA_VIEW %}
@@ -55,7 +57,7 @@
         {{ value.value|default:"&nbsp;" }}
 {% endif %}
 {% if value.owner %}
-        <img src="{% url static 'images/user.png' %}" class="user-icon" style="vertical-align: middle;" title="{{ value.owner.username }}" />
+        <img src="{% static 'images/user.png' %}" class="user-icon" style="vertical-align: middle;" title="{{ value.owner.username }}" />
 {% endif %}
         </div>
     </div>

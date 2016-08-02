@@ -1,5 +1,5 @@
-    {"url": "{% url ui-management %}", "title": "Management"}
+    {"url": "{% url "ui-management" %}", "title": "Management"}
 {% ifequal contenttype.app_label "storage" %}{% ifequal contenttype.model "storage" %}
-    ,{"url": "{% url storage-manage %}", "title": "Storage Management"}
-    ,{"url": "{% url storage-manage-storage object.id, object.name %}", "title": "{{ object.title }} (Storage)"}
+    ,{"url": "{% url "storage-manage" %}", "title": "Storage Management"}
+    ,{"url": "{% url "storage-manage-storage" object.id object.name %}", "title": "{{ object.title }} (Storage)"}
 {% endifequal %}{% endifequal %}

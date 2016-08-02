@@ -1,5 +1,6 @@
+{% load staticfiles %}
 
-<li><span class="dropdown-anchor">Tags <img src="{% url static 'images/down_arrow.png' %}" /></span>
+<li><span class="dropdown-anchor">Tags <img src="{% static 'images/down_arrow.png' %}" /></span>
   <div class="dropdown tags-dropdown">
 {% include "ui_tag_editor.html" %}
   <br />

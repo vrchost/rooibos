@@ -1,6 +1,6 @@
 
 
-<form method="GET" action="{% url access-effective-permissions contenttype.app_label, contenttype.model, object.id, object.name %}">
+<form method="GET" action="{% url "access-effective-permissions" contenttype.app_label contenttype.model object.id object.name %}">
 <label for="access_effective_permissions_user">Calculate effective permissions on this object for user:</label>
 <input type="text" name="user" id="access_effective_permissions_user" class="autocomplete-user" /><br />
 <input type="submit" value="Calculate" />
