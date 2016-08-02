@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
-django==1.4.22
+django==1.5.12
 django-tagging==0.3.2
 ipaddr==2.1.11
 django-extensions==1.4.9
