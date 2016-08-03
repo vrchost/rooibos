@@ -13,6 +13,10 @@ class Middleware:
         # Set META HTTPS to allow viewers to build correct server URL
         if request.META.get('HTTP_X_FORWARDED_SSL') == 'on':
             request.META['HTTPS'] = 'on'
+        # Set proper REMOTE_ADDR
+        addr = request.META.get('HTTP_X_FORWARDED_FOR')
+        if addr:
+            request.META['REMOTE_ADDR'] = addr
 
         # To support SWFUpload, copy the provided session key from POST
         # into COOKIES
