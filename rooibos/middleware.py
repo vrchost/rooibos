@@ -10,6 +10,10 @@ class Middleware:
         return None
 
     def process_request(self, request):
+        # Set META HTTPS to allow viewers to build correct server URL
+        if request.META.get('HTTP_X_FORWARDED_SSL') == 'on':
+            request.META['HTTPS'] = 'on'
+
         # To support SWFUpload, copy the provided session key from POST
         # into COOKIES
         # since Flash does not send browser cookies with its requests
