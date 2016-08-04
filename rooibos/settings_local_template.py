@@ -279,6 +279,8 @@ MASTER_TEMPLATE = 'master_root.html'
 
 INSTALLED_APPS = ()
 
+TEMPLATE_CONTEXT_PROCESSORS = ()
+
 
 FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
 
