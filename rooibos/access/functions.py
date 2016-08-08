@@ -1,9 +1,8 @@
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import AnonymousUser, User
+from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import _get_queryset
-from rooibos.util.caching import get_cached_value, invalidate_model_cache
 from models import AccessControl, ExtendedGroup
 
 
@@ -11,7 +10,6 @@ restriction_precedences = dict()
 
 
 def add_restriction_precedence(setting, func):
-    invalidate_model_cache(AccessControl)
     restriction_precedences[setting] = func
 
 
@@ -35,11 +33,6 @@ def get_effective_permissions_and_restrictions(
         return True, True, True, None
 
     model_type = ContentType.objects.get_for_model(model_instance)
-    key = "get_effective_permissions_and_restrictions-%d-%d-%d" % (
-        user.id or 0,
-        model_type.id,
-        model_instance.id,
-    )
 
     def calculate():
         if not user.is_anonymous():
@@ -91,8 +84,7 @@ def get_effective_permissions_and_restrictions(
         else:
             return reduce_aclist(filter(lambda a: a.usergroup, aclist))
 
-    return get_cached_value(
-        key, calculate, model_dependencies=[model_type, AccessControl, User])
+    return calculate()
 
 
 def get_effective_permissions(

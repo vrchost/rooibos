@@ -10,8 +10,6 @@ from django.conf import settings
 from rooibos.access import filter_by_access, check_access
 from rooibos.access.models import AccessControl
 from rooibos.util import unique_slug
-from rooibos.util.caching import get_cached_value, cache_get_many, \
-    cache_set_many
 import random
 import types
 import re
@@ -150,32 +148,11 @@ class Record(models.Model):
 
         ids = map(int, ids)
 
-        if user:
+        if user and user.is_superuser:
+            return records.filter(id__in=ids)
 
-            if user.is_superuser:
-                return records.filter(id__in=ids)
-
-            accessible_records = cache_get_many(
-                ['record-access-%d-%d' % (user.id or 0, id) for id in ids],
-                model_dependencies=[Record, Collection, AccessControl]
-            )
-            accessible_record_ids = map(
-                lambda (k, v): (int(k.rsplit('-', 1)[1]), v),
-                accessible_records.iteritems()
-            )
-
-            allowed_ids = [k for k, v in accessible_record_ids if v == 't']
-            denied_ids = [k for k, v in accessible_record_ids if v == 'f']
-
-            to_check = [id for id in ids
-                        if id not in allowed_ids and id not in denied_ids]
-
-            if not to_check:
-                return records.filter(id__in=allowed_ids)
-
-        else:
-            allowed_ids = []
-            to_check = ids
+        allowed_ids = []
+        to_check = ids
 
         # check which records have individual ACLs set
         individual = _records_with_individual_acl_by_ids(to_check)
@@ -200,19 +177,6 @@ class Record(models.Model):
             checked = records.filter(
                 id__in=to_check).values_list('id', flat=True)
             allowed_ids.extend(checked)
-
-        if user:
-            cache_update = dict(
-                (
-                    'record-access-%d-%d' % (user.id or 0, id),
-                    't' if id in checked else 'f'
-                )
-                for id in to_check
-            )
-            cache_set_many(
-                cache_update,
-                model_dependencies=[Record, Collection, AccessControl]
-            )
 
         return records.filter(id__in=allowed_ids)
 
@@ -384,10 +348,7 @@ class Record(models.Model):
                 context_type=None,
                 hidden=False)
             return titles[0].value if titles else None
-        return get_cached_value('record-%d-title' % self.id,
-                                get_title,
-                                model_dependencies=[Field, FieldValue],
-                                ) if self.id else None
+        return get_title() if self.id else None
 
     @property
     def identifier(self):
@@ -399,10 +360,7 @@ class Record(models.Model):
                 context_type=None,
                 hidden=False)
             return identifiers[0].value if identifiers else None
-        return get_cached_value('record-%d-identifiers' % self.id,
-                                get_identifier,
-                                model_dependencies=[Field, FieldValue],
-                                ) if self.id else None
+        return get_identifier() if self.id else None
 
     @property
     def shared(self):
@@ -737,18 +695,12 @@ def standardfield(field, standard='dc', equiv=False):
 
 
 def standardfield_ids(field, standard='dc', equiv=False):
-    def get_ids():
-        f = Field.objects.get(standard__prefix=standard, name=field)
-        if equiv:
-            ids = Field.objects.filter(
-                Q(id=f.id) |
-                Q(id__in=f.get_equivalent_fields())
-            ).values_list('id', flat=True)
-        else:
-            ids = [f.id]
-        return ids
-    return get_cached_value(
-        'standardfield_ids-%s-%s-%s' % (field, standard, equiv),
-        get_ids,
-        model_dependencies=[Field]
-    )
+    f = Field.objects.get(standard__prefix=standard, name=field)
+    if equiv:
+        ids = Field.objects.filter(
+            Q(id=f.id) |
+            Q(id__in=f.get_equivalent_fields())
+        ).values_list('id', flat=True)
+    else:
+        ids = [f.id]
+    return ids
