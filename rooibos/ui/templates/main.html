@@ -151,8 +151,8 @@
         {% for comment in comments reversed %}
             {{ comment.comment|safe|linebreaks }}
             <div class="byline">Posted {{ comment.submit_date|naturalday }} by {{ comment.user }}.
-            {% if perms.comments.change_comment %}<a href="{ % url ui-announcement-edit comment.id %}">Edit</a>{% endif %}
-            {% if perms.comments.delete_comment %}<a href="{ % url ui-announcement-delete comment.id %}">Delete</a>{% endif %}
+            {% if perms.comments.change_comment %}<a href="{% url "ui-announcement-edit" comment.id %}">Edit</a>{% endif %}
+            {% if perms.comments.delete_comment %}<a href="{% url "ui-announcement-delete" comment.id %}">Delete</a>{% endif %}
             </div>
         {% endfor %}
 

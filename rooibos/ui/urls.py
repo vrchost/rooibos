@@ -1,18 +1,8 @@
 from django.conf.urls import patterns, url
 from django.views.generic.base import TemplateView
-from django.views.generic.create_update import create_object, delete_object, \
-    update_object
-from django.contrib.comments.models import Comment
-from django.contrib.flatpages.models import FlatPage
-from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
-from django.utils.functional import lazy
-from django.conf import settings
 from views import css, select_record, add_tags, remove_tag, manage, options, \
-    clear_selected_records, delete_selected_records
-
-
-reverse_lazy = lazy(reverse, str)
+    clear_selected_records, delete_selected_records, \
+    AnnouncementCreateView, AnnouncementUpdateView, AnnouncementDeleteView
 
 
 urlpatterns = patterns(
@@ -44,45 +34,17 @@ urlpatterns = patterns(
     ),
     url(
         r'^announcement/new/$',
-        create_object,
-        {
-            'model': Comment,
-            'template_name': 'ui_announcements_form.html',
-            'extra_context': {
-                'flatpage_content_type':
-                    ContentType.objects.get_for_model(FlatPage).id,
-                'site': settings.SITE_ID,
-            },
-            'post_save_redirect': reverse_lazy('main'),
-            'login_required': True,
-        },
+        AnnouncementCreateView.as_view(),
         name='ui-announcement-new'
     ),
     url(
-        r'^announcement/(?P<object_id>\d+)/edit/$',
-        update_object,
-        {
-            'model': Comment,
-            'template_name': 'ui_announcements_form.html',
-            'extra_context': {
-                'flatpage_content_type':
-                    ContentType.objects.get_for_model(FlatPage).id,
-                'site': settings.SITE_ID,
-            },
-            'post_save_redirect': reverse_lazy('main'),
-            'login_required': True,
-        },
+        r'^announcement/(?P<pk>\d+)/edit/$',
+        AnnouncementUpdateView.as_view(),
         name='ui-announcement-edit'
     ),
     url(
-        r'^announcement/(?P<object_id>\d+)/delete/$',
-        delete_object,
-        {
-            'model': Comment,
-            'template_name': 'ui_announcements_delete.html',
-            'post_delete_redirect': reverse_lazy('main'),
-            'login_required': True,
-        },
+        r'^announcement/(?P<pk>\d+)/delete/$',
+        AnnouncementDeleteView.as_view(),
         name='ui-announcement-delete'
     ),
 )

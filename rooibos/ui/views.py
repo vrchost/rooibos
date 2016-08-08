@@ -5,13 +5,18 @@ from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseNotAllowed
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.views.decorators.cache import cache_control
 from django.utils import simplejson
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.csrf import csrf_protect
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.contrib.comments.models import Comment
+from django.contrib.flatpages.models import FlatPage
+from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
 from rooibos.util import json_view
 from rooibos.data.models import Record, Collection
 from rooibos.storage.models import Storage
@@ -276,3 +281,34 @@ def delete_selected_records(request):
         },
         context_instance=RequestContext(request)
     )
+
+
+class AnnouncementViewMixin(object):
+    model = Comment
+    fields = [
+        'comment', 'content_type', 'object_pk', 'user',
+        'site', 'is_public', 'submit_date',
+    ]
+    template_name_suffix = '_announcements_form'
+    success_url = reverse_lazy('main')
+
+    def get_context_data(self, **kwargs):
+        context = super(AnnouncementViewMixin, self).get_context_data(**kwargs)
+        context.update({
+            'flatpage_content_type':
+                ContentType.objects.get_for_model(FlatPage).id,
+            'site': settings.SITE_ID,
+        })
+        return context
+
+
+class AnnouncementCreateView(AnnouncementViewMixin, CreateView):
+    pass
+
+
+class AnnouncementUpdateView(AnnouncementViewMixin, UpdateView):
+    pass
+
+
+class AnnouncementDeleteView(AnnouncementViewMixin, DeleteView):
+    template_name_suffix = '_announcements_delete'
