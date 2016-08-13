@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.template import Variable
 from rooibos.data.forms import get_collection_visibility_prefs_form
 from rooibos.data.functions import get_collection_visibility_preferences
+from rooibos.data.models import FieldSet
 from rooibos.access.functions import filter_by_access
 
 
@@ -11,9 +12,10 @@ register = template.Library()
 
 class MetaDataNode(template.Node):
 
-    def __init__(self, record, fieldset):
+    def __init__(self, record, fieldset, crosslinks):
         self.record = Variable(record)
         self.fieldset = Variable(fieldset) if fieldset else None
+        self.crosslinks = Variable(crosslinks) if crosslinks else None
 
     def render(self, context):
         record = self.record.resolve(context)
@@ -24,6 +26,22 @@ class MetaDataNode(template.Node):
                 fieldset=fieldset
             )
         )
+
+        crosslinks = self.crosslinks and self.crosslinks.resolve(context)
+
+        crosslink_fields = dict()
+        if crosslinks:
+            try:
+                crosslink_fields.update(
+                    (field.id, None)
+                    for field in
+                    FieldSet.objects.get(
+                        name='metadata-crosslinks'
+                    ).fields.all()
+                )
+            except FieldSet.DoesNotExist:
+                pass
+
         if fieldvalues:
             fieldvalues[0].subitem = False
         for i in range(1, len(fieldvalues)):
@@ -32,6 +50,11 @@ class MetaDataNode(template.Node):
                 fieldvalues[i].group == fieldvalues[i - 1].group and
                 fieldvalues[i].resolved_label ==
                 fieldvalues[i - 1].resolved_label
+            )
+            fieldvalues[i].crosslinked = (
+                crosslinks and
+                fieldvalues[i].value and
+                fieldvalues[i].field_id in crosslink_fields
             )
 
         collections = filter_by_access(
@@ -48,17 +71,9 @@ class MetaDataNode(template.Node):
 
 @register.tag
 def metadata(parser, token):
-    try:
-        tag_name, record, fieldset = token.split_contents()
-    except ValueError:
-        try:
-            tag_name, record = token.split_contents()
-            fieldset = None
-        except ValueError:
-            raise template.TemplateSyntaxError, \
-                "%r tag requires exactly one or two arguments" % \
-                token.contents.split()[0]
-    return MetaDataNode(record, fieldset)
+    args = (token.split_contents() + [None, None])[1:4]
+    record, fieldset, crosslinks = args
+    return MetaDataNode(record, fieldset, crosslinks)
 
 
 @register.filter
