@@ -520,7 +520,7 @@ class MigrateCollectionGroups(MigrateModel):
         self.need_instance_map = True
 
     def hash(self, row):
-        return row.Title
+        return content_hash(row.Title)
 
     def update(self, instance, row):
         instance.title = row.Title
