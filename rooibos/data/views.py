@@ -383,6 +383,8 @@ def record(request, id, name, contexttype=None, contextid=None,
                 collectionformset = collection_formset(
                     prefix='c', initial=collections)
 
+        works = None
+
     else:
         fieldvalues_readonly = record.get_fieldvalues(
             owner=request.user, fieldset=fieldset)
@@ -393,6 +395,14 @@ def record(request, id, name, contexttype=None, contextid=None,
             q = Q(hidden=False)
         collection_items = record.collectionitem_set.filter(
             q, collection__in=readable_collections)
+
+        works = FieldValue.objects.filter(
+            record=record,
+            field__name='relation',
+            field__standard__prefix='dc',
+            refinement='isPartOf',
+            owner=None,
+        ).values_list('value', flat=True)
 
     if can_edit:
         from rooibos.storage.views import media_upload_form
@@ -408,6 +418,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         request,
         to_before=reverse('data-record-back-helper-url'),
     )
+
 
     if record.id:
         upload_url = (
@@ -440,6 +451,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             'record_usage': record_usage,
             'back_url': back_url,
             'download_image': download_image,
+            'works': works,
         },
         context_instance=RequestContext(request)
     )

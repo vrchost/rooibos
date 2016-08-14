@@ -147,6 +147,17 @@ $(document).ready(function() {
 </div>
 {% endif %}
 
+{% if works %}
+<div class="facet active-facet" id="data_record_back">
+    <div class="facet-header">Work</div>
+    <div class="facet-body">
+        <a href="{% url solr-search %}?c=work:{{ works|join:'|'|urlencode }}">
+            All images of this work
+        </a>
+    </div>
+</div>
+{% endif %}
+
 {% if not fv_formset %}
 <div class="facet active-facet" id="data_record_viewers">
     <div class="facet-header">Viewers</div>
