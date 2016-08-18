@@ -155,7 +155,7 @@
 {% endif %}
 
 <div id="facets" style="display: none;">
-{{ facets|default:"" }}
+{{ facets|safe|default:"" }}
 </div>
 
 {% if not has_last_modified_criteria %}
