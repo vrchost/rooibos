@@ -1,6 +1,51 @@
 {% load humanize %}
 <div class='metadata'>
+
+{% if COMPACT_METADATA_VIEW %}
+
+
+{% spaceless %}
 {% for value in values %}
+
+    {% if value.subitem %}
+        <span>; </span>
+    {% else %}
+
+        {% if not forloop.first %}
+        </div>
+    </div>
+        {% endif %}
+
+    <div class='metadata-{% if value.subitem %}sub{% endif %}item'>
+        <div class='label{% cycle '' ' altrow' %}'>{{ value.resolved_label }}:</div>
+        <div class='value{% cycle '' ' altrow' %}'>
+
+    {% endif %}
+
+    {% if value.crosslinked %}
+            <a href="{% url solr-search %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
+    {% else %}
+            <span>{{ value.value|default:"&nbsp;" }}</span>
+    {% endif %}
+
+    {% if value.owner %}
+        <img src="{% url static 'images/user.png' %}" class="user-icon" style="vertical-align: middle;" title="{{ value.owner.username }}" />
+    {% endif %}
+
+    {% if forloop.last %}
+        </div>
+    </div>
+    {% endif %}
+
+
+{% endfor %}
+{% endspaceless %}
+
+{% else %}
+
+
+{% for value in values %}
+
     <div class='metadata-{% if value.subitem %}sub{% endif %}item'>
         <div class='label{% cycle '' ' altrow' %}'>{{ value.resolved_label }}:</div>
         <div class='value{% cycle '' ' altrow' %}'>
@@ -14,7 +59,12 @@
 {% endif %}
         </div>
     </div>
+
 {% endfor %}
+
+
+{% endif %}
+
 
 {% for collection in collections %}
     <div class='metadata-item'>
