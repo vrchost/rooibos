@@ -452,7 +452,7 @@ def browse(request, manage=False):
             qn(model._meta.get_field(field).column)
         )
 
-    if presentations and not manage:
+    if presentations:
         q = OwnedWrapper.objects.extra(
             tables=(Presentation._meta.db_table,),
             where=(
@@ -471,8 +471,9 @@ def browse(request, manage=False):
         )
         tags = Tag.objects.usage_for_queryset(q, counts=True)
 
-        for p in presentations:
-            p.verify_password(request)
+        if not manage:
+            for p in presentations:
+                p.verify_password(request)
     else:
         tags = ()
 

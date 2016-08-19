@@ -229,11 +229,9 @@
         <td>{% for ptag in ptags %}
                 {% tag ptag presentation "True" %}
             {% endfor %}
-            {% if not manage %}
             {% for otag in otags %}
                 {% tag otag presentation 0 'secondary' %}
             {% endfor %}
-            {% endif %}
             {% if not ptags and not otags %}&nbsp;{% endif %}
         </td>
         <td>
