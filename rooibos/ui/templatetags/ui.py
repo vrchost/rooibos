@@ -43,7 +43,6 @@ def record(context, record, selectable=False, viewmode="thumb", notitle=False):
                     field__in=thumb_extra_fields.keys(),
                     owner=None,
                     context_type=None,
-                    hidden=False,
                 ).order_by('-order', '-id').values_list('field', 'value')
             )
             extra = [
