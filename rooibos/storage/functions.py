@@ -60,7 +60,7 @@ def rotateImageBasedOnExif(stream):
 
     try:
         orientation = image._getexif().get(EXIF_ORIENTATION, 1)
-    except (IndexError, KeyError):
+    except (IndexError, KeyError, AttributeError):
         orientation = 1
 
     mirror = EXIF_MIRRORED[orientation]
