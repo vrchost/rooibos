@@ -3,6 +3,7 @@ from django.shortcuts import render_to_response, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseForbidden
 from django.template import RequestContext
+from django.conf import settings
 
 
 def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
@@ -13,7 +14,10 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
     viewer = viewer_cls(None, request, objid=objid)
     if not viewer:
         if not request.user.is_authenticated():
-            return redirect(reverse('login') +
+            url = 'login'
+            if getattr(settings, 'SHIB_ENABLED', False):
+                url = 'shib_login'
+            return redirect(reverse(url) +
                             '?next=' + request.get_full_path())
         raise Http404()
 
