@@ -224,30 +224,3 @@ def do_variables(parser, token):
     nodelist = parser.parse(('endvar',))
     parser.delete_first_token()
     return VariablesNode(nodelist, var_name)
-
-
-@register.filter
-def fileversion(file):
-    """
-    Takes a given file pattern and finds a matching file in the static
-    directory.
-    Used for including external libraries that have the version number
-    in the file name.
-
-    Example:
-
-    {% url static '/flowplayer/flowplayer-*.swf'|fileversion %}
-
-    results in
-
-    /static/flowplayer/flowplayer-3.2.5.swf
-    """
-    static_dir = getattr(settings, "STATIC_DIR", None)
-    if not static_dir:
-        return file
-    matches = glob.glob(os.path.join(static_dir, file))
-    if not matches:
-        return file
-    return matches[0][
-        len(os.path.commonprefix([static_dir, matches[0]])):
-    ].replace('\\', '/')
