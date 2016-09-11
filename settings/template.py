@@ -1,3 +1,6 @@
+from settings.base import *
+
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -30,12 +33,17 @@ DATABASE_OPTIONS = {
 #    'MARS_Connection': True,
 # }
 
-# Settings for all database systems
-DATABASE_NAME = 'rooibos'
-DATABASE_USER = 'rooibos'
-DATABASE_PASSWORD = 'rooibos'
-DATABASE_HOST = ''             # Set to empty string for localhost.
-DATABASE_PORT = ''             # Set to empty string for default.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.' + DATABASE_ENGINE,
+        'NAME': 'mdid',
+        'USER': 'mdid',
+        'PASSWORD': 'rooibos',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': DATABASE_OPTIONS,
+    }
+}
 
 DEFAULT_CHARSET = 'utf-8'
 DATABASE_CHARSET = 'utf8'
@@ -296,5 +304,62 @@ WORKS = {
     'SEARCH_BOX': False,
 }
 
-additional_settings = [
-]
+
+def _get_log_handler():
+
+    # Can't do sys.argv since it does not exist when running under PyISAPIe
+    cmdline = getattr(sys, 'argv', [])
+    if len(cmdline) > 1:
+        # only use first command line argument for log file name
+        basename = 'rooibos-%s' % '-'.join(
+            re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:2])
+    else:
+        basename = 'rooibos'
+
+    try:
+        return {
+            'file': {
+                'class': 'logging.FileHandler',
+                'filename': os.path.join(LOG_DIR, basename +'.log'),
+                'formatter': 'verbose',
+            },
+        }
+    except NameError:
+        return {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'verbose',
+            }
+        }
+
+handler = _get_log_handler()
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(name)30.30s]%(levelname)8s %(asctime)s '
+                      '%(process)d %(message)s '
+                      '[%(filename)s:%(lineno)d]'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': handler,
+    'loggers': {
+        'rooibos': {
+            'handlers': [handler.keys()[0]],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'pika': {
+            'handlers': [handler.keys()[0]],
+            'level': 'WARNING',
+        },
+        '': {
+            'handlers': [handler.keys()[0]],
+            'level': 'DEBUG',
+        },
+    },
+}
