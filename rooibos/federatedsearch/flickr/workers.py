@@ -1,6 +1,7 @@
 from django.utils import simplejson
 from rooibos.data.models import Record
 from rooibos.storage.models import Media
+from rooibos.storage.functions import rotateImageBasedOnExif
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.federatedsearch.flickr import FlickrSearch
@@ -36,6 +37,7 @@ def flickr_download_media(job):
         # should be done better: loading file into StringIO object to make it
         # seekable
         file = StringIO(file.read())
+        file = rotateImageBasedOnExif(file)
         media.save_file(record.name + guess_extension(mimetype), file)
         jobinfo.complete('Complete', 'File downloaded')
 
