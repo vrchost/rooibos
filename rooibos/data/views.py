@@ -308,11 +308,12 @@ def record(request, id, name, contexttype=None, contextid=None,
                     if context:
                         instance.context = context
                     instance.save()
-                    messages.add_message(
-                        request,
-                        messages.INFO,
-                        message="Record saved successfully."
-                    )
+
+                messages.add_message(
+                    request,
+                    messages.INFO,
+                    message="Record saved successfully."
+                )
 
                 url = reverse(
                     'data-record-edit-customize' if customize
