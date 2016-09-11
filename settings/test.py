@@ -1,14 +1,27 @@
+import tempfile
+from .base import *  # NOQA
+
+
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 LOGGING_OUTPUT_ENABLED = DEBUG
 
-DATABASE_ENGINE = 'sqlite3'
-DATABASE_NAME = 'test.sqlite'
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'test.sqlite',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': {},
+    }
+}
 
-CACHE_BACKEND = 'dummy://'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}
 
-remove_settings = ['DATABASE_OPTIONS']
-
-import tempfile
 SCRATCH_DIR = tempfile.mkdtemp()
-print "Scratch directory for this test session is %s" % SCRATCH_DIR
