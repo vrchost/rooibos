@@ -551,6 +551,13 @@ def data_import_file(request, file):
         raise Http404
     available_fieldsets = FieldSet.for_user(request.user)
 
+    def _get_fields():
+        return Field.objects.select_related('standard').all() \
+            .order_by('standard', 'name')
+
+    def _get_display_label(field):
+        return '%s (%s) [%d]' % (field.label, field.name, field.id)
+
     def _field_choices():
         fsf = list(
             FieldSetField.objects.select_related('fieldset', 'field')
@@ -563,14 +570,18 @@ def data_import_file(request, file):
             grouped.setdefault(
                 (f.fieldset.title, f.fieldset.id), []).append(f.field)
         others = list(
-            Field.objects.exclude(id__in=[f.field.id for f in fsf])
-            .order_by('label').values_list('id', 'label')
+            (field.id, _get_display_label(field))
+            for field in
+            Field.objects.exclude(id__in=[f.field.id for f in fsf]).order_by('label')
         )
-        choices = [('', '-' * 10)] + [
-            (set[0], [(f.id, f.label) for f in fields])
-            for set, fields in sorted(
-                grouped.iteritems(), key=lambda s: s[0][0])
+        choices = [
+            ('', '-' * 10)
+        ] + [
+            (set[0], [(f.id, _get_display_label(f)) for f in fields])
+            for set, fields
+            in sorted(grouped.iteritems(), key=lambda s: s[0][0])
         ]
+
         if others:
             choices.append(('Others', others))
         return choices
