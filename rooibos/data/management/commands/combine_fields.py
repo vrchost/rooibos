@@ -10,17 +10,33 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option(
             '--execute', action='store_true',
-            help='Combine automatically detected fields'
+            help='Combine automatically detected fields',
         ),
         make_option(
             '--ignorevocabs', action='store_true',
-            help='Ignore vocabularies when comparing fields'
+            help='Ignore vocabularies when comparing fields',
+        ),
+        make_option(
+            '--merge', action='store',
+            help='Field to merge into another field',
+        ),
+        make_option(
+            '--into', action='store',
+            help='Field into which to merge another field',
         ),
     )
 
     def handle(self, *commands, **options):
 
         execute = options.get('execute')
+        merge = options.get('merge')
+        into = options.get('into')
+
+        if bool(merge) != bool(into):
+            print "--merge and --into must be specified together"
+            return
+
+        execute = execute or bool(merge)
 
         deleted = []
         equivalents = dict()
@@ -62,6 +78,17 @@ class Command(BaseCommand):
             len(unique), Field.objects.count()
         )
 
+        if merge and into:
+
+            merge = Field.objects.get(id=merge)
+            into = Field.objects.get(id=into)
+
+            combine_fields(merge, into)
+
+            print "Done"
+            return
+
+
         # for each unique field, determine replacements
 
         for fields in unique.values():
@@ -93,8 +120,13 @@ class Command(BaseCommand):
             print "\nRemaining fields after cleanup:", len(remaining)
 
         print "\nFields currently in use:\n    Values Field"
-        for name, prefix, count in FieldValue.objects.values_list(
-                'field__name', 'field__standard__prefix').annotate(
+        for fid, name, prefix, count in FieldValue.objects.values_list(
+                'field__id', 'field__name', 'field__standard__prefix').annotate(
                 dcount=Count('field')).order_by(
                 'field__standard__prefix', 'field__name'):
-            print "%10d %s%s" % (count, prefix + "." if prefix else "", name)
+            print "%10d %s%s [%d]" % (
+                count,
+                prefix + "." if prefix else "",
+                name,
+                fid,
+            )
