@@ -1,2 +1,0 @@
-
-LOGFILENAME = 'rooibos-workers'
