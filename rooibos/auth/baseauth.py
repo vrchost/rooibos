@@ -11,13 +11,13 @@ class BaseAuthenticationBackend:
 
     def _create_user(self, username, password=None,
                      first_name=None, last_name=None, email=None):
-        password = password or ''.join(
-            Random().sample(string.letters + string.digits, 20))
         last_name = last_name or username
         user = User(username=username, password=password)
         user.first_name = first_name and first_name[:30] or ''
         user.last_name = last_name[:30]
         user.email = email
+        if not password:
+            user.set_unusable_password()
         user.save()
         return user
 
