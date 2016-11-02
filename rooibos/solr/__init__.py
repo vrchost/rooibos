@@ -392,6 +392,7 @@ class SolrIndex():
                     ).append(v.value)
                 else:
                     doc.setdefault(v.field.name + '_t', []).append(clean_value)
+                    doc.setdefault(v.field.name + '_w', []).append(clean_value)
                     # also make sortable
                     if not v.field.name + '_sort' in doc:
                         doc[v.field.name + '_sort'] = clean_value
