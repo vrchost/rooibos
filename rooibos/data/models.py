@@ -421,7 +421,7 @@ class Record(models.Model):
             refinement='IsPartOf',
             value=work,
             index_value=work[:32],
-        ).values_list('record', flat=True)
+        ).order_by('record').values_list('record', flat=True)
 
         if not record_ids:
             return None
@@ -431,7 +431,7 @@ class Record(models.Model):
             field__standard__prefix='dc',
             field__name='system-value',
             record__in=record_ids,
-        ).values_list('record', flat=True)
+        ).order_by('record').values_list('record', flat=True)
 
         if primary:
             primary = primary[0]
