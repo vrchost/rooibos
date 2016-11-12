@@ -23,7 +23,12 @@
 			$('#update-items').css('font-weight', unsaved_changes ? 'bolder' : '');
 		}
 
-        $("#items tbody tr").each(function(i, e) {
+		var rows = $("#items tbody tr");
+        if (rows.length === 0) {
+            $("#lighttable").append('<div>This presentation contains no slides</div>');
+        }
+
+        rows.each(function(i, e) {
             var inputs = $(".thumbnail-col", e).children().not('a');
             var thumbnail = $(".thumbnail-col a", e).children();
             var title = $("<div class='title'>").html($(".title-col", e).html());
@@ -290,12 +295,8 @@
 
 
 <!-- Lighttable -->
-{% if formset.forms %}
-
-
 
 <form method="POST" action="" id="items-form">{% csrf_token %}
-{{ formset.management_form }}
 
 <ul class="actionbar" id="lighttable-actionbar">
 <li><input type="submit" name="update-items" id='update-items' value="Save" /></li>
@@ -330,6 +331,7 @@
     </tr>
     </thead>
     <tbody>
+{% if formset.forms %}
 {% with request.user|profile_setting:"options_basket_thumbnails"|default:"square" as format %}
 {% for form in formset.forms %}
     <tr class="sortable{% cycle "" " altrow" %} framed-thumbnails small middle-align">
@@ -343,12 +345,13 @@
     </tr>
 {% endfor %}
 {% endwith %}
+{% endif %}
     </tbody>
 </table>
 
-</form>
+{{ formset.management_form }}
 
-{% endif %}
+</form>
 <!-- end Lighttable -->
 
 {% endblock %}
