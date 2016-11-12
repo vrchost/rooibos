@@ -149,7 +149,6 @@
    <fieldType name="textFacet" class="solr.TextField" positionIncrementGap="100" >
       <analyzer>
         <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(^[0-9-]+$)" replacement="" replace="all" />
         <filter class="solr.LengthFilterFactory" min="2" max="100" />
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt"/>
@@ -160,7 +159,6 @@
     <fieldType name="wholeTextFacet" class="solr.TextField" positionIncrementGap="100" >
       <analyzer>
         <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.PatternReplaceFilterFactory" pattern="(^[0-9-]+$)" replacement="" replace="all" />
         <filter class="solr.LengthFilterFactory" min="2" max="100" />
       </analyzer>
     </fieldType>
