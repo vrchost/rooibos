@@ -38,7 +38,7 @@
             $("#lighttable").append($("<div class='slide' id='slide" + i + "'>").append(inputs, thumbnail, title, order, annotation, controls));
         });
 
-        $("#lighttable-buttons").show().children("button").attr('disabled', true);
+        $("#lighttable-actionbar").show().find("button").attr('disabled', true);
 
         $("#duplicate-button").click(function(e) {
             var selected_items = $("#lighttable div.slide.selected");
@@ -68,7 +68,7 @@
                 $(e).removeClass('selected').hide(200);
                 $("input[id$=DELETE]", e).attr('checked', true);
             });
-            $("#lighttable-buttons button").attr('disabled', true);
+            $("#lighttable-actionbar button").attr('disabled', true);
             e.preventDefault();
 			mark_unsaved_changes();
         });
@@ -106,7 +106,7 @@
 
         function selectionChanged() {
             selected = $("#lighttable div.slide.selected");
-            $("#lighttable-buttons button").attr('disabled', selected.length == 0);
+            $("#lighttable-actionbar button").attr('disabled', selected.length == 0);
             if (last_selected) {
                 $("textarea", last_selected).val($("#lighttable-annotation textarea").val());
             }
