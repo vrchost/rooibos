@@ -18,7 +18,7 @@ from rooibos.access.functions import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
 from rooibos.data.models import Field, Collection, FieldValue, Record, \
-    FieldSet, FieldSetField
+    FieldSet, FieldSetField, get_system_field
 from rooibos.data.functions import apply_collection_visibility_preferences, \
     get_collection_visibility_preferences
 from rooibos.storage.models import Storage
@@ -894,6 +894,7 @@ def overview(request):
     collections = collections.annotate(
         num_records=Count('records'))
     children = dict()
+    overview_thumbs = dict()
     for coll in collections:
         c = filter_by_access(request.user, coll.children.exclude(hidden=True))
         c = apply_collection_visibility_preferences(
@@ -901,11 +902,21 @@ def overview(request):
         )
         children[coll.id] = c
 
+    for record in Record.objects.filter(
+        id__in=FieldValue.objects.filter(
+            field=get_system_field(),
+            value='overview',
+            index_value='overview',
+        ).values('record'),
+    ):
+        for coll in record.collection_set.all().values_list('id', flat=True):
+            overview_thumbs[coll] = record
+
     return render_to_response(
         'overview.html',
         {
             'collections': [
-                (coll, children[coll.id])
+                (coll, children[coll.id], overview_thumbs.get(coll.id))
                 for coll in collections
             ]
         },

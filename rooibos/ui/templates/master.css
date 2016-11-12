@@ -993,11 +993,20 @@ div.fieldvalue-edit div.narrow input {
     width: 3em;
 }
 
-#collection-overview h2 {
+.collection-overview {
+    clear: left;
+}
+
+.collection-overview .overview_thumb {
+    float: left;
+    margin: 0 10px 5px 0;
+}
+
+.collection-overview h2 {
     margin: 20px 0 10px 0;
 }
 
-#collection-overview .usage-agreement {
+.collection-overview .usage-agreement {
     border: 1px solid {{ colors.borders }};
     font-size: smaller;
     width: 80%;
