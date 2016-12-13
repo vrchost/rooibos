@@ -112,8 +112,8 @@ ln -s -f /etc/nginx/sites-available/mdid /etc/nginx/sites-enabled/mdid
 rm -f /etc/nginx/sites-enabled/default
 nginx -s reload
 
-ln -s -f /vagrant/rooibos /opt/mdid/rooibos
-ln -s -f /vagrant/rooibos_settings /opt/mdid/rooibos_settings
+ln -s -f -n /vagrant/rooibos /opt/mdid/rooibos
+ln -s -f -n /vagrant/rooibos_settings /opt/mdid/rooibos_settings
 
 mysql -u root --password=changeme << END
 create database if not exists mdid character set utf8;
