@@ -21,10 +21,10 @@ COMPRESS = True
 COMPRESS_VERBOSE = True
 
 
-STATIC_ROOT = os.path.join(install_dir, '..', 'static')
+STATIC_ROOT = os.path.join(install_dir, 'static')
 
-SCRATCH_DIR = os.path.join(install_dir, '..', 'scratch')
-AUTO_STORAGE_DIR = os.path.join(install_dir, '..', 'autostorage')
+SCRATCH_DIR = os.path.join(install_dir, 'scratch')
+AUTO_STORAGE_DIR = os.path.join(install_dir, 'autostorage')
 
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
@@ -401,7 +401,7 @@ def _get_log_handler(log_dir=None):
         basename = 'rooibos'
 
     if not log_dir:
-        log_dir = os.path.join(install_dir, '..', 'log')
+        log_dir = os.path.join(install_dir, 'log')
 
     return {
         'file': {
