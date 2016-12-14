@@ -341,6 +341,7 @@ SHIB_LAST_NAME = None
 SHIB_LOGOUT_URL = None
 
 SSL_PORT = None  # ':443'
+SSL_ON = False
 
 SESSION_COOKIE_AGE = 6 * 3600  # in seconds
 

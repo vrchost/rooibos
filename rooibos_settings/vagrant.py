@@ -1,6 +1,8 @@
 from .base import *  # NOQA
 
 
+DEBUG = True
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'e#!poDuIJ}N,".K=H:T/4z5POb;Gl/N6$6a&,(DRAHUF5c",_p'
 
