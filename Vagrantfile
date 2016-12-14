@@ -65,6 +65,7 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "main", type: "shell", path: "vagrant/provisioners/main.sh"
+  config.vm.provision "mdid", type: "shell", path: "vagrant/provisioners/mdid.sh"
   config.vm.provision "supervisor", type: "shell", path: "vagrant/provisioners/supervisord.sh"
 
 end
