@@ -20,7 +20,7 @@ clip = {
     },
     plugins: {
         influxis: {
-            url: "{{ server_url }}{% url static 'flowplayer/flowplayer.rtmp-3.2.3.swf' %}",
+            url: "{{ server_url }}{% static 'flowplayer/flowplayer.rtmp-3.2.3.swf' %}",
             netConnectionUrl: '{{ streaming_server|escapejs }}'
             {% if audio %} ,
             durationFunc: 'getStreamLength'
@@ -52,7 +52,7 @@ clip = {
     {% if audio %} ,
     plugins: {
         audio: {
-            url: "{{ server_url }}{% url static 'flowplayer/flowplayer.audio-3.2.1.swf' %}"
+            url: "{{ server_url }}{% static 'flowplayer/flowplayer.audio-3.2.1.swf' %}"
         },
         controls: {
             fullscreen: false,
@@ -69,15 +69,15 @@ function insert_flowplayer() {
     e.style.width = "{{ selectedmedia.width|default:"520" }}px";
     e.style.height = "{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px";
     $f("{{ anchor_id }}",
-        "{{ server_url }}{% if flowplayer_key %}{% url static 'flowplayer/flowplayer.commercial-3.2.5.swf' %}{% else %}{% url static 'flowplayer/flowplayer-3.2.5.swf' %}{% endif %}", clip).ipad();
+        "{{ server_url }}{% if flowplayer_key %}{% static 'flowplayer/flowplayer.commercial-3.2.5.swf' %}{% else %}{% static 'flowplayer/flowplayer-3.2.5.swf' %}{% endif %}", clip).ipad();
 }
 
 if (typeof(flowplayer) == "function") {
     insert_flowplayer();
 } else {
     load_scripts([
-        "{{ server_url }}{% url static 'flowplayer/flowplayer-3.2.4.modified.js' %}",
-        "{{ server_url }}{% url static 'flowplayer/flowplayer.ipad-3.2.1.min.js' %}"
+        "{{ server_url }}{% static 'flowplayer/flowplayer-3.2.4.modified.js' %}",
+        "{{ server_url }}{% static 'flowplayer/flowplayer.ipad-3.2.1.min.js' %}"
         ], insert_flowplayer);
 }
 })();

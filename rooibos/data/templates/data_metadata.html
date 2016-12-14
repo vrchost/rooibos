@@ -25,13 +25,13 @@
     {% endif %}
 
     {% if value.crosslinked %}
-            <a href="{% url solr-search %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
+            <a href="{% url "solr-search" %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
     {% else %}
             <span>{{ value.value|default:"&nbsp;" }}</span>
     {% endif %}
 
     {% if value.owner %}
-        <img src="{% url static 'images/user.png' %}" class="user-icon" style="vertical-align: middle;" title="{{ value.owner.username }}" />
+        <img src="{% static 'images/user.png' %}" class="user-icon" style="vertical-align: middle;" title="{{ value.owner.username }}" />
     {% endif %}
 
     {% if forloop.last %}
@@ -52,7 +52,7 @@
         <div class='label{% cycle '' ' altrow' %}'>{{ value.resolved_label }}:</div>
         <div class='value{% cycle '' ' altrow' %}'>
 {% if value.crosslinked %}
-        <a href="{% url solr-search %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
+        <a href="{% url "solr-search" %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
 {% else %}
         {{ value.value|default:"&nbsp;" }}
 {% endif %}

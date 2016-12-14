@@ -153,12 +153,12 @@ $(document).ready(function() {
     <div class="facet-header">Work</div>
     <div class="facet-body">
         {% if part_of_works %}
-        <a href="{% url solr-search %}?c=work:{{ part_of_works|join:'|'|urlencode }}">
+        <a href="{% url "solr-search" %}?c=work:{{ part_of_works|join:'|'|urlencode }}">
             All images of this work
         </a><br />
         {% endif %}
         {% if related_works %}
-        <a href="{% url solr-search %}?c=work:{{ related_works|join:'|'|urlencode }}">
+        <a href="{% url "solr-search" %}?c=work:{{ related_works|join:'|'|urlencode }}">
             Images of related works
         </a><br />
         {% endif %}

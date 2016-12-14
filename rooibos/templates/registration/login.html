@@ -19,11 +19,11 @@
 
 
 {% if SHIB_ENABLED %}
-<div>Please <a href="{% url shib_login %}">log in using Shibboleth</a></div>
+<div>Please <a href="{% url "shib_login" %}">log in using Shibboleth</a></div>
 <h2 style="margin-top: 20px;">Log in locally</h2>
 {% else %}
 {% if CAS_SERVER_URL %}
-<div>Please <a href="{% url login %}">log in using CAS</a></div>
+<div>Please <a href="{% url "login" %}">log in using CAS</a></div>
 <h2 style="margin-top: 20px;">Log in locally</h2>
 {% endif %}
 {% endif %}
