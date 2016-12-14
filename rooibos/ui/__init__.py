@@ -4,15 +4,13 @@ from django.contrib.flatpages import models as flatpages_app
 from django.contrib.auth import models as auth_app
 
 
-def create_site_fixtures(*args, **kwargs):
+def create_site_flatpage_fixtures(*args, **kwargs):
     print "Creating sites fixtures"
     sites_app.Site.objects.get_or_create(
         domain='localhost',
         name='localhost',
     )
 
-
-def create_flatpage_fixtures(*args, **kwargs):
     print "Creating flatpages fixtures"
     p, created = flatpages_app.FlatPage.objects.get_or_create(
         url='/about/',
@@ -44,8 +42,7 @@ def create_user_fixtures(*args, **kwargs):
     )
 
 
-signals.post_syncdb.connect(create_site_fixtures, sender=sites_app)
-signals.post_syncdb.connect(create_flatpage_fixtures, sender=flatpages_app)
+signals.post_syncdb.connect(create_site_flatpage_fixtures, sender=flatpages_app)
 signals.post_syncdb.connect(create_user_fixtures, sender=auth_app)
 
 
