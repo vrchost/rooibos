@@ -227,7 +227,7 @@ def record(request, id, name, contexttype=None, contextid=None,
 
             class Meta:
                 model = FieldValue
-                exclude = []
+                fields = "__all__"
 
         class CollectionForm(forms.Form):
             id = forms.IntegerField(widget=forms.HiddenInput)

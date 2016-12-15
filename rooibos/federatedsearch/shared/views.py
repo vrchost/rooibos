@@ -342,6 +342,7 @@ def edit(request, id=None, name=None):
 
         class Meta:
             model = SharedCollection
+            fields = '__all__'
 
         def __init__(self, *args, **kwargs):
             super(SharedCollectionForm, self).__init__(*args, **kwargs)
