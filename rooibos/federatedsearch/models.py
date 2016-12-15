@@ -3,8 +3,8 @@ from datetime import datetime
 
 
 class CurrentHitCountManager(models.Manager):
-    def get_query_set(self):
-        return super(CurrentHitCountManager, self).get_query_set().filter(
+    def get_queryset(self):
+        return super(CurrentHitCountManager, self).get_queryset().filter(
             valid_until__gt=datetime.now())
 
 
