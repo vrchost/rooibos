@@ -25,7 +25,7 @@ django-pyodbc
 django-ssl-redirect
 django-storages==1.1.8
 django-tagging==0.3.2
-django==1.5.12
+django==1.6.11
 flake8
 flake8-docstrings
 flake8-todo
