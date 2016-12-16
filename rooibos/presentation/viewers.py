@@ -71,7 +71,7 @@ class FlashCardViewer(Viewer):
 
         passwords = request.session.get('passwords', dict())
 
-        response = HttpResponse(mimetype='application/pdf')
+        response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = \
             'filename="' + presentation.title + '-flashCards.pdf"'
 
@@ -211,7 +211,7 @@ class PrintViewViewer(Viewer):
 
         passwords = request.session.get('passwords', dict())
 
-        response = HttpResponse(mimetype='application/pdf')
+        response = HttpResponse(content_type='application/pdf')
 
         pagesize = getattr(pagesizes, settings.PDF_PAGESIZE)
         width, height = pagesize
@@ -439,7 +439,7 @@ class PackageFilesViewer(Viewer):
         tempfile.seek(0)
 
         wrapper = FileWrapper(tempfile)
-        response = HttpResponse(wrapper, mimetype='application/zip')
+        response = HttpResponse(wrapper, content_type='application/zip')
         response['Content-Disposition'] = \
             'attachment; filename=%s.zip' % filename(presentation.title)
         response['Content-Length'] = os.path.getsize(tempfile.name)

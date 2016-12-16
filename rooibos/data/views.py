@@ -960,7 +960,7 @@ def save_collection_visibility_preferences(request):
 
 
 def collection_dump_view(request, identifier, name):
-    response = HttpResponse(mimetype='text/plain')
+    response = HttpResponse(content_type='text/plain')
     collection_dump(
         request.user,
         identifier,

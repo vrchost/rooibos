@@ -37,7 +37,7 @@ def css(request, stylesheet):
     return render_to_response(stylesheet + '.css',
                               {},
                               context_instance=RequestContext(request),
-                              mimetype='text/css')
+                              content_type='text/css')
 
 
 @csrf_protect

@@ -65,7 +65,7 @@ def json_view(func):
 
         json = simplejson.dumps(response)
         # mimetype='application/json'
-        return HttpResponse(json, mimetype='text/plain')
+        return HttpResponse(json, content_type='text/plain')
     return wrap
 
 

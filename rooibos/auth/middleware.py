@@ -8,7 +8,8 @@ def basic_challenge(realm=None):
         realm = getattr(
             settings, 'WWW_AUTHENTICATION_REALM', 'Restricted Access')
     # TODO: Make a nice template for a 401 message?
-    response = HttpResponse('Authorization Required', mimetype="text/plain")
+    response = HttpResponse(
+        'Authorization Required', content_type="text/plain")
     response['WWW-Authenticate'] = 'Basic realm="%s"' % realm
     response.status_code = 401
     return response

@@ -71,7 +71,10 @@ def retrieve(request, recordid, record, mediaid, media):
                             request=request,
                             content_object=mediaobj)
     if content:
-        return HttpResponse(content=content, mimetype=str(mediaobj.mimetype))
+        return HttpResponse(
+            content=content,
+            content_type=str(mediaobj.mimetype)
+        )
     else:
         return HttpResponseRedirect(mediaobj.get_absolute_url())
 
@@ -103,7 +106,7 @@ def retrieve_image(request, recordid, record, width=None, height=None):
     try:
         response = HttpResponse(
             content=file(path, 'rb').read(),
-            mimetype='image/jpeg'
+            content_type='image/jpeg'
         )
         if 'forcedl' in request.GET:
             # if filename was used for record stub, remove extension here to
@@ -198,7 +201,7 @@ def media_upload(request, recordid, record):
                 )
                 return HttpResponse(
                     content=simplejson.dumps(dict(status='ok', html=html)),
-                    mimetype='application/json'
+                    content_type='application/json'
                 )
 
             return HttpResponseRedirect(
@@ -239,7 +242,9 @@ def record_thumbnail(request, id, name):
         )
         try:
             return HttpResponse(
-                content=open(filename, 'rb').read(), mimetype='image/jpeg')
+                content=open(filename, 'rb').read(),
+                content_type='image/jpeg'
+            )
         except IOError:
             logging.error("IOError: %s" % filename)
     return HttpResponseRedirect(
@@ -561,7 +566,7 @@ def import_files(request):
                 )
                 return HttpResponse(
                     content=simplejson.dumps(dict(status='ok', html=html)),
-                    mimetype='application/json'
+                    content_type='application/json'
                 )
 
             messages.add_message(
@@ -584,7 +589,7 @@ def import_files(request):
                 )
                 return HttpResponse(
                     content=simplejson.dumps(dict(status='ok', html=html)),
-                    mimetype='application/json'
+                    content_type='application/json'
                 )
 
     else:

@@ -15,7 +15,7 @@ def thumbnail(request, template):
     template = ZipFile(filename, mode='r')
     return HttpResponse(
         content=template.read('docProps/thumbnail.jpeg'),
-        mimetype='image/jpg'
+        content_type='image/jpg'
     )
 
 
@@ -33,7 +33,7 @@ def download(request, id, template):
         with open(filename, mode="rb") as f:
             response = HttpResponse(
                 content=f.read(),
-                mimetype='application/vnd.openxmlformats-officedocument'
+                content_type='application/vnd.openxmlformats-officedocument'
                 '.presentationml.presentation'
             )
         response['Content-Disposition'] = \
