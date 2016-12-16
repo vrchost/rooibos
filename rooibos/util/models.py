@@ -4,9 +4,7 @@ from django.contrib.contenttypes import generic
 from django.contrib.auth.models import User
 
 
-# Using race condition fix for get_or_created suggested on
-# https://stackoverflow.com/questions/2235318
-@transaction.commit_on_success
+@transaction.atomic
 class OwnedWrapperManager(models.Manager):
     """
     Allows retrieval of a wrapper object by specifying
@@ -17,21 +15,12 @@ class OwnedWrapperManager(models.Manager):
         except TypeError:
             pass
 
-        try:
-            obj, created = self.get_or_create(
-                user=user,
-                object_id=object and object.id or object_id,
-                content_type=object and
-                OwnedWrapper.t(object.__class__) or type
-            )
-        except IntegrityError:
-            transaction.commit()
-            obj = self.get(
-                user=user,
-                object_id=object and object.id or object_id,
-                content_type=object and
-                OwnedWrapper.t(object.__class__) or type
-            )
+        obj, created = self.get_or_create(
+            user=user,
+            object_id=object and object.id or object_id,
+            content_type=object and
+            OwnedWrapper.t(object.__class__) or type
+        )
         return obj
 
 

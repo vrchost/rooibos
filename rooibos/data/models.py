@@ -539,7 +539,7 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
 
 
-@transaction.commit_on_success
+@transaction.atomic
 def get_system_field():
     field, created = Field.objects.get_or_create(
         name='system-value',

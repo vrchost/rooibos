@@ -99,7 +99,6 @@ MIDDLEWARE_CLASSES = (
     'rooibos.ui.middleware.PageTitles',
     'pagination.middleware.PaginationMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
     'rooibos.access.middleware.AccessOnStart',
     'rooibos.data.middleware.DataOnStart',
