@@ -153,7 +153,6 @@ INSTALLED_APPS = (
     'pagination',
     'impersonate',
     'compressor',
-    'south',
 )
 
 

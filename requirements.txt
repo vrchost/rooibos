@@ -43,7 +43,6 @@ pypdf
 python-ldap
 python-memcached
 reportlab
-south
 werkzeug
 
 https://github.com/knabar/dj-impersonate/archive/master.zip
