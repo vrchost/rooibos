@@ -9,7 +9,7 @@ import shutil
 import string
 import os
 from rooibos.data.views import _get_scratch_dir  # TODO: make proper function
-from django.utils import simplejson
+import json as simplejson
 
 
 class Command(BaseCommand):

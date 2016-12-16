@@ -15,7 +15,7 @@ from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, \
     HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.utils import simplejson
+import json as simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST

@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.views.decorators.cache import cache_control
-from django.utils import simplejson
+import json as simplejson
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import CreateView, DeleteView, UpdateView

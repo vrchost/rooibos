@@ -9,7 +9,7 @@ from urlparse import urlparse
 import math
 import urllib
 import cookielib
-from django.utils import simplejson
+import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
 from rooibos.storage import Storage
@@ -22,7 +22,7 @@ from rooibos.access.functions import filter_by_access, sync_access
 from models import SharedCollection
 import datetime
 import socket
-from django.utils import simplejson as json
+import json
 import logging
 import os
 

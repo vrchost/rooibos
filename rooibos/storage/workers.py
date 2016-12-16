@@ -1,4 +1,4 @@
-from django.utils import simplejson
+import json as simplejson
 from rooibos.storage.models import Media, Storage
 from rooibos.data.models import Collection
 from rooibos.workers import register_worker

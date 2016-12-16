@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404, \
     render_to_response
 from django.template import RequestContext
 from django.template.loader import render_to_string
-from django.utils import simplejson
+import json as simplejson
 from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType

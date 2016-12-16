@@ -2,7 +2,7 @@ import re
 from django import template
 from django.template import Variable
 from django.contrib.contenttypes.models import ContentType
-from django.utils import simplejson
+import json as simplejson
 from django.conf import settings
 from django.core.cache import cache
 from tagging.models import Tag

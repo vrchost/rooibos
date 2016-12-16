@@ -6,7 +6,7 @@ from PIL import Image
 import shutil
 from StringIO import StringIO
 from django.test.client import Client
-from django.utils import simplejson
+import json as simplejson
 from django.conf import settings
 from django.contrib.auth.models import User
 from rooibos.data.models import Collection, Record, CollectionItem, \

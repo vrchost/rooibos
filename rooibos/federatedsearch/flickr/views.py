@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.utils import simplejson
+import json as simplejson
 from rooibos.data.models import Record
 from . import FlickrSearch
 import math

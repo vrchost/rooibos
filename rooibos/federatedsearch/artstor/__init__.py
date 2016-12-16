@@ -1,6 +1,6 @@
 import urllib
 import urllib2
-from django.utils import simplejson
+import json as simplejson
 from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
 from django.conf import settings

@@ -1,4 +1,4 @@
-from django.utils import simplejson
+import json as simplejson
 from rooibos.data.models import Record
 from rooibos.storage.models import Media
 from rooibos.storage.functions import rotateImageBasedOnExif

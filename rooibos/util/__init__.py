@@ -1,6 +1,6 @@
 from django.contrib.sites.models import Site
 from django.http import HttpResponse
-from django.utils import simplejson
+import json as simplejson
 from django.core.mail import mail_admins
 from django.utils.translation import ugettext as _
 from django.utils.decorators import wraps

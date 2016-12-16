@@ -1,5 +1,5 @@
 from __future__ import with_statement
-from django.utils import simplejson
+import json as simplejson
 from rooibos.workers import register_worker
 from rooibos.workers.models import JobInfo
 from rooibos.data.models import Collection, FieldSet

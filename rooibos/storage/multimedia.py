@@ -5,7 +5,7 @@ import wave
 import struct
 import re
 import logging
-from django.utils import simplejson
+import json as simplejson
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field

@@ -8,7 +8,7 @@ from rooibos.data.models import Collection, Record, standardfield, \
 from rooibos.federatedsearch.models import FederatedSearch
 from rooibos.storage import Storage
 from rooibos.workers.models import JobInfo
-from django.utils import simplejson
+import json as simplejson
 import flickrapi
 import urllib2
 import os

@@ -1,5 +1,5 @@
 from django import template
-from django.utils import simplejson
+import json as simplejson
 from rooibos.userprofile.models import UserProfile
 from rooibos.userprofile.views import load_settings
 
