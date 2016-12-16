@@ -46,5 +46,4 @@ reportlab
 werkzeug
 
 https://github.com/knabar/dj-impersonate/archive/master.zip
-https://github.com/knabar/django-google-analytics/archive/master.zip
 https://github.com/knabar/django-shibboleth/archive/master.zip

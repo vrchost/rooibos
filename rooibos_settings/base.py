@@ -125,7 +125,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django_extensions',
     'tagging',
-    'google_analytics',
     'rooibos.data',
     'rooibos.migration',
     'rooibos.util',
