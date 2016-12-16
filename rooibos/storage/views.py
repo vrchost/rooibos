@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import resolve, reverse
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, get_list_or_404, \

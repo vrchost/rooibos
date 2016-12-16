@@ -10,7 +10,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory
-from django.forms.util import ErrorList
+from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, \
     HttpResponse
 from django.shortcuts import render_to_response
