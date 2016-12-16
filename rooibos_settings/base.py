@@ -166,7 +166,6 @@ STORAGE_SYSTEMS = {
 GROUP_MANAGERS = {
 }
 
-AUTH_PROFILE_MODULE = 'userprofile.UserProfile'
 
 WEBSERVICE_NAMESPACE = "http://mdid.jmu.edu/webservices"
 

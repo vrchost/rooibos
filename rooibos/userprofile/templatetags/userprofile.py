@@ -16,7 +16,7 @@ class ProfileSettingsNode(template.Node):
         user = context['request'].user if 'request' in context else None
         if user and user.is_authenticated():
             try:
-                profile = user.get_profile()
+                profile = UserProfile.objects.get(user=user)
             except UserProfile.DoesNotExist:
                 profile = UserProfile.objects.create(user=user)
             if self.filter:

@@ -6,7 +6,7 @@ def load_settings(user, filter=None):
     if not user.is_authenticated():
         return {}
     try:
-        profile = user.get_profile()
+        profile = UserProfile.objects.get(user=user)
     except UserProfile.DoesNotExist:
         profile = UserProfile.objects.create(user=user)
     settings = dict()
@@ -23,7 +23,7 @@ def store_settings(user, key, value):
     if not user.is_authenticated():
         return False
     try:
-        profile = user.get_profile()
+        profile = UserProfile.objects.get(user=user)
     except UserProfile.DoesNotExist:
         profile = UserProfile.objects.create(user=user)
 
