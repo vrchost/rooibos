@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.auth.models import User, Group
 from ipaddr import IPAddress, IPNetwork
 
@@ -9,7 +9,7 @@ from ipaddr import IPAddress, IPNetwork
 class AccessControl(models.Model):
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField(db_index=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User, null=True, blank=True)
     usergroup = models.ForeignKey(Group, null=True, blank=True)
     read = models.NullBooleanField()

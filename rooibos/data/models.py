@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
@@ -616,7 +616,7 @@ class FieldValue(models.Model):
         ContentType, null=True, blank=True, serialize=False)
     context_id = models.PositiveIntegerField(
         null=True, blank=True, serialize=False)
-    context = generic.GenericForeignKey('context_type', 'context_id')
+    context = GenericForeignKey('context_type', 'context_id')
 
     def save(self, **kwargs):
         self.index_value = self.value[:32] if self.value is not None else None

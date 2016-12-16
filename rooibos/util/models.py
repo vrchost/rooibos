@@ -1,6 +1,7 @@
 from django.db import models, IntegrityError, transaction
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields \
+    import GenericForeignKey, GenericRelation
 from django.contrib.auth.models import User
 
 
@@ -31,9 +32,9 @@ class OwnedWrapper(models.Model):
     """
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
-    object = generic.GenericForeignKey('content_type', 'object_id')
+    object = GenericForeignKey('content_type', 'object_id')
     user = models.ForeignKey(User)
-    taggeditem = generic.GenericRelation('tagging.TaggedItem')
+    taggeditem = GenericRelation('tagging.TaggedItem')
 
     objects = OwnedWrapperManager()
 

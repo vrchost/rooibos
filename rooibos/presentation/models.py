@@ -1,6 +1,6 @@
 from django.db import models, connection
 from django.contrib.auth.models import User, Permission
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericRelation
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
@@ -24,7 +24,7 @@ class Presentation(models.Model):
     hide_default_data = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    ownedwrapper = generic.GenericRelation('util.OwnedWrapper')
+    ownedwrapper = GenericRelation('util.OwnedWrapper')
 
     def save(self, **kwargs):
         unique_slug(

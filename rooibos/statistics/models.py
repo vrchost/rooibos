@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.auth.models import User
 from datetime import datetime
 
@@ -8,7 +8,7 @@ from datetime import datetime
 class Activity(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
     object_id = models.PositiveIntegerField(null=True, db_index=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     user_field = models.ForeignKey(
         User, null=True, blank=True, db_column='user_id')
     date = models.DateField(db_index=True)
@@ -68,7 +68,7 @@ class Activity(models.Model):
 class AccumulatedActivity(models.Model):
     content_type = models.ForeignKey(ContentType, null=True)
     object_id = models.PositiveIntegerField(null=True, db_index=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     date = models.DateField(db_index=True)
     event = models.CharField(max_length=64, db_index=True)
     final = models.BooleanField(default=False)
