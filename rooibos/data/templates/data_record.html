@@ -14,7 +14,8 @@
         $(".submit-on-select-change :submit").remove();
 
         function hide_empty(elements, speed) {
-            $(":checkbox:not(:checked),:text[value=]", elements).closest("span.row").hide(speed);
+            $("input:checkbox:not(:checked),input:text[value=],input[type=number][value=]",
+                elements).closest("span.row").hide(speed);
         }
         hide_empty(".advanced");
         $(".advanced-switch input").attr("checked", false).click(function(e) {
