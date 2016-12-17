@@ -26,6 +26,7 @@ django-ssl-redirect
 django-storages==1.1.8
 django-tagging==0.3.2
 django==1.7.11
+django-contrib-comments
 flake8
 flake8-docstrings
 flake8-todo

@@ -13,7 +13,7 @@ import json as simplejson
 from django.contrib.auth.forms import AuthenticationForm
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
-from django.contrib.comments.models import Comment
+from django_comments.models import Comment
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings

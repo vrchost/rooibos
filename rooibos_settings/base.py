@@ -119,7 +119,7 @@ INSTALLED_APPS = (
     'django.contrib.flatpages',
     'django.contrib.admin',
     'django.contrib.humanize',
-    'django.contrib.comments',
+    'django_comments',
     'django.contrib.redirects',
     'django.contrib.staticfiles',
     'django.contrib.messages',
