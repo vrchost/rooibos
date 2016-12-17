@@ -94,7 +94,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'rooibos.api.middleware.CookielessSessionMiddleware',
-    'django.middleware.doc.XViewMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'rooibos.ui.middleware.PageTitles',
     'pagination.middleware.PaginationMiddleware',
