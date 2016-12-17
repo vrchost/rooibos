@@ -246,7 +246,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         field_value_formset = modelformset_factory(
             FieldValue,
             form=FieldValueForm,
-            exclude=FieldValueForm.Meta.exclude,
+            fields=FieldValueForm.Meta.fields,
             can_delete=True,
             extra=3
         )
