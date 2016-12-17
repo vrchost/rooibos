@@ -72,16 +72,27 @@ TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.media",
-    "django.core.context_processors.request",
-    "django.contrib.messages.context_processors.messages",
-    "rooibos.context_processors.settings",
-    "rooibos.context_processors.selected_records",
-    "rooibos.context_processors.current_presentation",
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': True,
+        'DIRS': [
+            os.path.join(install_dir, 'rooibos', 'templates'),
+        ],
+        'OPTIONS': {
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                "rooibos.context_processors.settings",
+                "rooibos.context_processors.selected_records",
+                "rooibos.context_processors.current_presentation",
+            )
+        }
+    },
+]
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.http.ConditionalGetMiddleware',
@@ -178,10 +189,6 @@ WEBSERVICE_NAMESPACE = "http://mdid.jmu.edu/webservices"
 #   False: login rejected, try additional login backends if available
 LOGIN_CHECKS = (
     'rooibos.access.models.update_membership_by_attributes',
-)
-
-TEMPLATE_DIRS = (
-    os.path.join(install_dir, 'rooibos', 'templates'),
 )
 
 STATICFILES_DIRS = [
