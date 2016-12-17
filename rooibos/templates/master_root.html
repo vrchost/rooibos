@@ -526,6 +526,9 @@
         }
 
         function keepAtTop(element, not_past) {
+            if (!element || !element.length) {
+                return;
+            }
             if (!keepAtTop.elements) keepAtTop.elements = Array();
             keepAtTop.elements.push(
                 element.css("position", "relative").css("top", "0").css('z-index',
@@ -533,7 +536,7 @@
             var placeholder = $("<div>").css("height", element.outerHeight(true)).insertBefore(element).hide();
             keepAtTop.$window = $(window).scroll(function() {
                 if (element.is(":hidden")) return;
-                var not_past_bottom = not_past ? not_past.offset().top + not_past.height() : Number.MAX_VALUE;
+                var not_past_bottom = not_past && not_past.length ? not_past.offset().top + not_past.height() : Number.MAX_VALUE;
                 var offset = 0;
                 $.each(keepAtTop.elements, function(i, e) {
                     if (e != element) offset += e.is(":visible") ? e.height() : 0;
