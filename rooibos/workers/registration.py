@@ -3,31 +3,11 @@ import pika
 import traceback
 import logging
 from collections import namedtuple
-from django.db import transaction, close_connection
 
 
 logger = logging.getLogger(__name__)
 
 QUEUE_VERSION = '5'
-
-
-@transaction.commit_manually
-def flush_transaction():
-    """
-    Flush the current transaction so we don't read stale data
-
-    Use in long running processes to make sure fresh data is read from
-    the database.  This is a problem with MySQL and the default
-    transaction mode.  You can fix it by setting
-    "transaction-isolation = READ-COMMITTED" in my.cnf or by calling
-    this function at the appropriate moment
-    """
-    try:
-        transaction.commit()
-    except Exception:
-        # database connection probably closed, open a new one
-        logger.exception("Forcing connection close")
-        close_connection()
 
 
 workers = dict()
@@ -37,7 +17,6 @@ def register_worker(id):
     def register(worker):
 
         def wrapped_worker(*args, **kwargs):
-            flush_transaction()
             try:
                 return worker(*args, **kwargs)
             except:
@@ -96,7 +75,6 @@ def worker_callback(ch, method, properties, body):
 
 
 def run_worker(worker, arg, **kwargs):
-    flush_transaction()
     discover_workers()
     logger.debug("Running worker %s with arg %s" % (worker, arg))
 
