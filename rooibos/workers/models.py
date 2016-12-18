@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from registration import run_worker
 from datetime import datetime, timedelta
+from django_celery_results.models import TaskResult
 
 
 class JobInfo(models.Model):
@@ -42,3 +43,17 @@ class JobInfo(models.Model):
             self.status_time and
             (datetime.now() - self.status_time > timedelta(0, 60))
         )
+
+
+class TaskOwnership(models.Model):
+    task = models.ForeignKey(
+        TaskResult,
+        to_field='task_id',
+        db_constraint=False,
+        null=False,
+        blank=False,
+    )
+    owner = models.ForeignKey(User, null=False, blank=False)
+
+    def __str__(self):
+        return '<TaskResult: {0.task} ({0.owner})>'.format(self)
