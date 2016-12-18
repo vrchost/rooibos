@@ -17,6 +17,7 @@
 
 beautifulsoup
 boto
+Celery
 django-cas-ng
 django-compressor
 django-extensions
@@ -27,6 +28,7 @@ django-storages
 django-tagging
 django-contrib-comments
 Django==1.8.17
+django-celery-results
 flake8
 flake8-docstrings
 flake8-todo

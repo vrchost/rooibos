@@ -2,7 +2,7 @@
 
 cat > /etc/supervisor/conf.d/mdid.conf << END
 [group:mdid]
-programs=mdid_app,mdid_worker
+programs=mdid_app,celery
 
 [program:mdid_app]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
@@ -14,15 +14,16 @@ stopasgroup=true
 redirect_stderr=true
 stdout_logfile=/opt/mdid/log/gunicorn.log
 
-[program:mdid_worker]
-environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
-command=/opt/mdid/venv/bin/django-admin.py runworkers
+[program:celery]
+directory=/opt/mdid/
+environment=PYTHONPATH="/opt/mdid",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant",PATH="/opt/mdid/venv/bin"
+command=/opt/mdid/venv/bin/celery -A rooibos worker -l info
 user=ubuntu
 autostart=true
 autorestart=true
 stopasgroup=true
 redirect_stderr=true
-stdout_logfile=/opt/mdid/log/workers.log
+stdout_logfile=/opt/mdid/log/celery.log
 END
 
 supervisorctl reload
