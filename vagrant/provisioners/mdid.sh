@@ -15,3 +15,11 @@ export DJANGO_SETTINGS_MODULE=rooibos_settings.vagrant
 django-admin collectstatic --noinput
 django-admin migrate --noinput
 END
+
+su vagrant << ENDSU
+cat > ~/.bash_aliases << END
+export PYTHONPATH=/opt/mdid
+export DJANGO_SETTINGS_MODULE=rooibos_settings.vagrant
+. /opt/mdid/venv/bin/activate
+END
+ENDSU
