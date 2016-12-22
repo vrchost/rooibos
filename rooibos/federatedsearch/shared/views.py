@@ -13,7 +13,6 @@ import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
 from rooibos.storage import Storage
-from rooibos.workers.models import JobInfo
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django import forms
@@ -217,11 +216,8 @@ class SharedSearch(FederatedSearch):
         CollectionItem.objects.create(collection=collection, record=record)
 
         # create job to download actual media file
-        job = JobInfo.objects.create(
-            func='shared_download_media',
-            arg=simplejson.dumps(dict(shared_id=self.shared.id,
-                                      record=record.id, url=image_url)))
-        job.run()
+        from .tasks import shared_download_media
+        shared_download_media.delay(self.shared.id, record.id, image_url)
 
         return record
 

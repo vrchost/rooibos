@@ -19,27 +19,6 @@
 {{ block.super }}
 <script type="text/javascript">
     $(document).ready(function() {
-        $(".job-args").each(function() {
-            var a = $(this).text();
-            if (a.length > 30)
-                $(this).qtip({
-                    content: a,
-                    position: {
-                        corner: {
-                            target: 'rightMiddle',
-                            tooltip: 'leftTop'
-                        },
-                        adjust: {
-                            screen: true,
-                        }
-                    },
-                    style: {
-                        name: 'cream',
-                        tip: true,
-                        width: 500
-                    }
-                }).text(a.substring(0, 30) + '...');
-        });
         checkbox = $('<input type="checkbox">').click(function() {
             var c = this.checked;
             $("input[name=r]").each(function() { this.checked = c; });

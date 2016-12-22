@@ -30,10 +30,10 @@ from rooibos.storage import get_media_for_record, get_image_for_record, \
     find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
-from rooibos.workers.models import JobInfo
 import logging
 import os
 import mimetypes
+from .tasks import storage_match_up_media
 
 
 def add_content_length(func):
@@ -652,16 +652,12 @@ def match_up_files(request):
                 )
             )
 
-            job = JobInfo.objects.create(
+            storage_match_up_media.delay(
                 owner=request.user,
-                func='storage_match_up_media',
-                arg=simplejson.dumps(dict(
-                    collection=collection.id,
-                    storage=storage.id,
-                    allow_multiple_use=form.cleaned_data['allow_multiple_use']
-                ))
+                collection=collection.id,
+                storage=storage.id,
+                allow_multiple_use=form.cleaned_data['allow_multiple_use'],
             )
-            job.run()
 
             messages.add_message(
                 request,

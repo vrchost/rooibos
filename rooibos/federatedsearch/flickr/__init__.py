@@ -7,8 +7,6 @@ from rooibos.data.models import Collection, Record, standardfield, \
     CollectionItem, FieldValue
 from rooibos.federatedsearch.models import FederatedSearch
 from rooibos.storage import Storage
-from rooibos.workers.models import JobInfo
-import json as simplejson
 import flickrapi
 import urllib2
 import os
@@ -223,11 +221,8 @@ class FlickrSearch(FederatedSearch):
         CollectionItem.objects.create(collection=collection, record=record)
 
         # create job to download actual media file
-        job = JobInfo.objects.create(
-            func='flickr_download_media',
-            arg=simplejson.dumps(dict(record=record.id, url=image_url))
-        )
-        job.run()
+        from .tasks import flickr_download_media
+        flickr_download_media.delay(record.id, image_url)
 
         return record
 

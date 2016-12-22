@@ -1,7 +1,6 @@
 from django.db.models import Q, Count
 from django.db import reset_queries
 from models import Field, FieldValue, Record, CollectionItem, get_system_field
-from rooibos.solr.models import delay_record_indexing, resume_record_indexing
 import csv
 
 
@@ -263,45 +262,40 @@ class SpreadsheetImport(object):
             reader.next()
 
         last_row = None
-        try:
 
-            for i, row in enumerate(reader):
+        for i, row in enumerate(reader):
 
-                # On every row, delay record indexing for a little longer
-                delay_record_indexing()
-                reset_queries()
+            reset_queries()
 
-                row = self._split_values(row)
-                if not last_row:
-                    last_row = row
-                    continue
+            row = self._split_values(row)
+            if not last_row:
+                last_row = row
+                continue
 
-                # compare IDs of current and last rows
-                last_id = last_row.get(identifier_field)
-                if not last_id:
-                    last_row = row
-                    self.no_id_skipped += 1
-                    for func in self.on_no_id_skipped:
-                        func(None)
-                    continue
+            # compare IDs of current and last rows
+            last_id = last_row.get(identifier_field)
+            if not last_id:
+                last_row = row
+                self.no_id_skipped += 1
+                for func in self.on_no_id_skipped:
+                    func(None)
+                continue
 
-                current_id = row.get(identifier_field)
+            current_id = row.get(identifier_field)
 
-                if not current_id or (last_id == current_id):
-                    # combine current and last rows
-                    for key, values in row.iteritems():
-                        v = last_row.get(key) or []
-                        for value in (values or []):
-                            if value not in v:
-                                v.append(value)
-                        last_row[key] = v
-                    for func in self.on_continuation:
-                        func(last_id)
-                else:
-                    process_row(last_row)
-                    last_row = row
-
-            if last_row:
+            if not current_id or (last_id == current_id):
+                # combine current and last rows
+                for key, values in row.iteritems():
+                    v = last_row.get(key) or []
+                    for value in (values or []):
+                        if value not in v:
+                            v.append(value)
+                    last_row[key] = v
+                for func in self.on_continuation:
+                    func(last_id)
+            else:
                 process_row(last_row)
-        finally:
-            resume_record_indexing()
+                last_row = row
+
+        if last_row:
+            process_row(last_row)

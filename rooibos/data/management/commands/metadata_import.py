@@ -2,14 +2,13 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from rooibos.data.models import Field
 from optparse import make_option
-from rooibos.workers.models import JobInfo
 import csv
 import random
 import shutil
 import string
 import os
 from rooibos.data.views import _get_scratch_dir  # TODO: make proper function
-import json as simplejson
+from ...tasks import csvimport
 
 
 class Command(BaseCommand):
@@ -85,27 +84,23 @@ class Command(BaseCommand):
         full_path = os.path.join(_get_scratch_dir(), 'cmdline=' + filename)
         shutil.copy(data_file, full_path)
 
-        JobInfo.objects.create(
-            owner=User.objects.get(username='admin'),
-            func='csvimport',
-            arg=simplejson.dumps(
-                dict(
-                    file='cmdline=' + filename,
-                    separator=';',
-                    collections=collections,
-                    update=True,
-                    add=True,
-                    test=False,
-                    personal=False,
-                    fieldset=None,
-                    mapping=mapping,
-                    separate_fields=separate_fields,
-                    labels=labels,
-                    order=order,
-                    hidden=hidden,
-                    refinements=refinements,
-                )
-            )
+        args = dict(
+            filename='cmdline=' + filename,
+            separator=';',
+            collection_ids=collections,
+            update=True,
+            add=True,
+            test=False,
+            personal=False,
+            mapping=mapping,
+            separate_fields=separate_fields,
+            labels=labels,
+            order=order,
+            hidden=hidden,
+            refinements=refinements,
         )
 
-        print "Job submitted"
+        task = csvimport.delay(
+            owner=User.objects.get(username='admin'), **args)
+
+        print "Job submitted: %s" % task.id
