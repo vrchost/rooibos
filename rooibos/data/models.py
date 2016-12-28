@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
-from rooibos.access import filter_by_access, check_access
+from rooibos.access.functions import filter_by_access, check_access
 from rooibos.access.models import AccessControl
 from rooibos.util import unique_slug
 import random

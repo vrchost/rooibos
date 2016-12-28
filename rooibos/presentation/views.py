@@ -15,7 +15,7 @@ from django import forms
 from django.views.decorators.http import require_POST
 from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 from rooibos.data.models import FieldSet, Record
 from rooibos.data.forms import FieldSetChoiceField
 from rooibos.ui.actionbar import update_actionbar_tags

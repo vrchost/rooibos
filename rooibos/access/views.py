@@ -10,9 +10,9 @@ from django.conf import settings
 from django import forms
 from django.core.urlresolvers import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from models import AccessControl
-from . import check_access, get_effective_permissions_and_restrictions, \
-    get_accesscontrols_for_object
+from .models import AccessControl
+from .functions import check_access, \
+    get_effective_permissions_and_restrictions, get_accesscontrols_for_object
 from rooibos.statistics.models import Activity
 import re
 

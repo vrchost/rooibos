@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
 from models import Media, Storage, TrustedSubnet, ProxyUrl
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 from ipaddr import IPAddress, IPNetwork
 from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield

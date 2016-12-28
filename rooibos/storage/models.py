@@ -10,8 +10,8 @@ import uuid
 from ipaddr import IPAddress, IPNetwork
 from rooibos.util import unique_slug
 from rooibos.data.models import Record
-from rooibos.access import get_effective_permissions_and_restrictions, \
-    check_access
+from rooibos.access.functions import \
+    get_effective_permissions_and_restrictions, check_access
 import multimedia
 from functions import extract_text_from_pdf_stream
 

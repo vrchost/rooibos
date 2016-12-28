@@ -20,7 +20,7 @@ from django.conf import settings
 from rooibos.util import json_view
 from rooibos.data.models import Record, Collection
 from rooibos.storage.models import Storage
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 from tagging.models import Tag
 from tagging.utils import parse_tag_input
 from rooibos.util.models import OwnedWrapper

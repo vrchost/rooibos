@@ -1,5 +1,5 @@
 from django.core.exceptions import MiddlewareNotUsed
-from rooibos.access import add_restriction_precedence
+from rooibos.access.functions import add_restriction_precedence
 
 
 class StorageOnStart:

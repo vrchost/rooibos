@@ -1,5 +1,5 @@
 from rooibos.userprofile.views import load_settings, store_settings
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 from rooibos.presentation.models import Presentation
 
 

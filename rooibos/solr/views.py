@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from . import SolrIndex
 from pysolr import SolrError
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
 from rooibos.data.models import Field, Collection, FieldValue, Record, \

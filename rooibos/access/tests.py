@@ -4,8 +4,9 @@ from rooibos.storage.models import Storage
 from models import update_membership_by_attributes, AccessControl, ExtendedGroup, \
     ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, \
     join_values, process_shibboleth_attributes
-from . import check_access, get_effective_permissions, filter_by_access, \
-    get_effective_permissions_and_restrictions, add_restriction_precedence
+from functions import check_access, get_effective_permissions, \
+    filter_by_access, get_effective_permissions_and_restrictions, \
+    add_restriction_precedence
 from django.contrib.auth.models import User, Group, AnonymousUser
 from django.core.exceptions import PermissionDenied
 

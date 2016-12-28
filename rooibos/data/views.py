@@ -25,7 +25,7 @@ from models import Record, Collection, FieldSet, FieldSetField, \
 from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
 from functions import set_collection_visibility_preferences, \
     apply_collection_visibility_preferences, collection_dump
-from rooibos.access import filter_by_access, \
+from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings

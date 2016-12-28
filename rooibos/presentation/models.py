@@ -8,7 +8,7 @@ from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, \
     standardfield_ids
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
-from rooibos.access import filter_by_access
+from rooibos.access.functions import filter_by_access
 
 
 class Presentation(models.Model):

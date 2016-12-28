@@ -3,8 +3,8 @@ from django.http import Http404
 from django.shortcuts import render_to_response
 from django.conf import settings
 from django.template import RequestContext
-from rooibos.access import get_effective_permissions_and_restrictions, \
-    filter_by_access
+from rooibos.access.functions import \
+    get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.data.models import Record
 from models import Storage
