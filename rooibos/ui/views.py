@@ -289,7 +289,7 @@ class AnnouncementViewMixin(object):
         'comment', 'content_type', 'object_pk', 'user',
         'site', 'is_public', 'submit_date',
     ]
-    template_name_suffix = '_announcements_form'
+    template_name = 'comments/comment_announcements_form.html'
     success_url = reverse_lazy('main')
 
     def get_context_data(self, **kwargs):
@@ -311,4 +311,4 @@ class AnnouncementUpdateView(AnnouncementViewMixin, UpdateView):
 
 
 class AnnouncementDeleteView(AnnouncementViewMixin, DeleteView):
-    template_name_suffix = '_announcements_delete'
+    template_name = 'comments/comment_announcements_delete.html'
