@@ -71,6 +71,9 @@ class WorkSearchFacet(SearchFacet):
     def or_available(self):
         return False
 
+    def process_criteria(self, criteria, *args, **kwargs):
+        return '"' + _special.sub(r'\\\1', criteria) + '"'
+
     def display_value(self, value):
         record = Record.get_primary_work_record(value)
         return record.title if record else value
