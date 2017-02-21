@@ -28,14 +28,24 @@ def accumulate(event=None, from_date=None, until_date=None, object=None):
         if data['content_type']:
             data['content_type'] = ContentType.objects.get_for_id(
                 data['content_type'])
-        accumulated, created = AccumulatedActivity.objects.get_or_create(
+        query_values = dict(
             content_type=data['content_type'],
             object_id=data['object_id'],
             date=data['date'],
             event=data['event'],
-            defaults=dict(count=data['count'], final=data['date'] < today))
-        accumulated.save()
-        rows.append(accumulated)
+        )
+        try:
+            obj = AccumulatedActivity.objects.get(**query_values)
+            obj.count = data['count']
+            obj.final = data['date'] < today
+        except AccumulatedActivity.DoesNotExist:
+            obj = AccumulatedActivity(
+                count=data['count'],
+                final=data['date'] < today,
+                **query_values
+            )
+        obj.save()
+        rows.append(obj)
     return rows
 
 
