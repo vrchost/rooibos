@@ -412,7 +412,7 @@ def _get_log_handler(log_dir=None):
     return {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': os.path.join(log_dir, basename +'.log'),
+            'filename': os.path.join(log_dir, basename + '.log'),
             'formatter': 'verbose',
         },
     }

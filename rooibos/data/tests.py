@@ -855,8 +855,10 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         image_record2 = Record.objects.create()
 
         work_record.fieldvalue_set.create(field=self.dcid, value='WORK')
-        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
-        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='WORK')
+        image_record.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='WORK')
+        image_record2.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='WORK')
 
         self.assertTrue(work_record.is_work_record)
         self.assertFalse(work_record.is_image_record)
@@ -867,7 +869,8 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         self.assertTrue(image_record.is_image_record)
         self.assertEqual(1, image_record.get_work_records().count())
         self.assertEqual(1, image_record.get_image_records().count())
-        self.assertFalse(image_record.get_image_records(siblings=False).exists())
+        self.assertFalse(
+            image_record.get_image_records(siblings=False).exists())
 
     def testSolrIndexing(self):
         work_record = Record.objects.create()
@@ -875,8 +878,10 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         image_record2 = Record.objects.create()
 
         work_record.fieldvalue_set.create(field=self.dcid, value='SOLR')
-        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
-        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+        image_record.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='SOLR')
+        image_record2.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='SOLR')
 
         identifiers = [work_record.id, image_record.id, image_record2.id]
 
@@ -896,8 +901,10 @@ class ImageWorkRecordTestCase(unittest.TestCase):
         image_record = Record.objects.create()
         image_record2 = Record.objects.create()
 
-        image_record.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
-        image_record2.fieldvalue_set.create(field=self.dcrelation, refinement='IsPartOf', value='SET1')
+        image_record.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='SET1')
+        image_record2.fieldvalue_set.create(
+            field=self.dcrelation, refinement='IsPartOf', value='SET1')
 
         identifiers = [image_record.id, image_record2.id]
 

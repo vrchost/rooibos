@@ -152,7 +152,6 @@ class AttributeValue(models.Model):
     value = models.CharField(max_length=255)
 
 
-
 SEPARATOR = ' :: '
 
 

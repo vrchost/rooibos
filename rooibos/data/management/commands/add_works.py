@@ -70,7 +70,8 @@ class Command(BaseCommand):
             work, isprimary = mappings.get(identifier.value, (None, False))
             isprimary = isprimary == 'True'
             if not work:
-                print "Warning: no entry found for identifier '%s'" % identifier.value
+                print "Warning: no entry found for identifier '%s'" % \
+                      identifier.value
                 continue
 
             FieldValue.objects.create(

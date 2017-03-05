@@ -362,7 +362,7 @@ def edit(request, id=None, name=None):
                 request,
                 messages.INFO,
                 message="Shared collection '%s' has been removed." %
-                    collection.title
+                        collection.title
             )
             collection.delete()
             return HttpResponseRedirect(reverse('shared-manage'))

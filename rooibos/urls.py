@@ -113,7 +113,7 @@ urls = [
 ]
 
 try:
-    import django_shibboleth
+    import django_shibboleth  # noqa
     urls.append(
         (r'^shibboleth/', include('django_shibboleth.urls')),
     )

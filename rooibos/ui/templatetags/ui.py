@@ -12,8 +12,6 @@ from rooibos.util.models import OwnedWrapper
 from rooibos.ui.functions import fetch_current_presentation, \
     store_current_presentation
 from base64 import b32encode, b64encode
-import os
-import glob
 
 
 register = template.Library()

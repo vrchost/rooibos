@@ -1,4 +1,4 @@
-from django.db import models, IntegrityError, transaction
+from django.db import models, transaction
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields \
     import GenericForeignKey, GenericRelation

@@ -182,7 +182,7 @@ def modify_permissions(request, app_label, model, id, name):
                             request,
                             messages.INFO,
                             message="No user with username '%s' exists." %
-                                username
+                                    username
                         )
 
                 groupname = request.POST.get('addgroup')
@@ -207,7 +207,7 @@ def modify_permissions(request, app_label, model, id, name):
                             request,
                             messages.INFO,
                             message="No group with name '%s' exists." %
-                                groupname
+                                    groupname
                         )
 
                 return HttpResponseRedirect(request.get_full_path())

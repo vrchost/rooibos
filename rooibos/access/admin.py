@@ -23,7 +23,6 @@ class AttributeAdmin(admin.ModelAdmin):
     inlines = [AttributeValueInline]
 
 
-
 class SubnetAdmin(admin.ModelAdmin):
     pass
 

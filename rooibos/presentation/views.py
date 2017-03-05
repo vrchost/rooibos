@@ -280,7 +280,6 @@ def edit(request, id, name):
                 'hidden': presentation.hidden,
                 'description': presentation.description,
                 'password': presentation.password,
-                'hidden': presentation.hidden,
                 'fieldset': presentation.fieldset.id
                 if presentation.fieldset else None,
                 'hide_default_data': presentation.hide_default_data,

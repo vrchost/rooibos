@@ -55,6 +55,7 @@ EXIF_ROTATION = [
     90,
 ]
 
+
 def rotateImageBasedOnExif(stream):
     image = Image.open(stream)
 

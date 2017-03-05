@@ -35,9 +35,9 @@ class CookielessSessionMiddleware(object):
 
     def process_response(self, request, response):
 
-        if (not request.path.startswith("/admin")
-                and 'sessionid' in response.cookies
-                and 'fake-session' not in request.COOKIES):
+        if (not request.path.startswith("/admin") and
+                'sessionid' in response.cookies and
+                'fake-session' not in request.COOKIES):
             try:
                 sessionid = response.cookies['sessionid'].coded_value
                 if type(response) is HttpResponseRedirect:

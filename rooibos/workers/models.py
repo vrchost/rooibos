@@ -37,6 +37,8 @@ class JobInfo(models.Model):
         self.update_status(status)
 
     def stalled(self):
-        return (not self.completed
-                and self.status_time
-                and (datetime.now() - self.status_time > timedelta(0, 60)))
+        return (
+            not self.completed and
+            self.status_time and
+            (datetime.now() - self.status_time > timedelta(0, 60))
+        )

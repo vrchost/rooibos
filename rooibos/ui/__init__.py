@@ -42,7 +42,10 @@ def create_user_fixtures(*args, **kwargs):
     )
 
 
-signals.post_syncdb.connect(create_site_flatpage_fixtures, sender=flatpages_app)
+signals.post_syncdb.connect(
+    create_site_flatpage_fixtures,
+    sender=flatpages_app
+)
 signals.post_syncdb.connect(create_user_fixtures, sender=auth_app)
 
 

@@ -237,14 +237,14 @@ class SolrIndex():
             process_thread.start()
             reset_queries()
 
-
         if process_thread:
             process_thread.join()
         if verbose:
             pb.done()
 
         if all:
-            # TODO: this will remove objects that have been added in the meantime
+            # TODO: this will remove objects that have been added
+            # in the meantime
             SolrIndexUpdates.objects.filter(delete=False).delete()
         else:
             SolrIndexUpdates.objects.filter(id__in=processed_updates).delete()

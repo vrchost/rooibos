@@ -88,7 +88,6 @@ class Command(BaseCommand):
             print "Done"
             return
 
-
         # for each unique field, determine replacements
 
         for fields in unique.values():
@@ -120,10 +119,12 @@ class Command(BaseCommand):
             print "\nRemaining fields after cleanup:", len(remaining)
 
         print "\nFields currently in use:\n    Values Field"
-        for fid, name, prefix, count in FieldValue.objects.values_list(
-                'field__id', 'field__name', 'field__standard__prefix').annotate(
-                dcount=Count('field')).order_by(
-                'field__standard__prefix', 'field__name'):
+        query = FieldValue.objects.values_list(
+            'field__id', 'field__name', 'field__standard__prefix'
+        )
+        query = query.annotate(dcount=Count('field'))
+        query = query.order_by('field__standard__prefix', 'field__name')
+        for fid, name, prefix, count in query:
             print "%10d %s%s [%d]" % (
                 count,
                 prefix + "." if prefix else "",

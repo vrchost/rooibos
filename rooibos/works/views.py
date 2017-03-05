@@ -26,7 +26,9 @@ def render_to_json_response(response, callback=None, **response_kwargs):
 
 def search(request):
 
-    def process_record(record, owner=None, context=None, process_url=lambda url: url, dc_mapping_cache=None):
+    def process_record(
+            record, owner=None, context=None,
+            process_url=lambda url: url, dc_mapping_cache=None):
         if dc_mapping_cache is None:
             dc_mapping_cache = dict()
 
@@ -45,8 +47,10 @@ def search(request):
                         pass
             return dc_mapping_cache.get(field.id)
 
-        largeThumb = record.get_thumbnail_url('large', force_cdn=True) or \
-                     record.get_image_url(width=250, height=250)
+        largeThumb = (
+            record.get_thumbnail_url('large', force_cdn=True) or
+            record.get_image_url(width=250, height=250)
+        )
 
         return dict(
             id=record.id,
@@ -60,15 +64,27 @@ def search(request):
             work_images=record.get_image_records_query().count(),
         )
 
-    def process_records(records, owner=None, context=None, process_url=lambda url: url):
+    def process_records(
+            records, owner=None, context=None,
+            process_url=lambda url: url):
         dc_mapping_cache = dict()
-        return [process_record(record, owner, context, process_url, dc_mapping_cache)
-                for record in records] if records else []
+        return [
+            process_record(
+                record, owner, context, process_url, dc_mapping_cache
+            )
+            for record in records
+        ] if records else []
 
     cid = name = None
     hits, records, viewmode = solr_search(request, cid, name, json=True)
-    response = dict(hits=hits, records=process_records(records, owner=request.user))
-    return render_to_json_response(response, callback=request.GET.get('callback'))
+    response = dict(
+        hits=hits,
+        records=process_records(records, owner=request.user)
+    )
+    return render_to_json_response(
+        response,
+        callback=request.GET.get('callback')
+    )
 
 
 def metadata(request, record_id):
@@ -81,17 +97,21 @@ def metadata(request, record_id):
             value=value.value,
             order=value.order,
             field=value.field.full_name,
-            )
+        )
         for value in record.get_fieldvalues()
     ]
 
     response = dict(data=data)
-    return render_to_json_response(response, callback=request.GET.get('callback'))
+    return render_to_json_response(
+        response,
+        callback=request.GET.get('callback')
+    )
 
 
 def works(request):
 
-    return render_to_response('works/works.html',
-                              {
-                               },
-                              context_instance=RequestContext(request))
+    return render_to_response(
+        'works/works.html',
+        {},
+        context_instance=RequestContext(request)
+    )

@@ -12,10 +12,9 @@ class Command(BaseCommand):
         make_option('--mapping', '-m', dest='mapping_file',
                     help='Mapping CSV file'),
         make_option('--collection', '-c', dest='collections',
-                   action='append',
+                    action='append',
                     help='Collection identifier (multiple allowed)'),
     )
-
 
     def handle(self, *args, **kwargs):
 

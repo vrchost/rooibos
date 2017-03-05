@@ -59,7 +59,9 @@ def get_hexdigest(algorithm, salt, raw_password):
         try:
             import crypt
         except ImportError:
-            raise ValueError('"crypt" password algorithm not supported in this environment')
+            raise ValueError(
+                '"crypt" password algorithm not supported in this environment'
+            )
         return crypt.crypt(raw_password, salt)
 
     if algorithm == 'md5':

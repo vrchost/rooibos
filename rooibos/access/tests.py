@@ -1,7 +1,8 @@
 import unittest
 from rooibos.data.models import Collection
 from rooibos.storage.models import Storage
-from models import update_membership_by_attributes, AccessControl, ExtendedGroup, \
+from models import update_membership_by_attributes, AccessControl, \
+    ExtendedGroup, \
     ATTRIBUTE_BASED_GROUP, AUTHENTICATED_GROUP, EVERYBODY_GROUP, \
     join_values, process_shibboleth_attributes
 from functions import check_access, get_effective_permissions, \

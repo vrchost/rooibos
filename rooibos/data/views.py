@@ -572,7 +572,9 @@ def data_import_file(request, file):
         others = list(
             (field.id, _get_display_label(field))
             for field in
-            Field.objects.exclude(id__in=[f.field.id for f in fsf]).order_by('label')
+            Field.objects.exclude(
+                id__in=[f.field.id for f in fsf]
+            ).order_by('label')
         )
         choices = [
             ('', '-' * 10)
