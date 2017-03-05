@@ -61,9 +61,11 @@ def create(request):
     if request.method == "POST":
         form = CreatePresentationForm(request.POST)
         if form.is_valid():
+            hidden = getattr(settings, 'PRESENTATION_HIDE_ON_CREATE', False)
             presentation = Presentation.objects.create(
                 title=form.cleaned_data['title'],
-                owner=request.user
+                owner=request.user,
+                hidden=hidden,
             )
             if form.cleaned_data['add_selected']:
                 add_selected_items(request, presentation)

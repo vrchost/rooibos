@@ -286,6 +286,8 @@ FORCE_SLIDE_REPROCESS = False
 # access on newly created presentations
 PRESENTATION_PERMISSIONS = []
 
+# Set to True if newly created presentations should be hidden
+PRESENTATION_HIDE_ON_CREATE = False
 
 # Show extra field values next to thumbnails, specify by field label
 # THUMB_EXTRA_FIELDS = ['Creator', 'Work Type']
