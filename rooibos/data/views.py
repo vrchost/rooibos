@@ -164,8 +164,10 @@ def record(request, id, name, contexttype=None, contextid=None,
     elif id and name:
         fieldset = None
     else:
+        default_fieldset_name = getattr(
+            settings, 'RECORD_DEFAULT_FIELDSET', 'dc')
         # Creating new record, use DC fieldset by default
-        fieldset = FieldSet.objects.get(name='dc')
+        fieldset = FieldSet.objects.get(name=default_fieldset_name)
 
     collection_items = collectionformset = None
 

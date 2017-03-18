@@ -395,6 +395,9 @@ AUTHENTICATION_BACKENDS = (
 MASTER_TEMPLATE = 'master_root.html'
 
 
+RECORD_DEFAULT_FIELDSET = 'dc'
+
+
 def _get_log_handler(log_dir=None):
 
     # Can't do sys.argv since it does not exist when running under PyISAPIe
