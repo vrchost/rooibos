@@ -312,7 +312,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             return q + ' AND ' + k
 
     if keywords:
-        keywords = re.sub('[-+\\\|!()\{}\[\]^"~:]', '', keywords)
+        keywords = re.sub('[-+\\\|!()\{}\[\]^"~:]', ' ', keywords)
     if keywords:
         keywords = reduce(build_keywords, keywords.split())
 
