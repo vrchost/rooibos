@@ -68,15 +68,16 @@ class SearchFacet(object):
 
 class WorkSearchFacet(SearchFacet):
 
-    def or_available(self):
-        return False
-
-    def process_criteria(self, criteria, *args, **kwargs):
-        return '"' + _special.sub(r'\\\1', criteria) + '"'
-
     def display_value(self, value):
-        record = Record.get_primary_work_record(value)
-        return record.title if record else value
+        values = value.split('|')
+        comment = ''
+        if len(values) > 1:
+            comment = (' (+%d others)' % (len(values) - 1))
+        for v in values:
+            record = Record.get_primary_work_record(v)
+            if record and record.title:
+                return record.title + comment
+        return value
 
 
 class RecordDateSearchFacet(SearchFacet):
