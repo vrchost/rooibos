@@ -823,12 +823,21 @@ def _get_browse_fields(collection_id):
 
 
 def browse(request, id=None, name=None):
+
+    browse_children = getattr(settings, 'BROWSE_CHILDREN', False)
+
     collections = filter_by_access(request.user, Collection)
     collections = apply_collection_visibility_preferences(request.user,
                                                           collections)
-    collections = collections.annotate(
-        num_records=Count('records')).filter(
-        num_records__gt=0).order_by('title')
+
+    if not browse_children:
+        # Filter out empty collections.  When browsing child collections
+        # as well, we don't do this
+        collections = collections.annotate(
+            num_records=Count('records')).filter(
+            num_records__gt=0)
+
+    collections = collections.order_by('title')
 
     if not collections:
         return render_to_response(
@@ -859,6 +868,9 @@ def browse(request, id=None, name=None):
     if not fields:
         raise Http404()
 
+    collection_and_children = \
+        [collection] + list(collection.all_child_collections)
+
     if 'f' in request.GET:
         try:
             field = get_object_or_404(Field, id=request.GET['f'],
@@ -874,8 +886,10 @@ def browse(request, id=None, name=None):
 
     values = FieldValue.objects.filter(
         field=field,
-        record__collection=collection).values('value').annotate(
-        freq=Count('value', distinct=False)).order_by('value')
+        record__collection__in=collection_and_children
+    ).values('value').annotate(
+        freq=Count('record', distinct=True)
+    ).order_by('value')
 
     if 's' in request.GET:
         start = values.filter(value__lt=request.GET['s']).count() / 50 + 1
@@ -884,11 +898,16 @@ def browse(request, id=None, name=None):
             kwargs={'id': collection.id, 'name': collection.name}) +
             "?f=%s&page=%s" % (field.id, start))
 
+    collection_filter = '|'.join(
+        str(c.id) for c in collection_and_children
+    )
+
     return render_to_response(
         'browse.html',
         {
             'collections': collections,
             'selected_collection': collection and collection or None,
+            'collection_filter': collection_filter,
             'fields': fields,
             'selected_field': field,
             'values': values,

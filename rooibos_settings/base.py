@@ -397,6 +397,9 @@ MASTER_TEMPLATE = 'master_root.html'
 
 RECORD_DEFAULT_FIELDSET = 'dc'
 
+# include child collections in browse screens
+BROWSE_CHILDREN = False
+
 
 def _get_log_handler(log_dir=None):
 
