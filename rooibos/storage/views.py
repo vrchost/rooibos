@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404, get_list_or_404, \
 from django.template import RequestContext
 from django.template.loader import render_to_string
 import json as simplejson
+from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
@@ -71,10 +72,13 @@ def retrieve(request, recordid, record, mediaid, media):
                             request=request,
                             content_object=mediaobj)
     if content:
-        return HttpResponse(
+        response = HttpResponse(
             content=content,
             content_type=str(mediaobj.mimetype)
         )
+        name = smart_str(mediaobj.url)
+        response["Content-Disposition"] = "attachment; filename=%s" % name
+        return response
     else:
         return HttpResponseRedirect(mediaobj.get_absolute_url())
 
