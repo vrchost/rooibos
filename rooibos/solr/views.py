@@ -68,6 +68,12 @@ class SearchFacet(object):
 
 class WorkSearchFacet(SearchFacet):
 
+    def process_criteria(self, criteria, *args, **kwargs):
+        return '|'.join(
+            '"' + _special.sub(r'\\\1', c) + '"'
+            for c in criteria.split('|')
+        )
+
     def display_value(self, value):
         values = value.split('|')
         comment = ''
