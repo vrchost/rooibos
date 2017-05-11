@@ -6,6 +6,7 @@ import struct
 import re
 import logging
 import json as simplejson
+import zipfile
 from StringIO import StringIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field
@@ -188,6 +189,19 @@ def render_pdf(pdffile):
     return image
 
 
+def thumbnail_from_pptx(pptxfile):
+    try:
+        with zipfile.ZipFile(pptxfile, 'r') as pptx:
+            image = StringIO(pptx.open('docProps/thumbnail.jpeg').read())
+            image.seek(0)
+            return image
+    except:
+        logging.debug(
+            'Cannot extract thumbnail from PPTX file %s' % pptxfile,
+            exc_info=True,
+        )
+
+
 def get_image(media):
     logging.debug('get_image: %s (%s)' % (
         media.get_absolute_file_path(), media.mimetype))
@@ -210,6 +224,8 @@ def get_image(media):
             media.get_absolute_file_path(), media.mimetype)
     elif media.mimetype == 'application/pdf':
         image = render_pdf(media.get_absolute_file_path())
+    elif media.url.endswith('.pptx'):
+        image = thumbnail_from_pptx(media.get_absolute_file_path())
     return image
 
 
