@@ -83,7 +83,7 @@ def get_image_for_record(
         # also support video and audio
         q = q | Q(mimetype__startswith='video/') | \
             Q(mimetype__startswith='audio/')
-    q = q | Q(mimetype='application/pdf')
+    q = q | Q(mimetype='application/pdf') | Q(url__endswith='.pptx')
 
     media = media.select_related('storage').filter(q)
 
