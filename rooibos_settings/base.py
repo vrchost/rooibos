@@ -228,6 +228,10 @@ PPTEXPORT_WIDTH = 800
 PPTEXPORT_HEIGHT = 600
 
 
+PRIMARY_COLOR = "rgb(152, 189, 198)"
+SECONDARY_COLOR = "rgb(118, 147, 154)"
+
+
 COMPACT_METADATA_VIEW = False
 
 WORKS = {
@@ -317,7 +321,6 @@ EXPOSE_TO_CONTEXT = (
     'CAS_SERVER_URL',
     'WORKS',
 )
-
 
 ADMINS = (
     # ('Your name', 'your@email.example'),
