@@ -70,7 +70,7 @@ class WorkSearchFacet(SearchFacet):
 
     def process_criteria(self, criteria, *args, **kwargs):
         return '|'.join(
-            '"' + _special.sub(r'\\\1', c) + '"'
+            '"' + _special.sub(r'\\\1', _strip_quotes.sub(r'\1', c)) + '"'
             for c in criteria.split('|')
         )
 
@@ -209,6 +209,7 @@ class CollectionSearchFacet(SearchFacet):
 
 
 _special = re.compile(r'(\+|-|&&|\|\||!|\(|\)|\{|}|\[|\]|\^|"|~|\*|\?|:|\\)')
+_strip_quotes = re.compile(r'^"(.*)"$')
 
 
 class ExactValueSearchFacet(SearchFacet):
