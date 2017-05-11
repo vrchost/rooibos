@@ -143,18 +143,23 @@ pip install --allow-external --upgrade \
 ### Configure MDID
 ```
 sudo -iu mdid  # switch to mdid user
-cd /opt/mdid/rooibos_settings
+cd /opt/mdid/rooibos/rooibos_settings
 cp template.py local_settings.py
 ```
 Edit `local_settings.py` and change settings as needed.
 
 Make sure to change `SECRET_KEY` to a unique value and do not share it!
 
+Also, if possible, change the asterisk in `ALLOWED_HOSTS` to your server
+host name, if you know it, for example `['mdid.yourschool.edu']`.
+
 Run the following command to initialize static files:
 ```
 sudo -iu mdid  # switch to mdid user
 source /opt/mdid/venv/bin/activate
 cd /opt/mdid/rooibos
+export PYTHONPATH="/opt/mdid/rooibos"
+export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 python manage.py collectstatic
 ```
 ### Create or update database schema
@@ -162,6 +167,8 @@ python manage.py collectstatic
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
+export PYTHONPATH="/opt/mdid/rooibos"
+export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 # The following command may fail
 # - if so, running it a second time should work
 python manage.py syncdb --noinput
@@ -178,7 +185,7 @@ server {
     error_log /opt/mdid/log/error.log;
 
     location /static/ {
-        alias /opt/mdid/static/;
+        alias /opt/mdid/rooibos/static/;
         expires 30d;
     }
 
@@ -203,6 +210,8 @@ Create a new file `/opt/mdid/wrapper.sh` with the following content:
 set -x
 cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
+export PYTHONPATH="/opt/mdid/rooibos"
+export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 python manage.py $@
 ```
 Create a new file `/opt/mdid/crontab` with the following content:
@@ -243,7 +252,8 @@ programs=mdid_app,mdid_worker
 
 [program:mdid_app]
 directory=/opt/mdid/rooibos
-environment=PATH="/opt/mdid/venv/bin",PYTHONPATH="/opt/mdid/rooibos_settings",
+environment=PATH="/opt/mdid/venv/bin",
+§§ PYTHONPATH="/opt/mdid/rooibos/rooibos_settings",
 §§ DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001
 §§ rooibos.wsgi:application
@@ -256,7 +266,8 @@ stdout_logfile=/opt/mdid/log/gunicorn.log
 
 [program:mdid_worker]
 directory=/opt/mdid/rooibos
-environment=PATH="/opt/mdid/venv/bin",PYTHONPATH="/opt/mdid/rooibos_settings",
+environment=PATH="/opt/mdid/venv/bin",
+§§ PYTHONPATH="/opt/mdid/rooibos/rooibos_settings",
 §§ DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 command=/opt/mdid/venv/bin/python manage.py runworkers
 user=mdid
