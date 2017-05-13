@@ -77,7 +77,7 @@ def retrieve(request, recordid, record, mediaid, media):
             content_type=str(mediaobj.mimetype)
         )
         name = smart_str(mediaobj.url)
-        response["Content-Disposition"] = "attachment; filename=%s" % name
+        response["Content-Disposition"] = 'attachment; filename="%s"' % name
         return response
     else:
         return HttpResponseRedirect(mediaobj.get_absolute_url())
