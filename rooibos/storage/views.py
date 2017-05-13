@@ -62,6 +62,11 @@ def retrieve(request, recordid, record, mediaid, media):
         return HttpResponseForbidden()
     mediaobj = mediaobj[0]
 
+    # Allow passing in an argument to prevent setting "attachment" content
+    # disposition, which keeps e.g. the PDF viewer built into Google Chrome
+    # from working
+    inline = request.GET.has_key('inline')
+
     try:
         content = mediaobj.load_file()
     except IOError:
@@ -77,7 +82,9 @@ def retrieve(request, recordid, record, mediaid, media):
             content_type=str(mediaobj.mimetype)
         )
         name = smart_str(mediaobj.url)
-        response["Content-Disposition"] = 'attachment; filename="%s"' % name
+        if not inline:
+            response["Content-Disposition"] = \
+                'attachment; filename="%s"' % name
         return response
     else:
         return HttpResponseRedirect(mediaobj.get_absolute_url())

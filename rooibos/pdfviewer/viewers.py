@@ -63,7 +63,8 @@ class PdfViewer(Viewer):
 
     def pdf_url(self):
         return self.obj.media_set.filter(
-            mimetype='application/pdf')[0].get_delivery_url()
+            mimetype='application/pdf'
+        )[0].get_delivery_url() + '?inline'
 
 
 @register_viewer('pdfviewer', PdfViewer)
