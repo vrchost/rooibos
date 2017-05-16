@@ -109,7 +109,7 @@ Adjust the database name, user name, and password as needed:
 mysql -u root
 create database mdid character set utf8;
 grant all privileges on mdid.* to mdid@localhost
-    identified by 'mdid';
+    identified by 'rooibos';
 \q
 ```
 ### Create user account
