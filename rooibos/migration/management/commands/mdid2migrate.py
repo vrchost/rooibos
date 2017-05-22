@@ -872,7 +872,8 @@ class MigratePresentations(MigrateModel):
         instance.owner = self.users[str(row.UserID)]
         instance.description = row.Description
         instance.hidden = row.ArchiveFlag
-        instance.password = row.AccessPassword
+        instance.password = row.AccessPassword[:32] \
+            if row.AccessPassword else None
 
     def post_save(self, instance, row):
         instance.override_dates(
