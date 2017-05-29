@@ -1178,7 +1178,7 @@ class MigratePermissions(MigrateModel):
 
     def __init__(self, cursor, type, code, instances, query=None, label=None):
         if not query:
-            query = "SELECT ID,ObjectID,UserID,GroupID,GrantPriv,DenyPriv "
+            query = "SELECT ID,ObjectID,UserID,GroupID,GrantPriv,DenyPriv " \
             "FROM accesscontrol WHERE ObjectType='%s' AND ObjectID>0" % code
         super(MigratePermissions, self).__init__(
             cursor=cursor,
