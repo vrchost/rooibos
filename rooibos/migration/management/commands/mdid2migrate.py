@@ -166,6 +166,7 @@ class MigrateModel(object):
         ) if r else None
         count = 0
         merged_ids = dict()
+        logging.debug('Running query against MDID2 database: %s' % self.query)
         for row in self.cursor.execute(self.query):
             hash = self.hash(row)
             h = self.object_history.pop(self.key(row), None)
@@ -1358,19 +1359,6 @@ class Command(BaseCommand):
 
     def handle(self, *config_files, **options):
 
-        logpath = settings.LOG_DIR
-        if not os.path.exists(logpath):
-            os.makedirs(logpath)
-
-        root = logging.getLogger()
-        map(root.removeHandler, root.handlers)
-        logging.basicConfig(
-            filename=os.path.join(
-                logpath, '%s-migration.log' % getattr(
-                    settings, 'LOGFILENAME', 'rooibos')
-            ),
-            level=logging.DEBUG
-        )
         logging.info("Starting migration")
 
         if len(config_files) != 1:
