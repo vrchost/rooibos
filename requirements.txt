@@ -26,7 +26,7 @@ django-ssl-redirect
 django-storages
 django-tagging
 django-contrib-comments
-django==1.8.*
+Django==1.8.17
 flake8
 flake8-docstrings
 flake8-todo
