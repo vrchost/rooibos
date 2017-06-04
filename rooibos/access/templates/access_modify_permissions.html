@@ -13,9 +13,9 @@
             var write = read.next('span');
             var manage = write.next('span');
             var restrictions = manage.next('span');
-            $("#id_read").attr('selectedIndex', read.hasClass('a') * 1  + read.hasClass('d') * 2)
-            $("#id_write").attr('selectedIndex', write.hasClass('a') * 1  + write.hasClass('d') * 2)
-            $("#id_manage").attr('selectedIndex', manage.hasClass('a') * 1  + manage.hasClass('d') * 2)
+            $("#id_read").prop('selectedIndex', read.hasClass('a') * 1  + read.hasClass('d') * 2)
+            $("#id_write").prop('selectedIndex', write.hasClass('a') * 1  + write.hasClass('d') * 2)
+            $("#id_manage").prop('selectedIndex', manage.hasClass('a') * 1  + manage.hasClass('d') * 2)
             $("#id_restrictions").val(restrictions.data('title') || "");
         }
     });

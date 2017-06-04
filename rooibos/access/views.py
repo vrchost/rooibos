@@ -15,6 +15,10 @@ from .functions import check_access, \
     get_effective_permissions_and_restrictions, get_accesscontrols_for_object
 from rooibos.statistics.models import Activity
 import re
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
@@ -113,14 +117,20 @@ def modify_permissions(request, app_label, model, id, name):
     class ACForm(forms.Form):
         read = forms.TypedChoiceField(
             choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            required=False,
+            empty_value=None,
             coerce=tri_state
         )
         write = forms.TypedChoiceField(
             choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            required=False,
+            empty_value=None,
             coerce=tri_state
         )
         manage = forms.TypedChoiceField(
             choices=((None, 'Not set'), (True, 'Allowed'), (False, 'Denied')),
+            required=False,
+            empty_value=None,
             coerce=tri_state
         )
         restrictions = forms.CharField(
