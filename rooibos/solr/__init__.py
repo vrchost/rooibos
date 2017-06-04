@@ -178,7 +178,7 @@ class SolrIndex():
             record_id_list = list(record_ids)
             media_dict = self._preload_related(Media, record_id_list)
             fieldvalue_dict = self._preload_related(FieldValue, record_id_list,
-                                                    related=2)
+                                                    fields=('field',))
             groups_dict = self._preload_related(CollectionItem, record_id_list)
 
             image_to_works = self._preload_image_to_works(record_id_list)
@@ -293,9 +293,10 @@ class SolrIndex():
         from models import mark_for_update
         mark_for_update(record_id, delete)
 
-    def _preload_related(self, model, record_ids, filter=Q(), related=0):
+    def _preload_related(self, model, record_ids, filter=Q(), fields=None):
         d = dict((i, []) for i in record_ids)
-        for x in model.objects.select_related(depth=related).filter(
+        fields = fields or []
+        for x in model.objects.select_related(*fields).filter(
                 filter, record__id__in=record_ids):
             d[x.record_id].append(x)
         return d
