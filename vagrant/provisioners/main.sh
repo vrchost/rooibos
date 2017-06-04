@@ -5,12 +5,13 @@ debconf-set-selections <<< 'mysql-server mysql-server/root_password_again passwo
 
 apt-get update
 apt-get install -y python-pip libjpeg-dev libfreetype6-dev \
-    nginx mysql-server-5.5 libmysqlclient-dev python-dev \
+    nginx mysql-server libmysqlclient-dev python-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     jetty8 rabbitmq-server supervisor
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
+pip install --upgrade pip
 pip install virtualenv
 
 rm -f /etc/nginx/sites-enabled/default
@@ -50,8 +51,8 @@ fi
 cat > /etc/default/jetty8 << END
 NO_START=0
 VERBOSE=yes
-JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64/jre"
-JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
+JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64/jre"
+JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true"
 END
 
 if [ ! -e /usr/share/jetty8/webapps/solr.war ] ; then
@@ -69,10 +70,10 @@ if [ ! -e /usr/share/jetty8/webapps/solr.war ] ; then
 fi
 
 mkdir -p /opt/mdid/scratch /opt/mdid/storage /opt/mdid/log /opt/mdid/static
-chown -R vagrant:vagrant /opt/mdid
+chown -R ubuntu:ubuntu /opt/mdid
 if [ ! -e /opt/mdid/venv ] ; then
     cd /opt/mdid
-    sudo -u vagrant virtualenv venv
+    sudo -u ubuntu virtualenv venv
 fi
 
 if [ ! -e /opt/mdid/venv/lib/python2.7/site-packages/gfx.so ] ; then
@@ -82,7 +83,7 @@ if [ ! -e /opt/mdid/venv/lib/python2.7/site-packages/gfx.so ] ; then
     cd swftools-0.9.2
     ./configure
     make
-    sudo -u vagrant cp lib/python/gfx.so /opt/mdid/venv/lib/python2.7/site-packages/
+    sudo -u ubuntu cp lib/python/gfx.so /opt/mdid/venv/lib/python2.7/site-packages/
 fi
 
 cat > /etc/nginx/sites-enabled/mdid << END

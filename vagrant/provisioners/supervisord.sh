@@ -8,7 +8,7 @@ programs=mdid_app,mdid_worker
 directory=/opt/mdid/rooibos
 environment=PATH="/opt/mdid/venv/bin",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant",PYTHONPATH="/opt/mdid"
 command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 rooibos.wsgi:application
-user=vagrant
+user=ubuntu
 autostart=true
 autorestart=true
 stopasgroup=true
@@ -19,7 +19,7 @@ stdout_logfile=/opt/mdid/log/gunicorn.log
 directory=/opt/mdid/rooibos
 environment=PATH="/opt/mdid/venv/bin",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant",PYTHONPATH="/opt/mdid"
 command=/opt/mdid/venv/bin/django-admin.py runworkers
-user=vagrant
+user=ubuntu
 autostart=true
 autorestart=true
 stopasgroup=true

@@ -1,7 +1,8 @@
 from .base import *  # NOQA
 
 
-DEBUG = True
+DEBUG = False
+ALLOWED_HOSTS = ['localhost']
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'e#!poDuIJ}N,".K=H:T/4z5POb;Gl/N6$6a&,(DRAHUF5c",_p'
@@ -29,7 +30,7 @@ DATABASES = {
 # system time zone.
 TIME_ZONE = 'America/Chicago'
 
-SOLR_URL = 'http://127.0.0.1:8983/solr/'
+SOLR_URL = 'http://127.0.0.1:8080/solr/'
 
 # Theme colors for use in CSS
 PRIMARY_COLOR = "rgb(152, 229, 198)"

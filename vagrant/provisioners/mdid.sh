@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-su vagrant << END
+su ubuntu << END
 cd /opt/mdid
 source venv/bin/activate
 pip install --upgrade -r /vagrant/requirements.txt
