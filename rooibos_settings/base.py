@@ -410,8 +410,10 @@ def _get_log_handler(log_dir=None):
     cmdline = getattr(sys, 'argv', [])
     if len(cmdline) > 1:
         # only use first command line argument for log file name
-        basename = 'rooibos-%s' % '-'.join(
-            re.sub(r'[^a-zA-Z0-9]', '', x) for x in cmdline[1:2])
+        cmd = os.path.splitext(os.path.basename(cmdline[0]))[0]
+        cmd = re.sub(r'[^a-zA-Z0-9]', '', cmdline[1]) \
+            if cmd == 'manage' else cmd
+        basename = 'rooibos-%s' % cmd
     else:
         basename = 'rooibos'
 
@@ -449,6 +451,10 @@ LOGGING = {
             'propagate': False,
         },
         'pika': {
+            'handlers': [handler.keys()[0]],
+            'level': 'WARNING',
+        },
+        'django': {
             'handlers': [handler.keys()[0]],
             'level': 'WARNING',
         },
