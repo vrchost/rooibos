@@ -120,3 +120,9 @@ mysql -u root --password=changeme << END
 create database if not exists mdid character set utf8;
 grant all privileges on mdid.* to mdid@localhost identified by 'mdid';
 END
+
+cat > .bash_aliases << END
+export PYTHONPATH=/opt/mdid
+export DJANGO_SETTINGS_MODULE=rooibos_settings.vagrant
+source /opt/mdid/venv/bin/activate
+END

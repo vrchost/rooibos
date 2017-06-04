@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+mkdir -p /opt/solr/mdid/conf
+touch /opt/solr/mdid/core.properties
+mkdir -p /opt/solr/mdid/data
+cp /vagrant/solr4/template/conf/* /opt/solr/mdid/conf
+chown -R jetty:jetty /opt/solr
+service jetty8 restart
+
 su ubuntu << END
 cd /opt/mdid
 source venv/bin/activate
