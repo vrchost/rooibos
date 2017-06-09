@@ -1,6 +1,5 @@
 from .base import *  # NOQA
 
-
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'e#!poDuIJ}N,".K=H:T/4z5POb;Gl/N6$6a&,(DRAHUF5c",_p'
 
@@ -21,6 +20,10 @@ DATABASES = {
             'charset': 'utf8',
         },
     }
+}
+
+RABBITMQ_OPTIONS = {
+    host='localhost',
 }
 
 # Local time zone for this installation. Choices can be found here:
