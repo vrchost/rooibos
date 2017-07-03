@@ -4,7 +4,7 @@ The following instructions are for Ubuntu Linux 14.04 LTS and 16.04 LTS, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
-Lines starting with `§§` are continuations of the previous line.
+
 ## Server Preparation
 ### Packages
 ```
@@ -81,18 +81,18 @@ Edit `/etc/default/jetty8`:
 ```
 NO_START=0
 JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64/jre"
-JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m
-§§ -Djava.awt.headless=true"
+JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
 ```
-MDID currently requires Solr 4; you may have to adjust the exact version as available when running the following commands:
+Note: `JAVA_HOME` may need to be adjusted to reflect the correct Java version.
+
+MDID currently requires Solr 4; you may have to adjust the exact version as
+available when running the following commands:
 ```
 mkdir -p /opt/solr-install
 cd /opt/solr-install
-wget https://archive.apache.org/dist/lucene/solr/4.10.4/
-§§solr-4.10.4.tgz
+wget https://archive.apache.org/dist/lucene/solr/4.10.4/solr-4.10.4.tgz
 tar xf solr-4.10.4.tgz
-cp solr-4.10.4/dist/solr-4.10.4.war \
-    /usr/share/jetty8/webapps/solr.war
+cp solr-4.10.4/dist/solr-4.10.4.war /usr/share/jetty8/webapps/solr.war
 cp -R solr-4.10.4/example/solr /opt
 chown -R jetty:jetty /opt/solr
 wget http://www.slf4j.org/dist/slf4j-1.7.5.tar.gz
@@ -102,8 +102,11 @@ service jetty8 restart
 ```
 ## Install MDID
 ### Create database
-Create a new MySQL database or restore an existing database from a previous MDID3 installation.
+Create a new MySQL database or restore an existing database from a previous
+MDID3 installation.
+
 _Note: When migration from MDID2, create a new MySQL database at this point._
+
 Adjust the database name, user name, and password as needed:
 ```
 mysql -u root
@@ -121,29 +124,38 @@ adduser --disabled-password mdid
 mkdir -p /opt/mdid
 chown mdid:mdid /opt/mdid
 ```
-The following assumes you have downloaded the package to /opt/mdid.
 
 Run the following commands as the `mdid` user.
 ```
 sudo -iu mdid
 cd /opt/mdid
-tar xzf rooibos-*.tar.gz
-mv rooibos-v* rooibos
 mkdir scratch storage log static
 ```
+
+Extract the package so that the contents are placed in `/opt/mdid/rooibos`:
+
+    /opt/mdid/rooibos/requirements.txt
+    /opt/mdid/rooibos/rooibos
+    /opt/mdid/rooibos/rooibos_settings
+    ...
+
+This way, updated packages can be installed by just replacing
+`/opt/mdid/rooibos` with the new version.
+
 ### Create virtual environment
 ```
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
 virtualenv venv
 source venv/bin/activate
-pip install --allow-external --upgrade \
-    -r rooibos/requirements.txt
+pip install --allow-external --upgrade -r rooibos/requirements.txt
 ```
 ### Configure MDID
 ```
 sudo -iu mdid  # switch to mdid user
-cd /opt/mdid/rooibos/rooibos_settings
+cd /opt/mdid
+cp -r rooibos/rooibos_settings rooibos_settings
+cd /opt/mdid/rooibos_settings
 cp template.py local_settings.py
 ```
 Edit `local_settings.py` and change settings as needed.
@@ -157,22 +169,20 @@ Run the following command to initialize static files:
 ```
 sudo -iu mdid  # switch to mdid user
 source /opt/mdid/venv/bin/activate
-cd /opt/mdid/rooibos
-export PYTHONPATH="/opt/mdid/rooibos"
+export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-python manage.py collectstatic
+django-admin collectstatic
 ```
 ### Create or update database schema
 ```
 sudo -iu mdid  # switch to mdid user
-cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
-export PYTHONPATH="/opt/mdid/rooibos"
+export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 # The following command may fail
 # - if so, running it a second time should work
-python manage.py syncdb --noinput
-python manage.py migrate
+django-admin syncdb --noinput
+django-admin migrate
 ```
 ### Configure nginx
 Create a new file `/etc/nginx/sites-available/mid` with the following content:
@@ -185,7 +195,7 @@ server {
     error_log /opt/mdid/log/error.log;
 
     location /static/ {
-        alias /opt/mdid/rooibos/static/;
+        alias /opt/mdid/static/;
         expires 30d;
     }
 
@@ -208,16 +218,14 @@ Create a new file `/opt/mdid/wrapper.sh` with the following content:
 ```
 #!/bin/bash
 set -x
-cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
 export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-python manage.py $@
+django-admin $@
 ```
 Create a new file `/opt/mdid/crontab` with the following content:
 ```
-*/5 * * * * /bin/bash /opt/mdid/wrapper.sh solr index >
-§§/opt/mdid/log/cron.log 2>> /opt/mdid/log/cron-error.log
+*/5 * * * * /bin/bash /opt/mdid/wrapper.sh solr index>/opt/mdid/log/cron.log 2>> /opt/mdid/log/cron-error.log
 0 * * * * /bin/bash /opt/mdid/wrapper.sh runjobs hourly
 0 4 * * * /bin/bash /opt/mdid/wrapper.sh runjobs daily
 0 5 * * 0 /bin/bash /opt/mdid/wrapper.sh runjobs weekly
@@ -251,12 +259,8 @@ Create a new file `/etc/supervisor/conf.d/mdid.conf` with the following content:
 programs=mdid_app,mdid_worker
 
 [program:mdid_app]
-directory=/opt/mdid/rooibos
-environment=PATH="/opt/mdid/venv/bin",
-§§ PYTHONPATH="/opt/mdid/rooibos/rooibos_settings",
-§§ DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001
-§§ rooibos.wsgi:application
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 rooibos.wsgi:application
 user=mdid
 autostart=true
 autorestart=true
@@ -265,11 +269,8 @@ redirect_stderr=true
 stdout_logfile=/opt/mdid/log/gunicorn.log
 
 [program:mdid_worker]
-directory=/opt/mdid/rooibos
-environment=PATH="/opt/mdid/venv/bin",
-§§ PYTHONPATH="/opt/mdid/rooibos/rooibos_settings",
-§§ DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/python manage.py runworkers
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/django-admin runworkers
 user=mdid
 autostart=true
 autorestart=true

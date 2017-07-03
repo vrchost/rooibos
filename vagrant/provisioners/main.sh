@@ -113,7 +113,7 @@ ln -s -f /etc/nginx/sites-available/mdid /etc/nginx/sites-enabled/mdid
 rm -f /etc/nginx/sites-enabled/default
 nginx -s reload
 
-ln -s -f -n /vagrant/rooibos /opt/mdid/rooibos
+ln -s -f -n /vagrant /opt/mdid/rooibos
 ln -s -f -n /vagrant/rooibos_settings /opt/mdid/rooibos_settings
 
 mysql -u root --password=changeme << END
@@ -122,7 +122,7 @@ grant all privileges on mdid.* to mdid@localhost identified by 'mdid';
 END
 
 cat > .bash_aliases << END
-export PYTHONPATH=/opt/mdid
+export PYTHONPATH=/opt/mdid:/opt/mdid/rooibos
 export DJANGO_SETTINGS_MODULE=rooibos_settings.vagrant
 source /opt/mdid/venv/bin/activate
 END

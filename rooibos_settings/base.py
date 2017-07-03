@@ -77,7 +77,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'DIRS': [
-            os.path.join(install_dir, 'rooibos', 'templates'),
+            os.path.join(install_dir, 'rooibos', 'rooibos', 'templates'),
         ],
         'OPTIONS': {
             'context_processors': (
@@ -192,7 +192,7 @@ LOGIN_CHECKS = (
 )
 
 STATICFILES_DIRS = [
-    os.path.join(install_dir, 'rooibos', 'static'),
+    os.path.join(install_dir, 'rooibos', 'rooibos', 'static'),
 ]
 
 STATICFILES_FINDERS = (
