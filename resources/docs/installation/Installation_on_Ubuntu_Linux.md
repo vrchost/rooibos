@@ -158,7 +158,11 @@ cp -r rooibos/rooibos_settings rooibos_settings
 cd /opt/mdid/rooibos_settings
 cp template.py local_settings.py
 ```
-Edit `local_settings.py` and change settings as needed.
+Edit `local_settings.py` and change settings as needed, including:
+
+```
+SOLR_URL = 'http://localhost:8080/solr/mdid'
+```
 
 Make sure to change `SECRET_KEY` to a unique value and do not share it!
 
