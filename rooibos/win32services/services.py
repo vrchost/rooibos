@@ -4,7 +4,6 @@ import win32serviceutil
 import win32service
 import win32event
 import servicemanager
-from rooibos import settings
 
 
 install_dir = os.path.normpath(
@@ -34,8 +33,12 @@ class Service(win32serviceutil.ServiceFramework):
         self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         try:
             self.ReportServiceStatus(win32service.SERVICE_RUNNING)
-            from django.core.management import execute_manager
-            execute_manager(settings)
+
+            os.environ.setdefault(
+                "DJANGO_SETTINGS_MODULE", "rooibos_settings.local_settings")
+            from django.core.management import execute_from_command_line
+            execute_from_command_line(['', 'runworkers'])
+
             win32event.WaitForSingleObject(
                 self.stop_event, win32event.INFINITE)
         except Exception, ex:
