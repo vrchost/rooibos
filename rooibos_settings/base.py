@@ -11,6 +11,13 @@ install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 if install_dir not in sys.path:
     sys.path.insert(0, install_dir)
 
+# Detect if we installed in an extra sub-directory or not
+# (Windows and Ubuntu instructions differ here)
+if os.path.exists(os.path.join(install_dir, 'rooibos', 'urls.py')):
+    package_dir = install_dir
+else:
+    package_dir = os.path.join(install_dir, 'rooibos')
+
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -77,7 +84,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': True,
         'DIRS': [
-            os.path.join(install_dir, 'rooibos', 'rooibos', 'templates'),
+            os.path.join(package_dir, 'rooibos', 'templates'),
         ],
         'OPTIONS': {
             'context_processors': (
@@ -192,7 +199,7 @@ LOGIN_CHECKS = (
 )
 
 STATICFILES_DIRS = [
-    os.path.join(install_dir, 'rooibos', 'rooibos', 'static'),
+    os.path.join(package_dir, 'rooibos', 'static'),
 ]
 
 STATICFILES_FINDERS = (
