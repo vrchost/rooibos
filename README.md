@@ -13,14 +13,6 @@ More information is also available at [mdid.org](http://mdid.org).
 Please find installation instructions for different operating systems
 under `resources/docs/installation`.
 
-## Upgrading from earlier versions of MDID3
+## Upgrading from earlier versions of MDID
 
-It is not recommended to perform an in-place upgrade.  You should follow the
-installation instructions above and then transfer your settings and potentially
-your database and media files (or point the new installation to the respective
-current locations).
-
-## Upgrading from MDID2
-
-You will need to perform an installation as outlined above and then run the
-`mdid2migrate` command.
+Please find upgrade instructions under `resources/docs/installation`.
