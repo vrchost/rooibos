@@ -56,10 +56,16 @@ Open a command prompt and run
 Open local_settings.py in a text editor and add the following setting:
 
     STATIC_ROOT = 'c:/mdid/static'
-    
+
 Make sure to change `SECRET_KEY` to a unique value and do not share it!
 Also, if possible, change the asterisk in `ALLOWED_HOSTS` to your server
 host name, if you know it, for example `['mdid.yourschool.edu']`.
+
+MDID requires two system environment variables set when running commands
+from the command prompt or via scheduled tasks.
+
+    setx -m DJANGO_SETTINGS_MODULE "rooibos_settings.local_settings"
+    setx -m PYTHONPATH "c:\mdid"
 
 
 ## Create database
@@ -73,8 +79,6 @@ Open a command prompt and run
     \q
     
     cd /d c:\mdid
-    DJANGO_SETTINGS_MODULE=rooibos_settings.local_settings
-    PYTHONPATH=c:\mdid
     c:\python27\scripts\django-admin.py migrate
     
 If you receive a "foreign key constraint" error, run the command a second time.
@@ -166,7 +170,10 @@ the browser and the command window and proceed to the next step.
 
 ### Install service
 
-Extract the NSSM package and from a command window run `nssm install solr`.
+Extract the NSSM package, making sure to use the bit version matching the
+installed version of Java.
+
+From a command window run `nssm install solr`.
 
 In the Application tab, enter
 
