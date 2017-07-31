@@ -1,0 +1,74 @@
+# This stack file is designed to be deployed using
+# docker stack deploy -c stack.yml mdid
+#
+# A secret named mdid.db_password.1 should already be created in your swarm
+# cluster. Be sure to go through this file to see what should change in your
+# environment.
+
+version: '3.2'
+
+# There's a secret stored in Docker, but we don't keep it here (it's external)
+secrets:
+  mdid.db_password.1:
+    external: true
+
+# Possibly use NFS for media storage
+# volumes:
+#   media:
+#     driver: local
+#     driver_opts:
+#       type: nfs
+#       o: addr=NFS_server.example.edu,nfsvers=3
+#       device: ":/mdid/media"
+
+services:
+  mdid:
+    image: wmit/mdid:3.2
+    # volumes:
+    # - type: volume
+    #   source: media
+    #   target: /var/mdid/media
+    #   read_only: false
+    secrets:
+    - source: mdid.db_password.1
+      target: db_password
+      mode: 0444
+    environment:
+      DB_NAME: mdid
+      DB_USER: mdid
+      DB_PASSWORD: /run/secrets/db_password
+      DB_HOST: databaseserver.example.edu
+    deploy:
+      replicas: 1
+
+  worker:
+    build: .
+    image: wmit/mdid:3.2
+    command: python manage.py runworkers
+    healthcheck:
+      disable: true
+    # volumes:
+    # - type: volume
+    #   source: media
+    #   target: /var/mdid/media
+    #   read_only: false
+    secrets:
+    - source: mdid.db_password.1
+      target: db_password
+      mode: 0444
+    environment:
+      DB_NAME: mdid
+      DB_USER: mdid
+      DB_PASSWORD: /run/secrets/db_password
+      DB_HOST: databaseserver.example.edu
+
+  solr:
+    build: solr4/
+    image: wmit/solr4-mdid
+
+  rabbitmq:
+    image: rabbitmq:3.6-alpine
+
+  memcached:
+    image: memcached:1.4-alpine
+    command: memcached -m 128
