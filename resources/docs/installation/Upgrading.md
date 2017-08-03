@@ -6,6 +6,8 @@ any other custom files and folders in place.
 
 Afterwards, run `django-admin migrate` to apply any database changes.
 
+See a more detailed list of changes in CHANGELOG.md.
+
 
 # Upgrading from MDID 3.0 or 3.1
 
