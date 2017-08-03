@@ -105,8 +105,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.http.ConditionalGetMiddleware',
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
-    'ssl_redirect.middleware.SSLRedirectMiddleware',
-    'rooibos.middleware.RemoveSSLArgMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -354,8 +352,6 @@ SHIB_FIRST_NAME = None
 SHIB_LAST_NAME = None
 SHIB_LOGOUT_URL = None
 
-SSL_PORT = None  # ':443'
-SSL_ON = False
 
 SESSION_COOKIE_AGE = 6 * 3600  # in seconds
 
