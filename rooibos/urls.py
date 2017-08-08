@@ -44,8 +44,7 @@ class ShowcasesView(TemplateView):
 
 
 urls = [
-    # main page needs SSL because of embedded login form, otherwise CSRF fails
-    url(r'^$', main, {'HELP': 'frontpage', 'SSL': True}, name='main'),
+    url(r'^$', main, {'HELP': 'frontpage'}, name='main'),
     url(
         r'^about/',
         TemplateView.as_view(template_name='about.html'),
@@ -128,7 +127,6 @@ if getattr(settings, 'CAS_SERVER_URL', None):
             'django_cas_ng.views.login',
             {
                 'HELP': 'logging-in',
-                'SSL': True
             },
             name='login'
         ),
@@ -137,7 +135,6 @@ if getattr(settings, 'CAS_SERVER_URL', None):
             login,
             {
                 'HELP': 'logging-in',
-                'SSL': True
             },
             name='local-login'
         ),
@@ -158,7 +155,6 @@ else:
             login,
             {
                 'HELP': 'logging-in',
-                'SSL': True
             },
             name='login'
         ),
