@@ -288,7 +288,9 @@ $(document).ready(function() {
     {% for m in media %}
         <li>
             {% if m.downloadable_in_template %}
-            <a href="{{ m.get_absolute_url }}">{{ m.name }}</a>
+            {{ m.name }}
+            <a href="{{ m.get_absolute_url }}">Download</a> |
+            <a href="{{ m.get_absolute_url }}?inline" target="_blank">Open</a>
             {% else %}
             {{ m.name }}
             {% endif %}
