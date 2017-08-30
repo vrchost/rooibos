@@ -75,11 +75,17 @@ def worker_callback(ch, method, properties, body):
 
 
 def run_worker(worker, arg, **kwargs):
+
+    options = getattr(settings, 'RABBITMQ_OPTIONS', None)
+    if not options:
+        logger.warn(
+            'Not running worker %s, RABBITMQ_OPTIONS not defined' % worker)
+        return
+
     discover_workers()
     logger.debug("Running worker %s with arg %s" % (worker, arg))
 
-    connection = pika.BlockingConnection(pika.ConnectionParameters(
-        **getattr(settings, 'RABBITMQ_OPTIONS', dict(host='127.0.0.1'))))
+    connection = pika.BlockingConnection(pika.ConnectionParameters(**options))
     channel = connection.channel()
     channel.confirm_delivery()
     queue_name = 'rooibos-%s-jobs-%s' % (
