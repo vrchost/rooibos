@@ -2,5 +2,8 @@ language: python
 python:
   - "2.7"
 install: "pip install -r requirements.txt"
-env: DJANGO_SETTINGS_MODULE=rooibos_settings.test
+env:
+  global:
+    - DJANGO_SETTINGS_MODULE=rooibos_settings.test
+    - PYTHONPATH=.
 script: django-admin test
