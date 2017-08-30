@@ -4,13 +4,13 @@ import StringIO
 
 class OnlineStorageSystem():
 
-    def __init__(self, base=None):
+    def __init__(self, base=None, storage=None):
         pass
 
-    def get_absolute_media_url(self, storage, media):
+    def get_absolute_media_url(self, media):
         return media.url
 
-    def get_absolute_file_path(self, storage, media):
+    def get_absolute_file_path(self, media):
         return None
 
     def open(self, url):
@@ -26,3 +26,6 @@ class OnlineStorageSystem():
 
     def is_local(self):
         return False
+
+    def load_file(self, media):
+        return self.open(media.url)
