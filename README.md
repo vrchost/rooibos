@@ -8,8 +8,7 @@ and is now developed and maintained by [vrcHost LLC](http://vrc.host).
 
 More information is also available at [mdid.org](http://mdid.org).
 
-.. image:: https://api.travis-ci.org/vrchost/rooibos.png
-   :target: http://travis-ci.org/vrchost/rooibos
+[![Travis](https://api.travis-ci.org/vrchost/rooibos.png)](http://travis-ci.org/vrchost/rooibos)
 
 ## Installation
 
