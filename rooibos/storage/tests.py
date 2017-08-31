@@ -391,11 +391,12 @@ class OnlineStorageSystemTestCase(unittest.TestCase):
         self.collection.delete()
 
     def test_retrieval(self):
-        url = "file:///" + os.path.join(
+        url = os.path.join(
             os.path.dirname(__file__),
             'test_data',
             'dcmetro.tif'
         ).replace('\\', '/')
+        url = "file://" + ('' if url.startswith('/') else '/') + url
         media = Media.objects.create(
             record=self.record,
             storage=self.storage,

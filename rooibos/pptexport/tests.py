@@ -69,7 +69,7 @@ class PowerpointTestCase(unittest.TestCase):
             media = Media.objects.create(
                 record=record, storage=self.storage, mimetype='image/jpeg')
             with open(os.path.join(
-                    os.path.dirname(__file__), 'viewers', 'powerpoint',
+                    os.path.dirname(__file__),
                     'test_data', '%02d.jpg' % n), 'rb') as f:
                 media.save_file('%02d.jpg' % n, f)
 

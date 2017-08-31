@@ -844,33 +844,33 @@ class ImageWorkRecordTestCase(unittest.TestCase):
 
     def testNoRelation(self):
         record = Record.objects.create()
-        self.assertFalse(record.is_work_record)
-        self.assertFalse(record.is_image_record)
-        self.assertFalse(record.get_work_records().exists())
-        self.assertFalse(record.get_image_records().exists())
+        self.assertEqual(0, len(record.get_works()))
+        self.assertEqual(0, record.get_image_records_query().count())
 
     def testRelation(self):
         work_record = Record.objects.create()
         image_record = Record.objects.create()
         image_record2 = Record.objects.create()
 
+        # Work identifiers and dc.identifier are not connected,
+        # so in these tests work_record will not be associated with the
+        # image_records
         work_record.fieldvalue_set.create(field=self.dcid, value='WORK')
         image_record.fieldvalue_set.create(
             field=self.dcrelation, refinement='IsPartOf', value='WORK')
         image_record2.fieldvalue_set.create(
             field=self.dcrelation, refinement='IsPartOf', value='WORK')
 
-        self.assertTrue(work_record.is_work_record)
-        self.assertFalse(work_record.is_image_record)
-        self.assertFalse(work_record.get_work_records().exists())
-        self.assertEqual(2, work_record.get_image_records().count())
+        # work_record does not have relation.isPartOf set, so it's not
+        # part of any work
+        self.assertEquals(0, len(work_record.get_works()))
+        self.assertIn('WORK', image_record.get_works())
+        self.assertIn('WORK', image_record2.get_works())
 
-        self.assertFalse(image_record.is_work_record)
-        self.assertTrue(image_record.is_image_record)
-        self.assertEqual(1, image_record.get_work_records().count())
-        self.assertEqual(1, image_record.get_image_records().count())
-        self.assertFalse(
-            image_record.get_image_records(siblings=False).exists())
+        # same again
+        self.assertEquals(0, work_record.get_image_records_query().count())
+        self.assertEquals(2, image_record.get_image_records_query().count())
+        self.assertEquals(2, image_record2.get_image_records_query().count())
 
     def testSolrIndexing(self):
         work_record = Record.objects.create()

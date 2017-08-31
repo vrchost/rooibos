@@ -9,10 +9,10 @@ from rooibos.storage import get_media_for_record
 
 class PseudoStreamingStorageSystem(LocalFileSystemStorageSystem):
 
-    def __init__(self, base=None):
-        LocalFileSystemStorageSystem.__init__(self, base)
+    def __init__(self, base=None, storage=None):
+        LocalFileSystemStorageSystem.__init__(self, base, storage)
 
-    def get_absolute_media_url(self, storage, media):
+    def get_absolute_media_url(self, media):
         return reverse(
             'storage-retrieve-pseudostream',
             kwargs={
@@ -23,7 +23,7 @@ class PseudoStreamingStorageSystem(LocalFileSystemStorageSystem):
             }
         )
 
-    def get_absolute_file_path(self, storage, media):
+    def get_absolute_file_path(self, media):
         return self.path(media.url)
 
     def open(self, *args, **kwargs):
