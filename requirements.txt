@@ -22,7 +22,6 @@ django-compressor
 django-extensions
 django-pagination
 django-pyodbc
-django-ssl-redirect
 django-storages
 django-tagging
 django-contrib-comments
