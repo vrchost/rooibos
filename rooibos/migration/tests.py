@@ -8,7 +8,7 @@ class UserTestCase(unittest.TestCase):
 
         class DummyRow(object):
             def __init__(self):
-                self.Login = 'test'
+                self.Login = 'test_UNIQUE98659856298356'
                 self.Password = None
                 self.Name = 'Test'
                 self.FirstName = 'Test'
