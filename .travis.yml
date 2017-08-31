@@ -10,8 +10,14 @@ env:
 script: django-admin test
 before_deploy:
   - VERSION=$(git describe)
+  - NAME=rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER
   - mkdir -p travis-build
-  - git archive --prefix rooibos-$VERSION/ -o travis-build/rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER.tar.gz HEAD
+  - git archive --prefix rooibos-$VERSION/ -o travis-build/$NAME.tar.gz HEAD
+  - mkdir -p travis-build-temp
+  - cd travis-build-temp
+  - tar xzf ../travis-build/$NAME.tar.gz
+  - zip -r ../travis-build/$NAME.zip *
+  - cd ..
 deploy:
   provider: s3
   access_key_id: AKIAJTFTACX5PEZXKG3Q
