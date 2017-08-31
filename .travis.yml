@@ -10,7 +10,8 @@ env:
 script: django-admin test
 before_deploy:
   - VERSION=$(git describe)
-  - git archive --prefix rooibos-$VERSION/ -o rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER.tar.gz HEAD
+  - mkdir -p travis-build
+  - git archive --prefix rooibos-$VERSION/ -o travis-build/rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER.tar.gz HEAD
 deploy:
   provider: s3
   access_key_id: AKIAJTFTACX5PEZXKG3Q
@@ -22,3 +23,5 @@ deploy:
     repo: vrchost/rooibos
     all_branches: true
   skip_cleanup: true
+  local_dir: travis-build
+  upload-dir: builds/$TRAVIS_BRANCH
