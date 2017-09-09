@@ -14,3 +14,4 @@ def testjob(self):
                 }
             )
         time.sleep(1)
+    return True

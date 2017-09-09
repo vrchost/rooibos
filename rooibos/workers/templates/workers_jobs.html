@@ -58,7 +58,6 @@
 {% endif %}
     <th>Status</th>
     <th>Created</th>
-    <th>Last updated</th>
     <th>Completed</th>
     <th>Result</th>
     <th id="remove-col" style="text-align: center;"></th>
@@ -69,32 +68,14 @@
     <td>{{ job.id }}</td>
     <td>{{ job.owner.username }}</td>
 {% endif %}
-    <td>{{ job.func }}</td>
+    <td>{{ job.function }}</td>
 {% if request.user.is_superuser %}
-    <td class="job-args">{{ job.arg }}</td>
+    <td class="job-args">{{ job.args }}</td>
 {% endif %}
     <td>{{ job.status }}</td>
-    <td>{{ job.created_time|naturalday }} {{ job.created_time|time }}</td>
-    <td>{{ job.status_time|naturalday }} {{ job.status_time|time }}<br />({{ job.status_time|timesince }})</td>
-    <td>{% if job.completed %}
-            Completed
-        {% else %}
-            {% if job.stalled %}
-                Stalled
-            {% else %}
-                {% if job.status_time %}
-                    In Progress
-                {% else %}
-                    Not started
-                {% endif %}
-            {% endif %}
-            {% if request.user.is_superuser %}
-                {% if job.stalled or not job.status_time %}
-                    <br /><input type="submit" name="run-{{ job.id }}" value="Restart" />
-                {% endif %}
-            {% endif %}
-        {% endif %}</td>
-    <td>{{ job.result }}</td>
+    <td>{{ job.created|naturalday }} {{ job.created|time }}</td>
+    <td>{{ job.date_done|naturalday }} {{ job.date_done|time }}<br />({{ job.date_done|timesince }})</td>
+    <td>{{ job.result|default:"-" }}</td>
     <td style="text-align: center;">{% if job.completed or request.user.is_superuser %}<input type="checkbox" value="{{ job.id }}" name="r" />{% endif %}</td>
 </tr>
 {% endfor %}

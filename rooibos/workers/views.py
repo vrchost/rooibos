@@ -2,16 +2,16 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
-from django_celery_results.models import TaskResult
+from .models import OwnedTaskResult
 from .tasks import testjob
 
 
 @login_required
 def joblist(request):
 
-    jobs = TaskResult.objects.all()
+    jobs = OwnedTaskResult.objects.all()
     if not request.user.is_superuser:
-        jobs = jobs.filter(taskownership__owner=request.user)
+        jobs = jobs.filter(owner=request.user)
     jobs = jobs.order_by('-date_done')
 
     if request.method == "POST":

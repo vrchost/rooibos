@@ -3,7 +3,9 @@ from celery import Celery
 from functools import wraps
 from kombu import Queue
 from django.conf import settings
-from rooibos.workers.models import TaskOwnership
+from rooibos.workers.models import OwnedTaskResult
+from datetime import datetime
+import json
 
 
 app = Celery('rooibos')
@@ -43,15 +45,34 @@ def owned_task(*args, **kwargs):
             @app.task(**kwargs)
             @wraps(func)
             def wrapped(self, *args, **kwargs):
+                record = None
                 if not self.request.called_directly and userarg in kwargs:
                     user = kwargs[userarg]
-                    TaskOwnership.objects.get_or_create(
+                    try:
+                        json_args = json.dumps(dict(
+                            args=args, kwargs=kwargs
+                        ))
+                    except TypeError, exception:
+                        json_args = repr(exception)
+                    object, _ = OwnedTaskResult.objects.get_or_create(
                         task_id=self.request.id,
                         owner_id=user,
+                        function=func.__name__,
+                        args=json_args,
+                        date_done=None,
                     )
+                    record = object.id
                     if removeuserarg:
                         del kwargs[userarg]
-                return func(self, *args, **kwargs)
+                result = func(self, *args, **kwargs)
+                if record:
+                    try:
+                        object = OwnedTaskResult.objects.get(id=record)
+                        object.date_done = datetime.now()
+                        object.save()
+                    except OwnedTaskResult.DoesNotExist:
+                        pass
+                return result
 
             return wrapped
 

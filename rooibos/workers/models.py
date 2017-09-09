@@ -3,15 +3,14 @@ from django.contrib.auth.models import User
 from django_celery_results.models import TaskResult
 
 
-class TaskOwnership(models.Model):
-    task = models.OneToOneField(
-        TaskResult,
-        to_field='task_id',
-        db_constraint=False,
-        null=False,
-        blank=False,
-    )
-    owner = models.ForeignKey(User, null=False, blank=False)
+class OwnedTaskResult(TaskResult):
 
-    def __str__(self):
-        return '<TaskResult: {0.task} ({0.owner})>'.format(self)
+    owner = models.ForeignKey(User, null=False, blank=False)
+    function = models.CharField(max_length=64)
+    args = models.TextField(null=True, default=None, editable=False)
+    created = models.DateTimeField(auto_now=True)
+
+    def as_dict(self):
+        result = super(OwnedTaskResult, self).as_dict()
+        result['owner'] = self.owner.username if self.owner else None
+        return result
