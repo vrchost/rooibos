@@ -6,7 +6,7 @@ programs=mdid_app,mdid_worker
 
 [program:mdid_app]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
-command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 rooibos.wsgi:application
+command=/opt/mdid/venv/bin/gunicorn -t 60 -w 4 -b 127.0.0.1:8001 rooibos.wsgi:application
 user=ubuntu
 autostart=true
 autorestart=true
