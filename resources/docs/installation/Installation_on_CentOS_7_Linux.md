@@ -9,6 +9,7 @@ Unless noted otherwise, all commands should be run as `root`.
 ### Packages
 ```
 yum update
+yum --enablerepo=extras install epel-release
 yum groupinstall 'Development Tools'
 yum install python-pip libjpeg-devel \
     nginx mariadb-server mariadb-devel python-devel \
@@ -31,9 +32,9 @@ Get the latest version of jetty from
 ```
 wget http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.7.v20170914/jetty-distribution-9.4.7.v20170914.tar.gz
 tar zxvf jetty-distribution-9.4.7.v20170914.tar.gz -C /opt/
-mv /opt/jetty-distribution-9.4.7.v20170914.tar.gz/ /opt/jetty
+mv /opt/jetty-distribution-9.4.7.v20170914/ /opt/jetty
 useradd -m jetty
-chown -R jetty:jetty /opt/jetty/ /var/run/jetty
+chown -R jetty:jetty /opt/jetty/
 ln -s /opt/jetty/bin/jetty.sh /etc/init.d/jetty
 chkconfig --add jetty
 chkconfig --level 345 jetty on
@@ -50,10 +51,12 @@ JETTY_LOGS=/opt/jetty/logs/
 JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
 ```
 
-### Enable nginx
+### Enable services
 ```
 systemctl enable nginx
+systemctl enable rabbitmq-server.service
 systemctl start nginx
+systemctl start rabbitmq-server.service
 firewall-cmd --permanent --zone=public --add-service=http 
 firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --reload
@@ -186,7 +189,7 @@ Make sure to change `SECRET_KEY` to a unique value and do not share it!
 Also, if possible, change the asterisk in `ALLOWED_HOSTS` to your server
 host name, if you know it, for example `['mdid.yourschool.edu']`.
 
-Change the port of `SOLR_URL` to `8080`.
+Change `SOLR_URL` to `http://localhost:8080/solr/mdid`.
 
 Run the following command to initialize static files:
 ```
@@ -212,7 +215,7 @@ python manage.py migrate
 ```
 
 ### Configure nginx
-Create a new file `/etc/nginx/conf.d/mid.conf` with the following content:
+Create a new file `/etc/nginx/conf.d/mdid.conf` with the following content:
 ```
 server {
     listen   0.0.0.0:80 default_server;
@@ -325,9 +328,16 @@ supervisorctl reload
 ## Further steps
 In a production environment, the following topics should be investigated:
 * Configure swap space
-* Firewall
-MDID only requires port 80 to be open (port 443 if SSL is configured)
 * SSL certificate for nginx
 * Log rotation for log files in `/opt/mdid/log`
 * Server and process monitoring
 * Backup
+
+
+## Note on SELinux
+
+You may have to allow HTTP traffic for port 8001:
+
+```
+semanage port -a -t http_port_t -p tcp 8001
+```
