@@ -27,6 +27,9 @@ CACHES = {
     }
 }
 
+# set to None to not trigger jobs during tests
+RABBITMQ_OPTIONS = None
+
 SCRATCH_DIR = tempfile.mkdtemp()
 print "USING SCRATCH_DIR:", SCRATCH_DIR
 

@@ -403,6 +403,11 @@ MASTER_TEMPLATE = 'master_root.html'
 
 RECORD_DEFAULT_FIELDSET = 'dc'
 
+RABBITMQ_OPTIONS = {
+    'host': 'localhost',
+}
+
+
 # include child collections in browse screens
 BROWSE_CHILDREN = False
 
