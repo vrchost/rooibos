@@ -42,6 +42,7 @@ chkconfig --level 345 jetty on
 
 Create `/etc/default/jetty`:
 ```
+cat /etc/default/jetty <<EOT
 JETTY_RUN=/opt/jetty
 JETTY_HOME=/opt/jetty
 JETTY_USER=jetty
@@ -49,6 +50,7 @@ JETTY_PORT=8080
 JETTY_HOST=127.0.0.1
 JETTY_LOGS=/opt/jetty/logs/
 JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
+EOT
 ```
 
 ### Enable services
