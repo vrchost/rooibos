@@ -1,4 +1,5 @@
 from django.conf import settings
+import django.db
 import pika
 import traceback
 import logging
@@ -54,6 +55,10 @@ def execute_handler(handler, arg):
 
 def worker_callback(ch, method, properties, body):
     logger.debug('worker_callback running')
+    django.db.connection.ensure_connection()
+    if not django.db.connection.is_usable():
+        logger.error('Database connection is not usable, reconnecting')
+        django.db.connection.connect()
     discover_workers()
     jobname, data = body.split()
     handler = workers.get(jobname)
