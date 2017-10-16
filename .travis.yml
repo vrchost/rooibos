@@ -12,7 +12,7 @@ before_deploy:
   - VERSION=$(git describe)
   - NAME=rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER
   - mkdir -p travis-build
-  - echo VERSION="$VERSION" > rooibos/version.py
+  - echo VERSION=\"$VERSION\" > rooibos/version.py
   - git add rooibos/version.py
   - git commit -m "Update version number"
   - git archive --prefix rooibos-$VERSION/ -o travis-build/$NAME.tar.gz HEAD
