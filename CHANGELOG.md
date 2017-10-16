@@ -1,4 +1,4 @@
-# Changes in 3.3.0
+# Changes in 3.2.1
 
 - upgrade django-cas library
 - removed SSL setting from MDID; the application should now
@@ -6,3 +6,4 @@
   web server level
 - added files for Docker support
 - additional documentation
+- add missing requests library to requirements.txt
