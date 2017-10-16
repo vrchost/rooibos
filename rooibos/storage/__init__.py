@@ -158,7 +158,7 @@ def get_image_for_record(
                 image.save(output, 'JPEG', quality=85, optimize=True)
                 return output.getvalue(), image.size
             except Exception, e:
-                logging.error(
+                logging.exception(
                     'Image derivative failed for media %d (%s)' %
                     (master.id, e)
                 )
