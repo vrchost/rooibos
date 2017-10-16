@@ -22,3 +22,4 @@ rooibos/static/cache/*
 bin-release-temp/
 .DS_Store
 .vagrant/
+*.log
