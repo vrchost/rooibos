@@ -189,7 +189,7 @@ django-admin syncdb --noinput
 django-admin migrate
 ```
 ### Configure nginx
-Create a new file `/etc/nginx/sites-available/mid` with the following content:
+Create a new file `/etc/nginx/sites-available/mdid` with the following content:
 ```
 server {
     listen   0.0.0.0:80;
@@ -295,3 +295,129 @@ MDID only requires port 80 to be open (port 443 if SSL is configured)
 * Log rotation for log files in `/opt/mdid/log`
 * Server and process monitoring
 * Backup
+
+## Shibboleth support
+
+To use Shibboleth for user authentication, follow the steps below to
+modify your working MDID installation to connect to your IdP.
+
+### Install additional packages
+
+apt-get install apache2 apache2-utils libapache2-mod-shib2 libshibsp-dev \
+    libshibsp-doc opensaml2-tools shibboleth-sp2-schemas
+
+### Configure Shibboleth
+
+Configure your Shibboleth SP in `/etc/shibboleth/shibboleth2.xml`, including
+setting the application ID to `mdid`.
+
+Make sure to add a key or generate a new key using `shib-keygen`.
+
+Uncomment the attributes you want to use in `attribute-map.xml`.
+
+### Configure apache
+
+Modify `/etc/apache2/ports.conf` and change all instances of port 80 to
+port 8100.
+
+Enable apache modules:
+```
+a2enmod rewrite
+a2enmod proxy
+a2enmod proxy_http
+a2enmod headers
+ln -s -f /etc/apache2/mods-available/shib2.load \
+    /etc/apache2/mods-enabled/shib2.load
+apachectl restart
+```
+Add a new apache site configuration file at
+`/etc/apache2/sites-available/mdid.conf`, replacing `your.server.domain` with
+the appropriate value:
+```
+<VirtualHost 127.0.0.1:8100>
+        UseCanonicalName Off
+
+        ServerName https://your.server.domain
+
+        DocumentRoot /home/mdid/www
+
+        <Directory /home/mdid/www>
+            Order allow,deny
+            Allow from all
+            Require all granted
+        </Directory>
+
+        Alias /static/ "/opt/instances/mdid/static/"
+
+        ErrorLog /opt/instances/%(instance)s/log/apache2-error.log
+        CustomLog /opt/instances/mdid/log/apache2-access.log combined
+
+        <Location /shibboleth>
+                AuthType shibboleth
+                ShibRequireSession On
+                ShibUseHeaders On
+                ShibRequestSetting applicationId mdid
+                require valid-user
+        </Location>
+
+        ProxyPreserveHost On
+        <Location />
+            ProxyPass http://127.0.0.1:8001/
+            ProxyPassReverse http://127.0.0.1:8001/
+            RequestHeader set X-FORWARDED-PROTOCOL ssl
+            RequestHeader set X-FORWARDED-SSL on
+            RequestHeader set Host your.server.domain
+        </Location>
+
+        <Location /Shibboleth.sso>
+                SetHandler shib
+                ShibRequestSetting applicationId mdid
+                ProxyPass "!"
+        </Location>
+</VirtualHost>
+```
+Activate the file:
+```
+ln -s -f /etc/apache2/sites-available/mdid.conf \
+    /etc/apache2/sites-enabled/999-mdid.conf
+```
+
+### Configure nginx
+
+In your nginx site file `/etc/nginx/sites-available/mdid`, change the port
+number in the `proxy_pass` statement from 8001 to 8100.
+
+### Configure MDID
+
+Add the following settings to your MDID configuration, changing attribute
+names as required:
+
+```
+SHIB_ENABLED = True
+SHIB_ATTRIBUTE_MAP = {
+    "HTTP_MAIL": (True, "mail"),
+    "HTTP_GIVENNAME": (False, "givenName"),
+    "HTTP_SN": (False, "sn"),
+    "HTTP_USERNAME": (True, "username"),
+}
+SHIB_USERNAME = "username"
+SHIB_EMAIL = "mail"
+SHIB_FIRST_NAME = "givenName"
+SHIB_LAST_NAME = "sn"
+```
+
+By default MDID will not show a logout link, but if your Shibboleth setup
+allows logouts, you can configure the logout URL with
+
+```
+SHIB_LOGOUT_URL = "http://link.to.your.shibboleth.logout"
+```
+
+### Restart all services
+
+```
+service shibd restart
+apache2ctl graceful
+nginx -s reload
+supervisorctl restart mdid:*
+```

@@ -356,7 +356,7 @@ class SolrIndex():
 
         work_to_images = dict()
         for record_id, image in images:
-            image_ids = identifier_map.get(image)
+            image_ids = identifier_map.get(image, [])
             for i in image_ids:
                 if record_id != i:
                     work_to_images.setdefault(i, []).append(record_id)

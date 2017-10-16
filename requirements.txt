@@ -17,7 +17,7 @@
 
 beautifulsoup
 boto
-django-cas
+django-cas-ng
 django-compressor
 django-extensions
 django-pagination

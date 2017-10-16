@@ -124,7 +124,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
     urls += [
         url(
             r'^login/$',
-            'django_cas.views.login',
+            'django_cas_ng.views.login',
             {
                 'HELP': 'logging-in',
             },
@@ -140,7 +140,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
         ),
         url(
             r'^logout/$',
-            'django_cas.views.logout',
+            'django_cas_ng.views.logout',
             {
                 'HELP': 'logging-out',
                 'next_page': settings.LOGOUT_URL
