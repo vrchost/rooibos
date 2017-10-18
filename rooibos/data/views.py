@@ -293,6 +293,9 @@ def record(request, id, name, contexttype=None, contextid=None,
                             )
 
                 instances = formset.save(commit=False)
+                # Explicitly remove deleted objects
+                for instance in formset.deleted_objects:
+                    instance.delete()
                 o1 = fieldvalues and max(v.order for v in fieldvalues) or 0
                 o2 = instances and max(v.order for v in instances) or 0
                 order = max(o1, o2, 0)

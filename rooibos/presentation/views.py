@@ -226,6 +226,9 @@ def edit(request, id, name):
         formset = ordering_formset(request.POST, queryset=queryset)
         if formset.is_valid():
             instances = formset.save(commit=False)
+            # Explicitly remove deleted objects
+            for instance in formset.deleted_objects:
+                instance.delete()
             for instance in instances:
                 instance.presentation = presentation
                 instance.save()
