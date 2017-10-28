@@ -49,10 +49,7 @@ class MegazineViewer(Viewer):
                                pageheight * pageheight) * 2 - pageheight)
 
         divid = request.GET.get('id', 'unknown')
-        server = (
-            ('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
-            '://' + request.META['HTTP_HOST']
-        )
+        server = '//' + request.META['HTTP_HOST']
 
         return render_to_response(
             'megazine_viewer.js',

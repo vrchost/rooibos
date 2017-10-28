@@ -26,8 +26,8 @@
 {% block content %}
 
 {% var as air %}
-{"url": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% static 'dmvinstaller/DesktopMediaViewer.air' %}",
-"server": "http{% if request.META.HTTPS == "on" %}s{% endif %}://{{ request.META.HTTP_HOST }}{% url "main" %}"}
+{"url": "//{{ request.META.HTTP_HOST }}{% static 'dmvinstaller/DesktopMediaViewer.air' %}",
+"server": "//{{ request.META.HTTP_HOST }}{% url "main" %}"}
 {% endvar %}
 
 

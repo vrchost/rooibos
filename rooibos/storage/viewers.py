@@ -86,10 +86,7 @@ class MediaPlayer(Viewer):
         streaming_server = None
         streaming_media = None
 
-        server = (
-            ('https' if request.META.get('HTTPS', 'off') == 'on' else 'http') +
-            '://' + request.META['HTTP_HOST']
-        )
+        server = '//' + request.META['HTTP_HOST']
 
         if delivery_url.startswith('rtmp://'):
             try:

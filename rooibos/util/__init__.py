@@ -152,11 +152,6 @@ def safe_int(value, default):
         return default
 
 
-def get_full_url(absolute_url):
-    # todo: support SSL
-    return 'http://%s%s' % (Site.objects.get_current().domain, absolute_url)
-
-
 def guess_extension(mimetype):
     x = mimetypes.guess_extension(mimetype)
     if x == '.jpe':
