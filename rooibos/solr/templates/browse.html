@@ -54,14 +54,14 @@ Jump to:
 <a href="{% url "solr-browse-collection" selected_collection.id selected_collection.name %}?f={{ selected_field.id }}&amp;s={{ letter }}">{{ letter }}</a>
 {% endfor %}
 
-{% autopaginate values 50 %}
+{% autopaginate dummyvalues 50 %}
 {% paginate %}
 
 <div class="browsecolumn">
 {% for v in values %}
 {% ifchanged %}<div style="font-size: x-large; font-weight: bolder;">{{ v.value|capfirst|slice:":1" }}</div>{% endifchanged %}
     <div><a class="related-images" href="{% url "solr-search" %}?c=allcollections:{{ collection_filter }}&amp;c={{ selected_field.full_name }}_s:{{ v.value|urlencode }}">{{ v.value }}</a> ({{ v.freq }})</div>
-    {% ifequal forloop.counter 25 %}
+    {% ifequal forloop.counter column_split %}
     </div>
     <div class="browsecolumn">
     {% endifequal %}

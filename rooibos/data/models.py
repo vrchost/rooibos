@@ -644,6 +644,10 @@ class FieldValue(models.Model):
 
     class Meta:
         ordering = ['order']
+        index_together = [
+            ['record', 'field'],
+            ['field', 'record', 'index_value'],
+        ]
 
 
 class DisplayFieldValue(FieldValue):

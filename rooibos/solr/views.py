@@ -28,6 +28,11 @@ from rooibos.federatedsearch.views import sidebar_api_raw, \
 import re
 import copy
 import random
+import logging
+from datetime import datetime
+
+
+logger = logging.getLogger(__name__)
 
 
 class SearchFacet(object):
@@ -831,6 +836,9 @@ def _get_browse_fields(collection_id):
 
 def browse(request, id=None, name=None):
 
+    timing_start = datetime.now()
+    logger.debug('Starting browse')
+
     browse_children = getattr(settings, 'BROWSE_CHILDREN', False)
 
     collections = filter_by_access(request.user, Collection)
@@ -875,6 +883,8 @@ def browse(request, id=None, name=None):
     if not fields:
         raise Http404()
 
+    logger.debug('Retrieved fields in %s' % (datetime.now() - timing_start))
+
     collection_and_children = \
         [collection] + list(collection.all_child_collections)
 
@@ -891,23 +901,59 @@ def browse(request, id=None, name=None):
     else:
         field = fields[0]
 
-    values = FieldValue.objects.filter(
+    ivalues = FieldValue.objects.filter(
         field=field,
         record__collection__in=collection_and_children
-    ).values('value').annotate(
-        freq=Count('record', distinct=True)
-    ).order_by('value')
+    ).values('index_value').distinct().order_by('index_value')
 
     if 's' in request.GET:
-        start = values.filter(value__lt=request.GET['s']).count() / 50 + 1
+        start = ivalues.filter(value__lt=request.GET['s']).count() / 50 + 1
         return HttpResponseRedirect(reverse(
             'solr-browse-collection',
             kwargs={'id': collection.id, 'name': collection.name}) +
             "?f=%s&page=%s" % (field.id, start))
 
+    try:
+        page = int(request.GET['page'])
+    except:
+        page = 1
+
+    start = (page - 1) * 50
+    ivalues_list = list(
+        row['index_value']
+        for row in ivalues[start:start + 50]
+    )
+
+    logger.debug('Retrieved ivalues_list in %s' % (datetime.now() - timing_start))
+
+    ivalues_length = ivalues.count()
+
+    logger.debug('Retrieved ivalues_length in %s' % (datetime.now() - timing_start))
+
+    values = list(FieldValue.objects.filter(
+        field=field,
+        record__collection__in=collection_and_children,
+        index_value__in=ivalues_list,
+    ).values('value').annotate(
+        freq=Count('record', distinct=True)
+    ).order_by('value'))
+
+    logger.debug('Retrieved values in %s' % (datetime.now() - timing_start))
+
     collection_filter = '|'.join(
         str(c.id) for c in collection_and_children
     )
+
+    class DummyContent():
+        def __init__(self, length):
+            self.length = length
+        def __len__(self):
+            return self.length
+        def __getitem__(self, index):
+            if isinstance(index, slice):
+                return range(index.start or 0, index.stop, index.step or 1)
+            else:
+                return None
 
     return render_to_response(
         'browse.html',
@@ -918,6 +964,9 @@ def browse(request, id=None, name=None):
             'fields': fields,
             'selected_field': field,
             'values': values,
+            'ivalues': ivalues,
+            'column_split': len(values) / 2,
+            'dummyvalues': DummyContent(ivalues_length),
         },
         context_instance=RequestContext(request))
 
