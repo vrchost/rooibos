@@ -49,7 +49,7 @@ class MegazineViewer(Viewer):
                                pageheight * pageheight) * 2 - pageheight)
 
         divid = request.GET.get('id', 'unknown')
-        server = '//' + request.META['HTTP_HOST']
+        server = '//' + request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
 
         return render_to_response(
             'megazine_viewer.js',
