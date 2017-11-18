@@ -836,9 +836,6 @@ def _get_browse_fields(collection_id):
 
 def browse(request, id=None, name=None):
 
-    timing_start = datetime.now()
-    logger.debug('Starting browse')
-
     browse_children = getattr(settings, 'BROWSE_CHILDREN', False)
 
     collections = filter_by_access(request.user, Collection)
@@ -883,8 +880,6 @@ def browse(request, id=None, name=None):
     if not fields:
         raise Http404()
 
-    logger.debug('Retrieved fields in %s' % (datetime.now() - timing_start))
-
     collection_and_children = \
         [collection] + list(collection.all_child_collections)
 
@@ -903,8 +898,10 @@ def browse(request, id=None, name=None):
 
     ivalues = FieldValue.objects.filter(
         field=field,
-        record__collection__in=collection_and_children
-    ).values('index_value').distinct().order_by('index_value')
+        record__collection__in=collection_and_children,
+    ).exclude(
+        browse_value='',
+    ).values('browse_value').distinct().order_by('browse_value')
 
     if 's' in request.GET:
         start = ivalues.filter(value__lt=request.GET['s']).count() / 50 + 1
@@ -920,25 +917,19 @@ def browse(request, id=None, name=None):
 
     start = (page - 1) * 50
     ivalues_list = list(
-        row['index_value']
+        row['browse_value']
         for row in ivalues[start:start + 50]
     )
 
-    logger.debug('Retrieved ivalues_list in %s' % (datetime.now() - timing_start))
-
     ivalues_length = ivalues.count()
-
-    logger.debug('Retrieved ivalues_length in %s' % (datetime.now() - timing_start))
 
     values = list(FieldValue.objects.filter(
         field=field,
         record__collection__in=collection_and_children,
-        index_value__in=ivalues_list,
-    ).values('value').annotate(
+        browse_value__in=ivalues_list,
+    ).values('value', 'browse_value').annotate(
         freq=Count('record', distinct=True)
-    ).order_by('value'))
-
-    logger.debug('Retrieved values in %s' % (datetime.now() - timing_start))
+    ).order_by('browse_value', 'value'))
 
     collection_filter = '|'.join(
         str(c.id) for c in collection_and_children
