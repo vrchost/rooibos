@@ -899,8 +899,6 @@ def browse(request, id=None, name=None):
     ivalues = FieldValue.objects.filter(
         field=field,
         record__collection__in=collection_and_children,
-    ).exclude(
-        browse_value='',
     ).values('browse_value').distinct().order_by('browse_value')
 
     if 's' in request.GET:
@@ -916,10 +914,11 @@ def browse(request, id=None, name=None):
         page = 1
 
     start = (page - 1) * 50
-    ivalues_list = list(
+    ivalues_list = [
         row['browse_value']
         for row in ivalues[start:start + 50]
-    )
+        if row['browse_value'] != ''
+    ]
 
     ivalues_length = ivalues.count()
 
