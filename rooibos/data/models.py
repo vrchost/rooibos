@@ -606,7 +606,7 @@ class FieldValue(models.Model):
     index_value = models.CharField(
         max_length=32, db_index=True, serialize=False)
     browse_value = models.CharField(
-        max_length=32, db_index=True, serialize=False, null=True)
+        max_length=32, db_index=True, serialize=False)
     date_start = models.DecimalField(
         null=True, blank=True, max_digits=12, decimal_places=0)
     date_end = models.DecimalField(

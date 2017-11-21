@@ -226,6 +226,8 @@ def record(request, id, name, contexttype=None, contextid=None,
                 widget=forms.HiddenInput, required=False)
             index_value = forms.CharField(
                 widget=forms.HiddenInput, required=False)
+            browse_value = forms.CharField(
+                widget=forms.HiddenInput, required=False)
 
             class Meta:
                 model = FieldValue
