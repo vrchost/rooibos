@@ -605,6 +605,8 @@ class FieldValue(models.Model):
     value = models.TextField()
     index_value = models.CharField(
         max_length=32, db_index=True, serialize=False)
+    browse_value = models.CharField(
+        max_length=32, db_index=True, serialize=False)
     date_start = models.DecimalField(
         null=True, blank=True, max_digits=12, decimal_places=0)
     date_end = models.DecimalField(
@@ -620,6 +622,8 @@ class FieldValue(models.Model):
 
     def save(self, **kwargs):
         self.index_value = self.value[:32] if self.value is not None else None
+        self.browse_value = FieldValue.make_browse_value(self.value) \
+            if self.value is not None else None
         super(FieldValue, self).save(kwargs)
         if self.value and self.field.id in standardfield_ids(
                 'identifier', equiv=True):
@@ -642,11 +646,18 @@ class FieldValue(models.Model):
     def dump(self, owner=None, collection=None):
         print("%s: %s" % (self.resolved_label, self.value))
 
+    BROWSE_VALUE_REGEX = re.compile(r"^((a|the|an) +|[^\w]+)+", re.I)
+
+    @staticmethod
+    def make_browse_value(value):
+        return FieldValue.BROWSE_VALUE_REGEX.sub('', value or '')[:32]
+
     class Meta:
         ordering = ['order']
         index_together = [
             ['record', 'field'],
             ['field', 'record', 'index_value'],
+            ['field', 'record', 'browse_value'],
         ]
 
 
