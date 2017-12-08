@@ -1,4 +1,4 @@
-# Installation on Ubuntu Linux
+# Installation on CentOS 7 Linux
 
 The following instructions are for CentOS 7, but
 should work with minor changes on other distributions as well.
