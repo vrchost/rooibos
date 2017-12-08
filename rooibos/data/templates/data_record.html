@@ -107,6 +107,13 @@
         $(".fieldvalue-edit").append("<button class='addrow'> + </button>");
         $(".fieldvalue-edit button.addrow").live('click', addRow);
 
+        var viewers = $('#data_record_viewers a');
+        if (viewers.length === 1) {
+            // make thumbnail link to available viewer
+            $('#data_record_thumbnail .record a')
+                .off('click')
+                .attr('href', viewers.eq(0).attr('href'));
+        }
     });
 </script>
 
