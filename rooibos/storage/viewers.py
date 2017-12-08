@@ -21,10 +21,10 @@ SUPPORTED_MIMETYPES = (
 )
 
 
-def _supported_media(obj, user):
+def _supported_media(obj, user, supported_mimetypes=SUPPORTED_MIMETYPES):
     return obj.media_set.filter(
         storage__in=filter_by_access(user, Storage),
-        mimetype__in=SUPPORTED_MIMETYPES,
+        mimetype__in=supported_mimetypes,
     )
 
 
@@ -129,3 +129,47 @@ def mediaplayer(obj, request, objid=None):
     media = _supported_media(obj, request.user)
     return MediaPlayer(obj, request.user) if any(
         _check_playable(request.user, m) for m in media) else None
+
+
+class GifViewer(Viewer):
+
+    title = "GIF Viewer"
+    weight = 20
+    is_embeddable = True
+
+    def embed_script(self, request):
+
+        divid = request.GET.get('id', 'unknown')
+
+        media = _supported_media(self.obj, request.user, ['image/gif'])
+        if not media:
+            raise Http404()
+
+        selectedmedia = media[0]
+
+        server = '//' + request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+
+        return render_to_response(
+            'storage_gifviewer.js',
+            {
+                'record': self.obj,
+                'selectedmedia': selectedmedia,
+                'server_url': server,
+                'anchor_id': divid,
+            },
+            context_instance=RequestContext(request)
+        )
+
+
+@register_viewer('gifviewer', GifViewer)
+def gifviewer(obj, request, objid=None):
+    if obj:
+        if not isinstance(obj, Record):
+            return None
+    else:
+        try:
+            obj = Record.get_or_404(objid, request.user)
+        except Http404:
+            return None
+    media = _supported_media(obj, request.user, ['image/gif'])
+    return GifViewer(obj, request.user) if media else None
