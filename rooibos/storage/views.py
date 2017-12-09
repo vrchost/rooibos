@@ -200,8 +200,6 @@ def media_upload(request, recordid, record):
                                          mimetype=mimetype)
             media.save_file(file.name, file)
 
-            # TODO: handle batch upload
-
             return HttpResponseRedirect(
                 request.GET.get('next', reverse('main')))
         else:
@@ -421,6 +419,8 @@ def import_files(request):
         multiple_files = forms.BooleanField(
             required=False, label='Allow multiple files of same type')
         personal_records = forms.BooleanField(required=False)
+        response_type = forms.CharField(
+            required=False, widget=forms.HiddenInput)
 
         def clean(self):
             cleaned_data = self.cleaned_data
@@ -553,7 +553,12 @@ def import_files(request):
                     # Multiple matching records found
                     pass
 
-            # TODO: handle batch upload
+            if form.cleaned_data['response_type'] == 'json':
+                return HttpResponse(
+                    content=simplejson.dumps(
+                        dict(status='ok', message=result)),
+                    content_type='application/json'
+                )
 
             messages.add_message(
                 request,
@@ -564,8 +569,6 @@ def import_files(request):
             return HttpResponseRedirect(next)
 
         else:
-            # invalid form submission
-            # TODO: handle batch upload
             pass
 
     else:

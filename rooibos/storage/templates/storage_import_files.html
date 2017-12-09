@@ -49,12 +49,51 @@
 </table>
 <span id="html-upload-control">{{ upload_form.file.label }} {{ upload_form.file }}<br /></span>
 <input type="submit" value="Upload Media" id="upload-button" />
+{{ upload_form.response_type }}
 </form>
+
 
 <div id="upload-queue"></div>
 
 {% if debug %}
 <ol id="log" style="display: none; clear: both; border: thin solid lightgrey; overflow: auto; max-height: 200px; margin-top: 20px;"></ol>
 {% endif %}
+
+{% endblock %}
+
+
+{% block javascript %}
+{{ block.super }}
+
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/vendor/jquery.ui.widget.js' %}"></script>
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/jquery.iframe-transport.js' %}"></script>
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/jquery.fileupload.js' %}"></script>
+<script>
+$(function () {
+    $('#{{ upload_form.file.id_for_label }}')
+      .attr('multiple', 'multiple')
+      .fileupload({
+        dataType: 'json',
+        add: function (e, data) {
+            data.context = $('<p/>')
+                .text('Uploading "' + data.files[0].name + '"...')
+                .appendTo($('#upload-queue'));
+            data.submit();
+        },
+        fail: function (e, data) {
+            console.log(e, data);
+            data.context.text(data.context.text() +
+                ' Upload failed (' + data.textStatus + ').');
+        },
+        done: function (e, data) {
+            console.log(e, data);
+            data.context.text(data.context.text() +
+                ' Upload finished. ' + data.result.message);
+        }
+    });
+    $('#upload-button').hide();
+    $('#{{ upload_form.response_type.id_for_label }}').attr('value', 'json');
+});
+</script>
 
 {% endblock %}
