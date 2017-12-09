@@ -18,17 +18,6 @@ class Middleware:
         if addr:
             request.META['REMOTE_ADDR'] = addr
 
-        # To support SWFUpload, copy the provided session key from POST
-        # into COOKIES
-        # since Flash does not send browser cookies with its requests
-        if (
-            request.method == 'POST' and
-            request.POST.get('swfupload') == 'true' and
-            settings.SESSION_COOKIE_NAME in request.POST
-        ):
-            request.COOKIES[settings.SESSION_COOKIE_NAME] = \
-                request.POST[settings.SESSION_COOKIE_NAME]
-
     def process_response(self, request, response):
         # Remove the Vary header for content loaded into Flash,
         # otherwise caching is broken

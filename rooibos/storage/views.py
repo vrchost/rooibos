@@ -200,20 +200,7 @@ def media_upload(request, recordid, record):
                                          mimetype=mimetype)
             media.save_file(file.name, file)
 
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': 'saved',
-                        'record': record,
-                        'sidebar': 'sidebar' in request.GET,
-                    },
-                    context_instance=RequestContext(request)
-                )
-                return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
-                    content_type='application/json'
-                )
+            # TODO: handle batch upload
 
             return HttpResponseRedirect(
                 request.GET.get('next', reverse('main')))
@@ -566,19 +553,7 @@ def import_files(request):
                     # Multiple matching records found
                     pass
 
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': result,
-                        'record': record,
-                    },
-                    context_instance=RequestContext(request)
-                )
-                return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
-                    content_type='application/json'
-                )
+            # TODO: handle batch upload
 
             messages.add_message(
                 request,
@@ -590,18 +565,8 @@ def import_files(request):
 
         else:
             # invalid form submission
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': form.errors
-                    },
-                    context_instance=RequestContext(request)
-                )
-                return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
-                    content_type='application/json'
-                )
+            # TODO: handle batch upload
+            pass
 
     else:
         form = UploadFileForm()
