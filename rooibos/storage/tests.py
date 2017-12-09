@@ -499,12 +499,12 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
             'protectedtest:test'.encode('base64').strip()
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hello world', response.content)
+        self.assertEqual('hello world', ''.join(response.streaming_content))
 
         # now logged in
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hello world', response.content)
+        self.assertEqual('hello world', ''.join(response.streaming_content))
 
 
 class AutoConnectMediaTestCase(unittest.TestCase):
