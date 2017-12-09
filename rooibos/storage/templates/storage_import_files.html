@@ -1,33 +1,6 @@
 {% extends "master.html" %}
 {% load ui %}
 
-{% block javascript %}
-{{ block.super }}
-<script type="text/javascript">
-function update_form_parameters(control) {
-	control.swfupload('removePostParam', '{{ upload_form.collection.name }}');
-	control.swfupload('removePostParam', '{{ upload_form.storage.name }}');
-	control.swfupload('removePostParam', '{{ upload_form.create_records.name }}');
-	control.swfupload('removePostParam', '{{ upload_form.personal_records.name }}');
-	control.swfupload('removePostParam', '{{ upload_form.replace_files.name }}');
-	control.swfupload('removePostParam', '{{ upload_form.multiple_files.name }}');
-	control.swfupload('addPostParam', '{{ upload_form.collection.name }}', $("#{{ upload_form.collection.auto_id }}").val());
-	control.swfupload('addPostParam', '{{ upload_form.storage.name }}', $("#{{ upload_form.storage.auto_id }}").val());
-	control.swfupload('addPostParam', '{{ upload_form.create_records.name }}', $("#{{ upload_form.create_records.auto_id }}").attr("checked") ? "on" : "");
-	control.swfupload('addPostParam', '{{ upload_form.personal_records.name }}', $("#{{ upload_form.personal_records.auto_id }}").attr("checked") ? "on" : "");
-	control.swfupload('addPostParam', '{{ upload_form.replace_files.name }}', $("#{{ upload_form.replace_files.auto_id }}").attr("checked") ? "on" : "");
-	control.swfupload('addPostParam', '{{ upload_form.multiple_files.name }}', $("#{{ upload_form.multiple_files.auto_id }}").attr("checked") ? "on" : "");
-	var limit = $("#{{ upload_form.storage.auto_id }}").val().split(',')[1];
-	control.swfupload('setFileSizeLimit', limit);
-}
-
-</script>
-
-{% include "storage_upload_js.html" %}
-
-{% endblock %}
-
-
 {% block content %}
 
 <h2>Import Media Files</h2>
@@ -76,12 +49,51 @@ function update_form_parameters(control) {
 </table>
 <span id="html-upload-control">{{ upload_form.file.label }} {{ upload_form.file }}<br /></span>
 <input type="submit" value="Upload Media" id="upload-button" />
+{{ upload_form.response_type }}
 </form>
+
 
 <div id="upload-queue"></div>
 
 {% if debug %}
 <ol id="log" style="display: none; clear: both; border: thin solid lightgrey; overflow: auto; max-height: 200px; margin-top: 20px;"></ol>
 {% endif %}
+
+{% endblock %}
+
+
+{% block javascript %}
+{{ block.super }}
+
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/vendor/jquery.ui.widget.js' %}"></script>
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/jquery.iframe-transport.js' %}"></script>
+<script src="{% url 'static' 'jQuery-File-Upload-9.19.2/js/jquery.fileupload.js' %}"></script>
+<script>
+$(function () {
+    $('#{{ upload_form.file.id_for_label }}')
+      .attr('multiple', 'multiple')
+      .fileupload({
+        dataType: 'json',
+        add: function (e, data) {
+            data.context = $('<p/>')
+                .text('Uploading "' + data.files[0].name + '"...')
+                .appendTo($('#upload-queue'));
+            data.submit();
+        },
+        fail: function (e, data) {
+            console.log(e, data);
+            data.context.text(data.context.text() +
+                ' Upload failed (' + data.textStatus + ').');
+        },
+        done: function (e, data) {
+            console.log(e, data);
+            data.context.text(data.context.text() +
+                ' Upload finished. ' + data.result.message);
+        }
+    });
+    $('#upload-button').hide();
+    $('#{{ upload_form.response_type.id_for_label }}').attr('value', 'json');
+});
+</script>
 
 {% endblock %}

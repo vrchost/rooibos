@@ -200,21 +200,6 @@ def media_upload(request, recordid, record):
                                          mimetype=mimetype)
             media.save_file(file.name, file)
 
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': 'saved',
-                        'record': record,
-                        'sidebar': 'sidebar' in request.GET,
-                    },
-                    context_instance=RequestContext(request)
-                )
-                return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
-                    content_type='application/json'
-                )
-
             return HttpResponseRedirect(
                 request.GET.get('next', reverse('main')))
         else:
@@ -434,6 +419,8 @@ def import_files(request):
         multiple_files = forms.BooleanField(
             required=False, label='Allow multiple files of same type')
         personal_records = forms.BooleanField(required=False)
+        response_type = forms.CharField(
+            required=False, widget=forms.HiddenInput)
 
         def clean(self):
             cleaned_data = self.cleaned_data
@@ -566,17 +553,10 @@ def import_files(request):
                     # Multiple matching records found
                     pass
 
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': result,
-                        'record': record,
-                    },
-                    context_instance=RequestContext(request)
-                )
+            if form.cleaned_data['response_type'] == 'json':
                 return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
+                    content=simplejson.dumps(
+                        dict(status='ok', message=result)),
                     content_type='application/json'
                 )
 
@@ -589,19 +569,7 @@ def import_files(request):
             return HttpResponseRedirect(next)
 
         else:
-            # invalid form submission
-            if request.POST.get('swfupload') == 'true':
-                html = render_to_string(
-                    'storage_import_file_response.html',
-                    {
-                        'result': form.errors
-                    },
-                    context_instance=RequestContext(request)
-                )
-                return HttpResponse(
-                    content=simplejson.dumps(dict(status='ok', html=html)),
-                    content_type='application/json'
-                )
+            pass
 
     else:
         form = UploadFileForm()
