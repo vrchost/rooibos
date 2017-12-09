@@ -117,17 +117,6 @@
     });
 </script>
 
-{% if record.id %}
-{% include "storage_upload_sidebar_js.html" %}
-<script type="text/javascript">
-$(document).ready(function() {
-    $('#upload-control').bind('uploadSuccess', function(event, file, serverData){
-        $("#record-id-{{ record.id }}").attr("src", "{{ record.get_thumbnail_url }}?" + new Date().getTime().toString());
-    });
-});
-</script>
-{% endif %}
-
 {% endblock %}
 
 
