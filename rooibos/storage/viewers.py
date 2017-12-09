@@ -109,7 +109,6 @@ class MediaPlayer(Viewer):
                 'audio': selectedmedia.mimetype.startswith('audio/'),
                 'server_url': server,
                 'autoplay': autoplay,
-                'flowplayer_key': getattr(settings, "FLOWPLAYER_KEY", None),
                 'anchor_id': divid,
             },
             context_instance=RequestContext(request)
