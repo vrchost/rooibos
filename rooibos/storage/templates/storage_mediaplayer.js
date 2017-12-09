@@ -6,11 +6,14 @@
 
 function insert_player() {
     var e = document.getElementById("{{ anchor_id }}");
+    e.style.width = '{{ selectedmedia.width|default:"520" }}px';
+    e.style.height = '{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px';
     e.innerHTML = '<video id="{{ anchor_id }}-video" controls ' +
 {% if autoplay %}
         'autoplay ' +
 {% endif %}
         'class="video-js" ' +
+        'style="width: {{ selectedmedia.width|default:"520" }}px; height: {% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px;"' +
         'width="{{ selectedmedia.width|default:"520" }}" ' +
         'height="{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}">' +
 {% if streaming_server and streaming_media %}
