@@ -260,11 +260,6 @@ SHOW_FRONTPAGE_LOGIN = 'yes'
 # See static/megazine/COPYING.
 MEGAZINE_PUBLIC_KEY = ""
 
-# To use a commercial licensed flowplayer, enter your flowplayer key here
-# and add the flowplayer.commercial-3.x.x.swf file to the
-# rooibos/static/flowplayer directory
-FLOWPLAYER_KEY = ""
-
 
 # By default, video delivery links are created as symbolic links. Some
 # streaming servers (e.g. Wowza) don't deliver those, so hard links are

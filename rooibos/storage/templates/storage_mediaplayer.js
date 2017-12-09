@@ -3,81 +3,40 @@
 
 (function() {
 {% include "viewers_loadscripts.js" %}
-var clip;
-{% if streaming_server and streaming_media %}
-clip = {
-{% if flowplayer_key %}
-    key: '{{ flowplayer_key }}',
-{% endif %}
-    clip: {
-        autoPlay: {{ autoplay|yesno:"true,false" }},
-        url: '{{ streaming_media|escapejs }}',
-{% if idevice_streaming_url %}
-        ipadUrl: '{{ idevice_streaming_url }}',
-{% endif %}
-        provider: 'influxis',
-        scaling: 'fit'
-    },
-    plugins: {
-        influxis: {
-            url: "{{ server_url }}{% static 'flowplayer/flowplayer.rtmp-3.2.3.swf' %}",
-            netConnectionUrl: '{{ streaming_server|escapejs }}'
-            {% if audio %} ,
-            durationFunc: 'getStreamLength'
-            {% endif %}
-        }
-        {% if audio %} ,
-        controls: {
-            fullscreen: false,
-            height: 30,
-            autoHide: false
-        }
-        {% endif %}
-    }
-};
-{% else %}
-clip = {
-{% if flowplayer_key %}
-    key: '{{ flowplayer_key }}',
-{% endif %}
-    clip: {
-        autoPlay: {{ autoplay|yesno:"true,false" }},
-        url: '{{ delivery_url|escapejs }}'
-        {% if audio %} ,
-        type: 'audio'
-        {% else %} ,
-        scaling: 'fit'
-        {% endif %}
-    }
-    {% if audio %} ,
-    plugins: {
-        audio: {
-            url: "{{ server_url }}{% static 'flowplayer/flowplayer.audio-3.2.1.swf' %}"
-        },
-        controls: {
-            fullscreen: false,
-            height: 30,
-            autoHide: false
-        }
-    }
-    {% endif %}
-};
-{% endif %}
 
-function insert_flowplayer() {
+function insert_player() {
     var e = document.getElementById("{{ anchor_id }}");
-    e.style.width = "{{ selectedmedia.width|default:"520" }}px";
-    e.style.height = "{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px";
-    $f("{{ anchor_id }}",
-        "{{ server_url }}{% if flowplayer_key %}{% static 'flowplayer/flowplayer.commercial-3.2.5.swf' %}{% else %}{% static 'flowplayer/flowplayer-3.2.5.swf' %}{% endif %}", clip).ipad();
+    e.style.width = '{{ selectedmedia.width|default:"520" }}px';
+    e.style.height = '{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px';
+    e.innerHTML = '<video id="{{ anchor_id }}-video" controls ' +
+{% if autoplay %}
+        'autoplay ' +
+{% endif %}
+        'class="video-js" ' +
+        'style="width: {{ selectedmedia.width|default:"520" }}px; height: {% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}px;"' +
+        'width="{{ selectedmedia.width|default:"520" }}" ' +
+        'height="{% if audio %}30{% else %}{{ selectedmedia.height|default:"330" }}{% endif %}">' +
+{% if streaming_server and streaming_media %}
+        '<source src="{{ streaming_media }}" type="{{ selectedmedia.mimetype }}">' +
+{% else %}
+        '<source src="{{ delivery_url }}" type="{{ selectedmedia.mimetype }}">' +
+{% endif %}
+        '</video>';
+    videojs("{{ anchor_id }}");
 }
 
-if (typeof(flowplayer) == "function") {
-    insert_flowplayer();
+if (typeof(videojs) == "function") {
+    insert_player();
 } else {
+
+    var stylesheet = document.createElement("link");
+    stylesheet.type = "text/css";
+    stylesheet.rel = "stylesheet";
+    stylesheet.href = "{{ server_url }}{% static 'video-js-6.5.1/video-js.css' %}";
+    document.getElementsByTagName("head")[0].appendChild(stylesheet);
+
     load_scripts([
-        "{{ server_url }}{% static 'flowplayer/flowplayer-3.2.4.modified.js' %}",
-        "{{ server_url }}{% static 'flowplayer/flowplayer.ipad-3.2.1.min.js' %}"
-        ], insert_flowplayer);
+        "{{ server_url }}{% static 'video-js-6.5.1/video.js' %}"
+        ], insert_player);
 }
 })();

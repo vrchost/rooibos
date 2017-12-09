@@ -11,7 +11,6 @@ solr/collection1/data/tlog
 solr/collection1/data/index/_*
 config.xml
 CACHE
-rooibos/static/flowplayer/flowplayer.commercial*
 bin-debug/
 unused_bin/
 .metadata/

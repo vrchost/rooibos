@@ -22,6 +22,7 @@ from django.template.defaultfilters import filesizeformat
 from models import Media, Storage, TrustedSubnet, ProxyUrl
 from rooibos.access.functions import filter_by_access
 from ipaddr import IPAddress, IPNetwork
+from ranged_fileresponse import RangedFileResponse
 from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield
 from rooibos.storage import get_media_for_record, get_image_for_record, \
@@ -66,28 +67,50 @@ def retrieve(request, recordid, record, mediaid, media):
     # disposition, which keeps e.g. the PDF viewer built into Google Chrome
     # from working
     inline = request.GET.has_key('inline')
+    name = smart_str(mediaobj.url)
 
-    try:
-        content = mediaobj.load_file()
-    except IOError:
-        logging.error("mediaobj.load_file() failed for media.id %s" % mediaid)
-        raise Http404()
+    if mediaobj.is_local():  # support byte range requests
+
+        try:
+            content_file = mediaobj.get_absolute_file_path()
+        except IOError:
+            logging.error(
+                "mediaobj.get_absolute_file_path() failed for media.id %s" %
+                mediaid)
+            raise Http404()
+
+        retval = RangedFileResponse(
+            request,
+            open(content_file, 'r'),
+            content_type=str(mediaobj.mimetype)
+        )
+
+    else:
+
+        try:
+            content = mediaobj.load_file()
+        except IOError:
+            logging.error(
+                "mediaobj.load_file() failed for media.id %s" % mediaid)
+            raise Http404()
+
+        if content:
+            retval = HttpResponse(
+                content=content,
+                content_type=str(mediaobj.mimetype)
+            )
+        else:
+            inline = True
+            retval = HttpResponseRedirect(mediaobj.get_absolute_url())
+
+    if not inline:
+        retval["Content-Disposition"] = \
+            'attachment; filename="%s"' % name
 
     Activity.objects.create(event='media-download',
                             request=request,
                             content_object=mediaobj)
-    if content:
-        response = HttpResponse(
-            content=content,
-            content_type=str(mediaobj.mimetype)
-        )
-        name = smart_str(mediaobj.url)
-        if not inline:
-            response["Content-Disposition"] = \
-                'attachment; filename="%s"' % name
-        return response
-    else:
-        return HttpResponseRedirect(mediaobj.get_absolute_url())
+    return retval
 
 
 @add_content_length
