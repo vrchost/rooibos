@@ -389,10 +389,13 @@ Display metadata as: {{ fieldsetform.fieldset }}
     {% endif %}
 </h2>
 
+
+{% if fieldsetform %}
 <form method="GET" action="" class="submit-on-select-change">
     Edit using fields template: {{ fieldsetform.fieldset }}
     <input type="submit" value="Edit" />
 </form>
+{% endif %}
 
 
 <form method="POST" action="">{% csrf_token %}

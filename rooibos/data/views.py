@@ -446,6 +446,10 @@ def record(request, id, name, contexttype=None, contextid=None,
     else:
         upload_url = None
 
+    # In edit mode, optionally hide fieldset dropdown
+    if formset and getattr(settings, 'HIDE_RECORD_FIELDSETS', False):
+        fieldsetform = None
+
     return render_to_response(
         'data_record.html',
         {

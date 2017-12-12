@@ -397,6 +397,8 @@ MASTER_TEMPLATE = 'master_root.html'
 
 
 RECORD_DEFAULT_FIELDSET = 'dc'
+HIDE_RECORD_FIELDSETS = False
+
 
 RABBITMQ_OPTIONS = {
     'host': 'localhost',
