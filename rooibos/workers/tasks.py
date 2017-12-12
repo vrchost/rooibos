@@ -1,10 +1,21 @@
 from __future__ import absolute_import, unicode_literals
+import os
 import time
+from datetime import datetime
+from django.conf import settings
 from ..celeryapp import owned_task
+
+
+def _get_scratch_dir():
+    path = os.path.join(settings.SCRATCH_DIR, 'job-attachment-test')
+    if not os.path.exists(path):
+        os.makedirs(path)
+    return path
 
 
 @owned_task(removeuserarg=True)
 def testjob(self):
+    results = []
     for i in range(10):
         if not self.request.called_directly:
             self.update_state(
@@ -13,5 +24,12 @@ def testjob(self):
                     'percent': i * 10,
                 }
             )
+            results.append('Completed %d%% at %s\n' % (i * 10, datetime.now()))
         time.sleep(1)
-    return True
+    attachment = os.path.join(
+        _get_scratch_dir(), 'testjob-%s.txt' % self.request.id)
+    with open(attachment, 'w') as attachment_file:
+        attachment_file.writelines(results)
+    return {
+        'attachment': attachment,
+    }

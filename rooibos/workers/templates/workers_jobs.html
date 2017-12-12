@@ -2,6 +2,7 @@
 {% load pagination_tags %}
 {% load humanize %}
 {% load ui %}
+{% load workers %}
 
 {% block sidebar %}
 {% var as related_pages %}
@@ -75,7 +76,7 @@
     <td>{{ job.status }}</td>
     <td>{{ job.created|naturalday }} {{ job.created|time }}</td>
     <td>{{ job.date_done|naturalday }} {{ job.date_done|time }}<br />({{ job.date_done|timesince }})</td>
-    <td>{{ job.result|default:"-" }}</td>
+    <td>{{ job.result|default:"-"|format_worker_result }}</td>
     <td style="text-align: center;">{% if job.completed or request.user.is_superuser %}<input type="checkbox" value="{{ job.id }}" name="r" />{% endif %}</td>
 </tr>
 {% endfor %}

@@ -1,9 +1,10 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from .models import OwnedTaskResult
-from .tasks import testjob
+from .tasks import testjob, _get_scratch_dir
+import os
 
 
 @login_required
@@ -35,3 +36,12 @@ def joblist(request):
                                'highlight': highlight,
                                },
                               context_instance=RequestContext(request))
+
+
+@login_required
+def download_attachment(request, url):
+    attachment = os.path.join(_get_scratch_dir(), url)
+    retval = HttpResponse(content=open(attachment, 'rb'))
+    retval["Content-Disposition"] = \
+            'attachment; filename="%s"' % url
+    return retval
