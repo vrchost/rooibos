@@ -31,3 +31,19 @@ def format_worker_result(result):
         return SafeString(''.join(lines))
     except (AttributeError, TypeError):
         return result
+
+
+@register.filter
+def format_worker_args(result):
+    try:
+        data = json.loads(result)
+        if 'args' not in data or 'kwargs' not in data:
+            return result
+    except (ValueError, TypeError):
+        return result
+
+    lines = [repr(arg) for arg in data['args']] + [
+        '<strong>%s:</strong> %r' % (key, value)
+        for key, value in data['kwargs'].iteritems()
+    ]
+    return SafeString('<br />'.join(lines))

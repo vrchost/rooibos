@@ -71,7 +71,7 @@
 {% endif %}
     <td>{{ job.function }}</td>
 {% if request.user.is_superuser %}
-    <td class="job-args">{{ job.args }}</td>
+    <td class="job-args">{{ job.args|format_worker_args }}</td>
 {% endif %}
     <td>{{ job.status }}</td>
     <td>{{ job.created|naturalday }} {{ job.created|time }}</td>
