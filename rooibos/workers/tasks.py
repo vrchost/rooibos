@@ -7,9 +7,15 @@ from ..celeryapp import owned_task
 
 
 def _get_scratch_dir():
-    path = os.path.join(settings.SCRATCH_DIR, 'job-attachment-test')
+    path = os.path.join(settings.SCRATCH_DIR, 'job-attachment')
     if not os.path.exists(path):
         os.makedirs(path)
+    return path
+
+
+def get_attachment(request):
+    name = '%s-%s' % (request.task_name, request.id)
+    path = os.path.join(_get_scratch_dir(), name)
     return path
 
 
@@ -26,8 +32,7 @@ def testjob(self):
             )
             results.append('Completed %d%% at %s\n' % (i * 10, datetime.now()))
         time.sleep(1)
-    attachment = os.path.join(
-        _get_scratch_dir(), 'testjob-%s.txt' % self.request.id)
+    attachment = get_attachment(self.request)
     with open(attachment, 'w') as attachment_file:
         attachment_file.writelines(results)
     return {
