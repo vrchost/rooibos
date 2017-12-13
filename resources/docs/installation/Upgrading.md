@@ -1,12 +1,86 @@
-# Upgrading from MDID 3.2 or later
+# Upgrading from MDID 3.3.x
 
-To upgrade an installation of MDID 3.2 or later, just replace the old
+To upgrade an installation of MDID 3.3 or later, replace the old
 package folder with the new package, keeping your `rooibos_settings` and
 any other custom files and folders in place.
 
 Afterwards, run `django-admin migrate` to apply any database changes.
 
-See a more detailed list of changes in CHANGELOG.md.
+
+# Upgrading from MDID 3.2.x
+
+To upgrade an installation of MDID 3.2.x, replace the old
+package folder with the new package, keeping your `rooibos_settings` and
+any other custom files and folders in place.
+
+## Update virtual environment
+```
+sudo -iu mdid  # switch to mdid user
+cd /opt/mdid
+virtualenv venv
+source venv/bin/activate
+pip install --allow-external --upgrade -r rooibos/requirements.txt
+```
+
+## Migrate database
+
+Run `django-admin migrate` to apply any database changes.
+
+## Update supervisor configuration
+
+### Ubuntu
+
+Edit the file `/etc/supervisor/conf.d/mdid.conf` and completely remove the
+`[program:mdid_worker]` section.
+
+Change the `[group:mdid]` section to
+```
+programs=mdid_app,celery,celery_solr,celery_beat
+```
+
+Add the following sections at the end of the file:
+
+```
+[program:celery]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@%h
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery.log
+
+[program:celery_solr]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@%h
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-solr.log
+
+[program:celery_beat]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/celery -A rooibos beat -s /opt/mdid/celerybeat-schedule -l info --pidfile=/tmp/celerybeat.pid
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-beat.log
+```
+
+Load the configuration:
+```
+supervisorctl reload
+```
+
+### CentOS
+
+Follow the Ubuntu instructions above, but the supervisor configuration
+file is located at `/etc/supervisord.d/mdid.ini`.
 
 
 # Upgrading from MDID 3.0 or 3.1
