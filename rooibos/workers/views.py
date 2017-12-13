@@ -26,10 +26,7 @@ def joblist(request):
 
         return HttpResponseRedirect(request.get_full_path())
 
-    try:
-        highlight = int(request.GET.get('highlight'))
-    except (ValueError, TypeError):
-        highlight = None
+    highlight = request.GET.get('highlight')
 
     return render_to_response("workers_jobs.html",
                               {'jobs': jobs,

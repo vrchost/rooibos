@@ -64,9 +64,9 @@
     <th id="remove-col" style="text-align: center;"></th>
 </tr>
 {% for job in jobs %}
-<tr class="{% cycle '' 'altrow' %}{% ifequal highlight job.id %} highlight-row{% endifequal %}">
+<tr class="{% cycle '' 'altrow' %}{% ifequal highlight job.task_id %} highlight-row{% endifequal %}{% ifequal highlight job.id %} highlight-row{% endifequal %}">
 {% if request.user.is_superuser %}
-    <td>{{ job.id }}</td>
+    <td>{{ job.id }} <!-- {{ job.task_id }} --></td>
     <td>{{ job.owner.username }}</td>
 {% endif %}
     <td>{{ job.function }}</td>
@@ -81,7 +81,7 @@
 </tr>
 {% endfor %}
 <tr>
-    <td colspan="{% if request.user.is_superuser %}9{% else %}6{% endif %}"></td>
+    <td colspan="{% if request.user.is_superuser %}8{% else %}5{% endif %}"></td>
     <td><input type="submit" name="remove" value="Remove" /></td>
 </tr>
 </table>
