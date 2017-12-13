@@ -1,8 +1,12 @@
 import mimetypes
 import os
+from datetime import datetime
 from rooibos.storage.models import Media, Storage
 from rooibos.data.models import Collection
-from rooibos.storage import match_up_media
+from rooibos.storage import match_up_media, analyze_media
+from rooibos.access.functions import filter_by_access
+from django.contrib.auth.models import User
+from rooibos.workers.tasks import get_attachment
 from ..celeryapp import owned_task
 
 
@@ -48,4 +52,25 @@ def storage_match_up_media(
         'allow_multiple_use': allow_multiple_use,
         'count': count + 1,
         'created': created,
+    }
+
+
+@owned_task()
+def analyze_media_task(self, owner, storage_id):
+    storage = filter_by_access(
+        User.objects.get(id=owner),
+        Storage.objects.filter(id=storage_id), manage=True)[0]
+    broken, extra = analyze_media(storage, True)
+    broken = [m.url for m in broken]
+    attachment = get_attachment(self)
+    with open(attachment, 'w') as report:
+        report.write('Analyze Report for Storage %s (%d)\n\n' % (
+            storage.name, storage.id))
+        report.write('Created on %s\n\n' % datetime.now())
+        report.write('%d MISSING FILES:\n' % len(broken))
+        report.write('\n'.join(sorted(broken)))
+        report.write('\n\n%d EXTRA FILES:\n' % len(extra))
+        report.write('\n'.join(sorted(extra)))
+    return {
+        'attachment': attachment,
     }

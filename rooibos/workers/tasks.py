@@ -13,8 +13,8 @@ def _get_scratch_dir():
     return path
 
 
-def get_attachment(request):
-    name = '%s-%s' % (request.task_name, request.id)
+def get_attachment(self):
+    name = '%s-%s.txt' % (self.name.split('.')[-1], self.request.id)
     path = os.path.join(_get_scratch_dir(), name)
     return path
 
@@ -32,7 +32,7 @@ def testjob(self):
             )
             results.append('Completed %d%% at %s\n' % (i * 10, datetime.now()))
         time.sleep(1)
-    attachment = get_attachment(self.request)
+    attachment = get_attachment(self)
     with open(attachment, 'w') as attachment_file:
         attachment_file.writelines(results)
     return {

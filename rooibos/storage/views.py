@@ -33,7 +33,7 @@ from rooibos.statistics.models import Activity
 import logging
 import os
 import mimetypes
-from .tasks import storage_match_up_media
+from .tasks import storage_match_up_media, analyze_media_task
 
 
 def add_content_length(func):
@@ -676,20 +676,15 @@ def match_up_files(request):
 
 
 @login_required
-def analyze(request, id, name, allow_multiple_use=True):
-    storage = get_object_or_404(filter_by_access(
-        request.user, Storage.objects.filter(id=id), manage=True))
-    broken, extra = analyze_media(storage, allow_multiple_use)
-    broken = [m.url for m in broken]
-    return render_to_response(
-        'storage_analyze.html',
-        {
-            'storage': storage,
-            'broken': sorted(broken),
-            'extra': sorted(extra),
-        },
-        context_instance=RequestContext(request)
+def analyze(request, id, name):
+    task = analyze_media_task.delay(owner=request.user.id, storage_id=id)
+    messages.add_message(
+        request,
+        messages.INFO,
+        message='Analyze job has been submitted.'
     )
+    return HttpResponseRedirect(
+        "%s?highlight=%s" % (reverse('workers-jobs'), task.id))
 
 
 @login_required

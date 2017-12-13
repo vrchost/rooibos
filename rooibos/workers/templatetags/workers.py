@@ -1,6 +1,6 @@
 from django import template
 from django.utils.safestring import SafeString
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 import json
 import os
 
@@ -29,7 +29,7 @@ def format_worker_result(result):
                     url, name)
             lines.append('%s: %s<br />' % (key, value))
         return SafeString(''.join(lines))
-    except (AttributeError, TypeError):
+    except (AttributeError, TypeError, NoReverseMatch):
         return result
 
 
