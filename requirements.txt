@@ -18,7 +18,7 @@
 beautifulsoup
 boto
 django-cas-ng
-django-compressor
+django-compressor==2.2
 django-extensions
 django-pagination
 django-pyodbc
