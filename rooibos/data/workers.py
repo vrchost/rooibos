@@ -57,7 +57,8 @@ def csvimport(job):
             def handler(id):
                 counter.counter += 1
                 jobinfo.update_status('processing row %s' % counter.counter)
-                outwriter.writerow([';'.join(id) if id else '', event])
+                outwriter.writerow(
+                    [';'.join(id).encode('utf-8') if id else '', event])
             return handler
 
         counter = Counter()
