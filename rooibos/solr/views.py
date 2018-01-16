@@ -849,7 +849,7 @@ def browse(request, id=None, name=None):
             num_records=Count('records')).filter(
             num_records__gt=0)
 
-    collections = collections.order_by('title')
+    collections = collections.order_by('order', 'title')
 
     if not collections:
         return render_to_response(
