@@ -829,6 +829,13 @@ def _get_browse_fields(collection_id):
         ids = list(
             query.order_by().distinct().values_list('field_id', flat=True))
         fields = list(Field.objects.filter(id__in=ids))
+        # order fields by order specified in field set, if any
+        if fieldset:
+            order = dict(
+                FieldSetField.objects.filter(fieldset=fieldset)
+                    .values_list('field','order')
+            )
+            fields = sorted(fields, key=lambda f: order.get(f.id, 999999))
         cache.set('browse_fields_%s' % collection_id,
                   [f.id for f in fields], 60)
     return fields
