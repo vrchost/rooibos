@@ -51,11 +51,12 @@ class SearchFacet(object):
         else:
             self.facets = facets
 
-    def clean_result(self, hits):
+    def clean_result(self, hits, sort=True):
         # sort facet items and remove the ones that match all hits
         self.facets = filter(lambda f: f[1] < hits,
                              getattr(self, 'facets', None) or [])
-        self.facets = sorted(self.facets,
+        if sort:
+            self.facets = sorted(self.facets,
                              key=lambda f: len(f) > 2 and f[2] or f[0])
 
     def or_available(self):
@@ -199,8 +200,10 @@ class CollectionSearchFacet(SearchFacet):
     def set_result(self, facets):
         result = []
         if facets:
-            for id, title in Collection.objects.filter(
-                    id__in=map(int, facets.keys())).values_list('id', 'title'):
+            collections = Collection.objects.filter(
+                id__in=map(int, facets.keys())
+            ).order_by('order', 'title').values_list('id', 'title')
+            for id, title in collections:
                 result.append((id, facets[str(id)], title))
         super(CollectionSearchFacet, self).set_result(result)
 
@@ -211,6 +214,11 @@ class CollectionSearchFacet(SearchFacet):
 
     def federated_search_query(self, value):
         return ''
+
+    # Override to not sort alphabetically
+    def clean_result(self, hits):
+        return super(CollectionSearchFacet, self).clean_result(
+            hits, sort=False)
 
 
 _special = re.compile(r'(\+|-|&&|\|\||!|\(|\)|\{|}|\[|\]|\^|"|~|\*|\?|:|\\)')
