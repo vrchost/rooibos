@@ -1,8 +1,11 @@
 # Upgrading from MDID 3.2 or later
 
 To upgrade an installation of MDID 3.2 or later, just replace the old
-package folder with the new package, keeping your `rooibos_settings` and
-any other custom files and folders in place.
+package folder with the new package, keeping your local settings file
+and any other custom files and folders in place.  Remember to update
+other files in `rooibos_settings` though.
+
+Run `pip install -r requirements.txt` to update and install new requirements.
 
 Afterwards, run `django-admin migrate` to apply any database changes.
 
