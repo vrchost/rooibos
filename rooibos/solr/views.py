@@ -817,7 +817,8 @@ def search_json(request, id=None, name=None, selected=False):
 
 def _get_browse_fields(collection_id):
     fields = cache.get('browse_fields_%s' % collection_id)
-    if fields:
+    order = cache.get('browse_fields_order_%s' % collection_id)
+    if fields and order:
         fields = list(Field.objects.filter(id__in=fields))
     else:
         # check if fieldset for browsing exists
@@ -841,11 +842,14 @@ def _get_browse_fields(collection_id):
         if fieldset:
             order = dict(
                 FieldSetField.objects.filter(fieldset=fieldset)
-                    .values_list('field','order')
+                    .values_list('field', 'order')
             )
-            fields = sorted(fields, key=lambda f: order.get(f.id, 999999))
+        else:
+            order = dict()
         cache.set('browse_fields_%s' % collection_id,
                   [f.id for f in fields], 60)
+        cache.set('browse_fields_order_%s' % collection_id, order)
+    fields = sorted(fields, key=lambda f: order.get(f.id, 1000000 + f.id))
     return fields
 
 
