@@ -247,8 +247,10 @@ def media_delete(request, mediaid, medianame):
 @add_content_length
 @cache_control(private=True, max_age=3600)
 def record_thumbnail(request, id, name):
+    force_reprocess = request.GET.get('reprocess') == 'true'
     filename = get_thumbnail_for_record(
-        id, request.user, crop_to_square='square' in request.GET)
+        id, request.user, crop_to_square='square' in request.GET,
+        force_reprocess=force_reprocess)
     if filename:
         Activity.objects.create(
             event='media-thumbnail',

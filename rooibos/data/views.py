@@ -439,7 +439,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         upload_url = (
             "%s?sidebar&next=%s" % (
                 reverse('storage-media-upload', args=(record.id, record.name)),
-                request.get_full_path()
+                request.get_full_path() + '?refreshthumb=1'
             )
         )
     else:

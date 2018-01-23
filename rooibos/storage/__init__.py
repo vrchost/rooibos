@@ -188,9 +188,11 @@ def get_image_for_record(
         return m.get_absolute_file_path()
 
 
-def get_thumbnail_for_record(record, user=None, crop_to_square=False):
+def get_thumbnail_for_record(record, user=None, crop_to_square=False,
+                             force_reprocess=False):
     return get_image_for_record(
-        record, user, width=100, height=100, crop_to_square=crop_to_square)
+        record, user, width=100, height=100, crop_to_square=crop_to_square,
+        force_reprocess=force_reprocess)
 
 
 def find_record_by_identifier(
