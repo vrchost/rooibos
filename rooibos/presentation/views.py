@@ -576,9 +576,37 @@ def duplicate(request, id, name):
         filter_by_access(request.user, Presentation, write=True, manage=True).
         filter(id=id)
     )
-    dup = duplicate_presentation(presentation, request.user)
-    return HttpResponseRedirect(
-        reverse('presentation-edit', args=(dup.id, dup.name)))
+    target_user = None
+    username = request.POST.get('user')
+    if username:
+        try:
+            target_user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            messages.add_message(
+                request,
+                messages.INFO,
+                message="No user with username '%s' exists." %
+                        username
+            )
+            return HttpResponseRedirect(
+                reverse('presentation-edit',
+                        args=(presentation.id, presentation.name)))
+
+    dup = duplicate_presentation(presentation, target_user or request.user)
+
+    if not target_user:
+        return HttpResponseRedirect(
+            reverse('presentation-edit', args=(dup.id, dup.name)))
+    else:
+        messages.add_message(
+            request,
+            messages.INFO,
+            message="A copy of the presentation was created for user '%s'." %
+                    username
+        )
+        return HttpResponseRedirect(
+            reverse('presentation-edit',
+                    args=(presentation.id, presentation.name)))
 
 
 @login_required

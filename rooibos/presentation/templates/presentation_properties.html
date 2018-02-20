@@ -439,6 +439,11 @@
         <form action="{% url "presentation-duplicate" presentation.id presentation.name %}" method="POST">{% csrf_token %}
         <input type="submit" name="duplicate-presentation" value="Duplicate presentation" />
         </form>
+        <br />
+        <form action="{% url "presentation-duplicate" presentation.id presentation.name %}" method="POST">{% csrf_token %}
+            User: <input type="text" class="autocomplete-user" name="user" /><br />
+            <input type="submit" name="duplicate-presentation" value="Give a copy" />
+        </form>
     </div>
   </div>
 
