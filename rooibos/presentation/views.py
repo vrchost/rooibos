@@ -320,11 +320,20 @@ def browse(request, manage=False):
         qs = load_settings(
             request.user, filter='presentation_browse_querystring')
         if 'presentation_browse_querystring' in qs:
+
+            # Don't restore the "untagged only" setting, as it confuses
+            # a lot of users
+            args = qs['presentation_browse_querystring'][0]
+            args = '&'.join(
+                p for p in args.split('&')
+                if not p.startswith('ut=')
+            )
+
             return HttpResponseRedirect(
                 '%s?%s' % (
                     reverse('presentation-manage'
                             if manage else 'presentation-browse'),
-                    qs['presentation_browse_querystring'][0],
+                    args,
                 )
             )
 
