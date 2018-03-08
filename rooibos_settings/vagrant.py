@@ -38,15 +38,15 @@ SECONDARY_COLOR = "rgb(118, 167, 154)"
 
 USE_X_FORWARDED_HOST = True
 
-CAS_SERVER_URL = "https://cas.example.edu/cas-external/"
+#CAS_SERVER_URL = "https://cas.example.edu/cas-external/"
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
-    "django_cas_ng.backends.CASBackend",
+#    "django_cas_ng.backends.CASBackend",
 )
 MIDDLEWARE_CLASSES += (
     "rooibos.auth.middleware.BasicAuthenticationMiddleware",
-    "django_cas_ng.middleware.CASMiddleware",
+#    "django_cas_ng.middleware.CASMiddleware",
 )
 INSTALLED_APPS += (
-    'django_cas_ng',
+#    'django_cas_ng',
 )
