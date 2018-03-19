@@ -15,8 +15,8 @@ angular.module('clientApp', ['bw.paging'])
 })
 
 .controller('MainController', [
-    '$scope', '$http', '$timeout', '$window',
-    function ($scope, $http, $timeout, $window) {
+    '$scope', '$http', '$timeout', '$window', '$filter',
+    function ($scope, $http, $timeout, $window, $filter) {
 
         var getKeyword = function () {
             var args = window.location.search.split(/[&?]/);
@@ -45,8 +45,6 @@ angular.module('clientApp', ['bw.paging'])
         $scope.formatting = {
             fullThumbs: false
         };
-
-        $scope.metadata = [];
 
         var timeoutPromise;
 
@@ -108,7 +106,7 @@ angular.module('clientApp', ['bw.paging'])
             }
             $timeout(function () {
                 $scope.metadataBox = angular
-                    .element('.work.selected ~ .metadata')
+                    .element('.work.selected ~ .metadatabox')
                     .filter(':visible:first')
                     .html(html);
 
@@ -133,6 +131,22 @@ angular.module('clientApp', ['bw.paging'])
             });
         };
 
+        var makeMetadataSidebar = function () {
+            var work = $filter('encodeURIComponent')($scope.selectedRecord.works[0]);
+            var imgsrc = $scope.selectedRecord.image + '400x400/';
+            var link = '<a href="/explore/explore/?c=work:' + work + '" target="_blank">';
+            var img = '<img src="' + imgsrc + '" />';
+            return '<div class="metadata-sidebar">' +
+                    link +
+                    img +
+                    '<br />' +
+                    '<span class="btn btn-primary all-images">' +
+                    'All images for this work' +
+                    '</span>' +
+                    '</a>' +
+                    '</div>';
+        };
+
         $scope.select = function ($event, record) {
             var selected = record.selected;
             if ($scope.selectedRecord) {
@@ -143,16 +157,10 @@ angular.module('clientApp', ['bw.paging'])
             if (record.selected) {
                 $scope.selectedRecord = record;
                 populateMetadataBox('Loading...');
-                $http.jsonp(
-                    '/works/metadata/' + record.id + '/' +
-                    '?callback=JSON_CALLBACK'
-                ).success(function (data) {
-                    $scope.metadata = data.data;
-                    $timeout(function () {
-                        populateMetadataBox(
-                            angular.element('.metadata-renderer').html()
-                        );
-                    });
+                $http.get(
+                    '/data/record-preview/' + record.id + '/'
+                ).success(function (html) {
+                    populateMetadataBox(makeMetadataSidebar() + html);
                 }).error(function () {
                     populateMetadataBox('An error occurred loading metadata');
                 });
@@ -248,14 +256,6 @@ angular.module('clientApp', ['bw.paging'])
     background-color: rgba(50, 50, 50, .8);
 }
 
-.work-metadata {
-    left: 260px;
-    right: 10px;
-    height: 240px;
-    background-color: yellow;
-    position: absolute;
-}
-
 .work.selected .metadata-arrow-box {
   position: relative;
   background: #88b7d5;
@@ -280,7 +280,7 @@ angular.module('clientApp', ['bw.paging'])
   margin-left: -22px;
 }
 
-.metadata {
+.metadatabox {
   background-color: white;
   padding: 10px;
   border: solid 4px #88b7d5;
@@ -298,14 +298,6 @@ angular.module('clientApp', ['bw.paging'])
     margin-top: 10px;
 }
 
-.metadata-values {
-    width: 60%;
-}
-
-.metadata-label {
-    font-weight: bold;
-}
-
 .odd-row {
     background-color: #f3f3ff;
 }
@@ -315,60 +307,84 @@ angular.module('clientApp', ['bw.paging'])
     border-color: rgb(136, 183, 213);
 }
 
-.metadata:nth-child(2n) {
+.metadatabox:nth-child(2n) {
   display: none;
 }
-.work.selected ~ .metadata:nth-child(4n) {
+.work.selected ~ .metadatabox:nth-child(4n) {
   display: block;
 }
-.work.selected ~ .metadata:nth-child(4n) ~ .metadata { /* specificity 5 */
+.work.selected ~ .metadatabox:nth-child(4n) ~ .metadatabox { /* specificity 5 */
   display: none;
 }
 
 
 @media (min-width: 768px) {
-  .work.selected ~ .metadata:nth-child(4n) {
+  .work.selected ~ .metadatabox:nth-child(4n) {
     display: none;
   }
-  .work.selected ~ .metadata.s1:nth-child(6n) {
+  .work.selected ~ .metadatabox.s1:nth-child(6n) {
     display: block;
   }
-  .work.selected ~ .metadata.s1:nth-child(6n) ~ .metadata {
+  .work.selected ~ .metadatabox.s1:nth-child(6n) ~ .metadatabox {
     display: none;
   }
 }
 
 @media (min-width: 992px) {
-  .work.selected ~ .metadata.s1:nth-child(6n) {
+  .work.selected ~ .metadatabox.s1:nth-child(6n) {
     display: none;
   }
-  .work.selected ~ .metadata.s1.s2:nth-child(8n) {
+  .work.selected ~ .metadatabox.s1.s2:nth-child(8n) {
     display: block;
   }
-  .work.selected ~ .metadata.s1.s2:nth-child(8n) ~ .metadata {
+  .work.selected ~ .metadatabox.s1.s2:nth-child(8n) ~ .metadatabox {
     display: none;
   }
 }
 
 @media (min-width: 1200px) {
-  .work.selected ~ .metadata.s1.s2:nth-child(8n) {
+  .work.selected ~ .metadatabox.s1.s2:nth-child(8n) {
     display: none;
   }
-  .work.selected ~ .metadata.s1.s2.s3:nth-child(12n) {
+  .work.selected ~ .metadatabox.s1.s2.s3:nth-child(12n) {
     display: block;
   }
-  .work.selected ~ .metadata.s1.s2.s3:nth-child(12n) ~ .metadata {
+  .work.selected ~ .metadatabox.s1.s2.s3:nth-child(12n) ~ .metadatabox {
     display: none;
   }
 }
 
-.work.selected ~ .metadata.s1.s2.s3:last-child {
+.work.selected ~ .metadatabox.s1.s2.s3:last-child {
   display: block;
 }
 
 [ng\:cloak], [ng-cloak], .ng-cloak {
   display: none !important;
 }
+
+
+div.metadata div.label {
+    font-size: 100%;
+    color: black;
+    line-height: normal;
+}
+
+.record-preview .altrow {
+    background-color: rgb(247, 247, 247);
+}
+
+.record-preview div.metadata div.label {
+    width: 180px;
+}
+
+/* Hide download link */
+.record-preview div.metadata {
+    display: none;
+}
+.record-preview div.metadata:first-child {
+    display: block;
+}
+
 
 </style>
 
@@ -424,32 +440,13 @@ angular.module('clientApp', ['bw.paging'])
         </div>
 
         <div ng-repeat-end="record in results.records"
-             class="col-lg-12 col-md-12 col-sm-12 col-xs-12 metadata s1 s2 s3"
+             class="col-lg-12 col-md-12 col-sm-12 col-xs-12 metadatabox s1 s2 s3"
                 >
             Loading...
         </div>
 
     </div>
 
-</div>
-
-
-<div class="metadata-renderer" style="display: none">
-    <div class="metadata-sidebar">
-        <a ng-href="/explore/explore/?c=work:{% templatetag openvariable %}selectedRecord.works[0] | encodeURIComponent{% templatetag closevariable %}" target="_blank">
-            <img ng-src="{% templatetag openvariable %}selectedRecord.image + '400x400/'{% templatetag closevariable %}" />
-            <br />
-            <span class="btn btn-primary all-images">
-                All images for this work
-            </span>
-        </a>
-    </div>
-    <div class="metadata-values">
-        <div ng-repeat="item in metadata" ng-class-odd="'odd-row'">
-            <span ng-bind="item.label" class="metadata-label"></span>:
-            <span ng-bind="item.value" class="metadata-value"></span>
-        </div>
-    </div>
 </div>
 
 

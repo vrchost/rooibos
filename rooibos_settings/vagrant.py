@@ -1,7 +1,7 @@
 from .base import *  # NOQA
 
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['localhost']
 
 # Make this unique, and don't share it with anybody.
@@ -49,4 +49,12 @@ MIDDLEWARE_CLASSES += (
 )
 INSTALLED_APPS += (
 #    'django_cas_ng',
+)
+
+COMPACT_METADATA_VIEW = True
+
+EXPOSE_TO_CONTEXT = (
+    "STATIC_DIR", "PRIMARY_COLOR", "SECONDARY_COLOR", "CUSTOM_TRACKER_HTML",
+    "ADMINS", "LOGO_URL", "FAVICON_URL", "COPYRIGHT", "CAS_SERVER_URL",
+    "WORKS", "COMPACT_METADATA_VIEW", "MASTER_TEMPLATE",
 )
