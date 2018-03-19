@@ -248,7 +248,7 @@ class Media(models.Model):
 
     def delete_file(self):
         self.clear_derivatives()
-        if self.storage:
+        if self.storage and self.url:
             return self.storage.storage_system.delete(self.url)
         else:
             return False
