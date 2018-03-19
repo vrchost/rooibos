@@ -51,7 +51,6 @@ angular.module('clientApp', ['bw.paging'])
         var timeoutPromise;
 
         $scope.$watch('search.keyword', function () {
-            console.log('watch');
             $timeout.cancel(timeoutPromise);
             timeoutPromise = $timeout(function () {
                 $scope.results = {
@@ -85,7 +84,6 @@ angular.module('clientApp', ['bw.paging'])
             }
             var url = '/works/search/' +
                 '?callback=JSON_CALLBACK&' + args.join('&');
-            console.log('requesting', url);
             $http.jsonp(
                 url
             ).success(function (data) {
@@ -96,7 +94,6 @@ angular.module('clientApp', ['bw.paging'])
                 $scope.results.hits = data.hits;
                 $scope.results.records = $scope.results.records.concat(data.records);
                 $scope.loading = false;
-                console.log('success', $scope, data);
             }).error(function () {
                 $scope.loading = false;
                 console.log('error');
@@ -110,14 +107,10 @@ angular.module('clientApp', ['bw.paging'])
                 $scope.metadataBox = undefined;
             }
             $timeout(function () {
-                console.log('A');
                 $scope.metadataBox = angular
                     .element('.work.selected ~ .metadata')
                     .filter(':visible:first')
                     .html(html);
-                console.log('B');
-
-                console.log($scope.metadataBox);
 
                 var $window = angular.element(window);
                 var windowTop = $window.scrollTop();
@@ -154,7 +147,6 @@ angular.module('clientApp', ['bw.paging'])
                     '/works/metadata/' + record.id + '/' +
                     '?callback=JSON_CALLBACK'
                 ).success(function (data) {
-                    console.log('metadata', data);
                     $scope.metadata = data.data;
                     $timeout(function () {
                         populateMetadataBox(
