@@ -42,6 +42,7 @@ class Collection(models.Model):
 
     class Meta:
         ordering = ['order', 'title']
+        app_label = 'data'
 
     def save(self, **kwargs):
         unique_slug(self, slug_source='title', slug_field='name',
@@ -106,6 +107,7 @@ class CollectionItem(models.Model):
 
     def natural_key(self):
         return self.collection.natural_key() + self.record.natural_key()
+
     natural_key.dependencies = ['data.Collection', 'data.Record']
 
     def __unicode__(self):
@@ -114,6 +116,9 @@ class CollectionItem(models.Model):
             self.collection_id,
             'hidden' if self.hidden else ''
         )
+
+    class Meta:
+        app_label = 'data'
 
 
 def _records_with_individual_acl_by_ids(ids):
@@ -138,6 +143,9 @@ class Record(models.Model):
     manager = models.CharField(max_length=50, null=True, blank=True)
     next_update = models.DateTimeField(null=True, blank=True, serialize=False)
     owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
+
+    class Meta:
+        app_label = 'data'
 
     def natural_key(self):
         return (self.name,)
@@ -348,6 +356,7 @@ class Record(models.Model):
                 context_type=None,
                 hidden=False)
             return titles[0].value if titles else None
+
         return get_title() if self.id else None
 
     @property
@@ -360,6 +369,7 @@ class Record(models.Model):
                 context_type=None,
                 hidden=False)
             return identifiers[0].value if identifiers else None
+
         return get_identifier() if self.id else None
 
     @property
@@ -453,6 +463,9 @@ class MetadataStandard(models.Model):
     name = models.SlugField(max_length=50, unique=True)
     prefix = models.CharField(max_length=16, unique=True)
 
+    class Meta:
+        app_label = 'data'
+
     def natural_key(self):
         return (self.prefix,)
 
@@ -469,11 +482,15 @@ class Vocabulary(models.Model):
 
     class Meta:
         verbose_name_plural = "vocabularies"
+        app_label = 'data'
 
 
 class VocabularyTerm(models.Model):
     vocabulary = models.ForeignKey(Vocabulary)
     term = models.TextField()
+
+    class Meta:
+        app_label = 'data'
 
     def __unicode__(self):
         return self.term
@@ -498,8 +515,12 @@ class Field(models.Model):
     vocabulary = models.ForeignKey(
         Vocabulary, null=True, blank=True, serialize=False)
 
+    class Meta:
+        app_label = 'data'
+
     def natural_key(self):
         return (self.standard.prefix if self.standard else '', self.name,)
+
     natural_key.dependencies = ['data.MetadataStandard']
 
     def save(self, **kwargs):
@@ -537,6 +558,7 @@ class Field(models.Model):
         unique_together = ('name', 'standard')
         ordering = ['name']
         order_with_respect_to = 'standard'
+        app_label = 'data'
 
 
 @transaction.atomic
@@ -569,6 +591,7 @@ class FieldSet(models.Model):
 
     class Meta:
         ordering = ['title']
+        app_label = 'data'
 
     @staticmethod
     def for_user(user):
@@ -591,6 +614,7 @@ class FieldSetField(models.Model):
 
     class Meta:
         ordering = ['order']
+        app_label = 'data'
 
 
 class FieldValue(models.Model):
@@ -653,6 +677,7 @@ class FieldValue(models.Model):
         return FieldValue.BROWSE_VALUE_REGEX.sub('', value or '')[:32]
 
     class Meta:
+        app_label = 'data'
         ordering = ['order']
         index_together = [
             ['record', 'field'],
@@ -665,6 +690,10 @@ class DisplayFieldValue(FieldValue):
     """
     Represents a mapped field value for display.  Cannot be saved.
     """
+
+    class Meta:
+        app_label = 'data'
+
     def save(self, *args, **kwargs):
         raise NotImplementedError()
 

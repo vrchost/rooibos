@@ -16,6 +16,7 @@ class JobInfo(models.Model):
 
     class Meta:
         ordering = ['completed', '-created_time']
+        app_label = 'workers'
 
     def run(self):
         try:
