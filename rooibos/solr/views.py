@@ -921,7 +921,8 @@ def browse(request, id=None, name=None):
     ).values('browse_value').distinct().order_by('browse_value')
 
     if 's' in request.GET:
-        start = ivalues.filter(value__lt=request.GET['s']).count() / 50 + 1
+        start = ivalues.filter(
+            browse_value__lt=request.GET['s']).count() / 50 + 1
         return HttpResponseRedirect(reverse(
             'solr-browse-collection',
             kwargs={'id': collection.id, 'name': collection.name}) +
