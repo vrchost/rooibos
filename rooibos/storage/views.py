@@ -133,9 +133,11 @@ def retrieve_image(request, recordid, record, width=None, height=None):
             "get_image_for_record failed for record.id %s" % recordid)
         raise Http404()
 
+    record_obj = Record.objects.get(id=recordid)
+
     Activity.objects.create(event='media-download-image',
                             request=request,
-                            content_object=Record.objects.get(id=recordid),
+                            content_object=record_obj,
                             data=dict(width=width, height=height))
     try:
         response = HttpResponse(
@@ -147,8 +149,9 @@ def retrieve_image(request, recordid, record, width=None, height=None):
             # prevent duplication
             if record.endswith('jpg'):
                 record = record[:-3]
+            name = record_obj.title or record
             response["Content-Disposition"] = \
-                "attachment; filename=%s.jpg" % record
+                'attachment; filename="%s.jpg"' % smart_str(name)
         return response
     except IOError:
         logging.error("IOError: %s" % path)
