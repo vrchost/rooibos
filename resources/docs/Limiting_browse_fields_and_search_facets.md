@@ -24,3 +24,11 @@ Search facets
 ---
 
 The above command also creates a fieldset called `facet-fields` that defaults to all Dublin Core fields except `dc.identifier`.  This fieldset is used to determine which facets are shown on the **Explore** screen.  Removing a field from this fieldset will effectively hide the corresponding search facet.
+
+There are also a number of built-in facets such as "Image size", "Last modified", etc.  To hide those facets, create a new setting in your `local_settings.py` file in the following form:
+
+    HIDE_FACETS = ('Image size', 'Last modified',)
+
+Make sure to use trailing commas after each entry, even if you only have one entry in the list.
+
+After restarting your MDID application, the facets will show up with the new configuration applied.
