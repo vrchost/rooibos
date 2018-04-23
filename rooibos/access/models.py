@@ -19,6 +19,7 @@ class AccessControl(models.Model):
 
     class Meta:
         unique_together = ('content_type', 'object_id', 'user', 'usergroup')
+        app_label = 'access'
 
     def save(self, **kwargs):
         if (self.user and self.usergroup):
@@ -33,6 +34,7 @@ class AccessControl(models.Model):
                 return char.upper()
             else:
                 return '-'
+
         return '%s [%s%s%s] %s (%s)' % (
             self.user or self.usergroup or 'AnonymousUser',
             f(self.read, 'r'),
@@ -93,6 +95,9 @@ class ExtendedGroup(Group):
         ('E', 'Everybody'),
     )
 
+    class Meta:
+        app_label = 'access'
+
     type = models.CharField(max_length=1, choices=TYPE_CHOICES)
 
     objects = ExtendedGroupManager()
@@ -138,6 +143,9 @@ class Subnet(models.Model):
     def __unicode__(self):
         return '%s: %s' % (self.group.name, self.subnet)
 
+    class Meta:
+        app_label = 'access'
+
 
 class Attribute(models.Model):
     group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'P'})
@@ -146,10 +154,16 @@ class Attribute(models.Model):
     def __unicode__(self):
         return '%s: %s' % (self.group.name, self.attribute)
 
+    class Meta:
+        app_label = 'access'
+
 
 class AttributeValue(models.Model):
     attribute = models.ForeignKey(Attribute)
     value = models.CharField(max_length=255)
+
+    class Meta:
+        app_label = 'access'
 
 
 SEPARATOR = ' :: '
