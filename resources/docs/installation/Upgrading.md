@@ -43,7 +43,7 @@ Add the following sections at the end of the file:
 ```
 [program:celery]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@%h
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@localhost
 user=mdid
 autostart=true
 autorestart=true
@@ -53,7 +53,7 @@ stdout_logfile=/opt/mdid/log/celery.log
 
 [program:celery_solr]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@%h
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@localhost
 user=mdid
 autostart=true
 autorestart=true
