@@ -53,7 +53,10 @@ Vagrant.configure("2") do |config|
     #
     # Customize the amount of memory on the VM:
     vb.memory = "2048"
+
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
+
   #
   # View the documentation for the provider you are using for more
   # information on available options.
@@ -71,5 +74,4 @@ Vagrant.configure("2") do |config|
   config.vm.provision "main", type: "shell", path: "vagrant/provisioners/main.sh"
   config.vm.provision "mdid", type: "shell", path: "vagrant/provisioners/mdid.sh"
   config.vm.provision "supervisor", type: "shell", path: "vagrant/provisioners/supervisord.sh"
-
 end
