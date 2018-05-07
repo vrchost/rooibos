@@ -719,3 +719,12 @@ def standardfield_ids(field, standard='dc', equiv=False):
     else:
         ids = [f.id]
     return ids
+
+
+class RemoteMetadata(models.Model):
+
+    collection = models.ForeignKey('Collection')
+    storage = models.ForeignKey('storage.Storage')
+    url = models.CharField(max_length=255)
+    mapping_url = models.CharField(max_length=255)
+    last_modified = models.CharField(max_length=100, null=True, blank=True)

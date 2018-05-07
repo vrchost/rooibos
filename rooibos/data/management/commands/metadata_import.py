@@ -1,14 +1,11 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
-from rooibos.data.models import Field
 from optparse import make_option
-import csv
+from ...spreadsheetimport import submit_import_job
 import random
 import shutil
 import string
 import os
-from rooibos.data.views import _get_scratch_dir  # TODO: make proper function
-from ...tasks import csvimport
+from ...views import _get_scratch_dir
 
 
 class Command(BaseCommand):
@@ -40,67 +37,11 @@ class Command(BaseCommand):
             print "--collection, --mapping and --data are required parameters"
             return
 
-        fields = dict(
-            (f.full_name, f) for f in Field.objects.all()
-        )
-
-        def get_field_id(field_name):
-            f = fields.get(field_name)
-            if not f:
-                print "WARNING: Field %s not found" % field_name
-                return None
-            return f.id
-
-        def str2bool(value):
-            return value.lower() in ("1", "true", "t", "yes", "y")
-
-        mappings = []
-        with open(mapping_file, 'rU') as mapping_fileobj:
-            mapping = csv.DictReader(mapping_fileobj)
-            for m in mapping:
-                m['mapto'] = get_field_id(m['mapto'])
-                mappings.append(m)
-
-        mapping = dict(
-            (m['field'], m['mapto']) for m in mappings
-        )
-        separate_fields = dict(
-            (m['field'], str2bool(m['separate'])) for m in mappings
-        )
-        labels = dict(
-            (m['field'], m['label']) for m in mappings
-        )
-        hidden = dict(
-            (m['field'], str2bool(m['hidden'])) for m in mappings
-        )
-        order = dict(
-            (m['field'], int(m['order'])) for m in mappings
-        )
-        refinements = dict(
-            (m['field'], m['refinement']) for m in mappings
-        )
-
         filename = "".join(random.sample(string.letters + string.digits, 32))
         full_path = os.path.join(_get_scratch_dir(), 'cmdline=' + filename)
         shutil.copy(data_file, full_path)
 
-        args = dict(
-            filename='cmdline=' + filename,
-            separator=';',
-            collection_ids=collections,
-            update=True,
-            add=True,
-            test=False,
-            personal=False,
-            mapping=mapping,
-            separate_fields=separate_fields,
-            labels=labels,
-            order=order,
-            hidden=hidden,
-            refinements=refinements,
-        )
 
-        task = csvimport.delay(
-            owner=User.objects.get(username='admin'), **args)
+        task = submit_import_job(mapping_file, data_file, collections)
 
         print "Job submitted: %s" % task.id
