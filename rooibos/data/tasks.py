@@ -1,9 +1,7 @@
 from __future__ import with_statement
-
 import os
-
 from ..celeryapp import owned_task
-from rooibos.data.models import Collection
+from .models import Collection
 from .spreadsheetimport import SpreadsheetImport
 
 
@@ -23,17 +21,17 @@ def csvimport(
         def __init__(self):
             self.counter = 0
 
-    count = 0
+    count = dict(value=0)
     event_count = dict()
 
     def create_handler(event):
         def handler(*args, **kwargs):
-            count += 1
+            count['value'] += 1
             event_count[event] = event_count.get(event, 0) + 1
             self.update_state(
                 state='PROGRESS',
                 meta={
-                    'count': count,
+                    'count': count['value'],
                 }
             )
         return handler
@@ -68,6 +66,6 @@ def csvimport(
     )
 
     return {
-        'count': count,
+        'count': count['value'],
         'events': event_count,
     }
