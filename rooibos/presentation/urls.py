@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, url
 from views import manage, create, edit, duplicate, browse, password, \
-    record_usage
+    record_usage, manifest
 
 
 urlpatterns = patterns(
@@ -27,5 +27,10 @@ urlpatterns = patterns(
         r'^record-usage/(?P<id>\d+)/(?P<name>[-\w]+)/$',
         record_usage,
         name='presentation-record-usage'
+    ),
+    url(
+        r'^manifest/(?P<id>\d+)/(?P<name>[-\w]+)/$',
+        manifest,
+        name='presentation-manifest',
     ),
 )

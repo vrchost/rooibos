@@ -22,6 +22,7 @@ from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
+from rooibos.util import json_view
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
 
@@ -623,3 +624,73 @@ def record_usage(request, id, name):
         },
         context_instance=RequestContext(request)
     )
+
+
+def get_id(request, *args):
+    server = '//' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    s = '/'.join(map(str, args))
+    return 'http:%s/iiif/%s' % (server, s)
+
+
+def slide_manifest(request, slide, owner):
+
+    fieldvalues = slide.get_fieldvalues(owner=owner)
+    title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
+    id = get_id(request, 'slide', 'canvas', slide.id)
+    image = slide.record.get_image_url(
+        force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False),
+        handler='storage-retrieve-iiif-image',
+    )
+
+    return {
+        '@id': id,
+        '@type': 'sc:Canvas',
+        'label': title,
+        "height":1000,
+        "width":750,
+        'images': [{
+            '@type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': {
+                '@id': image,
+                '@type': 'dctypes:Image',
+                'format': 'image/jpeg',
+                'service': {
+                    '@context': 'http://iiif.io/api/image/2/context.json',
+                    '@id': image,
+                    'profile': 'http://iiif.io/api/image/2/level1.json'
+                },
+                "height":2000,
+                "width":1500
+            },
+            'on': id,
+        }]
+    }
+
+
+@json_view
+def manifest(request, id, name):
+    p = Presentation.get_by_id_for_request(id, request)
+    if not p:
+        return dict(result='error')
+
+    owner = request.user if request.user.is_authenticated() else None
+    slides = p.items.select_related('record').filter(hidden=False)
+
+    return {
+        '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
+        '@type': 'sc:Manifest',
+        '@id': get_id(request, 'presentation', p.id, 'manifest'),
+        'label': p.title,
+        'metadata': [],
+        'description': p.description,
+        'sequences': [{
+            '@id': get_id(request, 'presentation', p.id, 'all'),
+            '@type': 'sc:Range',
+            'label': 'All slides',
+            'canvases': [
+                slide_manifest(request, slide, owner) for slide in slides
+            ]
+        }],
+    }

@@ -61,6 +61,30 @@ def presentationviewer(obj, request, objid=None):
         presentation, request.user) if presentation else None
 
 
+class PresentationViewerOld(Viewer):
+
+    title = "View (classic)"
+    weight = 99
+
+    def view(self, request):
+        return_url = request.GET.get('next', reverse('presentation-browse'))
+        return render_to_response(
+            'presentation_viewer_old.html',
+            {
+                'presentation': self.obj,
+                'return_url': return_url,
+            },
+            context_instance=RequestContext(request)
+        )
+
+
+@register_viewer('presentationviewer_classic', PresentationViewerOld)
+def presentationviewer(obj, request, objid=None):
+    presentation = _get_presentation(obj, request, objid)
+    return PresentationViewerOld(
+        presentation, request.user) if presentation else None
+
+
 class FlashCardViewer(Viewer):
 
     title = "Flash Cards"

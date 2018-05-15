@@ -30,6 +30,7 @@ from rooibos.storage import get_media_for_record, get_image_for_record, \
     find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
+from .lorisgateway import handle_loris_request
 import logging
 import os
 import mimetypes
@@ -761,3 +762,29 @@ def find_records_without_media(request):
         },
         context_instance=RequestContext(request)
     )
+
+
+def retrieve_iiif_image(request, recordid, record):
+
+    passwords = request.session.get('passwords', dict())
+    force_reprocess = 'reprocess' in request.GET
+
+    path = get_image_for_record(
+        recordid,
+        request.user,
+        passwords=passwords,
+        force_reprocess=force_reprocess
+    )
+    if not path:
+        logging.error(
+            "get_image_for_record failed for record.id %s" % recordid)
+        raise Http404()
+
+    record_obj = Record.objects.get(id=recordid)
+
+    Activity.objects.create(event='media-download-image',
+                            request=request,
+                            content_object=record_obj,
+                            data=dict())
+
+    return handle_loris_request(request, path, recordid, record)
