@@ -5,10 +5,6 @@ from django_celery_results.models import TaskResult
 
 class OwnedTaskResult(TaskResult):
 
-    class Meta:
-        ordering = ['completed', '-created_time']
-        app_label = 'workers'
-
     owner = models.ForeignKey(User, null=False, blank=False)
     function = models.CharField(max_length=64)
     args = models.TextField(null=True, default=None, editable=False)
