@@ -139,6 +139,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.messages',
     'django_extensions',
+    'django_celery_results',
     'tagging',
     'rooibos.data',
     'rooibos.migration',
@@ -469,3 +470,6 @@ LOGGING = {
         },
     },
 }
+
+
+CELERY_RESULT_BACKEND = 'django-db'

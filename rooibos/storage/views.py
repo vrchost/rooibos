@@ -30,10 +30,10 @@ from rooibos.storage import get_media_for_record, get_image_for_record, \
     find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
-from rooibos.workers.models import JobInfo
 import logging
 import os
 import mimetypes
+from .tasks import storage_match_up_media, analyze_media_task
 
 
 def add_content_length(func):
@@ -657,16 +657,12 @@ def match_up_files(request):
                 )
             )
 
-            job = JobInfo.objects.create(
+            storage_match_up_media.delay(
                 owner=request.user,
-                func='storage_match_up_media',
-                arg=simplejson.dumps(dict(
-                    collection=collection.id,
-                    storage=storage.id,
-                    allow_multiple_use=form.cleaned_data['allow_multiple_use']
-                ))
+                collection=collection.id,
+                storage=storage.id,
+                allow_multiple_use=form.cleaned_data['allow_multiple_use'],
             )
-            job.run()
 
             messages.add_message(
                 request,
@@ -685,20 +681,15 @@ def match_up_files(request):
 
 
 @login_required
-def analyze(request, id, name, allow_multiple_use=True):
-    storage = get_object_or_404(filter_by_access(
-        request.user, Storage.objects.filter(id=id), manage=True))
-    broken, extra = analyze_media(storage, allow_multiple_use)
-    broken = [m.url for m in broken]
-    return render_to_response(
-        'storage_analyze.html',
-        {
-            'storage': storage,
-            'broken': sorted(broken),
-            'extra': sorted(extra),
-        },
-        context_instance=RequestContext(request)
+def analyze(request, id, name):
+    task = analyze_media_task.delay(owner=request.user.id, storage_id=id)
+    messages.add_message(
+        request,
+        messages.INFO,
+        message='Analyze job has been submitted.'
     )
+    return HttpResponseRedirect(
+        "%s?highlight=%s" % (reverse('workers-jobs'), task.id))
 
 
 @login_required

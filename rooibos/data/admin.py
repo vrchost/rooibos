@@ -1,6 +1,7 @@
 from django.contrib import admin
 from models import MetadataStandard, Field, FieldSet, FieldSetField, \
-    Record, FieldValue, Collection, Vocabulary, VocabularyTerm
+    Record, FieldValue, Collection, Vocabulary, VocabularyTerm, \
+    RemoteMetadata
 
 
 class MetadataStandardAdmin(admin.ModelAdmin):
@@ -64,6 +65,10 @@ class VocabularyTermAdmin(admin.ModelAdmin):
     list_display_links = ('vocabulary', )
 
 
+class RemoteMetadataAdmin(admin.ModelAdmin):
+    list_display = ('collection', 'storage', 'url', 'last_modified', )
+
+
 admin.site.register(Collection, CollectionAdmin)
 admin.site.register(MetadataStandard, MetadataStandardAdmin)
 admin.site.register(Field, FieldAdmin)
@@ -71,3 +76,4 @@ admin.site.register(FieldSet, FieldSetAdmin)
 admin.site.register(Record, RecordAdmin)
 admin.site.register(Vocabulary, VocabularyAdmin)
 admin.site.register(VocabularyTerm, VocabularyTermAdmin)
+admin.site.register(RemoteMetadata, RemoteMetadataAdmin)

@@ -2,6 +2,7 @@
 {% load pagination_tags %}
 {% load humanize %}
 {% load ui %}
+{% load workers %}
 
 {% block sidebar %}
 {% var as related_pages %}
@@ -19,27 +20,6 @@
 {{ block.super }}
 <script type="text/javascript">
     $(document).ready(function() {
-        $(".job-args").each(function() {
-            var a = $(this).text();
-            if (a.length > 30)
-                $(this).qtip({
-                    content: a,
-                    position: {
-                        corner: {
-                            target: 'rightMiddle',
-                            tooltip: 'leftTop'
-                        },
-                        adjust: {
-                            screen: true,
-                        }
-                    },
-                    style: {
-                        name: 'cream',
-                        tip: true,
-                        width: 500
-                    }
-                }).text(a.substring(0, 30) + '...');
-        });
         checkbox = $('<input type="checkbox">').click(function() {
             var c = this.checked;
             $("input[name=r]").each(function() { this.checked = c; });
@@ -79,48 +59,29 @@
 {% endif %}
     <th>Status</th>
     <th>Created</th>
-    <th>Last updated</th>
     <th>Completed</th>
     <th>Result</th>
     <th id="remove-col" style="text-align: center;"></th>
 </tr>
 {% for job in jobs %}
-<tr class="{% cycle '' 'altrow' %}{% ifequal highlight job.id %} highlight-row{% endifequal %}">
+<tr class="{% cycle '' 'altrow' %}{% ifequal highlight job.task_id %} highlight-row{% endifequal %}{% ifequal highlight job.id %} highlight-row{% endifequal %}">
 {% if request.user.is_superuser %}
-    <td>{{ job.id }}</td>
+    <td>{{ job.id }} <!-- {{ job.task_id }} --></td>
     <td>{{ job.owner.username }}</td>
 {% endif %}
-    <td>{{ job.func }}</td>
+    <td>{{ job.function }}</td>
 {% if request.user.is_superuser %}
-    <td class="job-args">{{ job.arg }}</td>
+    <td class="job-args">{{ job.args|format_worker_args }}</td>
 {% endif %}
     <td>{{ job.status }}</td>
-    <td>{{ job.created_time|naturalday }} {{ job.created_time|time }}</td>
-    <td>{{ job.status_time|naturalday }} {{ job.status_time|time }}<br />({{ job.status_time|timesince }})</td>
-    <td>{% if job.completed %}
-            Completed
-        {% else %}
-            {% if job.stalled %}
-                Stalled
-            {% else %}
-                {% if job.status_time %}
-                    In Progress
-                {% else %}
-                    Not started
-                {% endif %}
-            {% endif %}
-            {% if request.user.is_superuser %}
-                {% if job.stalled or not job.status_time %}
-                    <br /><input type="submit" name="run-{{ job.id }}" value="Restart" />
-                {% endif %}
-            {% endif %}
-        {% endif %}</td>
-    <td>{{ job.result }}</td>
+    <td>{{ job.created|naturalday }} {{ job.created|time }}</td>
+    <td>{{ job.date_done|naturalday }} {{ job.date_done|time }}<br />({{ job.date_done|timesince }})</td>
+    <td>{{ job.result|default:"-"|format_worker_result }}</td>
     <td style="text-align: center;">{% if job.completed or request.user.is_superuser %}<input type="checkbox" value="{{ job.id }}" name="r" />{% endif %}</td>
 </tr>
 {% endfor %}
 <tr>
-    <td colspan="{% if request.user.is_superuser %}9{% else %}6{% endif %}"></td>
+    <td colspan="{% if request.user.is_superuser %}8{% else %}5{% endif %}"></td>
     <td><input type="submit" name="remove" value="Remove" /></td>
 </tr>
 </table>

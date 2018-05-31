@@ -247,6 +247,7 @@ def analyze_media(storage, allow_multiple_use=False,
                   remove_used_from_extra=True):
     broken = []
     used = []
+    extra = []
     # Storage must be able to provide file list
     if hasattr(storage, 'get_files'):
         # Find extra files, i.e. files in the storage area that don't

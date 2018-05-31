@@ -29,13 +29,13 @@ from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
-from rooibos.workers.models import JobInfo
 from spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
 from rooibos.util import safe_int
 from rooibos.middleware import HistoryMiddleware
+from .tasks import csvimport
 
 
 @login_required
@@ -721,15 +721,14 @@ def data_import_file(request, file):
             if request.POST.get('import_button'):
 
                 arg = dict(
-                    file=_get_filename(request, file),
+                    filename=_get_filename(request, file),
                     separator=form.cleaned_data['separator'],
-                    collections=map(
+                    collection_ids=map(
                         int, form.cleaned_data['collections']),
                     update=form.cleaned_data['update'],
                     add=form.cleaned_data['add'],
                     test=form.cleaned_data['test'],
                     personal=form.cleaned_data['personal'],
-                    fieldset=form.cleaned_data['fieldset'],
                     mapping=dict(
                         (
                             f.cleaned_data['fieldname'],
@@ -770,19 +769,15 @@ def data_import_file(request, file):
 
                 )
 
-                j = JobInfo.objects.create(
-                    owner=request.user,
-                    func='csvimport',
-                    arg=simplejson.dumps(arg)
-                )
-                j.run()
+                task = csvimport.delay(owner=request.user, **arg)
+
                 messages.add_message(
                     request,
                     messages.INFO,
                     message='Import job has been submitted.'
                 )
                 return HttpResponseRedirect(
-                    "%s?highlight=%s" % (reverse('workers-jobs'), j.id))
+                    "%s?highlight=%s" % (reverse('workers-jobs'), task.id))
         else:
             imp, preview_rows = analyze()
     else:

@@ -2,7 +2,7 @@
 
 cat > /etc/supervisor/conf.d/mdid.conf << END
 [group:mdid]
-programs=mdid_app,mdid_worker
+programs=mdid_app,celery,celery_solr,celery_beat
 
 [program:mdid_app]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
@@ -14,15 +14,35 @@ stopasgroup=true
 redirect_stderr=true
 stdout_logfile=/opt/mdid/log/gunicorn.log
 
-[program:mdid_worker]
+[program:celery]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
-command=/opt/mdid/venv/bin/django-admin.py runworkers
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@%%h
 user=ubuntu
 autostart=true
 autorestart=true
 stopasgroup=true
 redirect_stderr=true
-stdout_logfile=/opt/mdid/log/workers.log
+stdout_logfile=/opt/mdid/log/celery.log
+
+[program:celery_solr]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@%%h
+user=ubuntu
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-solr.log
+
+[program:celery_beat]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.vagrant"
+command=/opt/mdid/venv/bin/celery -A rooibos beat -s /opt/mdid/celerybeat-schedule -l info --pidfile=/tmp/celerybeat.pid
+user=ubuntu
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-beat.log
 END
 
 supervisorctl reload

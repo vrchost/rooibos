@@ -1,8 +1,9 @@
 from django.db.models import Q, Count
 from django.db import reset_queries
-from models import Field, FieldValue, Record, CollectionItem, get_system_field
-from rooibos.solr.models import delay_record_indexing, resume_record_indexing
+from django.contrib.auth.models import User
+from .models import Field, FieldValue, Record, CollectionItem, get_system_field
 import csv
+import os
 
 
 class SpreadsheetImport(object):
@@ -263,45 +264,103 @@ class SpreadsheetImport(object):
             reader.next()
 
         last_row = None
-        try:
 
-            for i, row in enumerate(reader):
+        for i, row in enumerate(reader):
 
-                # On every row, delay record indexing for a little longer
-                delay_record_indexing()
-                reset_queries()
+            reset_queries()
 
-                row = self._split_values(row)
-                if not last_row:
-                    last_row = row
-                    continue
+            row = self._split_values(row)
+            if not last_row:
+                last_row = row
+                continue
 
-                # compare IDs of current and last rows
-                last_id = last_row.get(identifier_field)
-                if not last_id:
-                    last_row = row
-                    self.no_id_skipped += 1
-                    for func in self.on_no_id_skipped:
-                        func(None)
-                    continue
+            # compare IDs of current and last rows
+            last_id = last_row.get(identifier_field)
+            if not last_id:
+                last_row = row
+                self.no_id_skipped += 1
+                for func in self.on_no_id_skipped:
+                    func(None)
+                continue
 
-                current_id = row.get(identifier_field)
+            current_id = row.get(identifier_field)
 
-                if not current_id or (last_id == current_id):
-                    # combine current and last rows
-                    for key, values in row.iteritems():
-                        v = last_row.get(key) or []
-                        for value in (values or []):
-                            if value not in v:
-                                v.append(value)
-                        last_row[key] = v
-                    for func in self.on_continuation:
-                        func(last_id)
-                else:
-                    process_row(last_row)
-                    last_row = row
-
-            if last_row:
+            if not current_id or (last_id == current_id):
+                # combine current and last rows
+                for key, values in row.iteritems():
+                    v = last_row.get(key) or []
+                    for value in (values or []):
+                        if value not in v:
+                            v.append(value)
+                    last_row[key] = v
+                for func in self.on_continuation:
+                    func(last_id)
+            else:
                 process_row(last_row)
-        finally:
-            resume_record_indexing()
+                last_row = row
+
+        if last_row:
+            process_row(last_row)
+
+
+def submit_import_job(mapping_file, data_file, collections):
+    fields = dict(
+        (f.full_name, f) for f in Field.objects.all()
+    )
+
+    def get_field_id(field_name):
+        f = fields.get(field_name)
+        if not f:
+            print "WARNING: Field %s not found" % field_name
+            return None
+        return f.id
+
+    def str2bool(value):
+        return value.lower() in ("1", "true", "t", "yes", "y")
+
+    mappings = []
+    with open(mapping_file, 'rU') as mapping_fileobj:
+        mapping = csv.DictReader(mapping_fileobj)
+        for m in mapping:
+            m['mapto'] = get_field_id(m['mapto'])
+            mappings.append(m)
+
+    mapping = dict(
+        (m['field'], m['mapto']) for m in mappings
+    )
+    separate_fields = dict(
+        (m['field'], str2bool(m['separate'])) for m in mappings
+    )
+    labels = dict(
+        (m['field'], m['label']) for m in mappings
+    )
+    hidden = dict(
+        (m['field'], str2bool(m['hidden'])) for m in mappings
+    )
+    order = dict(
+        (m['field'], int(m['order'])) for m in mappings
+    )
+    refinements = dict(
+        (m['field'], m['refinement']) for m in mappings
+    )
+
+    args = dict(
+        filename=os.path.basename(data_file),
+        separator=';',
+        collection_ids=collections,
+        update=True,
+        add=True,
+        test=False,
+        personal=False,
+        mapping=mapping,
+        separate_fields=separate_fields,
+        labels=labels,
+        order=order,
+        hidden=hidden,
+        refinements=refinements,
+    )
+
+    from tasks import csvimport
+    task = csvimport.delay(
+        owner=User.objects.get(username='admin').id, **args)
+    return task

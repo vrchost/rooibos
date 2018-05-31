@@ -260,7 +260,7 @@ cp /opt/tools/swftools-0.9.2/lib/python/*.so \
 Create a new file `/etc/supervisor/conf.d/mdid.conf` with the following content:
 ```
 [group:mdid]
-programs=mdid_app,mdid_worker
+programs=mdid_app,celery,celery_solr,celery_beat
 
 [program:mdid_app]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
@@ -272,15 +272,35 @@ stopasgroup=true
 redirect_stderr=true
 stdout_logfile=/opt/mdid/log/gunicorn.log
 
-[program:mdid_worker]
+[program:celery]
 environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/django-admin runworkers
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@localhost
 user=mdid
 autostart=true
 autorestart=true
 stopasgroup=true
 redirect_stderr=true
-stdout_logfile=/opt/mdid/log/workers.log
+stdout_logfile=/opt/mdid/log/celery.log
+
+[program:celery_solr]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@localhost
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-solr.log
+
+[program:celery_beat]
+environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
+command=/opt/mdid/venv/bin/celery -A rooibos beat -s /opt/mdid/celerybeat-schedule -l info --pidfile=/tmp/celerybeat.pid
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=/opt/mdid/log/celery-beat.log
 ```
 Load the configuration:
 ```

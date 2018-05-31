@@ -4,12 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, CollectionItem
 from tagging.models import TaggedItem
 from rooibos.util.models import OwnedWrapper
-from workers import schedule_solr_index
 import logging
-from django.core.cache import cache
-
-
-DELAY_INDEXING_CACHE_KEY = '_solr_delay_record_indexing'
 
 
 logger = logging.getLogger(__name__)
@@ -22,23 +17,6 @@ class SolrIndexUpdates(models.Model):
 
 def mark_for_update(record_id, delete=False):
     SolrIndexUpdates.objects.create(record=record_id, delete=delete)
-    delay = cache.get(DELAY_INDEXING_CACHE_KEY)
-    if not delay:
-        logger.debug('Record indexing is not delayed, creating indexing job')
-        schedule_solr_index()
-    else:
-        logger.debug('Record indexing is delayed, not creating indexing job')
-
-
-def delay_record_indexing():
-    logger.debug('Delaying record indexing for 60 seconds')
-    cache.set(DELAY_INDEXING_CACHE_KEY, True, 60)
-
-
-def resume_record_indexing():
-    logger.debug('Resuming record indexing')
-    cache.set(DELAY_INDEXING_CACHE_KEY, False)
-    schedule_solr_index()
 
 
 def post_record_delete_callback(sender, **kwargs):
