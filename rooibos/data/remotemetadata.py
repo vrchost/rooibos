@@ -84,7 +84,7 @@ def fetch_remote_metadata():
                 full_mapping_path, full_metadata_path, [source.collection_id])
 
             match_up_media = storage_match_up_media.si(
-                owner=User.objects.get(username='admin'),
+                owner=User.objects.get(username='admin').id,
                 storage_id=source.storage_id,
                 collection_id=source.collection_id,
                 allow_multiple_use=False)
