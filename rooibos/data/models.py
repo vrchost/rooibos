@@ -34,8 +34,6 @@ class Collection(models.Model):
     agreement = models.TextField(blank=True, null=True)
     password = models.CharField(max_length=32, blank=True, serialize=False)
     order = models.IntegerField(blank=False, null=False, default=100)
-    password = models.CharField(max_length=32, blank=True)
-    order = models.IntegerField(blank=False, null=False, default=100)
 
     def natural_key(self):
         return (self.name,)
