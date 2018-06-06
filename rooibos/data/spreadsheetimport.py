@@ -303,7 +303,8 @@ class SpreadsheetImport(object):
             process_row(last_row)
 
 
-def submit_import_job(mapping_file, data_file, collections):
+
+def create_import_job(mapping_file, data_file, collections):
     fields = dict(
         (f.full_name, f) for f in Field.objects.all()
     )
@@ -361,6 +362,12 @@ def submit_import_job(mapping_file, data_file, collections):
     )
 
     from tasks import csvimport
-    task = csvimport.delay(
+    signature = csvimport.s(
         owner=User.objects.get(username='admin').id, **args)
+    return signature
+
+
+def submit_import_job(mapping_file, data_file, collections):
+    sig = create_import_job(mapping_file, data_file, collections)
+    task = sig.delay()
     return task

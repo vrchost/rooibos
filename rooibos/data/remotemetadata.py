@@ -1,5 +1,3 @@
-from django.conf import settings
-from models import RemoteMetadata
 import urllib2
 import logging
 import shutil
@@ -8,7 +6,11 @@ import string
 import random
 import gzip
 import StringIO
-from .spreadsheetimport import submit_import_job
+from celery import chain
+from django.contrib.auth.models import User
+from rooibos.storage.tasks import storage_match_up_media
+from .models import RemoteMetadata
+from .spreadsheetimport import create_import_job
 from .views import _get_scratch_dir
 
 
@@ -78,8 +80,17 @@ def fetch_remote_metadata():
         if fetch_url_to_file(source.url, full_metadata_path) and \
                 fetch_url_to_file(source.mapping_url, full_mapping_path):
             source.save()
-            task = submit_import_job(
+            import_metadata = create_import_job(
                 full_mapping_path, full_metadata_path, [source.collection_id])
+
+            match_up_media = storage_match_up_media.si(
+                owner=User.objects.get(username='admin'),
+                storage_id=source.storage_id,
+                collection_id=source.collection_id,
+                allow_multiple_use=False)
+
+            task = chain(import_metadata, match_up_media).delay()
+
             logger.info(
                 'Submitted import job for remote metadata %d with task %s' %
                 (source.id, task.id)
