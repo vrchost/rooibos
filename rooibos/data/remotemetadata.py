@@ -79,7 +79,6 @@ def fetch_remote_metadata():
 
         if fetch_url_to_file(source.url, full_metadata_path) and \
                 fetch_url_to_file(source.mapping_url, full_mapping_path):
-            source.save()
             import_metadata = create_import_job(
                 full_mapping_path, full_metadata_path, [source.collection_id])
 
@@ -90,6 +89,8 @@ def fetch_remote_metadata():
                 allow_multiple_use=False)
 
             task = chain(import_metadata, match_up_media).delay()
+
+            source.save()
 
             logger.info(
                 'Submitted import job for remote metadata %d with task %s' %
