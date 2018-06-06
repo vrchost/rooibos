@@ -3,7 +3,7 @@ from ...remotemetadata import fetch_remote_metadata
 
 
 class Job(DailyJob):
-    help = "Accumulate activity statistics"
+    help = "Fetch and update remote metadata"
 
     def execute(self):
         fetch_remote_metadata()
