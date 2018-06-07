@@ -70,6 +70,10 @@ def fetch_url_to_file(url, path):
 
 
 def fetch_remote_metadata():
+
+    ids = []
+    tasks = []
+
     for source in check_remote_metadata():
         filename = "".join(random.sample(string.letters + string.digits, 32))
         full_metadata_path = os.path.join(
@@ -79,6 +83,7 @@ def fetch_remote_metadata():
 
         if fetch_url_to_file(source.url, full_metadata_path) and \
                 fetch_url_to_file(source.mapping_url, full_mapping_path):
+
             import_metadata = create_import_job(
                 full_mapping_path, full_metadata_path, [source.collection_id])
 
@@ -88,11 +93,16 @@ def fetch_remote_metadata():
                 collection_id=source.collection_id,
                 allow_multiple_use=False)
 
-            task = chain(import_metadata, match_up_media).delay()
+            tasks.append(import_metadata)
+            tasks.append(match_up_media)
+            ids.append(source.id)
 
             source.save()
 
-            logger.info(
-                'Submitted import job for remote metadata %d with task %s' %
-                (source.id, task.id)
-            )
+    task = chain(*tasks).delay()
+
+    logger.info(
+        'Submitted import job for remote metadata %r with task %s' %
+        (ids, task.id)
+    )
+

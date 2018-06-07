@@ -362,7 +362,7 @@ def create_import_job(mapping_file, data_file, collections):
     )
 
     from tasks import csvimport
-    signature = csvimport.s(
+    signature = csvimport.si(
         owner=User.objects.get(username='admin').id, **args)
     return signature
 
