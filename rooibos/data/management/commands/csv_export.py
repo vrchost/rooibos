@@ -2,7 +2,7 @@ from __future__ import with_statement
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, Record
 from optparse import make_option
-import csv
+import unicodecsv as csv
 from rooibos.util.progressbar import ProgressBar
 
 
@@ -53,7 +53,7 @@ class Command(BaseCommand):
 
                     for value in values:
                         fieldname = value.field.full_name
-                        v = value.value.encode('utf8')
+                        v = value.value
                         if fieldname in row:
                             if not separator:
                                 extra_values.append(value)
