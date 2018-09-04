@@ -149,12 +149,15 @@
     <!--<field name="type_sort" type="string" indexed="true" stored="true"/>-->
     <!-- This can be enabled, in case the client does not know what fields may be searched. It isn't enabled by default
          because it's very expensive to index everything twice. -->
-    <!-- <copyField source="*" dest="_text_"/> -->
+    <copyField source="*" dest="_text_"/>
 
     <field name="tag" type="string" indexed="true" stored="true" multiValued="true"/>
     <field name="ownedtag" type="string" indexed="true" stored="false" multiValued="true"/>
 
     <copyField source="tag" dest="_text_"/>
+
+    <copyField source="*_t" dest="_text_"/>
+    <copyField source="filecontent" dest="_text_"/>
 
     <!-- Dynamic field definitions allow using convention over configuration
        for fields via the specification of patterns to match field names.
