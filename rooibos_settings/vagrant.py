@@ -30,7 +30,7 @@ DATABASES = {
 # system time zone.
 TIME_ZONE = 'America/Chicago'
 
-SOLR_URL = 'http://127.0.0.1:8080/solr/mdid'
+SOLR_URL = 'http://127.0.0.1:8983/solr/mdid'
 
 # Theme colors for use in CSS
 PRIMARY_COLOR = "rgb(152, 229, 198)"
