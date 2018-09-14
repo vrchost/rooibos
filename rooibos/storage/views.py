@@ -657,10 +657,10 @@ def match_up_files(request):
                 )
             )
 
-            storage_match_up_media.delay(
-                owner=request.user,
-                collection=collection.id,
-                storage=storage.id,
+            task = storage_match_up_media.delay(
+                owner=request.user.id,
+                collection_id=collection.id,
+                storage_id=storage.id,
                 allow_multiple_use=form.cleaned_data['allow_multiple_use'],
             )
 
@@ -670,7 +670,7 @@ def match_up_files(request):
                 message='Match up media job has been submitted.'
             )
             return HttpResponseRedirect(
-                "%s?highlight=%s" % (reverse('workers-jobs'), job.id))
+                "%s?highlight=%s" % (reverse('workers-jobs'), task.id))
     else:
         form = MatchUpForm(request.GET)
 

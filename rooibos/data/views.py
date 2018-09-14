@@ -769,7 +769,7 @@ def data_import_file(request, file):
 
                 )
 
-                task = csvimport.delay(owner=request.user, **arg)
+                task = csvimport.delay(owner=request.user.id, **arg)
 
                 messages.add_message(
                     request,
