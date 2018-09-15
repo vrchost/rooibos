@@ -1,5 +1,6 @@
 import mimetypes
 import os
+import json
 from datetime import datetime
 from rooibos.storage.models import Media, Storage
 from rooibos.data.models import Collection
@@ -46,12 +47,16 @@ def storage_match_up_media(
                 }
             )
 
+    attachment = get_attachment(self)
+    with open(attachment, 'w') as report:
+        json.dump(created, report, indent=2)
+
     return {
         'collection': collection_id,
         'storage': storage_id,
         'allow_multiple_use': allow_multiple_use,
         'count': count + 1,
-        'created': created,
+        'attachment': attachment,
     }
 
 
