@@ -43,7 +43,8 @@ def format_worker_args(result):
         return result
 
     lines = [repr(arg) for arg in data['args']] + [
-        '<strong>%s:</strong> %s' % (key, value)
+        '<strong class="job-arg">%s:</strong> '
+        '<span class="job-arg-value">%s</span>' % (key, value)
         for key, value in data['kwargs'].iteritems()
     ]
     return SafeString('<br />'.join(lines))

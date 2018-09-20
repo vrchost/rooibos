@@ -1390,4 +1390,15 @@ td.annotation-col textarea {
 }
 
 
+.job-args {
+    max-width: 400px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.job-args:hover {
+    white-space: normal;
+}
+
 </style>
