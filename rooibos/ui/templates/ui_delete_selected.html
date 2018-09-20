@@ -23,7 +23,7 @@
 
 <div style="margin: 20px 0;">
     {% for record in items %}
-    <a href="{{ record.get_absolute_url }}"><img id="delete-record-id-{{ record.id }}" class="thumbnail record-anchor" src="{{ record.get_square_thumbnail_url }}" alt="{{ record.title }}" /></a>
+    <a href="{{ record.get_absolute_url }}"><img id="delete-record-id-{{ record.id }}" class="thumbnail record-anchor" src="{{ record.get_square_thumbnail_url }}" alt="{{ record.alt_text }}" /></a>
     {% endfor %}
 </div>
 

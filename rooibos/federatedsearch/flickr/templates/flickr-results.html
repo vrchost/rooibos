@@ -90,7 +90,7 @@
 {% for r in results.records %}
 
 <div class="record">
-    <a href="{{ r.record_url }}" target="flickr_page"><img class="thumbnail" src="{{ r.thumb_url }}" alt="{{ r.title }}" /></a>
+    <a href="{{ r.record_url }}" target="flickr_page"><img class="thumbnail" src="{{ r.thumb_url }}" alt="{{ r.alt_text }}" /></a>
     <div class="record-title"><a href="{{ r.record_url }}" target="flickr_page">{{ r.title }}</a></div>
     <input type="checkbox" class="remote-record-select" name="r" value="{{ r.flickr_id }}"{% if r.selected %} checked="checked"{% endif %} />
 </div>

@@ -99,7 +99,7 @@ slideshows.
 <div id="resultlist" class="resultlist-thumb">
 {% for r in results.records %}
 <div class="record">
-    <a href="{{ r.record_url }}" target="af"><img class="thumbnail" src="{{ r.thumb_url }}" alt="{{ r.title }}" /></a>
+    <a href="{{ r.record_url }}" target="af"><img class="thumbnail" src="{{ r.thumb_url }}" alt="{{ r.alt_text }}" /></a>
     <div class="record-title"><a href="{{ r.record_url }}" target="af">{{ r.title }}</a></div>
 </div>
 {% endfor %}

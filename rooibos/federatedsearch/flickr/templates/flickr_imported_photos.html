@@ -19,7 +19,7 @@
 
 {% for photo in photos %}
     <div class="record">
-        <a href="{{ photo.record.get_absolute_url }}"><img class="thumbnail" src="{{ photo.record.get_thumbnail_url }}" alt="{{ photo.record.title }}" /></a>
+        <a href="{{ photo.record.get_absolute_url }}"><img class="thumbnail" src="{{ photo.record.get_thumbnail_url }}" alt="{{ photo.record.alt_text }}" /></a>
         <br />
         {{ photo.record.title }}<br />
     </div>

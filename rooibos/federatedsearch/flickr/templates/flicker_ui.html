@@ -1,6 +1,6 @@
 {% ifequal viewmode|default:"thumb" "thumb" %}
     <div class="record">
-        <a href="{{ photo.photo_page }}"><img class="thumbnail" src="{{ photo.thumb }}" alt="{{ photo.title }}" /></a>
+        <a href="{{ photo.photo_page }}"><img class="thumbnail" src="{{ photo.thumb }}" alt="{{ photo.alt_text }}" /></a>
         {% if selectable %}
             <input type="checkbox" class="flickr-select" name="r" value="{{photo.id}}|{{photo.title}}"{% if selected %} checked="checked"{% endif %} />
         {% if selected %}<input type="hidden" name="sr" value="{{ photo.id }}" />{% endif %}

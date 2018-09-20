@@ -91,7 +91,7 @@
     data-{{ m.label|slugify }}="{{ m.value }}"
     {% endfor %}
     >
-    <img class="thumbnail" src="{{ r.thumbnail }}" alt="{{ r.title }}" />
+    <img class="thumbnail" src="{{ r.thumbnail }}" alt="{{ r.alt_text }}" />
     <div class="record-title">{{ r.title }}</div>
     <input type="checkbox" class="remote-record-select" name="r" value="{{ r.id }}"{% if r.selected %} checked="checked"{% endif %} />
     <img src="{% static 'images/info.png' %}" alt="Information" class="info-icon remote-metadata-anchor" />

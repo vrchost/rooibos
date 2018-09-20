@@ -81,23 +81,19 @@
 
     <div id="image-preview-container">
         {% for record in records %}
-        {% with record.title as title %}
         <div class="image-preview-main"{% if not forloop.first %} style="display: none;"{% endif %}>
             <a href="{{ record.get_absolute_url }}">
-                <img src="{% url "storage-retrieve-image" record.id record.name 560 420 %}" title="{{ title }}" alt="{{ title }}" />
+                <img src="{% url "storage-retrieve-image" record.id record.name 560 420 %}" title="{{ record.title }}" alt="{{ record.alt_text }}" />
             </a>
         </div>
-        {% endwith %}
         {% endfor %}
     </div>
     {% for record in records %}
-        {% with record.title as title %}
     <div class="image-preview-thumb{% if forloop.first %} active-image-preview-thumb{% endif %} record-anchor" id="record-id-{{ record.id }}">
         <a href="{{ record.get_absolute_url }}">
-            <img src="{{ record.get_square_thumbnail_url }}" title="{{ title }}" alt="{{ title }}" />
+            <img src="{{ record.get_square_thumbnail_url }}" title="{{ record.title }}" alt="{{ record.alt_text }}" />
         </a>
     </div>
-        {% endwith %}
     {% endfor %}
     <div id="image-preview-reload"><a href=".">Load new images</a></div>
     {% with records.0.collection_set.all.0 as collection %}

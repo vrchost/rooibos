@@ -2,7 +2,7 @@
 {% spaceless %}
 {% with request.user|profile_setting:"options_basket_thumbnails"|default:"square" as format %}
 {% for record in selected_records %}
-<a href="{{ record.get_absolute_url }}"><img id="basket-record-id-{{ record.id }}" data-record-id="{{ record.id }}" data-record-name="{{ record.name }}" class="thumbnail record-anchor metadata-anchor" src="{% if format == "square" %}{{ record.get_square_thumbnail_url }}{% else %}{{ record.get_thumbnail_url }}{% endif %}" alt="{{ record.title }}" title="{{ record.title }}" /></a>
+<a href="{{ record.get_absolute_url }}"><img id="basket-record-id-{{ record.id }}" data-record-id="{{ record.id }}" data-record-name="{{ record.name }}" class="thumbnail record-anchor metadata-anchor" src="{% if format == "square" %}{{ record.get_square_thumbnail_url }}{% else %}{{ record.get_thumbnail_url }}{% endif %}" alt="{{ record.alt_text }}" title="{{ record.title }}" /></a>
 {% empty %}
 <br />Your basket is empty.
 {% endfor %}
