@@ -65,7 +65,7 @@ def create_data_fixtures(*args, **kwargs):
         (10, [25], dc, "relation", "Relation"),
         (11, [26], dc, "rights", "Rights"),
         (12, [27], dc, "source", "Source"),
-        (13, [16, 29, 30], dc, "subject", "Subject"),
+        (13, [16, 30], dc, "subject", "Subject"),
         (14, [33], dc, "title", "Title"),
         (15, [34], dc, "type", "Type"),
         (16, [13], tag, "tags", "Tags"),
@@ -81,7 +81,7 @@ def create_data_fixtures(*args, **kwargs):
         (26, [11], vra, "rights", "Rights"),
         (27, [12], vra, "source", "Source"),
         (28, [], vra, "stateedition", "State/Edition"),
-        (29, [2, 13], vra, "styleperiod", "Style/Period"),
+        (29, [2], vra, "styleperiod", "Style/Period"),
         (30, [13], vra, "subject", "Subject"),
         (31, [6], vra, "technique", "Technique"),
         (32, [7], vra, "textref", "Textual Reference"),
@@ -147,6 +147,7 @@ def create_data_fixtures(*args, **kwargs):
             defaults=dict(
                 importance=importance,
                 order=order,
+                label=f[field].label,
             )
         )
 
