@@ -38,10 +38,11 @@ class Command(BaseCommand):
             return
 
         filename = "".join(random.sample(string.letters + string.digits, 32))
-        full_path = os.path.join(_get_scratch_dir(), 'cmdline=' + filename)
+        filename = 'cmdline=' + filename
+        full_path = os.path.join(_get_scratch_dir(), filename)
         shutil.copy(data_file, full_path)
 
 
-        task = submit_import_job(mapping_file, data_file, collections)
+        task = submit_import_job(mapping_file, filename, collections)
 
         print "Job submitted: %s" % task.id
