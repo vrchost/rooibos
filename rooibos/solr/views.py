@@ -229,11 +229,17 @@ class ExactValueSearchFacet(SearchFacet):
 
     def __init__(self, name):
         prefix, name = ([None] + name[:-2].split('.'))[-2:]
-        if prefix:
-            field = Field.objects.get(standard__prefix=prefix, name=name)
-        else:
-            field = Field.objects.get(standard=None, name=name)
-        super(ExactValueSearchFacet, self).__init__(name, field.label)
+        try:
+            if prefix:
+                field = Field.objects.get(standard__prefix=prefix, name=name)
+            else:
+                field = Field.objects.get(standard=None, name=name)
+            label = field.label
+        except Field.DoesNotExist:
+            logger.exception(
+                'Cannot field field %r with prefix %r' % (name, prefix))
+            label = 'Error'
+        super(ExactValueSearchFacet, self).__init__(name, label)
 
     def process_criteria(self, criteria, *args, **kwargs):
         return '"' + _special.sub(r'\\\1', criteria) + '"'
@@ -499,15 +505,16 @@ def run_search(user,
             search_facets[f].set_result(facets.get(f))
 
     if orquery:
-        (f, v) = orquery.split(':', 1)
+        f, v = orquery.split(':', 1)
         orfacets = s.search(_generate_query(
             search_facets, user, collection, criteria, keywords, selected,
             remove, orquery),
             rows=0, facets=[f], facet_mincount=1, facet_limit=100)[2]
-        orfacet = copy.copy(search_facets[f])
-        orfacet.label = '%s in %s or...' % (v.replace("|", " or "),
-                                            orfacet.label)
-        orfacet.set_result(orfacets[f])
+        orfacet = copy.copy(search_facets[f]) if f in search_facets else None
+        if orfacet:
+            orfacet.label = '%s in %s or...' % (v.replace("|", " or "),
+                                                orfacet.label)
+            orfacet.set_result(orfacets[f])
     else:
         orfacet = None
 
