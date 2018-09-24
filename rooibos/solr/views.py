@@ -822,7 +822,7 @@ def search_json(request, id=None, name=None, selected=False):
     return dict(html=html)
 
 
-def _get_browse_fields(collection_id):
+def _get_browse_fields(collection_id, child_collection_ids=None):
     fields = cache.get('browse_fields_%s' % collection_id)
     order = cache.get('browse_fields_order_%s' % collection_id)
     if fields and order:
@@ -838,7 +838,10 @@ def _get_browse_fields(collection_id):
                 fieldset = FieldSet.objects.get(name='browse-collections')
             except FieldSet.DoesNotExist:
                 pass
-        query = FieldValue.objects.filter(record__collection=collection_id)
+        collections = [collection_id]
+        if child_collection_ids:
+            collections.extend(child_collection_ids)
+        query = FieldValue.objects.filter(record__collection__in=collections)
         if fieldset:
             query = query.filter(
                 field__in=list(fieldset.fields.values_list('id', flat=True)))
@@ -893,7 +896,8 @@ def browse(request, id=None, name=None):
     if id:
         collection = get_object_or_404(collections, id=id)
         if collection:
-            fields = _get_browse_fields(collection.id)
+            fields = _get_browse_fields(
+                collection.id, list(collection.all_child_collections))
             if not fields:
                 return HttpResponseRedirect(reverse('solr-browse'))
 
