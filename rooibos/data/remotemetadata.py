@@ -99,6 +99,9 @@ def fetch_remote_metadata():
 
             source.save()
 
+    if not tasks:
+        return
+
     task = chain(*tasks).delay()
 
     logger.info(
