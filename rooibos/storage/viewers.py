@@ -6,7 +6,7 @@ from django.template import RequestContext
 from rooibos.access.functions import \
     get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
-from rooibos.data.models import Record
+from rooibos.data.models import Record, FieldValue
 from models import Storage
 import re
 
@@ -172,3 +172,49 @@ def gifviewer(obj, request, objid=None):
             return None
     media = _supported_media(obj, request.user, ['image/gif'])
     return GifViewer(obj, request.user) if media else None
+
+
+def _get_links(record):
+    return FieldValue.objects.filter(
+        record=record,
+        index_value__startswith='https://www.youtube.com/watch?v=',
+    ).values('value')
+
+
+class YoutubeViewer(Viewer):
+
+    title = "YouTube Viewer"
+    weight = 20
+    is_embeddable = True
+
+    def embed_script(self, request):
+
+        divid = request.GET.get('id', 'unknown')
+
+        links = list(_get_links(self.obj))
+        if not links:
+            raise Http404()
+
+        return render_to_response(
+            'storage_youtubeviewer.js',
+            {
+                'record': self.obj,
+                'anchor_id': divid,
+                'embed_url': links[0]['value'].replace('watch?v=', 'embed/'),
+            },
+            context_instance=RequestContext(request)
+        )
+
+
+@register_viewer('gifviewer', YoutubeViewer)
+def youtubeviewer(obj, request, objid=None):
+    if obj:
+        if not isinstance(obj, Record):
+            return None
+    else:
+        try:
+            obj = Record.get_or_404(objid, request.user)
+        except Http404:
+            return None
+    return YoutubeViewer(obj, request.user) \
+        if _get_links(obj).count() else None
