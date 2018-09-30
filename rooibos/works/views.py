@@ -28,24 +28,7 @@ def search(request):
 
     def process_record(
             record, owner=None, context=None,
-            process_url=lambda url: url, dc_mapping_cache=None):
-        if dc_mapping_cache is None:
-            dc_mapping_cache = dict()
-
-        def get_dc_field(field):
-            if field.id not in dc_mapping_cache and False:
-                if field.standard and field.standard.prefix == 'dc':
-                    dc_mapping_cache[field.id] = field.name
-                else:
-                    equivalents = (
-                        field for field in field.get_equivalent_fields()
-                        if field.standard and field.standard.prefix == 'dc'
-                    )
-                    try:
-                        dc_mapping_cache[field.id] = equivalents.next().name
-                    except StopIteration:
-                        pass
-            return dc_mapping_cache.get(field.id)
+            process_url=lambda url: url):
 
         largeThumb = (
             record.get_thumbnail_url('large', force_cdn=True) or
@@ -55,7 +38,7 @@ def search(request):
         return dict(
             id=record.id,
             name=record.name,
-            title=record.title,
+            title=record.work_title,
             identifier=record.identifier,
             thumbnail=process_url(record.get_thumbnail_url()),
             largeThumb=process_url(largeThumb),
@@ -67,10 +50,9 @@ def search(request):
     def process_records(
             records, owner=None, context=None,
             process_url=lambda url: url):
-        dc_mapping_cache = dict()
         return [
             process_record(
-                record, owner, context, process_url, dc_mapping_cache
+                record, owner, context, process_url
             )
             for record in records
         ] if records else []

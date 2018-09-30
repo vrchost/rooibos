@@ -66,7 +66,7 @@ def create_data_fixtures(*args, **kwargs):
         (11, [26], dc, "rights", "Rights"),
         (12, [27], dc, "source", "Source"),
         (13, [16, 30], dc, "subject", "Subject"),
-        (14, [33], dc, "title", "Title"),
+        (14, [], dc, "title", "Title"),
         (15, [34], dc, "type", "Type"),
         (16, [13], tag, "tags", "Tags"),
         (17, [1, 3], vra, "agent", "Agent"),
@@ -85,7 +85,7 @@ def create_data_fixtures(*args, **kwargs):
         (30, [13], vra, "subject", "Subject"),
         (31, [6], vra, "technique", "Technique"),
         (32, [7], vra, "textref", "Textual Reference"),
-        (33, [14], vra, "title", "Title"),
+        (33, [], vra, "title", "Title"),
         (34, [15], vra, "worktype", "Work Type"),
     ]
 

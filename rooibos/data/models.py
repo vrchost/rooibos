@@ -363,6 +363,12 @@ class Record(models.Model):
         return self._get_field_value('identifier') if self.id else None
 
     @property
+    def work_title(self):
+        work_title = self._get_field_value(
+            'title', standard='vra') if self.id else None
+        return work_title or self.title
+
+    @property
     def alt_text(self):
         return (
             self._get_field_value('alt-text', standard='system', hidden=None)
