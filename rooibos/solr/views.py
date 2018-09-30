@@ -87,8 +87,10 @@ class WorkSearchFacet(SearchFacet):
             comment = (' (+%d others)' % (len(values) - 1))
         for v in values:
             record = Record.get_primary_work_record(v)
-            if record and record.title:
-                return record.title + comment
+            if record:
+                title = record.work_title or record.title
+                if title:
+                    return title + comment
         return value
 
 
