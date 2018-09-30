@@ -95,7 +95,14 @@ class SolrIndex():
         self._build_group_tree()
         core_fields = dict(
             (f, f.get_equivalent_fields())
-            for f in Field.objects.filter(standard__prefix='dc'))
+            for f in Field.objects.filter(standard__prefix='dc')
+        )
+        # add VRA Title to support work titles
+        try:
+            vra_title = Field.objects.get(name='title', standard__prefix='vra')
+            core_fields[vra_title] = vra_title.get_equivalent_fields()
+        except Field.DoesNotExist:
+            pass
         count = 0
         batch_size = 100
         process_thread = None
@@ -366,21 +373,22 @@ class SolrIndex():
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media,
                         image_to_works, work_to_images,
                         implicit_primary_work_records):
-        required_fields = dict((f.name, None) for f in core_fields.keys())
+        required_fields = dict((f.full_name, f) for f in core_fields.keys())
         doc = {'id': str(record.id)}
         for v in fieldvalues:
             clean_value = self._clean_string(v.value)
             # Store Dublin Core or equivalent field for use with facets
             for cf, cfe in core_fields.iteritems():
+                name = cf.name if cf.standard.prefix == 'dc' else cf.full_name
                 if v.field == cf or v.field in cfe:
-                    doc.setdefault(cf.name + '_t', []).append(clean_value)
-                    doc.setdefault(cf.name + '_w', []).append(clean_value)
-                    if not cf.name + '_sort' in doc:
-                        doc[cf.name + '_sort'] = clean_value
-                    required_fields.pop(cf.name, None)
+                    doc.setdefault(name + '_t', []).append(clean_value)
+                    doc.setdefault(name + '_w', []).append(clean_value)
+                    if not name + '_sort' in doc:
+                        doc[name + '_sort'] = clean_value
+                    required_fields.pop(cf.full_name, None)
                     if v.refinement:
                         doc.setdefault(
-                            cf.name + '.' + v.refinement + '_t', []
+                            name + '.' + v.refinement + '_t', []
                         ).append(clean_value)
                         if v.refinement.lower() == 'ispartof':
                             doc.setdefault('work', []).append(clean_value)
@@ -399,8 +407,8 @@ class SolrIndex():
                         doc[v.field.name + '_sort'] = clean_value
             # For exact retrieval through browsing
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
-        for f in required_fields:
-            doc[f + '_t'] = SOLR_EMPTY_FIELD_VALUE
+        for _, f in required_fields.items():
+            doc[f.name + '_t'] = SOLR_EMPTY_FIELD_VALUE
         all_parents = [g.collection_id for g in groups]
         parents = [g.collection_id for g in groups if not g.hidden]
         # Combine the direct parents with (great-)grandparents
