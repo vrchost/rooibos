@@ -70,6 +70,7 @@ angular.module('clientApp', ['bw.paging'])
             var pageSize = $scope.search.pageSize;
             var page = goToPage || $scope.search.page;
             var args = [
+                's=vra.title_sort+asc,title_sort+asc',
                 'ps=' + pageSize,
                 'page=' + page,
                 'kw=' + encodeURIComponent($scope.search.keyword)
