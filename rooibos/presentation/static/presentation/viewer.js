@@ -1,6 +1,6 @@
 var Viewer = function (options) {
 
-    var mirador = Mirador(options);
+    this.mirador = Mirador(options);
     var viewer = this;
 
     if (window.opener && window.opener.viewer) {
@@ -40,7 +40,7 @@ var Viewer = function (options) {
     };
 
     this.forEachImageViewer = function (callback) {
-        var slots = mirador.viewer.workspace.slots;
+        var slots = viewer.mirador.viewer.workspace.slots;
         slots.forEach(function (slot) {
             var imageView = slot.window && slot.window.focusModules.ImageView;
             if (imageView) {
@@ -59,20 +59,16 @@ var Viewer = function (options) {
 
 
     var keydown = function (event) {
-
         if (event.key === 'ArrowLeft') {
             forEachWindowAndImageViewer(function (imageView) {
                 imageView.previous();
             });
         }
-
         if (event.key === 'ArrowRight') {
             forEachWindowAndImageViewer(function (imageView) {
                 imageView.next();
             });
         }
-
-        event.stopPropagation();
     };
 
     var keyup = function (event) { };
@@ -88,6 +84,37 @@ var Viewer = function (options) {
 
     document.addEventListener('keydown', eventWrapper(keydown, true), true);
     document.addEventListener('keyup', eventWrapper(keyup, true), true);
+
+
+    var delayWrapper = function (callback) {
+        return function () {
+            setTimeout(callback);
+        };
+    };
+
+    var fillEmptySlots = function () {
+        viewer.mirador.viewer.workspace.slots.forEach(function (slot) {
+            if (!slot.window) {
+
+                var manifests =
+                    viewer.mirador.viewer.state.getStateProperty('manifests');
+                for (var manifest in manifests) { }
+                manifest = manifests[manifest];
+                var canvases = manifest.jsonLd.sequences[0].canvases;
+                var windowConfig = {
+                  manifest: manifest,
+                  canvasID: canvases[1]['@id'],
+                  viewType: 'ImageView'
+                };
+                viewer.mirador.eventEmitter.publish(
+                    'ADD_WINDOW', windowConfig);
+            }
+        });
+    };
+
+
+    this.mirador.eventEmitter.subscribe(
+        'RESET_WORKSPACE_LAYOUT', delayWrapper(fillEmptySlots));
 
     return this;
 };
