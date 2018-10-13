@@ -6,37 +6,51 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>MDID{% if presentation.title %} - {{ presentation.title }}{% endif %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      #viewer {
-        width: 100%;
-        height: 100%;
-        position: fixed;
-      }
-    </style>
     <link rel="stylesheet" type="text/css" href="{% static 'mirador/css/mirador-combined.css' %}">
-    <script src="{% static 'mirador/mirador.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'presentation/viewer.css' %}">
 </head>
 
 <body>
+
 <div id="viewer"></div>
-<script type="text/javascript">
 
-    Mirador({
-      id: "viewer",
-      buildPath: "{% static 'mirador/' %}",
-      data: [{
-        manifestUri: "{% url 'presentation-manifest' presentation.id presentation.name %}",
-        location: "{{ presentation.title }}"
-      }],
-      windowObjects: [{
-        loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}",
-        viewType: "ImageView"
-      }]
-    });
+<script src="{% static 'mirador/mirador.js' %}"></script>
+<script src="{% static 'presentation/viewer.js' %}"></script>
 
+<script>
+    var options = {
+        id: "viewer",
+        buildPath: "{% static 'mirador/' %}",
+        data: [{
+            manifestUri: "{% url 'presentation-manifest' presentation.id presentation.name %}",
+            location: "{{ presentation.title }}"
+        }],
+        windowObjects: [{
+            loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}",
+            viewType: "ImageView"
+        }],
+        workspacePanelSettings: {
+            'maxRows': 2,
+            'maxColumns': 2,
+            'preserveWindows': true
+        },
+
+        mainMenuSettings: {
+            userButtons: [{
+                label: 'Additional Window',
+                attributes: {
+                    id: 'additional-window',
+                    href: 'javascript:window.viewer.additionalWindow();'
+                },
+                iconClass: 'fa fa-plus-square fa-lg fa-fw'
+            }]
+        },
+
+        autoHideControls: true
+    };
+
+    window.viewer = new Viewer(options);
 </script>
-</body>
-
 
 </body>
 </html>
