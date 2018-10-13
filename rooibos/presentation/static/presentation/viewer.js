@@ -5,14 +5,30 @@ var Viewer = function (options) {
 
     if (window.opener && window.opener.viewer) {
         this.windows = window.opener.viewer.windows;
+        this.synced = window.opener.viewer.synced;
     } else {
         this.windows = [window];
+        this.synced = false;
     }
 
     this.additionalWindow = function () {
         viewer.windows.push(
             window.open(window.location.href)
         );
+    };
+
+    this.syncViewers = function () {
+        var synced = !viewer.synced;
+        forEachWindow(function (w) {
+            w.viewer.setSynced(synced);
+        });
+    };
+
+    this.setSynced = function (synced) {
+        this.synced = synced;
+        jQuery('#sync-viewers span')
+            .toggleClass('fa-link', !synced)
+            .toggleClass('fa-unlink', synced);
     };
 
     var forEachWindow = function (callback) {
@@ -61,15 +77,17 @@ var Viewer = function (options) {
 
     var keyup = function (event) { };
 
-    var stopPropagationWrapper = function (eventHandler) {
+    var eventWrapper = function (eventHandler, onlyWhenSynced) {
         return function (event) {
-            eventHandler(event);
+            if (!onlyWhenSynced || viewer.synced) {
+                eventHandler(event);
+            }
             event.stopPropagation();
         };
     };
 
-    document.addEventListener('keydown', stopPropagationWrapper(keydown), true);
-    document.addEventListener('keyup', stopPropagationWrapper(keyup), true);
+    document.addEventListener('keydown', eventWrapper(keydown, true), true);
+    document.addEventListener('keyup', eventWrapper(keyup, true), true);
 
     return this;
 };
