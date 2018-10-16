@@ -206,7 +206,7 @@ class YoutubeViewer(Viewer):
         )
 
 
-@register_viewer('gifviewer', YoutubeViewer)
+@register_viewer('youtubeviewer', YoutubeViewer)
 def youtubeviewer(obj, request, objid=None):
     if obj:
         if not isinstance(obj, Record):
