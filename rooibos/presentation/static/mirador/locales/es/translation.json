@@ -17,6 +17,7 @@
     "brightnessTooltip": "Ajustar el brillo",
     "cancel": "Cancelar",
     "cancelAnnotation": "¿Desea cancelar esta anotación?",
+    "canvasMetadataTooltip" : "Información sobre esta imagen",
     "changeLayout": "Cambiar diseño",
     "changeLayoutTooltip": "Cambiar el número de ranuras visibles",
     "close": "Cerrar",

@@ -644,6 +644,10 @@ def slide_manifest(request, slide, owner):
         handler='storage-retrieve-iiif-image',
     )
 
+    metadata = [
+        dict(label=fv.resolved_label, value=fv.value) for fv in fieldvalues
+    ]
+
     passwords = request.session.get('passwords', dict())
     media = get_media_for_record(slide.record, request.user, passwords)
     if len(media):
@@ -684,7 +688,8 @@ def slide_manifest(request, slide, owner):
         'label': title,
         "height": canvas_height,
         "width": canvas_width,
-        'images': images
+        'images': images,
+        'metadata': metadata,
     }
 
 

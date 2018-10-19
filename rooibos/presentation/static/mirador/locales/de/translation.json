@@ -17,6 +17,7 @@
     "brightnessTooltip": "Helligkeit anpassen",
     "cancel": "Abbrechen",
     "cancelAnnotation": "Wollen Sie diese Annotation verwerfen?",
+    "canvasMetadataTooltip" : "Informationen zu diesem Bild",
     "changeLayout": "Layout ändern",
     "changeLayoutTooltip": "Anzahl der sichtbaren Slots anpassen",
     "close": "Schließen",
