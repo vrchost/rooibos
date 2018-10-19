@@ -23,6 +23,7 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view
+from rooibos.storage import get_media_for_record
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
 
@@ -643,29 +644,47 @@ def slide_manifest(request, slide, owner):
         handler='storage-retrieve-iiif-image',
     )
 
+    passwords = request.session.get('passwords', dict())
+    media = get_media_for_record(slide.record, request.user, passwords)
+    if len(media):
+        media = media[0]
+        media.identify(lazy=True)
+        canvas_width = width = media.width or 1600
+        canvas_height = height = media.height or 1200
+    else:
+        width = height = None
+        canvas_width = 1600
+        canvas_height = 1200
+
+    while canvas_height < 1200 or canvas_width < 1200:
+        canvas_height *= 2
+        canvas_width *= 2
+
+    images = [{
+        '@type': 'oa:Annotation',
+        'motivation': 'sc:painting',
+        'resource': {
+            '@id': image,
+            '@type': 'dctypes:Image',
+            'format': 'image/jpeg',
+            'service': {
+                '@context': 'http://iiif.io/api/image/2/context.json',
+                '@id': image,
+                'profile': 'http://iiif.io/api/image/2/level1.json'
+            },
+            "height": height,
+            "width": width
+        },
+        'on': id,
+    }] if width and height else []
+
     return {
         '@id': id,
         '@type': 'sc:Canvas',
         'label': title,
-        "height":1000,
-        "width":750,
-        'images': [{
-            '@type': 'oa:Annotation',
-            'motivation': 'sc:painting',
-            'resource': {
-                '@id': image,
-                '@type': 'dctypes:Image',
-                'format': 'image/jpeg',
-                'service': {
-                    '@context': 'http://iiif.io/api/image/2/context.json',
-                    '@id': image,
-                    'profile': 'http://iiif.io/api/image/2/level1.json'
-                },
-                "height":2000,
-                "width":1500
-            },
-            'on': id,
-        }]
+        "height": canvas_height,
+        "width": canvas_width,
+        'images': images
     }
 
 
