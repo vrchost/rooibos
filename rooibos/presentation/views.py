@@ -638,7 +638,7 @@ def slide_manifest(request, slide, owner):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
     title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
-    id = get_id(request, 'slide', 'canvas', slide.id)
+    id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
     image = slide.record.get_image_url(
         force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False),
         handler='storage-retrieve-iiif-image',
@@ -700,12 +700,14 @@ def manifest(request, id, name):
     return {
         '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
         '@type': 'sc:Manifest',
-        '@id': get_id(request, 'presentation', p.id, 'manifest'),
+        '@id': get_id(
+            request, 'presentation', 'presentatation%d' % p.id, 'manifest'),
         'label': p.title,
         'metadata': [],
         'description': p.description,
         'sequences': [{
-            '@id': get_id(request, 'presentation', p.id, 'all'),
+            '@id': get_id(
+                request, 'presentation', 'presentation%d' % p.id, 'all'),
             '@type': 'sc:Range',
             'label': 'All slides',
             'canvases': [
