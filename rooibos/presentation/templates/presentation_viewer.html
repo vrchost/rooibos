@@ -26,15 +26,39 @@
             location: "{{ presentation.title }}"
         }],
         windowObjects: [{
-            loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}",
-            viewType: "ImageView"
+            loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}"
         }],
         workspacePanelSettings: {
             'maxRows': 2,
             'maxColumns': 2,
             'preserveWindows': true
         },
-
+        windowSettings: {
+            availableViews: ['ImageView'],
+            viewType: 'ImageView',
+            bottomPanelVisible: false,
+            sidePanel: false,
+            overlay: false,
+            canvasControls: {
+                annotations: false,
+                imageManipulation: {
+                    manipulationLayer: true,
+                    controls: {
+                        rotate: true,
+                        brightness: true,
+                        contrast: true,
+                        saturate: true,
+                        grayscale: true,
+                        invert: false,
+                        mirror: true
+                    }
+                },
+                canvasInfo: {
+                    canvasInfoLayer: true
+                }
+            },
+            displayLayout: false
+        },
         mainMenuSettings: {
             userButtons: [{
                 label: 'Additional Window',
@@ -52,8 +76,9 @@
                 iconClass: 'fa fa-link fa-lg fa-fw'
             }]
         },
-
-        autoHideControls: true
+        autoHideControls: true,
+        fadeDuration: 400,
+        timeoutDuration: 3000
     };
 
     window.viewer = new Viewer(options);

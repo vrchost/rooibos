@@ -1,3 +1,12 @@
+.mirador-container .content-container {
+    margin-top: 0;
+}
+
+.mirador-container .manifest-info {
+    display: none;
+}
+
+
 .mdid-active {
     outline: blue 2px solid;
 }
