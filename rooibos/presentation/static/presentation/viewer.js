@@ -93,7 +93,7 @@ var Viewer = function (options) {
             });
         }
         if (event.key === ' ') {
-            viewer.markAsActive(1);
+            viewer.markAsActive(event.shiftKey ? -1 : 1);
         }
     };
 
