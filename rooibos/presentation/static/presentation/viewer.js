@@ -57,16 +57,34 @@ var Viewer = function (options) {
         });
     };
 
+    var imageViewNavigate = function (imageView, jump) {
+        var target = imageView.currentImgIndex + jump;
+        target = Math.min(imageView.imagesList.length - 1, Math.max(0, target));
+        if (target !== imageView.currentImgIndex) {
+            imageView.eventEmitter.publish(
+                'SET_CURRENT_CANVAS_ID.' + imageView.windowId,
+                imageView.imagesList[target]['@id']
+            );
+        }
+    };
+
+
+    var countUsedCanvases = function () {
+        return viewer.mirador.viewer.workspace.slots.map(function (slot) {
+            return slot.window ? 1 : null;
+        }).length;
+    };
 
     var keydown = function (event) {
+        var distance = countUsedCanvases();
         if (event.key === 'ArrowLeft') {
             forEachWindowAndImageViewer(function (imageView) {
-                imageView.previous();
+                imageViewNavigate(imageView, -distance);
             });
         }
         if (event.key === 'ArrowRight') {
             forEachWindowAndImageViewer(function (imageView) {
-                imageView.next();
+                imageViewNavigate(imageView, distance);
             });
         }
     };
@@ -92,19 +110,53 @@ var Viewer = function (options) {
         };
     };
 
+    var getUsedCanvases = function () {
+        return viewer.mirador.viewer.workspace.slots.map(function (slot) {
+            return slot.window ? slot.window.canvasID : null;
+        });
+    };
+
+    var getManifest = function () {
+        var manifests =
+            viewer.mirador.viewer.state.getStateProperty('manifests');
+        for (var manifest in manifests) {
+            if (!manifests.hasOwnProperty(manifest)) {
+                continue;
+            }
+            return manifests[manifest];
+        }
+    };
+
+    var getNextCanvases = function () {
+        var manifest = getManifest();
+        var canvases = manifest.jsonLd.sequences[0].canvases;
+        var used = getUsedCanvases();
+        var next = [];
+        var canvasId;
+        canvases.forEach(function (canvas) {
+            canvasId = canvas['@id'];
+            if (used.indexOf(canvasId) > -1) {
+                next = [];
+            } else {
+                next.push(canvasId);
+            }
+        });
+        // if no further slides found, return last one
+        if (!next.length && canvasId) {
+            next.push(canvasId);
+        }
+        return next;
+    };
+
     var fillEmptySlots = function () {
+        var next = getNextCanvases();
+        var manifest = getManifest();
         viewer.mirador.viewer.workspace.slots.forEach(function (slot) {
             if (!slot.window) {
-
-                var manifests =
-                    viewer.mirador.viewer.state.getStateProperty('manifests');
-                for (var manifest in manifests) { }
-                manifest = manifests[manifest];
-                var canvases = manifest.jsonLd.sequences[0].canvases;
                 var windowConfig = {
-                  manifest: manifest,
-                  canvasID: canvases[1]['@id'],
-                  viewType: 'ImageView'
+                    manifest: manifest,
+                    canvasID: next.length === 1 ? next[0] : next.shift(),
+                    viewType: 'ImageView'
                 };
                 viewer.mirador.eventEmitter.publish(
                     'ADD_WINDOW', windowConfig);
