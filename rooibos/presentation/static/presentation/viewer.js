@@ -6,9 +6,14 @@ var Viewer = function (options) {
     if (window.opener && window.opener.viewer) {
         this.windows = window.opener.viewer.windows;
         this.synced = window.opener.viewer.synced;
+        this.active = window.opener.viewer.active;
     } else {
         this.windows = [window];
         this.synced = false;
+        this.active = {
+            window: 0,
+            slot: 0
+        }
     }
 
     this.additionalWindow = function () {
@@ -32,27 +37,27 @@ var Viewer = function (options) {
     };
 
     var forEachWindow = function (callback) {
-        viewer.windows.forEach(function (w) {
-            if (!w.closed) {
-                callback(w);
+        viewer.windows.forEach(function (window, windowIndex) {
+            if (!window.closed) {
+                callback(window, windowIndex);
             }
         });
     };
 
     this.forEachImageViewer = function (callback) {
         var slots = viewer.mirador.viewer.workspace.slots;
-        slots.forEach(function (slot) {
+        slots.forEach(function (slot, slotIndex) {
             var imageView = slot.window && slot.window.focusModules.ImageView;
             if (imageView) {
-                callback(imageView);
+                callback(imageView, slotIndex);
             }
         });
     };
 
     var forEachWindowAndImageViewer = function (callback) {
-        forEachWindow(function (w) {
-            w.viewer.forEachImageViewer(function (imageViewer) {
-                callback(imageViewer);
+        forEachWindow(function (w, windowIndex) {
+            w.viewer.forEachImageViewer(function (imageView, slotIndex) {
+                callback(imageView, windowIndex, slotIndex);
             });
         });
     };
@@ -87,6 +92,9 @@ var Viewer = function (options) {
                 imageViewNavigate(imageView, distance);
             });
         }
+        if (event.key === ' ') {
+            viewer.markAsActive(1);
+        }
     };
 
     var keyup = function (event) { };
@@ -100,8 +108,8 @@ var Viewer = function (options) {
         };
     };
 
-    document.addEventListener('keydown', eventWrapper(keydown, true), true);
-    document.addEventListener('keyup', eventWrapper(keyup, true), true);
+    document.addEventListener('keydown', eventWrapper(keydown), true);
+    document.addEventListener('keyup', eventWrapper(keyup), true);
 
 
     var delayWrapper = function (callback) {
@@ -165,8 +173,40 @@ var Viewer = function (options) {
     };
 
 
+    this.markAsActive = function (jump) {
+        jump = jump || 0;
+        var positions = [];
+        var activePosition = 0;
+        var active = this.active;
+        forEachWindowAndImageViewer(function (imageView, windowIndex, slotIndex) {
+            var element = jQuery(imageView.element)
+                .parents('.slot').removeClass('mdid-active');
+            positions.push({
+                window: windowIndex,
+                slot: slotIndex,
+                element: element
+            });
+            if (active.window === windowIndex && active.slot === slotIndex) {
+                activePosition = positions.length - 1;
+            }
+        });
+        var count = positions.length;
+        if (!count) {
+            return;
+        }
+        activePosition = (activePosition + jump + count) % count;
+        positions[activePosition].element.addClass('mdid-active');
+        active.window = positions[activePosition].window;
+        active.slot = positions[activePosition].slot;
+    };
+
+
     this.mirador.eventEmitter.subscribe(
         'RESET_WORKSPACE_LAYOUT', delayWrapper(fillEmptySlots));
+
+    this.mirador.eventEmitter.subscribe('ADD_WINDOW', function () {
+        delayWrapper(viewer.markAsActive.bind(viewer))();
+    });
 
     return this;
 };
