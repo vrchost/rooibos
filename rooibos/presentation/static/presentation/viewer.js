@@ -73,7 +73,6 @@ var Viewer = function (options) {
         }
     };
 
-
     var countUsedCanvases = function () {
         return viewer.mirador.viewer.workspace.slots.map(function (slot) {
             return slot.window ? 1 : null;
@@ -108,8 +107,27 @@ var Viewer = function (options) {
         };
     };
 
+    var mouseMove = function () {
+        var mouseMoveTimeout;
+        var mouseMoveHudHidden = false;
+        var mouseMove = function () {
+            clearTimeout(mouseMoveTimeout);
+            mouseMoveTimeout = setTimeout(function () {
+                jQuery('.mirador-hud').hide();
+                mouseMoveHudHidden = true;
+            }, 2000);
+            if (mouseMoveHudHidden) {
+                jQuery('.mirador-hud').show();
+                mouseMoveHudHidden = false;
+            }
+        };
+        mouseMove();
+        return mouseMove;
+    }();
+
     document.addEventListener('keydown', eventWrapper(keydown), true);
     document.addEventListener('keyup', eventWrapper(keyup), true);
+    document.addEventListener('mousemove', mouseMove);
 
 
     var delayWrapper = function (callback) {
