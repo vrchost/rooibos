@@ -1,4 +1,4 @@
-# Madison Digial Image Database (MDID)
+# Madison Digital Image Database (MDID)
 
 The [Madison Digital Image Database](http://mdid.org/) is a free, open source
 media repo aimed at education spaces.
