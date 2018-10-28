@@ -51,7 +51,7 @@ var Viewer = function (options) {
         });
     };
 
-    this.forEachImageViewer = function (callback) {
+    this.forEachImageView = function (callback) {
         var slots = viewer.mirador.viewer.workspace.slots;
         slots.forEach(function (slot, slotIndex) {
             var imageView = slot.window && slot.window.focusModules.ImageView;
@@ -63,7 +63,7 @@ var Viewer = function (options) {
 
     var forEachWindowAndImageViewer = function (callback) {
         forEachWindow(function (w, windowIndex) {
-            w.viewer.forEachImageViewer(function (imageView, slotIndex) {
+            w.viewer.forEachImageView(function (imageView, slotIndex) {
                 callback(imageView, windowIndex, slotIndex);
             });
         });
