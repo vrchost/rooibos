@@ -6,7 +6,16 @@
     display: none;
 }
 
+.mirador-hud {
+    transition: opacity 0.4s ease-in-out;
+    opacity: 1;
+}
+
 
 .mdid-active {
     outline: blue 2px solid;
+}
+
+.mdid-hud-hidden {
+    opacity: 0;
 }

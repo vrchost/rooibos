@@ -96,8 +96,6 @@ var Viewer = function (options) {
         }
     };
 
-    var keyup = function (event) { };
-
     var eventWrapper = function (eventHandler, onlyWhenSynced) {
         return function (event) {
             if (!onlyWhenSynced || viewer.synced) {
@@ -113,11 +111,11 @@ var Viewer = function (options) {
         var mouseMove = function () {
             clearTimeout(mouseMoveTimeout);
             mouseMoveTimeout = setTimeout(function () {
-                jQuery('.mirador-hud').hide();
+                jQuery('.mirador-hud').addClass('mdid-hud-hidden');
                 mouseMoveHudHidden = true;
             }, 2000);
             if (mouseMoveHudHidden) {
-                jQuery('.mirador-hud').show();
+                jQuery('.mirador-hud').removeClass('mdid-hud-hidden');
                 mouseMoveHudHidden = false;
             }
         };
@@ -126,7 +124,6 @@ var Viewer = function (options) {
     }();
 
     document.addEventListener('keydown', eventWrapper(keydown), true);
-    document.addEventListener('keyup', eventWrapper(keyup), true);
     document.addEventListener('mousemove', mouseMove);
 
 
