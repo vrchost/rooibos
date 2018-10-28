@@ -81,9 +81,11 @@ var Viewer = function (options) {
     };
 
     var countUsedCanvases = function () {
-        return viewer.mirador.viewer.workspace.slots.map(function (slot) {
-            return slot.window ? 1 : null;
-        }).length;
+        var count = 0;
+        forEachWindowAndImageViewer(function () {
+            count++;
+        });
+        return count;
     };
 
     var keydown = function (event) {
