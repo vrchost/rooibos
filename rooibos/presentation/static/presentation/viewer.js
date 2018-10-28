@@ -41,6 +41,7 @@ var Viewer = function (options) {
         jQuery('#sync-viewers span')
             .toggleClass('fa-link', !synced)
             .toggleClass('fa-unlink', synced);
+        jQuery('body').toggleClass('mdid-synced', synced);
     };
 
     var forEachWindow = function (callback) {
@@ -88,20 +89,33 @@ var Viewer = function (options) {
         return count;
     };
 
+    var whenActive = function (callback) {
+        return function () {
+            var imageView = arguments[0];
+            if (viewer.synced ||
+                    jQuery(imageView.element).parents('.mdid-active').length) {
+                callback.apply(this, arguments);
+            }
+        };
+    };
+
     var keydown = function (event) {
-        var distance = countUsedCanvases();
+        var distance = viewer.synced ? countUsedCanvases() : 1;
         if (event.key === 'ArrowLeft') {
-            forEachWindowAndImageViewer(function (imageView) {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
                 imageViewNavigate(imageView, -distance);
-            });
+            }));
         }
         if (event.key === 'ArrowRight') {
-            forEachWindowAndImageViewer(function (imageView) {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
                 imageViewNavigate(imageView, distance);
-            });
+            }));
         }
         if (event.key === ' ') {
             viewer.markAsActive(event.shiftKey ? -1 : 1);
+        }
+        if (event.key === 's') {
+            viewer.syncViewers();
         }
     };
 

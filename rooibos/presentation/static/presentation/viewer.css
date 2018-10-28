@@ -13,7 +13,11 @@
 
 
 .mdid-active {
-    outline: blue 2px solid;
+    outline: rgb(40%, 60%, 100%) 3px solid;
+}
+
+.mdid-synced .mdid-active {
+    outline: none;
 }
 
 .mdid-hud-hidden {
