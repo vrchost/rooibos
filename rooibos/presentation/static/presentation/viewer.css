@@ -6,6 +6,7 @@
     display: none;
 }
 
+.mirador-osd,
 .mirador-hud {
     transition: opacity 0.4s ease-in-out;
     opacity: 1;
@@ -21,5 +22,9 @@
 }
 
 .mdid-hud-hidden {
+    opacity: 0;
+}
+
+.mdid-hide-image .mirador-osd {
     opacity: 0;
 }

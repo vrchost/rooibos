@@ -105,17 +105,27 @@ var Viewer = function (options) {
             forEachWindowAndImageViewer(whenActive(function (imageView) {
                 imageViewNavigate(imageView, -distance);
             }));
-        }
+        } else
         if (event.key === 'ArrowRight') {
             forEachWindowAndImageViewer(whenActive(function (imageView) {
                 imageViewNavigate(imageView, distance);
             }));
-        }
+        } else
         if (event.key === ' ') {
             viewer.markAsActive(event.shiftKey ? -1 : 1);
-        }
+        } else
         if (event.key === 's') {
             viewer.syncViewers();
+        } else
+        if (event.key === 'r') {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
+                imageView.osd.viewport.goHome();
+            }));
+        } else
+        if (event.key === 'h') {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
+                jQuery(imageView.element).toggleClass('mdid-hide-image')
+            }));
         }
     };
 
