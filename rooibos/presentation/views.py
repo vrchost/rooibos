@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
@@ -26,6 +26,7 @@ from rooibos.util import json_view
 from rooibos.storage import get_media_for_record
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
+import base64
 
 
 @login_required
@@ -693,6 +694,35 @@ def slide_manifest(request, slide, owner):
     }
 
 
+def blank_slide(request):
+    image = reverse('presentation-blank-slide', kwargs={'extra': ''})
+    id = get_id(request, 'slide', 'canvas', 'slide0')
+    return {
+        '@id': id,
+        '@type': 'sc:Canvas',
+        'label': 'End of presentation',
+        "height": 100,
+        "width": 100,
+        'images': [{
+            '@type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': {
+                '@id': image,
+                '@type': 'dctypes:Image',
+                'format': 'image/jpeg',
+                'service': {
+                    '@context': 'http://iiif.io/api/image/2/context.json',
+                    '@id': image,
+                    'profile': 'http://iiif.io/api/image/2/level1.json'
+                },
+                "height": 100,
+                "width": 100
+            },
+            'on': id,
+        }],
+        'metadata': [],
+    }
+
 @json_view
 def manifest(request, id, name):
     p = Presentation.get_by_id_for_request(id, request)
@@ -717,6 +747,24 @@ def manifest(request, id, name):
             'label': 'All slides',
             'canvases': [
                 slide_manifest(request, slide, owner) for slide in slides
+            ] + [
+                blank_slide(request)
             ]
         }],
     }
+
+
+def transparent_png(request, extra):
+
+    if extra == 'info.json':
+        return HttpResponse(
+            content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 100, "width": 100, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-blank-slide', kwargs={'extra': ''}) + '"}',
+            content_type='application/json',
+        )
+
+    DATA = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42' \
+           'mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+    return HttpResponse(
+        content=base64.b64decode(DATA),
+        content_type='image/png',
+    )
