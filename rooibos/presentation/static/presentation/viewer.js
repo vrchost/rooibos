@@ -17,8 +17,15 @@ var Viewer = function (options) {
     }
 
     this.additionalWindow = function () {
+        var next = getNextCanvases()[0];
+        var url = window.location.href;
+        if (url.indexOf('canvas=') === -1) {
+            url += (url.indexOf('?') === -1 ? '?' : '&') + 'canvas=' + next;
+        } else {
+            url = url.replace(/canvas=[^&]+/, 'canvas=' + next);
+        }
         viewer.windows.push(
-            window.open(window.location.href)
+            window.open(url, '_blank', 'height=600,width=800')
         );
     };
 

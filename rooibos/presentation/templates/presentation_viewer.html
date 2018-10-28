@@ -18,6 +18,10 @@
 <script src="{% static 'presentation/viewer.js' %}"></script>
 
 <script>
+
+    var match = window.location.href.match(/[?&]canvas=([^&]+)/);
+    var canvas = match ? match[1] : undefined;
+
     var options = {
         id: "viewer",
         buildPath: "{% static 'mirador/' %}",
@@ -26,6 +30,7 @@
             location: "{{ presentation.title }}"
         }],
         windowObjects: [{
+            canvasID: canvas,
             loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}"
         }],
         workspacePanelSettings: {
