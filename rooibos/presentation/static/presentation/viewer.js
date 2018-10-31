@@ -99,6 +99,23 @@ var Viewer = function (options) {
         };
     };
 
+    var applyLayout = function (layout) {
+        var options = {
+            layoutDescription: Mirador.layoutDescriptionFromGridString(layout)
+        };
+        var _applyLayout = function (window) {
+            if (!window.closed) {
+                window.viewer.mirador.eventEmitter.publish(
+                    'RESET_WORKSPACE_LAYOUT', options);
+            }
+        };
+        if (viewer.synced) {
+            forEachWindow(_applyLayout);
+        } else {
+            _applyLayout(viewer.windows[viewer.active.window]);
+        }
+    };
+
     var keydown = function (event) {
         var distance = viewer.synced ? countUsedCanvases() : 1;
         if (event.key === 'ArrowLeft') {
@@ -132,6 +149,27 @@ var Viewer = function (options) {
                 jQuery(imageView.element)
                     .find('.mirador-canvas-metadata-toggle').click();
             }));
+        } else
+        if (event.key === 'ArrowUp') {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
+                jQuery(imageView.element)
+                    .find('.mirador-osd-zoom-in').click();
+            }));
+        } else
+        if (event.key === 'ArrowDown') {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
+                jQuery(imageView.element)
+                    .find('.mirador-osd-zoom-out').click();
+            }));
+        } else
+        if (event.key === 'u') {
+            applyLayout('1x1');
+        } else
+        if (event.key === 'y') {
+            applyLayout('1x2');
+        } else
+        if (event.key === 'x') {
+            applyLayout('2x1');
         }
     };
 
