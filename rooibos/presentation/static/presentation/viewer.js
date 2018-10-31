@@ -126,6 +126,12 @@ var Viewer = function (options) {
             forEachWindowAndImageViewer(whenActive(function (imageView) {
                 jQuery(imageView.element).toggleClass('mdid-hide-image')
             }));
+        } else
+        if (event.key === 'i') {
+            forEachWindowAndImageViewer(whenActive(function (imageView) {
+                jQuery(imageView.element)
+                    .find('.mirador-canvas-metadata-toggle').click();
+            }));
         }
     };
 
