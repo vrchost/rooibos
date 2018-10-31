@@ -99,20 +99,16 @@ var Viewer = function (options) {
         };
     };
 
-    var applyLayout = function (layout) {
-        var options = {
-            layoutDescription: Mirador.layoutDescriptionFromGridString(layout)
-        };
-        var _applyLayout = function (window) {
+    var emitEvent = function (event, options) {
+        var _emitEvent = function (window) {
             if (!window.closed) {
-                window.viewer.mirador.eventEmitter.publish(
-                    'RESET_WORKSPACE_LAYOUT', options);
+                window.viewer.mirador.eventEmitter.publish(event, options);
             }
         };
         if (viewer.synced) {
-            forEachWindow(_applyLayout);
+            forEachWindow(_emitEvent);
         } else {
-            _applyLayout(viewer.windows[viewer.active.window]);
+            _emitEvent(viewer.windows[viewer.active.window]);
         }
     };
 
@@ -163,13 +159,25 @@ var Viewer = function (options) {
             }));
         } else
         if (event.key === 'u') {
-            applyLayout('1x1');
+            emitEvent('RESET_WORKSPACE_LAYOUT', {
+                layoutDescription:
+                    Mirador.layoutDescriptionFromGridString('1x1')
+            });
         } else
         if (event.key === 'y') {
-            applyLayout('1x2');
+            emitEvent('RESET_WORKSPACE_LAYOUT', {
+                layoutDescription:
+                    Mirador.layoutDescriptionFromGridString('1x2')
+            });
         } else
         if (event.key === 'x') {
-            applyLayout('2x1');
+            emitEvent('RESET_WORKSPACE_LAYOUT', {
+                layoutDescription:
+                    Mirador.layoutDescriptionFromGridString('2x1')
+            });
+        } else
+        if (event.key === 'f') {
+            emitEvent('TOGGLE_FULLSCREEN');
         }
     };
 
