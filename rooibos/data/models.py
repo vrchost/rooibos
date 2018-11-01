@@ -249,10 +249,11 @@ class Record(models.Model):
     def get_square_thumbnail_url(self):
         return self._get_thumbnail_url('square')
 
-    def get_image_url(self, force_reprocess=False, width=None, height=None):
+    def get_image_url(self, force_reprocess=False, width=None, height=None,
+                      handler=None):
         if width and height:
             url = reverse(
-                'storage-retrieve-image',
+                handler or 'storage-retrieve-image',
                 kwargs={
                     'recordid': self.id,
                     'record': self.name,
@@ -262,7 +263,7 @@ class Record(models.Model):
             )
         else:
             url = reverse(
-                'storage-retrieve-image-nosize',
+                handler or 'storage-retrieve-image-nosize',
                 kwargs={
                     'recordid': self.id,
                     'record': self.name

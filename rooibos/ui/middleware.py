@@ -21,6 +21,7 @@ class PageTitles:
             return None
 
         if response.status_code == 200 and \
+                hasattr(response, 'get') and \
                 response.get('Content-Type', '').startswith('text/html'):
             # If the page contains Unicode characters, not converting
             # this to Unicode

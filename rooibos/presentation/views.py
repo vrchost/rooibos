@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
@@ -22,8 +22,11 @@ from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
+from rooibos.util import json_view
+from rooibos.storage import get_media_for_record
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
+import base64
 
 
 @login_required
@@ -622,4 +625,146 @@ def record_usage(request, id, name):
             'presentations': presentations,
         },
         context_instance=RequestContext(request)
+    )
+
+
+def get_id(request, *args):
+    server = '//' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    s = '/'.join(map(str, args))
+    return 'http:%s/iiif/%s' % (server, s)
+
+
+def slide_manifest(request, slide, owner):
+
+    fieldvalues = slide.get_fieldvalues(owner=owner)
+    title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
+    id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
+    image = slide.record.get_image_url(
+        force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False),
+        handler='storage-retrieve-iiif-image',
+    )
+
+    metadata = [
+        dict(label=fv.resolved_label, value=fv.value) for fv in fieldvalues
+    ]
+
+    passwords = request.session.get('passwords', dict())
+    media = get_media_for_record(slide.record, request.user, passwords)
+    if len(media):
+        media = media[0]
+        media.identify(lazy=True)
+        canvas_width = width = media.width or 1600
+        canvas_height = height = media.height or 1200
+    else:
+        width = height = None
+        canvas_width = 1600
+        canvas_height = 1200
+
+    while canvas_height < 1200 or canvas_width < 1200:
+        canvas_height *= 2
+        canvas_width *= 2
+
+    images = [{
+        '@type': 'oa:Annotation',
+        'motivation': 'sc:painting',
+        'resource': {
+            '@id': image,
+            '@type': 'dctypes:Image',
+            'format': 'image/jpeg',
+            'service': {
+                '@context': 'http://iiif.io/api/image/2/context.json',
+                '@id': image,
+                'profile': 'http://iiif.io/api/image/2/level1.json'
+            },
+            "height": height,
+            "width": width
+        },
+        'on': id,
+    }] if width and height else []
+
+    return {
+        '@id': id,
+        '@type': 'sc:Canvas',
+        'label': title,
+        "height": canvas_height,
+        "width": canvas_width,
+        'images': images,
+        'metadata': metadata,
+    }
+
+
+def blank_slide(request):
+    image = reverse('presentation-blank-slide', kwargs={'extra': ''})
+    id = get_id(request, 'slide', 'canvas', 'slide0')
+    return {
+        '@id': id,
+        '@type': 'sc:Canvas',
+        'label': 'End of presentation',
+        "height": 100,
+        "width": 100,
+        'images': [{
+            '@type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': {
+                '@id': image,
+                '@type': 'dctypes:Image',
+                'format': 'image/jpeg',
+                'service': {
+                    '@context': 'http://iiif.io/api/image/2/context.json',
+                    '@id': image,
+                    'profile': 'http://iiif.io/api/image/2/level1.json'
+                },
+                "height": 100,
+                "width": 100
+            },
+            'on': id,
+        }],
+        'metadata': [],
+    }
+
+@json_view
+def manifest(request, id, name):
+    p = Presentation.get_by_id_for_request(id, request)
+    if not p:
+        return dict(result='error')
+
+    owner = request.user if request.user.is_authenticated() else None
+    slides = p.items.select_related('record').filter(hidden=False)
+
+    return {
+        '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
+        '@type': 'sc:Manifest',
+        '@id': get_id(
+            request, 'presentation', 'presentatation%d' % p.id, 'manifest'),
+        'label': p.title,
+        'metadata': [],
+        'description': p.description,
+        'sequences': [{
+            '@id': get_id(
+                request, 'presentation', 'presentation%d' % p.id, 'all'),
+            '@type': 'sc:Range',
+            'label': 'All slides',
+            'canvases': [
+                slide_manifest(request, slide, owner) for slide in slides
+            ] + [
+                blank_slide(request)
+            ]
+        }],
+    }
+
+
+def transparent_png(request, extra):
+
+    if extra == 'info.json':
+        return HttpResponse(
+            content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 100, "width": 100, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-blank-slide', kwargs={'extra': ''}) + '"}',
+            content_type='application/json',
+        )
+
+    DATA = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42' \
+           'mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+    return HttpResponse(
+        content=base64.b64decode(DATA),
+        content_type='image/png',
     )

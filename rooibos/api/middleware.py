@@ -36,6 +36,7 @@ class CookielessSessionMiddleware(object):
     def process_response(self, request, response):
 
         if (not request.path.startswith("/admin") and
+                hasattr(response, 'cookies') and
                 'sessionid' in response.cookies and
                 'fake-session' not in request.COOKIES):
             try:

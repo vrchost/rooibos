@@ -1,0 +1,55 @@
+body {
+    background-color: #222222;
+}
+
+
+.mirador-container .content-container {
+    margin-top: 0;
+}
+
+.mirador-container .manifest-info {
+    display: none;
+}
+
+.mirador-osd,
+.mirador-hud {
+    transition: opacity 0.4s ease-in-out;
+    opacity: 1;
+}
+
+.mirador-canvas-metadata {
+    opacity: 1;
+}
+
+.mirador-container .mirador-viewer .metadata-item {
+    font-size: smaller;
+    padding: 0;
+}
+
+.mirador-container .mirador-viewer .metadata-label {
+    text-transform: none;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.mirador-container .mirador-viewer .metadata-value {
+    display: inline-block;
+    padding-left: 0.5em;
+}
+
+
+.mdid-active {
+    outline: rgb(40%, 60%, 100%) 3px solid;
+}
+
+.mdid-synced .mdid-active {
+    outline: none;
+}
+
+.mdid-hud-hidden .hud-control {
+    opacity: 0 !important;
+}
+
+.mdid-hide-image .mirador-osd {
+    opacity: 0;
+}

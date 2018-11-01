@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU General Public License along
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
+attrs >= 17.4.0
 beautifulsoup
 boto
 Celery
+configobj >= 4.7.2,<=5.0.0
 django-cas-ng
 django-compressor==2.2
 django-extensions
@@ -40,7 +42,7 @@ MySQL-Python
 pep8
 pep8-naming
 pika
-Pillow
+pillow >= 2.4.0, <5.0
 pycrypto
 pypdf
 python-ldap
