@@ -11,6 +11,7 @@ body {
     display: none;
 }
 
+.mirador-main-menu,
 .mirador-osd,
 .mirador-hud {
     transition: opacity 0.4s ease-in-out;
@@ -46,6 +47,7 @@ body {
     outline: none;
 }
 
+.mirador-main-menu.mdid-hud-hidden,
 .mdid-hud-hidden .hud-control {
     opacity: 0 !important;
 }

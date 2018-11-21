@@ -196,11 +196,13 @@ var Viewer = function (options) {
         var mouseMove = function () {
             clearTimeout(mouseMoveTimeout);
             mouseMoveTimeout = setTimeout(function () {
-                jQuery('.mirador-hud').addClass('mdid-hud-hidden');
+                jQuery('.mirador-hud,.mirador-main-menu')
+                    .addClass('mdid-hud-hidden');
                 mouseMoveHudHidden = true;
             }, 2000);
             if (mouseMoveHudHidden) {
-                jQuery('.mirador-hud').removeClass('mdid-hud-hidden');
+                jQuery('.mirador-hud,.mirador-main-menu')
+                    .removeClass('mdid-hud-hidden');
                 mouseMoveHudHidden = false;
             }
         };
