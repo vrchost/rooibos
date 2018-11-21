@@ -20,39 +20,6 @@ yum install python-pip libjpeg-devel \
 pip install virtualenv
 ```
 
-### Install jetty
-
-```
-yum -y install java-1.8.0-openjdk wget
-```
-
-Get the latest version of jetty from 
-`https://www.eclipse.org/jetty/download.html`, e.g.
-
-```
-wget http://central.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.7.v20170914/jetty-distribution-9.4.7.v20170914.tar.gz
-tar zxvf jetty-distribution-9.4.7.v20170914.tar.gz -C /opt/
-mv /opt/jetty-distribution-9.4.7.v20170914/ /opt/jetty
-useradd -m jetty
-chown -R jetty:jetty /opt/jetty/
-ln -s /opt/jetty/bin/jetty.sh /etc/init.d/jetty
-chkconfig --add jetty
-chkconfig --level 345 jetty on
-```
-
-Create `/etc/default/jetty`:
-```
-cat /etc/default/jetty <<EOT
-JETTY_RUN=/opt/jetty
-JETTY_HOME=/opt/jetty
-JETTY_USER=jetty
-JETTY_PORT=8080
-JETTY_HOST=127.0.0.1
-JETTY_LOGS=/opt/jetty/logs/
-JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
-EOT
-```
-
 ### Enable services
 ```
 systemctl enable nginx
@@ -120,20 +87,18 @@ rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.
 yum install ffmpeg
 ```
 
+
 ### Install Solr
-MDID currently requires Solr 4; you may have to adjust the exact version as available when running the following commands:
+MDID currently requires Solr 7; you may have to adjust the exact version as
+available when running the following commands:
 ```
-mkdir -p /opt/solr-install
-cd /opt/solr-install
-wget https://archive.apache.org/dist/lucene/solr/4.10.4/solr-4.10.4.tgz
-tar xf solr-4.10.4.tgz
-cp solr-4.10.4/dist/solr-4.10.4.war /opt/jetty/webapps/solr.war
-cp -R solr-4.10.4/example/solr /opt
-chown -R jetty:jetty /opt/solr
-wget http://www.slf4j.org/dist/slf4j-1.7.5.tar.gz
-tar xzf slf4j-1.7.5.tar.gz
-mv slf4j-1.7.5/* /opt/jetty/lib/ext
-systemctl enable jetty.service
+mkdir -p /opt/solr_install /opt/solr
+cd /opt/solr_install
+wget https://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1.tgz
+tar xzf solr-7.3.1.tgz solr-7.3.1/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-7.3.1.tgz -f -d /opt/solr -i /opt/solr_install -n
+sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
+systemctl start solr
 ```
 
 ## Install MDID
@@ -273,12 +238,19 @@ crontab /opt/mdid/crontab
 
 ### Configure solr
 ```
-mkdir -p /opt/solr/mdid/conf
-touch /opt/solr/mdid/core.properties
-mkdir -p /opt/solr/mdid/data
-cp /opt/mdid/rooibos/solr4/template/conf/* /opt/solr/mdid/conf
-chown -R jetty:jetty /opt/solr
-service jetty restart
+mkdir -p /opt/solr/data/mdid/conf \
+    /opt/solr/data/mdid/lang \
+    /opt/solr/data/mdid/data
+touch /opt/solr/data/mdid/core.properties \
+    /opt/solr/data/mdid/protwords.txt \
+    /opt/solr/data/mdid/stopwords.txt \
+    /opt/solr/data/mdid/synonyms.txt
+cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
+    /opt/solr/data/mdid/lang
+cp /opt/mdid/solr7/conf/* \
+    /opt/solr/data/mdid/conf
+chown -R solr:solr /opt/solr/data/mdid
+systemctl restart solr
 ```
 
 ### Install gfx

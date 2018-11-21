@@ -77,29 +77,18 @@ PATH="/opt/ffmpeg/bin:$PATH" make install
 cp /opt/ffmpeg/bin/* /usr/local/bin
 ```
 ### Install Solr
-Edit `/etc/default/jetty8`:
-```
-NO_START=0
-JAVA_HOME="/usr/lib/jvm/java-7-openjdk-amd64/jre"
-JAVA_OPTIONS="-Dsolr.solr.home=/opt/solr -Xmx768m -Djava.awt.headless=true"
-```
-Note: `JAVA_HOME` may need to be adjusted to reflect the correct Java version.
-
-MDID currently requires Solr 4; you may have to adjust the exact version as
+MDID currently requires Solr 7; you may have to adjust the exact version as
 available when running the following commands:
 ```
-mkdir -p /opt/solr-install
-cd /opt/solr-install
-wget https://archive.apache.org/dist/lucene/solr/4.10.4/solr-4.10.4.tgz
-tar xf solr-4.10.4.tgz
-cp solr-4.10.4/dist/solr-4.10.4.war /usr/share/jetty8/webapps/solr.war
-cp -R solr-4.10.4/example/solr /opt
-chown -R jetty:jetty /opt/solr
-wget http://www.slf4j.org/dist/slf4j-1.7.5.tar.gz
-tar xzf slf4j-1.7.5.tar.gz
-mv slf4j-1.7.5/* /usr/share/jetty8/lib/ext
-service jetty8 restart
+mkdir -p /opt/solr_install /opt/solr
+cd /opt/solr_install
+wget https://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1.tgz
+tar xzf solr-7.3.1.tgz solr-7.3.1/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-7.3.1.tgz -f -d /opt/solr -i /opt/solr_install -n
+sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
+service solr start
 ```
+
 ## Install MDID
 ### Create database
 Create a new MySQL database or restore an existing database from a previous
@@ -161,7 +150,7 @@ cp template.py local_settings.py
 Edit `local_settings.py` and change settings as needed, including:
 
 ```
-SOLR_URL = 'http://localhost:8080/solr/mdid'
+SOLR_URL = 'http://localhost:8983/solr/mdid'
 ```
 
 Make sure to change `SECRET_KEY` to a unique value and do not share it!
@@ -229,7 +218,6 @@ django-admin $@
 ```
 Create a new file `/opt/mdid/crontab` with the following content:
 ```
-*/5 * * * * /bin/bash /opt/mdid/wrapper.sh solr index>/opt/mdid/log/cron.log 2>> /opt/mdid/log/cron-error.log
 0 * * * * /bin/bash /opt/mdid/wrapper.sh runjobs hourly
 0 4 * * * /bin/bash /opt/mdid/wrapper.sh runjobs daily
 0 5 * * 0 /bin/bash /opt/mdid/wrapper.sh runjobs weekly
@@ -243,12 +231,19 @@ crontab /opt/mdid/crontab
 ```
 ### Configure solr
 ```
-mkdir -p /opt/solr/mdid/conf
-touch /opt/solr/mdid/core.properties
-mkdir -p /opt/solr/mdid/data
-cp /opt/mdid/rooibos/solr4/template/conf/* /opt/solr/mdid/conf
-chown -R jetty:jetty /opt/solr
-service jetty8 restart
+mkdir -p /opt/solr/data/mdid/conf \
+    /opt/solr/data/mdid/lang \
+    /opt/solr/data/mdid/data
+touch /opt/solr/data/mdid/core.properties \
+    /opt/solr/data/mdid/protwords.txt \
+    /opt/solr/data/mdid/stopwords.txt \
+    /opt/solr/data/mdid/synonyms.txt
+cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
+    /opt/solr/data/mdid/lang
+cp /opt/mdid/solr7/conf/* \
+    /opt/solr/data/mdid/conf
+chown -R solr:solr /opt/solr/data/mdid
+service solr restart
 ```
 ### Install gfx
 ```

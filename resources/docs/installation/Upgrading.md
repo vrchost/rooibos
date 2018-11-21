@@ -22,6 +22,11 @@ source venv/bin/activate
 pip install --allow-external --upgrade -r rooibos/requirements.txt
 ```
 
+## Upgrade solr
+
+Follow the "Install Solr" and "Configure solr" sections in the installation
+instructions for your distribution
+
 ## Migrate database
 
 Run `django-admin migrate` to apply any database changes.
