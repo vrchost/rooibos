@@ -84,6 +84,13 @@
                     href: 'javascript:window.viewer.syncViewers();'
                 },
                 iconClass: 'fa fa-link fa-lg fa-fw'
+            }, {
+                label: 'Help',
+                attributes: {
+                    id: 'help-link',
+                    href: 'javascript:window.open("{% static 'presentation/help.html' %}");'
+                },
+                iconClass: 'fa fa-info-circle fa-lg fa-fw'
             }]
         },
         autoHideControls: false  // not functional anyway, we hide it ourselves
