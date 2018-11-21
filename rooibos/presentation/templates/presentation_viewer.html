@@ -25,6 +25,8 @@
     var match = window.location.href.match(/[?&]canvas=([^&]+)/);
     var canvas = match ? match[1] : undefined;
 
+    var returnUrl = '{{ return_url|urlencode }}';
+
     var options = {
         id: "viewer",
         buildPath: "{% static 'mirador/' %}",
@@ -82,10 +84,28 @@
                     href: 'javascript:window.viewer.syncViewers();'
                 },
                 iconClass: 'fa fa-link fa-lg fa-fw'
+            }, {
+                label: 'Help',
+                attributes: {
+                    id: 'help-link',
+                    href: 'javascript:window.open("{% static 'presentation/help.html' %}");'
+                },
+                iconClass: 'fa fa-info-circle fa-lg fa-fw'
             }]
         },
         autoHideControls: false  // not functional anyway, we hide it ourselves
     };
+
+    if (returnUrl) {
+        options.mainMenuSettings.userButtons.unshift({
+            label: 'Close Viewer',
+            attributes: {
+                id: 'close-viewer',
+                href: 'javascript:window.location.assign(returnUrl);'
+            },
+            iconClass: 'fa fa-sign-out fa-lg fa-fw'
+        });
+    }
 
     window.viewer = new Viewer(options);
 </script>
