@@ -7,15 +7,15 @@ from django.db import migrations
 def remove_equivalency(apps, schema_editor):
     Field = apps.get_model("data", "Field")
     try:
+        f = Field.objects.get(name='styleperiod', standard__prefix='vra')
         Field.objects.get(name='subject', standard__prefix='dc') \
-            .equivalent.filter(name='styleperiod', standard__prefix='vra') \
-            .delete()
+            .equivalent.remove(f)
     except Field.DoesNotExist:
         pass
     try:
+        f = Field.objects.get(name='subject', standard__prefix='dc')
         Field.objects.get(name='styleperiod', standard__prefix='vra') \
-            .equivalent.filter(name='subject', standard__prefix='dc') \
-            .delete()
+            .equivalent.remove(f)
     except Field.DoesNotExist:
         pass
 
