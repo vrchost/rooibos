@@ -39,8 +39,19 @@ body {
 }
 
 
+@keyframes mdid-active {
+    0% { outline: rgba(20%, 30%, 50%, 1) 3px solid; }
+    100% { outline: rgba(20%, 30%, 50%, 0) 3px solid; }
+}
+
 .mdid-active {
-    outline: rgb(40%, 60%, 100%) 3px solid;
+    -webkit-animation-name: mdid-active;
+    -moz-animation-name: mdid-active;
+    -o-animation-name: mdid-active;
+    animation-name: mdid-active;
+    animation-duration: 2s;
+    animation-delay: 2s;
+    animation-fill-mode: both;
 }
 
 .mdid-synced .mdid-active {
