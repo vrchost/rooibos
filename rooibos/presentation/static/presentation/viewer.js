@@ -169,12 +169,14 @@ var Viewer = function (options) {
                 layoutDescription:
                     Mirador.layoutDescriptionFromGridString('1x2')
             });
+            delayWrapper(viewer.markAsActive.bind(viewer))();
         } else
         if (event.key === 'x') {
             emitEvent('RESET_WORKSPACE_LAYOUT', {
                 layoutDescription:
                     Mirador.layoutDescriptionFromGridString('2x1')
             });
+            delayWrapper(viewer.markAsActive.bind(viewer))();
         } else
         if (event.key === 'f') {
             emitEvent('TOGGLE_FULLSCREEN');
@@ -297,7 +299,9 @@ var Viewer = function (options) {
             return;
         }
         activePosition = (activePosition + jump + count) % count;
-        positions[activePosition].element.addClass('mdid-active');
+        if (count > 1) {
+            positions[activePosition].element.addClass('mdid-active');
+        }
         active.window = positions[activePosition].window;
         active.slot = positions[activePosition].slot;
     };
