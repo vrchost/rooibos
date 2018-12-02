@@ -297,7 +297,9 @@ var Viewer = function (options) {
             return;
         }
         activePosition = (activePosition + jump + count) % count;
-        positions[activePosition].element.addClass('mdid-active');
+        if (count > 1) {
+            positions[activePosition].element.addClass('mdid-active');
+        }
         active.window = positions[activePosition].window;
         active.slot = positions[activePosition].slot;
     };
