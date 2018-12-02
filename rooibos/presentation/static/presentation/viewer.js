@@ -163,6 +163,7 @@ var Viewer = function (options) {
                 layoutDescription:
                     Mirador.layoutDescriptionFromGridString('1x1')
             });
+            delayWrapper(viewer.markAsActive.bind(viewer))();
         } else
         if (event.key === 'y') {
             emitEvent('RESET_WORKSPACE_LAYOUT', {
@@ -284,7 +285,9 @@ var Viewer = function (options) {
         var active = this.active;
         forEachWindowAndImageViewer(function (imageView, windowIndex, slotIndex) {
             var element = jQuery(imageView.element)
-                .parents('.slot').removeClass('mdid-active');
+                .parents('.slot')
+                .removeClass('mdid-active')
+                .removeClass('mdid-active-frame');
             positions.push({
                 window: windowIndex,
                 slot: slotIndex,
@@ -300,8 +303,9 @@ var Viewer = function (options) {
         }
         activePosition = (activePosition + jump + count) % count;
         if (count > 1) {
-            positions[activePosition].element.addClass('mdid-active');
+            positions[activePosition].element.addClass('mdid-active-frame');
         }
+        positions[activePosition].element.addClass('mdid-active');
         active.window = positions[activePosition].window;
         active.slot = positions[activePosition].slot;
     };

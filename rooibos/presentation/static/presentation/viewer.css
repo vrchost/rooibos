@@ -44,7 +44,7 @@ body {
     100% { outline: rgba(20%, 30%, 50%, 0) 3px solid; }
 }
 
-.mdid-active {
+.mdid-active-frame {
     -webkit-animation-name: mdid-active;
     -moz-animation-name: mdid-active;
     -o-animation-name: mdid-active;
@@ -54,8 +54,8 @@ body {
     animation-fill-mode: both;
 }
 
-.mdid-synced .mdid-active {
-    outline: none;
+.mdid-synced .mdid-active-frame {
+    animation: none;
 }
 
 .mirador-main-menu.mdid-hud-hidden,
