@@ -16,7 +16,8 @@ yum install python-pip libjpeg-devel \
     memcached unixODBC-devel openldap-devel \
     rabbitmq-server supervisor \
     python-pillow-devel python-imaging \
-    giflib-devel freetype-devel
+    giflib-devel freetype-devel java-1.8.0-openjdk wget
+pip install --upgrade pip
 pip install virtualenv
 ```
 
@@ -140,7 +141,7 @@ sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
 virtualenv venv
 source venv/bin/activate
-pip install --allow-external --upgrade -r rooibos/requirements.txt
+pip install --upgrade -r rooibos/requirements.txt
 ```
 
 ### Configure MDID
@@ -165,7 +166,7 @@ source /opt/mdid/venv/bin/activate
 cd /opt/mdid/rooibos
 export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-python manage.py collectstatic
+django-admin collectstatic
 ```
 
 ### Create or update database schema
@@ -177,8 +178,8 @@ export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 # The following command may fail
 # - if so, running it a second time should work
-python manage.py syncdb --noinput
-python manage.py migrate
+django-admin syncdb --noinput
+django-admin migrate
 ```
 
 ### Configure nginx
@@ -219,7 +220,7 @@ cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
 export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-python manage.py $@
+django-admin $@
 ```
 Create a new file `/opt/mdid/crontab` with the following content:
 ```
@@ -247,7 +248,7 @@ touch /opt/solr/data/mdid/core.properties \
     /opt/solr/data/mdid/synonyms.txt
 cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
     /opt/solr/data/mdid/lang
-cp /opt/mdid/solr7/conf/* \
+cp /opt/mdid/rooibos/solr7/conf/* \
     /opt/solr/data/mdid/conf
 chown -R solr:solr /opt/solr/data/mdid
 systemctl restart solr
