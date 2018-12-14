@@ -160,7 +160,6 @@ INSTALLED_APPS = (
     'rooibos.workers',
     'rooibos.userprofile',
     'rooibos.mediaviewer',
-    'rooibos.megazine',
     'rooibos.groupmanager',
     'rooibos.pdfviewer',
     'rooibos.pptexport',
@@ -254,13 +253,6 @@ FLICKR_SECRET = ''
 CUSTOM_TRACKER_HTML = ""
 
 SHOW_FRONTPAGE_LOGIN = 'yes'
-
-
-# The Megazine viewer is using a third party component that has commercial
-# licensing requirements.  To enable the component you need to enter your
-# license key, which is available for free for educational institutions.
-# See static/megazine/COPYING.
-MEGAZINE_PUBLIC_KEY = ""
 
 
 # By default, video delivery links are created as symbolic links. Some

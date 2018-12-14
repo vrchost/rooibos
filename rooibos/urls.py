@@ -81,7 +81,6 @@ urls = [
     (r'^impersonate/', include('impersonate.urls')),
     (r'^works/', include('rooibos.works.urls')),
     (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
-    (r'^megazine/', include('rooibos.megazine.urls')),
     (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
     (r'^pptexport/', include('rooibos.pptexport.urls')),
 
