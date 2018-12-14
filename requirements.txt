@@ -29,8 +29,8 @@ django-ranged-fileresponse
 django-storages==1.6.6
 django-tagging
 django-contrib-comments==1.8.0
-Django==1.8.17
-django-celery-results==1.0.4
+Django==1.9.13
+django-celery-results
 flake8
 flake8-docstrings
 flake8-todo
