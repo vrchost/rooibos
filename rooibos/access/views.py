@@ -26,7 +26,7 @@ def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
     if request.user.is_authenticated():
         request.session.modified = True
         # Similar redirect_to processing as in django.contrib.auth.views.login
-        redirect_to = request.REQUEST.get(redirect_field_name, '')
+        redirect_to = request.GET.get(redirect_field_name, '')
         # Light security check -- make sure redirect_to isn't garbage.
         if not redirect_to or ' ' in redirect_to:
             redirect_to = settings.LOGIN_REDIRECT_URL
