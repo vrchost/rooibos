@@ -13,8 +13,7 @@ from django.contrib.auth.models import User
 from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.data.models import Record, standardfield_ids
-from models import Media, Storage
-
+from .models import Media, Storage
 
 
 def extract_text_from_pdf_stream(stream):
