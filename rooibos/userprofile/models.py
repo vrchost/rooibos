@@ -11,7 +11,7 @@ class Preference(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.ForeignKey(User, unique=True)
+    user = models.OneToOneField(User)
     preferences = models.ManyToManyField(Preference, blank=True)
 
     def __unicode__(self):
