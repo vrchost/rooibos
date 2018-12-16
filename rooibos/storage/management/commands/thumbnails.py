@@ -2,7 +2,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from rooibos.data.models import Collection
-from rooibos.storage import get_thumbnail_for_record
+from rooibos.storage.functions import get_thumbnail_for_record
 from rooibos.util.progressbar import ProgressBar
 
 

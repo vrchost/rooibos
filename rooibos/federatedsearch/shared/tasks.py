@@ -2,7 +2,7 @@ from ...celeryapp import app
 
 from rooibos.data.models import Record
 from rooibos.storage.models import Media
-from rooibos.federatedsearch.shared import SharedSearch
+from .views import SharedSearch
 from rooibos.util import guess_extension
 from StringIO import StringIO
 import requests

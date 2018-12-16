@@ -2,7 +2,7 @@ from __future__ import with_statement
 from zipfile import ZipFile, ZIP_DEFLATED
 import os
 import xml.dom.minidom
-from rooibos.storage import get_image_for_record
+from rooibos.storage.functions import get_image_for_record
 from PIL import Image
 from django.conf import settings
 

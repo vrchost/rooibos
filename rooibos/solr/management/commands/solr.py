@@ -1,6 +1,6 @@
 from optparse import make_option
 from django.core.management.base import BaseCommand
-from rooibos.solr import SolrIndex
+from rooibos.solr.functions import SolrIndex
 
 
 class Command(BaseCommand):

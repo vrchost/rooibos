@@ -3,7 +3,6 @@ from celery import Celery
 from functools import wraps
 from kombu import Queue
 from django.conf import settings
-from rooibos.workers.models import OwnedTaskResult
 from datetime import datetime
 import json
 
@@ -36,6 +35,8 @@ def debug_task(self):
 
 
 def owned_task(*args, **kwargs):
+
+    from rooibos.workers.models import OwnedTaskResult
 
     def create_owned_task(userarg='owner', removeuserarg=False, **kwargs):
 

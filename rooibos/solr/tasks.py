@@ -1,6 +1,6 @@
 import logging
 from ..celeryapp import app, solr_queue_name
-from . import SolrIndex
+from .functions import SolrIndex
 
 
 logger = logging.getLogger(__name__)

@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from . import SolrIndex
+from .functions import SolrIndex
 from pysolr import SolrError
 from rooibos.access.functions import filter_by_access
 import socket

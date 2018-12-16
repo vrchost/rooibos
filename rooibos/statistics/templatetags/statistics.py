@@ -1,5 +1,5 @@
 from django import template
-from rooibos.statistics import get_history
+from rooibos.statistics.functions import get_history
 from datetime import datetime, timedelta
 
 

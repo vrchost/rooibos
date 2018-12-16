@@ -12,11 +12,10 @@ import cookielib
 import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
-from rooibos.storage import Storage
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django import forms
-from rooibos.federatedsearch.models import FederatedSearch, HitCount
+from rooibos.federatedsearch import FederatedSearch
 from rooibos.access.functions import filter_by_access, sync_access
 from models import SharedCollection
 import datetime
@@ -106,6 +105,9 @@ class SharedSearch(FederatedSearch):
         return 'shared_%s' % self.shared.name
 
     def search(self, keyword, page=1, pagesize=30):
+
+        from rooibos.federatedsearch.models import HitCount
+
         cached, created = HitCount.current_objects.get_or_create(
             source=self.get_source_id(),
             query='%s [%s:%s]' % (keyword, page, pagesize),
@@ -158,6 +160,9 @@ class SharedSearch(FederatedSearch):
         return collection
 
     def get_storage(self):
+
+        from rooibos.storage.models import Storage
+
         storage, created = Storage.objects.get_or_create(
             name=self.get_source_id(),
             defaults=dict(

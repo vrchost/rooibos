@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.core.servers.basehttp import FileWrapper
 from urllib2 import urlopen, HTTPError
 from localfs import LocalFileSystemStorageSystem
-from rooibos.storage import get_media_for_record
+from rooibos.storage.functions import get_media_for_record
 
 
 class PseudoStreamingStorageSystem(LocalFileSystemStorageSystem):

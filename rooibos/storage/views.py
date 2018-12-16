@@ -26,7 +26,8 @@ from ipaddr import IPAddress, IPNetwork
 from ranged_fileresponse import RangedFileResponse
 from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield
-from rooibos.storage import get_media_for_record, get_image_for_record, \
+from rooibos.storage.functions import get_media_for_record, \
+    get_image_for_record, \
     get_thumbnail_for_record, analyze_media, analyze_records, \
     find_record_by_identifier
 from rooibos.util import json_view
