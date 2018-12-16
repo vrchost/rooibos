@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User, check_password
+from django.contrib.auth.hashers import check_password
+from django.contrib.auth.models import User
 from django.utils.encoding import smart_str
 from rooibos.userprofile.views import load_settings, store_settings
 
