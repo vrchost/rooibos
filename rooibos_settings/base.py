@@ -20,7 +20,6 @@ else:
 
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 
 # Needed to enable compression JS and CSS files
@@ -73,12 +72,6 @@ MEDIA_ROOT = ''
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media-unused/'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -87,6 +80,7 @@ TEMPLATES = [
             os.path.join(package_dir, 'rooibos', 'templates'),
         ],
         'OPTIONS': {
+            'debug': DEBUG,
             'context_processors': (
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
