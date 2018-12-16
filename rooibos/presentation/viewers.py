@@ -4,7 +4,7 @@ from django.conf import settings
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.files.temp import NamedTemporaryFile
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from django.template import Context, Template
 from django.utils.encoding import smart_str
 from rooibos.viewers import register_viewer, Viewer

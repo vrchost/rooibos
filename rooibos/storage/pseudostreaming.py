@@ -1,7 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.utils.http import urlencode
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from urllib2 import urlopen, HTTPError
 from localfs import LocalFileSystemStorageSystem
 from rooibos.storage.functions import get_media_for_record
