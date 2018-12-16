@@ -8,7 +8,7 @@ from django.core.servers.basehttp import FileWrapper
 from django.template import Context, Template
 from django.utils.encoding import smart_str
 from rooibos.viewers import register_viewer, Viewer
-from rooibos.storage import get_image_for_record
+from rooibos.storage.functions import get_image_for_record
 from rooibos.data.models import Record
 from rooibos.api.views import presentation_detail
 from models import Presentation

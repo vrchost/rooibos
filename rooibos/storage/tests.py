@@ -12,7 +12,8 @@ from django.contrib.auth.models import User
 from rooibos.data.models import Collection, Record, CollectionItem, \
     FieldValue, standardfield
 from rooibos.storage.models import Media, ProxyUrl, Storage, TrustedSubnet
-from rooibos.storage import get_thumbnail_for_record, get_media_for_record, \
+from rooibos.storage.functions import get_thumbnail_for_record, \
+    get_media_for_record, \
     get_image_for_record, match_up_media, analyze_records, analyze_media
 from rooibos.access.models import AccessControl
 from rooibos.presentation.models import Presentation

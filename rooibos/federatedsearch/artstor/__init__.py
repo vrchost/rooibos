@@ -5,7 +5,7 @@ from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from rooibos.federatedsearch.models import FederatedSearch, HitCount
+from rooibos.federatedsearch import FederatedSearch
 from BeautifulSoup import BeautifulSoup
 import cookielib
 import datetime
@@ -66,6 +66,9 @@ class ArtstorSearch(FederatedSearch):
     def search(self, keyword, page=1, pagesize=50):
         if not keyword:
             return None
+
+        from rooibos.federatedsearch.models import HitCount
+
         cached, created = HitCount.current_objects.get_or_create(
             source=self.get_source_id(),
             query='%s [%s:%s]' % (keyword, page, pagesize),

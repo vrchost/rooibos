@@ -6,7 +6,7 @@ from ...celeryapp import app
 from rooibos.data.models import Record
 from rooibos.storage.models import Media
 from rooibos.storage.functions import rotateImageBasedOnExif
-from . import FlickrSearch
+from .search import FlickrSearch
 from rooibos.util import guess_extension
 
 

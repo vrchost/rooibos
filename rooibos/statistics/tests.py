@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User, AnonymousUser
 from models import Activity
 from datetime import date, time
-from . import accumulate, get_history
+from .functions import accumulate, get_history
 
 
 class AccumulatedActivityTest(TestCase):

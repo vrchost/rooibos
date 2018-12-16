@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from rooibos.storage.models import Media, Storage
 from rooibos.data.models import Collection
-from rooibos.storage import match_up_media, analyze_media
+from rooibos.storage.functions import match_up_media, analyze_media
 from rooibos.access.functions import filter_by_access
 from django.contrib.auth.models import User
 from rooibos.workers.tasks import get_attachment

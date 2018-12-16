@@ -4,7 +4,7 @@ from models import Collection, CollectionItem, Record, Field, FieldValue, \
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
-from rooibos.solr import SolrIndex
+from rooibos.solr.functions import SolrIndex
 from spreadsheetimport import SpreadsheetImport
 from cStringIO import StringIO
 

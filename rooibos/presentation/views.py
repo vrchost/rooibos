@@ -23,7 +23,7 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view
-from rooibos.storage import get_media_for_record
+from rooibos.storage.functions import get_media_for_record
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
 import base64

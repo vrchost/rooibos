@@ -4,7 +4,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 import json as simplejson
 from rooibos.data.models import Record
-from . import FlickrSearch
+from .search import FlickrSearch
 import math
 from django.utils.http import urlencode
 from rooibos.ui.views import select_record
