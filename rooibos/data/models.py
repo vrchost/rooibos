@@ -930,4 +930,4 @@ def create_data_fixtures(*args, **kwargs):
         )
 
 
-signals.post_syncdb.connect(create_data_fixtures)
+signals.post_migrate.connect(create_data_fixtures)
