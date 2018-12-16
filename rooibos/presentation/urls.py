@@ -1,10 +1,9 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import manage, create, edit, duplicate, browse, password, \
     record_usage, manifest, transparent_png, missing_png
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^manage/$', manage, name='presentation-manage'),
     url(r'^create/$', create, name='presentation-create'),
     url(
@@ -43,4 +42,4 @@ urlpatterns = patterns(
         missing_png,
         name='presentation-missing-slide'
     ),
-)
+]

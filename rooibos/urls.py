@@ -1,4 +1,4 @@
-from django.conf.urls import url, handler404, patterns, include
+from django.conf.urls import url, handler404, include
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.base import TemplateView
@@ -58,31 +58,31 @@ urls = [
         name='showcases'
     ),
 
-    (r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
 
     # Legacy URL for presentation viewer in earlier version
     url(r'^viewers/view/(?P<record>\d+)/.+/$', legacy_viewer),
 
-    (r'^ui/', include('rooibos.ui.urls')),
-    (r'^acl/', include('rooibos.access.urls')),
-    (r'^explore/', include('rooibos.solr.urls')),
-    (r'^media/', include('rooibos.storage.urls')),
-    (r'^data/', include('rooibos.data.urls')),
-    (r'^legacy/', include('rooibos.legacy.urls')),
-    (r'^presentation/', include('rooibos.presentation.urls')),
-    (r'^viewers/', include('rooibos.viewers.urls')),
-    (r'^workers/', include('rooibos.workers.urls')),
-    (r'^api/', include('rooibos.api.urls')),
-    (r'^profile/', include('rooibos.userprofile.urls')),
-    (r'^federated/', include('rooibos.federatedsearch.urls')),
-    (r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
-    (r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
-    (r'^shared/', include('rooibos.federatedsearch.shared.urls')),
-    (r'^impersonate/', include('impersonate.urls')),
-    (r'^works/', include('rooibos.works.urls')),
-    (r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
-    (r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
-    (r'^pptexport/', include('rooibos.pptexport.urls')),
+    url(r'^ui/', include('rooibos.ui.urls')),
+    url(r'^acl/', include('rooibos.access.urls')),
+    url(r'^explore/', include('rooibos.solr.urls')),
+    url(r'^media/', include('rooibos.storage.urls')),
+    url(r'^data/', include('rooibos.data.urls')),
+    url(r'^legacy/', include('rooibos.legacy.urls')),
+    url(r'^presentation/', include('rooibos.presentation.urls')),
+    url(r'^viewers/', include('rooibos.viewers.urls')),
+    url(r'^workers/', include('rooibos.workers.urls')),
+    url(r'^api/', include('rooibos.api.urls')),
+    url(r'^profile/', include('rooibos.userprofile.urls')),
+    url(r'^federated/', include('rooibos.federatedsearch.urls')),
+    url(r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
+    url(r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
+    url(r'^shared/', include('rooibos.federatedsearch.shared.urls')),
+    url(r'^impersonate/', include('rooibos.impersonate.urls')),
+    url(r'^works/', include('rooibos.works.urls')),
+    url(r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
+    url(r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
+    url(r'^pptexport/', include('rooibos.pptexport.urls')),
 
     url(
         r'^favicon.ico$',
@@ -115,7 +115,7 @@ urls = [
 try:
     import django_shibboleth  # noqa
     urls.append(
-        (r'^shibboleth/', include('django_shibboleth.urls')),
+        url(r'^shibboleth/', include('django_shibboleth.urls')),
     )
 except ImportError:
     pass
@@ -175,4 +175,4 @@ for app in apps:
         urls.append(url(r'^%s/' % app[5:], include('%s.urls' % app)))
 
 
-urlpatterns = patterns('', *urls)
+urlpatterns = urls

@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'rooibos.ui',
     'rooibos.viewers',
     'rooibos.help',
+    'rooibos.impersonate',
     'rooibos.presentation',
     'rooibos.statistics',
     'rooibos.federatedsearch',
@@ -165,7 +166,6 @@ INSTALLED_APPS = (
     'rooibos.pptexport',
     'rooibos.works',
     'pagination',
-    'impersonate',
     'compressor',
 )
 

@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import viewer_shell, viewer_script, legacy_embedded_video
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^(?P<viewer>\w+)/(?P<objid>\d+)/(?:[-\w]+/)?$',
         viewer_shell,
@@ -15,4 +14,4 @@ urlpatterns = patterns(
     ),
     # Legacy URL for videos embedded using previous versions of MDID3
     url(r'^embed/(?P<record>\d+)_(?P<media>\d+)\.js$', legacy_embedded_video),
-)
+]

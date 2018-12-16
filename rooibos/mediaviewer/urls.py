@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import install
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^install/$', install, name='mediaviewer-install'),
-)
+]
