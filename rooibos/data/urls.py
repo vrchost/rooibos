@@ -1,11 +1,10 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from views import manage_collections, manage_collection, record_preview, \
     record, record_delete, data_import_file, data_import, \
     save_collection_visibility_preferences, collection_dump_view
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^collections/manage/$',
         manage_collections,
@@ -87,4 +86,4 @@ urlpatterns = patterns(
         collection_dump_view,
         name='data-collection-dump'
     ),
-)
+]

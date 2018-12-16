@@ -1,12 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from django.views.generic.base import TemplateView
 from views import css, select_record, add_tags, remove_tag, manage, options, \
     clear_selected_records, delete_selected_records, \
     AnnouncementCreateView, AnnouncementUpdateView, AnnouncementDeleteView
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^css/(?P<stylesheet>[-\w]+)/$', css, name='ui-css'),
     url(r'^api/select-record/', select_record, name='ui-api-select-record'),
     url(r'^tag/(?P<type>\d+)/(?P<id>\d+)/', add_tags, name='ui-add-tags'),
@@ -47,4 +46,4 @@ urlpatterns = patterns(
         AnnouncementDeleteView.as_view(),
         name='ui-announcement-delete'
     ),
-)
+]

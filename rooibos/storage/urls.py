@@ -1,12 +1,11 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 from pseudostreaming import retrieve_pseudostream
 from views import retrieve, retrieve_image, media_upload, media_delete, \
     record_thumbnail, create_proxy_url_view, call_proxy_url, manage_storages, \
     import_files, manage_storage, match_up_files, analyze, \
     find_records_without_media, retrieve_iiif_image
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^get/(?P<recordid>\d+)/(?P<record>[-\w]+)/'
         r'(?P<mediaid>\d+)/(?P<media>[-\w]+)/$',
@@ -94,4 +93,4 @@ urlpatterns = patterns(
         find_records_without_media,
         name='storage-find-records-without-media'
     ),
-)
+]
