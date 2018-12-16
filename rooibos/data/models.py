@@ -524,7 +524,7 @@ class Field(models.Model):
     old_name = models.CharField(
         max_length=100, null=True, blank=True, serialize=False)
     standard = models.ForeignKey(MetadataStandard, null=True, blank=True)
-    equivalent = models.ManyToManyField("self", null=True, blank=True)
+    equivalent = models.ManyToManyField("self", blank=True)
     # TODO: serialize vocabularies
     vocabulary = models.ForeignKey(
         Vocabulary, null=True, blank=True, serialize=False)
@@ -567,7 +567,6 @@ class Field(models.Model):
 
     class Meta:
         unique_together = ('name', 'standard')
-        ordering = ['name']
         order_with_respect_to = 'standard'
         app_label = 'data'
 
