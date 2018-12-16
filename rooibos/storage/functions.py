@@ -2,7 +2,6 @@ from __future__ import with_statement
 from pyPdf.pdf import PdfFileReader
 from StringIO import StringIO
 from PIL import Image
-import StringIO
 import logging
 import mimetypes
 import os
@@ -231,7 +230,7 @@ def get_image_for_record(
                 image.thumbnail((width, height), Image.ANTIALIAS)
                 image = overlay_image_with_mimetype_icon(
                     image, master.mimetype)
-                output = StringIO.StringIO()
+                output = StringIO()
                 if image.mode != "RGB":
                     image = image.convert("RGB")
                 image.save(output, 'JPEG', quality=85, optimize=True)
