@@ -529,9 +529,6 @@ class Field(models.Model):
     vocabulary = models.ForeignKey(
         Vocabulary, null=True, blank=True, serialize=False)
 
-    class Meta:
-        app_label = 'data'
-
     def natural_key(self):
         return (self.standard.prefix if self.standard else '', self.name,)
 

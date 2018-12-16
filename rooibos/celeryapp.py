@@ -16,7 +16,7 @@ app = Celery('rooibos')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 _instance_name = getattr(settings, 'INSTANCE_NAME', '')
-queue_name =  'celery-%s' % (_instance_name or 'default')
+queue_name = 'celery-%s' % (_instance_name or 'default')
 solr_queue_name = queue_name + '-solr'
 
 app.conf.task_default_queue = queue_name
