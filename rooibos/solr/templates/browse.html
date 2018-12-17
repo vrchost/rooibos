@@ -2,7 +2,6 @@
 {% load ui %}
 {% load help %}
 {% load humanize %}
-{% load pagination_tags %}
 
 {% block javascript %}
 {{ block.super }}
@@ -54,8 +53,21 @@ Jump to:
 <a href="{% url "solr-browse-collection" selected_collection.id selected_collection.name %}?f={{ selected_field.id }}&amp;s={{ letter }}">{{ letter }}</a>
 {% endfor %}
 
-{% autopaginate dummyvalues 50 %}
-{% paginate %}
+
+<div class="pagination">
+    {% if dummyvalues.has_previous %}
+        <a href="?f={{ selected_field.id }}&amp;page={{ dummyvalues.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+        Page {{ dummyvalues.number }} of {{ dummyvalues.paginator.num_pages }}
+    </span>
+
+    {% if dummyvalues.has_next %}
+        <a href="?f={{ selected_field.id }}&amp;page={{ dummyvalues.next_page_number }}">next</a>
+    {% endif %}
+</div>
+
 
 <div class="browsecolumn">
 {% for v in values %}
@@ -70,7 +82,21 @@ Jump to:
 
 <div style="clear: both;"></div>
 
-{% paginate %}
+
+<div class="pagination">
+    {% if dummyvalues.has_previous %}
+        <a href="?f={{ selected_field.id }}&amp;page={{ dummyvalues.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+        Page {{ dummyvalues.number }} of {{ dummyvalues.paginator.num_pages }}
+    </span>
+
+    {% if dummyvalues.has_next %}
+        <a href="?f={{ selected_field.id }}&amp;page={{ dummyvalues.next_page_number }}">next</a>
+    {% endif %}
+</div>
+
 
 {% else %}
 

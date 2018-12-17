@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .functions import SolrIndex
 from pysolr import SolrError
 from rooibos.access.functions import filter_by_access
@@ -978,6 +979,16 @@ def browse(request, id=None, name=None):
             else:
                 return None
 
+    dummyvalues = DummyContent(ivalues_length)
+    paginator = Paginator(dummyvalues, 50)
+    page = request.GET.get('page')
+    try:
+        dummyvalues = paginator.page(page)
+    except PageNotAnInteger:
+        dummyvalues = paginator.page(1)
+    except EmptyPage:
+        dummyvalues = paginator.page(paginator.num_pages)
+
     return render_to_response(
         'browse.html',
         {
@@ -989,7 +1000,7 @@ def browse(request, id=None, name=None):
             'values': values,
             'ivalues': ivalues,
             'column_split': len(values) / 2,
-            'dummyvalues': DummyContent(ivalues_length),
+            'dummyvalues': dummyvalues,
         },
         context_instance=RequestContext(request))
 
