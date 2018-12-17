@@ -524,6 +524,18 @@ def run_search(user,
     return (hits, records, search_facets, orfacet, query, fields)
 
 
+class DummyContent():
+    def __init__(self, length):
+        self.length = length
+    def __len__(self):
+        return self.length
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return range(index.start or 0, index.stop, index.step or 1)
+        else:
+            return None
+
+
 def search(request, id=None, name=None, selected=False, json=False):
     collection = get_object_or_404(
         filter_by_access(request.user, Collection), id=id) if id else None
@@ -678,6 +690,16 @@ def search(request, id=None, name=None, selected=False, json=False):
         request, federated_search_query, cached_only=True
     ) if federated_search_query else None
 
+    pagination_helper = DummyContent(hits)
+    paginator = Paginator(pagination_helper, pagesize)
+    page = request.GET.get('page')
+    try:
+        pagination_helper = paginator.page(page)
+    except PageNotAnInteger:
+        pagination_helper = paginator.page(1)
+    except EmptyPage:
+        pagination_helper = paginator.page(paginator.num_pages)
+
     return render_to_response(
         'results.html',
         {
@@ -707,7 +729,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                 available_federated_sources(request.user)),
             'federated_search': federated_search,
             'federated_search_query': federated_search_query,
-            'pagination_helper': [None] * hits,
+            'pagination_helper': pagination_helper,
             'has_record_created_criteria': any(
                 f.startswith('created:') for f in criteria),
             'has_last_modified_criteria': any(
@@ -967,17 +989,6 @@ def browse(request, id=None, name=None):
     collection_filter = '|'.join(
         str(c.id) for c in collection_and_children
     )
-
-    class DummyContent():
-        def __init__(self, length):
-            self.length = length
-        def __len__(self):
-            return self.length
-        def __getitem__(self, index):
-            if isinstance(index, slice):
-                return range(index.start or 0, index.stop, index.step or 1)
-            else:
-                return None
 
     dummyvalues = DummyContent(ivalues_length)
     paginator = Paginator(dummyvalues, 50)
