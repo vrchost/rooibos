@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.db import connection
 from django import forms
 from django.views.decorators.http import require_POST
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
 from rooibos.access.functions import filter_by_access
@@ -517,6 +518,16 @@ def browse(request, manage=False):
         querystring = request.GET.urlencode()
         store_settings(
             request.user, 'presentation_browse_querystring', querystring)
+
+    if presentations:
+        paginator = Paginator(presentations, 50)
+        page = request.GET.get('page')
+        try:
+            presentations = paginator.page(page)
+        except PageNotAnInteger:
+            presentations = paginator.page(1)
+        except EmptyPage:
+            presentations = paginator.page(paginator.num_pages)
 
     return render_to_response(
         'presentation_browse.html',

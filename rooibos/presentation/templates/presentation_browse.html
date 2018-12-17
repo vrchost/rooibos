@@ -1,7 +1,6 @@
 {% extends "master.html" %}
 {% load ui %}
 {% load humanize %}
-{% load pagination_tags %}
 {% load viewers %}
 {% load staticfiles %}
 
@@ -135,8 +134,6 @@
 
 {{ block.super }}
 
-{% autopaginate presentations 50 %}
-
 {% var as refine %}
 {
     "sorturl": "{{ request.path }}?{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}sortby="
@@ -175,9 +172,6 @@
 <li><input type="submit" id="delete" name="delete" value="Delete" /></li>
 {% endif %}
 
-
-<li class="pagination">&nbsp;{% paginate %}</li>
-
 </ul>
 
 <br style="clear: left;" />
@@ -188,8 +182,6 @@
 
 
 {% block content %}
-
-{% autopaginate presentations 50 %}
 
 {% if presentations %}
 
@@ -268,7 +260,21 @@
 {% endfor %}
 </table>
 
-{% paginate %}
+
+<div class="pagination">
+    {% if presentations.has_previous %}
+        <a href="?page={{ presentations.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+        Page {{ presentations.number }} of {{ presentations.paginator.num_pages }}
+    </span>
+
+    {% if presentations.has_next %}
+        <a href="?page={{ presentations.next_page_number }}">next</a>
+    {% endif %}
+</div>
+
 
 {% else %}
 No presentations available.
