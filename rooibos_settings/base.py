@@ -106,7 +106,6 @@ MIDDLEWARE_CLASSES = (
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'rooibos.ui.middleware.PageTitles',
-    'pagination.middleware.PaginationMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
     'rooibos.access.middleware.AccessOnStart',
@@ -159,7 +158,6 @@ INSTALLED_APPS = (
     'rooibos.pdfviewer',
     'rooibos.pptexport',
     'rooibos.works',
-    'pagination',
     'compressor',
 )
 
