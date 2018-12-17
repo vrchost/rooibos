@@ -24,7 +24,6 @@ configobj >= 4.7.2,<=5.0.0
 django-cas-ng==3.5.10
 django-compressor==2.2
 django-extensions
-django-pagination
 django-ranged-fileresponse
 django-storages==1.6.6
 django-tagging
