@@ -1,5 +1,4 @@
 {% extends "master.html" %}
-{% load pagination_tags %}
 {% load humanize %}
 {% load ui %}
 {% load workers %}
@@ -32,17 +31,27 @@
 
 {% block content %}
 
-{% autopaginate jobs 25 %}
-
 <h1>Jobs</h1>
 
 <form action="{{ request.get_full_path }}" method="POST">{% csrf_token %}
     <input type="submit" name="testjob" value="Run Test Job" />
 </form>
 
-{% paginate %}
-
 {% if jobs %}
+
+<div class="pagination">
+    {% if jobs.has_previous %}
+        <a href="?page={{ jobs.previous_page_number }}">previous</a>
+    {% endif %}
+
+    <span class="current">
+        Page {{ jobs.number }} of {{ jobs.paginator.num_pages }}
+    </span>
+
+    {% if contacts.has_next %}
+        <a href="?page={{ jobs.next_page_number }}">next</a>
+    {% endif %}
+</div>
 
 <a href="{{ request.get_full_path }}">Refresh Job List</a>
 
