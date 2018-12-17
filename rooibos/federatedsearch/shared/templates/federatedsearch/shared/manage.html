@@ -1,10 +1,7 @@
 {% extends "master.html" %}
-{% load pagination_tags %}
 {% load humanize %}
 
 {% block content %}
-
-{% autopaginate collections 50 %}
 
 <h1>Shared Collection Management</h1>
 
@@ -12,8 +9,6 @@
 
 
 {% if collections %}
-
-{% paginate %}
 
 <table class="list" summary="Collections">
     <tr>
@@ -31,8 +26,6 @@
 {% endfor %}
 
 </table>
-
-{% paginate %}
 
 {% else %}
 
