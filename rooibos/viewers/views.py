@@ -1,8 +1,7 @@
 from functions import get_viewer_by_name
-from django.shortcuts import render_to_response, redirect
+from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseForbidden
-from django.template import RequestContext
 from django.conf import settings
 
 
@@ -34,15 +33,15 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
         options_form = None
         options = viewer.default_options
 
-    return render_to_response(
+    return render(
+        request,
         template,
         {
             'viewer': viewer,
             'next': request.GET.get('next'),
             'embed_code': viewer.embed_code(request, options),
             'options_form': options_form,
-        },
-        context_instance=RequestContext(request))
+        })
 
 
 def viewer_script(request, viewer, objid):

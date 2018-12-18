@@ -1,6 +1,5 @@
 from django import forms
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.data.models import Record
 
@@ -47,7 +46,8 @@ class PdfViewer(Viewer):
         server = '//' + request.META.get(
             'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
 
-        return render_to_response(
+        return render(
+            request,
             'pdfviewer.js',
             {
                 'media_url': self.pdf_url(),
@@ -55,8 +55,7 @@ class PdfViewer(Viewer):
                 'anchor_id': divid,
                 'width': width,
                 'height': height,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
     def pdf_url(self):

@@ -13,8 +13,7 @@ from django.forms.models import modelformset_factory
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, \
     HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 import json as simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
@@ -449,7 +448,7 @@ def record(request, id, name, contexttype=None, contextid=None,
     if formset and getattr(settings, 'HIDE_RECORD_FIELDSETS', False):
         fieldsetform = None
 
-    return render_to_response(
+    return render(request,
         'data_record.html',
         {
             'record': record,
@@ -472,8 +471,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             'download_image': download_image,
             'part_of_works': part_of_works,
             'related_works': related_works,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -531,13 +529,12 @@ def data_import(request):
     else:
         form = UploadFileForm()
 
-    return render_to_response(
+    return render(request,
         'data_import.html',
         {
             'form': form,
             'utf8_error': utf8_error,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -802,27 +799,25 @@ def data_import_file(request, file):
         mapping_formset = create_mapping_formset(initial=mapping, prefix='m')
         form = ImportOptionsForm(initial=options)
 
-    return render_to_response(
+    return render(request,
         'data_import_file.html',
         {
             'form': form,
             'preview_rows': preview_rows,
             'mapping_formset': mapping_formset,
             'writable_collections': bool(writable_collection_ids),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
 def record_preview(request, id):
     record = Record.get_or_404(id, request.user)
-    return render_to_response(
+    return render(request,
         'data_previewrecord.html',
         {
             'record': record,
             'none': None,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -831,12 +826,11 @@ def manage_collections(request):
 
     collections = filter_by_access(request.user, Collection, manage=True)
 
-    return render_to_response(
+    return render(request,
         'data_manage_collections.html',
         {
             'collections': collections,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -933,7 +927,7 @@ def manage_collection(request, id=None, name=None):
     else:
         form = CollectionForm(instance=collection)
 
-    return render_to_response(
+    return render(request,
         'data_collection_edit.html',
         {
             'form': form,
@@ -941,8 +935,7 @@ def manage_collection(request, id=None, name=None):
             'can_delete': collection.id and (
                 request.user.is_superuser or collection.owner == request.user
             ),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

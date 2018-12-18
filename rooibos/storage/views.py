@@ -10,9 +10,7 @@ from django.forms.utils import ErrorList
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, get_list_or_404, \
-    render_to_response
-from django.template import RequestContext
-from django.template.loader import render_to_string
+    render
 import json as simplejson
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_control
@@ -27,7 +25,7 @@ from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield
 from rooibos.storage.functions import get_media_for_record, \
     get_image_for_record, \
-    get_thumbnail_for_record, analyze_media, analyze_records, \
+    get_thumbnail_for_record, analyze_records, \
     find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
@@ -341,12 +339,12 @@ def manage_storages(request):
     for s in storages:
         s.analysis_available = hasattr(s, 'get_files')
 
-    return render_to_response(
+    return render(
+        request,
         'storage_manage.html',
         {
             'storages': storages,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -403,13 +401,13 @@ def manage_storage(request, storageid=None, storagename=None):
     else:
         form = StorageForm(instance=storage)
 
-    return render_to_response(
+    return render(
+        request,
         'storage_edit.html',
         {
             'storage': storage,
             'form': form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -604,12 +602,12 @@ def import_files(request):
     else:
         form = UploadFileForm()
 
-    return render_to_response(
+    return render(
+        request,
         'storage_import_files.html',
         {
             'upload_form': form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -676,10 +674,11 @@ def match_up_files(request):
     else:
         form = MatchUpForm(request.GET)
 
-    return render_to_response('storage_match_up_files.html',
-                              {'form': form,
-                               },
-                              context_instance=RequestContext(request))
+    return render(request,
+                  'storage_match_up_files.html',
+                  {'form': form,
+                   }
+                  )
 
 
 @login_required
@@ -753,15 +752,15 @@ def find_records_without_media(request):
     else:
         form = SelectionForm(request.GET)
 
-    return render_to_response(
+    return render(
+        request,
         'storage_find_records_without_media.html',
         {
             'form': form,
             'identifiers': identifiers,
             'records': records,
             'analyzed': analyzed,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

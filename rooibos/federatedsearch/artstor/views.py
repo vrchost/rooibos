@@ -1,7 +1,6 @@
 from . import ArtstorSearch
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.utils.http import urlencode
 import urllib2
 import math
@@ -37,7 +36,7 @@ def search(request):
     else:
         next_page_url = None
 
-    return render_to_response(
+    return render(request,
         'artstor-results.html',
         {
             'query': query,
@@ -47,6 +46,5 @@ def search(request):
             'pages': pages,
             'prev_page': prev_page_url,
             'next_page': next_page_url,
-        },
-        context_instance=RequestContext(request)
+        }
     )

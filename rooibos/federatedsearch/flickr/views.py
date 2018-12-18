@@ -1,7 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 import json as simplejson
 from rooibos.data.models import Record
 from .search import FlickrSearch
@@ -47,7 +46,7 @@ def search(request):
     else:
         next_page_url = None
 
-    return render_to_response(
+    return render(request,
         'flickr-results.html',
         {
             'query': query,
@@ -56,8 +55,7 @@ def search(request):
             'pages': pages,
             'prev_page': prev_page_url,
             'next_page': next_page_url,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

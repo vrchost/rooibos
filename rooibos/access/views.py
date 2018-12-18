@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ObjectDoesNotExist
@@ -55,9 +54,7 @@ def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
 
 def logout(request, *args, **kwargs):
     if request.session.get('unsafe_logout'):
-        return render_to_response('unsafe_logout.html',
-                                  {},
-                                  context_instance=RequestContext(request))
+        return render(request, 'unsafe_logout.html')
     else:
         kwargs['next_page'] = request.GET.get(
             'next', kwargs.get('next_page', settings.LOGOUT_URL))
@@ -90,14 +87,13 @@ def effective_permissions(request, app_label, model, id, name):
         acluser = None
         acl = None
 
-    return render_to_response('access_effective_permissions.html',
+    return render(request, 'access_effective_permissions.html',
                               {'object': object,
                                'contenttype': contenttype,
                                'acluser': acluser,
                                'acl': acl,
                                'qsuser': username,
-                               },
-                              context_instance=RequestContext(request))
+                               })
 
 
 def modify_permissions(request, app_label, model, id, name):
@@ -224,10 +220,9 @@ def modify_permissions(request, app_label, model, id, name):
     else:
         ac_form = ACForm()
 
-    return render_to_response('access_modify_permissions.html',
+    return render(request, 'access_modify_permissions.html',
                               {'object': object,
                                'contenttype': contenttype,
                                'permissions': permissions,
                                'ac_form': ac_form,
-                               },
-                              context_instance=RequestContext(request))
+                               })

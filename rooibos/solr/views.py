@@ -1,6 +1,6 @@
 from django.db.models import Count
 from django.core.cache import cache
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -700,7 +700,8 @@ def search(request, id=None, name=None, selected=False, json=False):
     except EmptyPage:
         pagination_helper = paginator.page(paginator.num_pages)
 
-    return render_to_response(
+    return render(
+        request,
         'results.html',
         {
             'criteria': map(readable_criteria, criteria),
@@ -734,8 +735,7 @@ def search(request, id=None, name=None, selected=False, json=False):
                 f.startswith('created:') for f in criteria),
             'has_last_modified_criteria': any(
                 f.startswith('modified:') for f in criteria),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -906,10 +906,10 @@ def browse(request, id=None, name=None):
     collections = collections.order_by('order', 'title')
 
     if not collections:
-        return render_to_response(
-            'browse.html',
-            {},
-            context_instance=RequestContext(request))
+        return render(
+            request,
+            'browse.html'
+        )
 
     if 'c' in request.GET:
         collection = get_object_or_404(collections, name=request.GET['c'])
@@ -1000,7 +1000,8 @@ def browse(request, id=None, name=None):
     except EmptyPage:
         dummyvalues = paginator.page(paginator.num_pages)
 
-    return render_to_response(
+    return render(
+        request,
         'browse.html',
         {
             'collections': collections,
@@ -1012,8 +1013,8 @@ def browse(request, id=None, name=None):
             'ivalues': ivalues,
             'column_split': len(values) / 2,
             'dummyvalues': dummyvalues,
-        },
-        context_instance=RequestContext(request))
+        }
+    )
 
 
 def overview(request):
@@ -1043,15 +1044,16 @@ def overview(request):
         for coll in record.collection_set.all().values_list('id', flat=True):
             overview_thumbs[coll] = record
 
-    return render_to_response(
+    return render(
+        request,
         'overview.html',
         {
             'collections': [
                 (coll, children[coll.id], overview_thumbs.get(coll.id))
                 for coll in collections
             ]
-        },
-        context_instance=RequestContext(request))
+        }
+    )
 
 
 @login_required
@@ -1072,12 +1074,12 @@ def terms(request):
     for term in terms:
         term[1] = term[1] * 6 / maxfreq
 
-    return render_to_response(
+    return render(
+        request,
         'terms.html',
         {
             'terms': sorted(terms, key=lambda t: t[0]),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -1198,9 +1200,11 @@ def search_form(request):
         collectionform = CollectionForm(prefix='coll')
         formset = search_form_formset(prefix='crit')
 
-    return render_to_response('search.html',
-                              {'collectionform': collectionform,
-                               'formset': formset,
-                               'collections': collections,
-                               },
-                              context_instance=RequestContext(request))
+    return render(
+        request,
+        'search.html',
+          {'collectionform': collectionform,
+           'formset': formset,
+           'collections': collections,
+           }
+    )

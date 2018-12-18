@@ -1,8 +1,7 @@
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.shortcuts import get_object_or_404, render_to_response
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
 from django.forms.models import modelformset_factory, ModelForm
@@ -108,7 +107,8 @@ def create(request):
     else:
         form = CreatePresentationForm()
 
-    return render_to_response(
+    return render(
+        request,
         'presentation_create.html',
         {
             'form': form,
@@ -118,8 +118,7 @@ def create(request):
             'can_publish': request.user.has_perm(
                 'presentation.publish_presentations'),
             'custom_permissions': custom_permissions,
-        },
-        context_instance=RequestContext(request),
+        }
     )
 
 
@@ -294,7 +293,8 @@ def edit(request, id, name):
         )
 
     contenttype = ContentType.objects.get_for_model(Presentation)
-    return render_to_response(
+    return render(
+        request,
         'presentation_properties.html',
         {
             'presentation': presentation,
@@ -304,8 +304,7 @@ def edit(request, id, name):
             'form': form,
             'selected_tags': [tag.name for tag in tags],
             'usertags': existing_tags if len(existing_tags) > 0 else None,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -526,7 +525,8 @@ def browse(request, manage=False):
         except EmptyPage:
             presentations = paginator.page(paginator.num_pages)
 
-    return render_to_response(
+    return render(
+        request,
         'presentation_browse.html',
         {
             'manage': manage,
@@ -539,8 +539,7 @@ def browse(request, manage=False):
             'presenters': presenters if len(presenters) > 1 else None,
             'keywords': keywords,
             'sortby': sortby,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -572,14 +571,14 @@ def password(request, id, name):
     else:
         form = PasswordForm()
 
-    return render_to_response(
+    return render(
+        request,
         'presentation_password.html',
         {
             'form': form,
             'presentation': presentation,
             'next': request.GET.get('next', reverse('presentation-browse')),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -629,13 +628,13 @@ def record_usage(request, id, name):
     presentations = Presentation.objects.filter(
         items__record=record).distinct().order_by('title')
 
-    return render_to_response(
+    return render(
+        request,
         'presentation_record_usage.html',
         {
             'record': record,
             'presentations': presentations,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

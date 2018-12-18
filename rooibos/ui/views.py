@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django import forms
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseNotAllowed
 from django.template import RequestContext
@@ -34,9 +34,7 @@ import random
 @cache_control(max_age=24 * 3600)
 def css(request, stylesheet):
 
-    return render_to_response(stylesheet + '.css',
-                              {},
-                              context_instance=RequestContext(request),
+    return render(request, stylesheet + '.css',
                               content_type='text/css')
 
 
@@ -64,11 +62,10 @@ def main(request):
     request.session.set_test_cookie()
     form = AuthenticationForm()
 
-    return render_to_response('main.html',
+    return render(request, 'main.html',
                               {'records': records,
                                'order': [0] + order,
-                               'login_form': form},
-                              context_instance=RequestContext(request))
+                               'login_form': form})
 
 
 @json_view
@@ -138,10 +135,9 @@ def remove_tag(request, type, id):
             )
             return HttpResponseRedirect(request.GET.get('next') or '/')
 
-    return render_to_response('ui_tag_remove.html',
+    return render(request, 'ui_tag_remove.html',
                               {'tag': tag,
-                               'next': request.GET.get('next')},
-                              context_instance=RequestContext(request))
+                               'next': request.GET.get('next')})
 
 
 @json_view
@@ -172,15 +168,15 @@ def manage(request):
     collection_manage = filter_by_access(
         request.user, Collection, manage=True).count() > 0
 
-    return render_to_response(
+    return render(
+        request,
         'ui_management.html',
         {
             'storage_manage': storage_manage,
             'storage_write': storage_write,
             'collection_write': collection_write,
             'collection_manage': collection_manage,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -231,12 +227,12 @@ def options(request):
         initial['alternate_password'] = '[unchanged]'
         ui_form = UserInterfaceForm(initial)
 
-    return render_to_response(
+    return render(
+        request,
         'ui_options.html',
         {
             'ui_form': ui_form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -274,12 +270,12 @@ def delete_selected_records(request):
             )
         )
 
-    return render_to_response(
+    return render(
+        request,
         'ui_delete_selected.html',
         {
             'items': deletable_items,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
