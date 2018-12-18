@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from optparse import make_option
 from rooibos.userprofile.views import load_settings
 import sys
 import json
@@ -9,10 +8,9 @@ import json
 class Command(BaseCommand):
     help = 'Print user profile settings in JSON format'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--user', '-u', dest='user',
+    def add_arguments(self, parser):
+        parser.add_argument('--user', '-u', dest='user',
                     help='User name'),
-    )
 
     def handle(self, *args, **kwargs):
 

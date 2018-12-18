@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, FieldValue, standardfield_ids, \
     get_system_field
-from optparse import make_option
 import csv
 from rooibos.util.progressbar import ProgressBar
 
@@ -9,14 +8,21 @@ from rooibos.util.progressbar import ProgressBar
 class Command(BaseCommand):
     help = 'Import Archivision works spreadsheet'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--collection', '-c', dest='collections',
-                    action='append',
-                    help='Collection identifier (multiple allowed)'),
-        make_option('--mapping', '-m', dest='mapping_file',
-                    action='store',
-                    help='File mapping identifiers to works'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--collection',
+            '-c',
+            dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)'
+        )
+        parser.add_argument(
+            '--mapping',
+            '-m',
+            dest='mapping_file',
+            action='store',
+            help='File mapping identifiers to works'
+        )
 
     def handle(self, *args, **kwargs):
 

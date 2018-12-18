@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.db import reset_queries, IntegrityError
-from optparse import make_option
 from rooibos.access.models import AccessControl, ExtendedGroup, Subnet, \
     AttributeValue, ATTRIBUTE_BASED_GROUP, IP_BASED_GROUP
 from ipaddr import IPNetwork
@@ -1336,16 +1335,17 @@ class MigrateVocabularyPermissions(MigratePermissions):
 
 class Command(BaseCommand):
     help = 'Migrates database from MDID2'
-    args = "config_file"
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument('config_file',
+                            help='Path to MDID2 config.xml file')
+
+        parser.add_argument(
             '--remove-full-prefix',
             dest='remove_full_prefix',
             action='store_true',
             help='Remove full/ prefix from media paths'
-        ),
-    )
+        )
 
     def read_config(self, file):
         connection = servertype = None
@@ -1357,15 +1357,12 @@ class Command(BaseCommand):
                 servertype = e.firstChild.nodeValue
         return (servertype, connection)
 
-    def handle(self, *config_files, **options):
+    def handle(self, *args, **options):
 
         logging.info("Starting migration")
 
-        if len(config_files) != 1:
-            print "Please specify exactly one configuration file."
-            return
-
-        servertype, connection = self.read_config(config_files[0])
+        config_file = options['config_file']
+        servertype, connection = self.read_config(config_file)
 
         def get_cursor():
             if servertype == "MSSQL":

@@ -1,5 +1,4 @@
 import datetime
-from optparse import make_option
 import os
 import sys
 import re
@@ -14,52 +13,51 @@ class Command(BaseCommand):
 
     help = 'Export presentation as PPTX file'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--list', '-l',
             dest='list',
             action='store_true',
             help='List presentations that would be exported'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--days', '-d',
             dest='days',
-            type='int',
+            type=int,
             metavar='N',
             help='Export presentations changed in the past N days'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--output-dir', '-o',
             dest='output_dir',
             help='Target directory for files'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--id', '-i',
             dest='id',
-            type='int',
+            type=int,
             help='Identifier of a specific presentation to export'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--min-id', '-n',
             dest='min_id',
-            type='int',
+            type=int,
             help='Minimum identifier of presentations to export '
             '(to batch export)'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--max-id', '-x',
             dest='max_id',
-            type='int',
+            type=int,
             help='Maximum identifier of presentations to export '
             '(to batch export)'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--template', '-t',
             dest='template',
             default='black',
             help='Template file to use'
-        ),
-    )
+        )
 
     def get_admin_user(self):
 

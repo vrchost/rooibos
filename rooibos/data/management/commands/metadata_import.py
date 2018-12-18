@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from optparse import make_option
 from ...spreadsheetimport import submit_import_job
 import random
 import shutil
@@ -11,21 +10,20 @@ from ...views import _get_scratch_dir
 class Command(BaseCommand):
     help = 'Command line metadata import tool'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--mapping', '-m', dest='mapping_file',
             help='Mapping CSV file'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--data', '-d', dest='data_file',
             help='Data CSV file'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--collection', '-c', dest='collections',
             action='append',
             help='Collection identifier (multiple allowed)'
-        ),
-    )
+        )
 
     def handle(self, *args, **kwargs):
 

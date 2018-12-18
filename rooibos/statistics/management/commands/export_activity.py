@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
 from rooibos.statistics.models import AccumulatedActivity
@@ -8,21 +7,19 @@ import csv
 
 class Command(BaseCommand):
     help = """Export accumulated activity"""
-    args = 'command'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--type', '-t',
             dest='content_type',
             help='Export activity for this content type '
             '(e.g. record, media, user)'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--year', '-y',
             dest='year',
             help='Export activity for given year only'
         )
-    )
 
     def handle(self, *args, **kwargs):
 
