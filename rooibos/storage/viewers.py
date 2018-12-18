@@ -1,8 +1,6 @@
 from django import forms
 from django.http import Http404
-from django.shortcuts import render_to_response
-from django.conf import settings
-from django.template import RequestContext
+from django.shortcuts import render
 from rooibos.access.functions import \
     get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
@@ -98,7 +96,8 @@ class MediaPlayer(Viewer):
         if '://' not in delivery_url:
             delivery_url = server + delivery_url
 
-        return render_to_response(
+        return render(
+            request,
             'storage_mediaplayer.js',
             {
                 'record': self.obj,
@@ -110,8 +109,7 @@ class MediaPlayer(Viewer):
                 'server_url': server,
                 'autoplay': autoplay,
                 'anchor_id': divid,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -148,15 +146,15 @@ class GifViewer(Viewer):
 
         server = '//' + request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
 
-        return render_to_response(
+        return render(
+            request,
             'storage_gifviewer.js',
             {
                 'record': self.obj,
                 'selectedmedia': selectedmedia,
                 'server_url': server,
                 'anchor_id': divid,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -195,14 +193,14 @@ class YoutubeViewer(Viewer):
         if not links:
             raise Http404()
 
-        return render_to_response(
+        return render(
+            request,
             'storage_youtubeviewer.js',
             {
                 'record': self.obj,
                 'anchor_id': divid,
                 'embed_url': links[0]['value'].replace('watch?v=', 'embed/'),
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 

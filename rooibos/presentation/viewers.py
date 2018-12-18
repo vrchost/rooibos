@@ -1,7 +1,6 @@
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.conf import settings
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.files.temp import NamedTemporaryFile
 from wsgiref.util import FileWrapper
@@ -71,7 +70,8 @@ class PresentationViewer(Viewer):
 
     def view(self, request):
         return_url = request.GET.get('next', reverse('presentation-browse'))
-        return render_to_response(
+        return render(
+            request,
             getattr(
                 settings,
                 'PRESENTATION_VIEWER_TEMPLATE',
@@ -80,8 +80,7 @@ class PresentationViewer(Viewer):
             {
                 'presentation': self.obj,
                 'return_url': return_url,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -103,13 +102,13 @@ class PresentationViewerOld(Viewer):
 
     def view(self, request):
         return_url = request.GET.get('next', reverse('presentation-browse'))
-        return render_to_response(
+        return render(
+            request,
             'presentation_viewer_old.html',
             {
                 'presentation': self.obj,
                 'return_url': return_url,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 

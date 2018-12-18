@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlencode
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 import urllib2
@@ -253,7 +252,7 @@ def search(request, id, name):
     next_page_url = ("?" + urlencode((('q', query), ('p', page + 1)))
                      if page < pages else None)
 
-    return render_to_response(
+    return render(request,
         'federatedsearch/shared/results.html', {
             'shared': shared.shared,
             'query': query,
@@ -263,8 +262,7 @@ def search(request, id, name):
             'pages': pages,
             'prev_page': prev_page_url,
             'next_page': next_page_url,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -317,12 +315,12 @@ def manage(request):
     if not request.user.is_superuser:
         raise Http404()
 
-    return render_to_response(
+    return render(request,
         'federatedsearch/shared/manage.html',
         {
             'collections': SharedCollection.objects.all(),
-        },
-        context_instance=RequestContext(request))
+        }
+    )
 
 
 @login_required
@@ -376,10 +374,10 @@ def edit(request, id=None, name=None):
     else:
         form = SharedCollectionForm(instance=collection)
 
-    return render_to_response(
+    return render(request,
         'federatedsearch/shared/edit.html',
         {
             'form': form,
             'collection': collection,
-        },
-        context_instance=RequestContext(request))
+        }
+    )
