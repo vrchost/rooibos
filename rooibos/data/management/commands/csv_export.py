@@ -1,7 +1,6 @@
 from __future__ import with_statement
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, Record
-from optparse import make_option
 import unicodecsv as csv
 from rooibos.util.progressbar import ProgressBar
 
@@ -9,15 +8,14 @@ from rooibos.util.progressbar import ProgressBar
 class Command(BaseCommand):
     help = 'Export collection metadata'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--data', '-d', dest='data_file',
-                    help='Output data CSV file'),
-        make_option('--collection', '-c', dest='collections',
+    def add_arguments(self, parser):
+        parser.add_argument('--data', '-d', dest='data_file',
+                    help='Output data CSV file')
+        parser.add_argument('--collection', '-c', dest='collections',
                     action='append',
-                    help='Collection identifier (multiple allowed)'),
-        make_option('--separator', '-s', dest='separator',
-                    help='Separator for multi-value fields'),
-    )
+                    help='Collection identifier (multiple allowed)')
+        parser.add_argument('--separator', '-s', dest='separator',
+                    help='Separator for multi-value fields')
 
     def handle(self, *args, **kwargs):
 

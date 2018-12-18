@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Collection
 from rooibos.storage.models import Storage
@@ -7,21 +6,22 @@ from rooibos.access.models import ExtendedGroup, Subnet, AccessControl, \
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
+
+    help = "Creates or updates IP address based extended user group "
+
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--name',
             '-n',
             dest='usergroup',
-            help='Name of user group to be managed'
-        ),
-        make_option(
+            help='Name of user group to be managed',
+        )
+        parser.add_argument(
             '--subnet',
             '-s',
             dest='subnet',
             help='Subnet for user group, e.g. 192.168.0.0/255.255.0.0'
-        ),
-    )
-    help = "Creates or updates IP address based extended user group "
+        )
 
     def handle(self, *args, **kwargs):
 

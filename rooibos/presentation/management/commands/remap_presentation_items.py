@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.data.models import standardfield_ids, FieldValue
 from rooibos.presentation.models import PresentationItem
@@ -6,29 +5,29 @@ from rooibos.util.progressbar import ProgressBar
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--from', '-f',
             dest='from_collection',
             action='store',
-            type='int',
+            type=int,
             help='Source collection'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--to', '-t',
             dest='to_collections',
             action='append',
-            type='int',
+            type=int,
             help='Target collection'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--commit', '-c',
             dest='commit',
             action='store_true',
             default=False,
             help='Commit changes'
-        ),
-    )
+        )
+
     help = "Maps presentation items from records in one collection to " \
         "records in another collection. " \
         "Records are compared by their identifier."

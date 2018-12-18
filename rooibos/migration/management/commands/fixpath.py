@@ -1,33 +1,32 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.storage.models import Storage
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--list', '-l',
             dest='list',
             action='store_true',
             help='List current storage paths'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--prefix', '-p',
             dest='prefix',
             help='Prefix to replace or filter by'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--replace-with', '-r',
             dest='replace',
             help='Replacement prefix'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--simulate', '-s',
             dest='simulate',
             action='store_true',
             help='Simulate only'
-        ),
-    )
+        )
+
     help = "Fixes storage (resource) paths after migration " \
            "or other move of image files"
 
