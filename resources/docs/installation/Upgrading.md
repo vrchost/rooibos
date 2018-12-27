@@ -6,6 +6,13 @@ any other custom files and folders in place.
 
 Afterwards, run `django-admin migrate` to apply any database changes.
 
+In your `local_settings.py`, change or add the following setting to reflect
+the new port used by Solr:
+
+```
+SOLR_URL = 'http://localhost:8983/solr/mdid'
+```
+
 
 # Upgrading from MDID 3.2.x
 
@@ -27,6 +34,14 @@ pip install --allow-external --upgrade -r rooibos/requirements.txt
 
 Follow the "Install Solr" and "Configure solr" sections in the installation
 instructions for your distribution
+
+In your `local_settings.py`, change or add the following setting to reflect
+the new port used by Solr:
+
+```
+SOLR_URL = 'http://localhost:8983/solr/mdid'
+```
+
 
 ## Migrate database
 

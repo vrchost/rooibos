@@ -157,7 +157,7 @@ Make sure to change `SECRET_KEY` to a unique value and do not share it!
 Also, if possible, change the asterisk in `ALLOWED_HOSTS` to your server
 host name, if you know it, for example `['mdid.yourschool.edu']`.
 
-Change `SOLR_URL` to `http://localhost:8080/solr/mdid`.
+Change `SOLR_URL` to `http://localhost:8983/solr/mdid`.
 
 Run the following command to initialize static files:
 ```
