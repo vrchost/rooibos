@@ -24,6 +24,14 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 import re
 import zipfile
 import os
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
+# Exceptions that may be raised when building a paragraph
+PARAGRAPH_EXCEPTIONS = (AttributeError, KeyError, IndexError, ValueError)
 
 
 def _get_presentation(obj, request, objid):
@@ -145,7 +153,8 @@ class FlashCardViewer(Viewer):
         def get_paragraph(*args, **kwargs):
             try:
                 return Paragraph(*args, **kwargs)
-            except (AttributeError, IndexError):
+            except PARAGRAPH_EXCEPTIONS:
+                logger.exception('Error building paragraph')
                 return None
 
         def draw_card(index, item):
@@ -339,8 +348,9 @@ class PrintViewViewer(Viewer):
                 text.append('<b>%s</b>: %s<br />' % ('Annotation', annotation))
             try:
                 p = Paragraph(''.join(text), styles['Normal'])
-            except (AttributeError, KeyError, IndexError):
+            except PARAGRAPH_EXCEPTIONS:
                 # this sometimes triggers an error in reportlab
+                logger.exception('Error building paragraph')
                 p = None
             if p:
                 image = get_image_for_record(
