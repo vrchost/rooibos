@@ -37,11 +37,11 @@ def handle_loris_request(request, filepath, record_id, record_name):
     config['logging']['log_level'] = 'DEBUG'
 
     config['logging']['log_dir'] = os.path.join(
-        settings.SCRATCH_DIR, '..', 'log')
+        settings.SCRATCH_DIR, 'loris_log')
     if not os.path.exists(config['logging']['log_dir']):
         os.makedirs(config['logging']['log_dir'])
     config['loris.Loris']['tmp_dp'] = os.path.join(
-        settings.SCRATCH_DIR, 'loris')
+        settings.SCRATCH_DIR, 'loris_tmp')
     if not os.path.exists(config['loris.Loris']['tmp_dp']):
         os.makedirs(config['loris.Loris']['tmp_dp'])
     config['loris.Loris']['enable_caching'] = False
