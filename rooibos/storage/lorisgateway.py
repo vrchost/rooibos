@@ -68,7 +68,7 @@ def handle_loris_request(request, filepath, record_id, record_name):
     response = loris.route(werkzeug_request)
 
     if response.status_code != 200:
-        return Http404()
+        raise Http404()
 
     return HttpResponse(
         content=response.get_data(),
