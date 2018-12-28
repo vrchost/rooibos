@@ -641,7 +641,7 @@ def slide_manifest(request, slide, owner):
     title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
     image = slide.record.get_image_url(
-        force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False),
+        force_reprocess=False,
         handler='storage-retrieve-iiif-image',
     )
 
