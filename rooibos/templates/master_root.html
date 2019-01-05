@@ -207,6 +207,8 @@
             </div>
         </div>
     </div>
+
+    <form style="display: none;" id="csrf-token-form">{% csrf_token %}</form>
 {% endspaceless %}
 {% endblock %}
 
@@ -245,23 +247,7 @@
     <script type="text/javascript">
         var ajaxManager = $.manageAjax.create('defaultQueue', { queue: true });
         var ajaxInteractionManager = $.manageAjax.create('interactionQueue', { queue: true });
-
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        var csrftoken = getCookie('csrftoken');
+        var csrftoken = jQuery("#csrf-token-form [name=csrfmiddlewaretoken]").val();
 
         // CSRF handling for AJAX requests
         function csrfSafeMethod(method) {
