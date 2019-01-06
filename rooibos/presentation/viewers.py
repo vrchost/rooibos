@@ -30,6 +30,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+USE_MIRADOR = not getattr(settings, 'DISABLE_MIRADOR_VIEWER', False)
+
+
 # Exceptions that may be raised when building a paragraph
 PARAGRAPH_EXCEPTIONS = (AttributeError, KeyError, IndexError, ValueError)
 
@@ -62,16 +65,20 @@ class PresentationViewer(Viewer):
         )
 
 
-@register_viewer('presentationviewer', PresentationViewer)
 def presentationviewer(obj, request, objid=None):
     presentation = _get_presentation(obj, request, objid)
     return PresentationViewer(
         presentation, request.user) if presentation else None
 
 
+if USE_MIRADOR:
+    register_viewer('presentationviewer', PresentationViewer) \
+        (presentationviewer)
+
+
 class PresentationViewerOld(Viewer):
 
-    title = "View (classic)"
+    title = "View (classic)" if USE_MIRADOR else "View"
     weight = 99
 
     def view(self, request):
@@ -86,7 +93,10 @@ class PresentationViewerOld(Viewer):
         )
 
 
-@register_viewer('presentationviewer_classic', PresentationViewerOld)
+@register_viewer(
+    'presentationviewer' + ('_classic' if USE_MIRADOR else ''),
+    PresentationViewerOld
+)
 def presentationviewer(obj, request, objid=None):
     presentation = _get_presentation(obj, request, objid)
     return PresentationViewerOld(
