@@ -648,6 +648,8 @@ def slide_manifest(request, slide, owner):
     metadata = [
         dict(label=fv.resolved_label, value=fv.value) for fv in fieldvalues
     ]
+    if slide.annotation:
+        metadata.insert(0, dict(label='Annotation', value=slide.annotation))
 
     passwords = request.session.get('passwords', dict())
     media = get_media_for_record(slide.record, request.user, passwords)
