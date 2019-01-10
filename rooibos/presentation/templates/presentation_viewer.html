@@ -25,7 +25,7 @@
     var match = window.location.href.match(/[?&]canvas=([^&]+)/);
     var canvas = match ? match[1] : undefined;
 
-    var returnUrl = '{{ return_url|urlencode }}';
+    var returnUrl = '{{ return_url }}';
 
     var options = {
         id: "viewer",
