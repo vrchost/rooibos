@@ -16,6 +16,13 @@ var Viewer = function (options) {
         }
     }
 
+    this.toggleAnnotationFontSize = function () {
+        forEachWindow(function (w) {
+            w.viewer.mirador.viewer.element.toggleClass(
+                'annotation-large-font');
+        });
+    };
+
     this.additionalWindow = function () {
         var next = getNextCanvases()[0];
         var url = window.location.href;

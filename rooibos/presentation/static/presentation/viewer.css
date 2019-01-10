@@ -66,3 +66,7 @@ body {
 .mdid-hide-image .mirador-osd {
     opacity: 0;
 }
+
+.annotation-large-font.mirador-container .mirador-canvas-metadata {
+    font-size: 24px;
+}
