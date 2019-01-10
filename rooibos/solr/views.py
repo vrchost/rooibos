@@ -433,7 +433,10 @@ def run_search(user,
                orquery=None,
                selected=False,
                remove=None,
-               produce_facets=False):
+               produce_facets=False,
+               limit=None,
+               offset=None,
+              ):
 
     available_storage = list(filter_by_access(user, Storage).values_list(
         'id', flat=True))
@@ -490,9 +493,15 @@ def run_search(user,
     return_facets = [key for key, facet in search_facets.iteritems()
                      if facet.fetch_facet_values()] if produce_facets else []
 
+    start = (page - 1) * pagesize
+    rows = pagesize
+    if limit is not None and offset is not None:
+        start = offset
+        rows = limit
+
     try:
         hits, records, facets = s.search(
-            query, sort=sort, rows=pagesize, start=(page - 1) * pagesize,
+            query, sort=sort, rows=rows, start=start,
             facets=return_facets, facet_mincount=1, facet_limit=100)
     except SolrError:
         hits = -1

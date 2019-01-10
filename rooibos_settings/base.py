@@ -96,6 +96,7 @@ TEMPLATES = [
 ]
 
 MIDDLEWARE_CLASSES = (
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.http.ConditionalGetMiddleware',
     'rooibos.middleware.Middleware',
     'rooibos.help.middleware.PageHelp',
@@ -133,7 +134,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django_extensions',
     'django_celery_results',
+    'corsheaders',
     'tagging',
+    'graphene_django',
     'rooibos.data',
     'rooibos.migration',
     'rooibos.util',
@@ -457,3 +460,25 @@ LOGGING = {
 
 
 CELERY_RESULT_BACKEND = 'django-db'
+
+
+GRAPHENE = {
+    'SCHEMA': 'rooibos.graphql.schema'  # Where your Graphene schema lives
+}
+
+
+GRAPHENE_DJANGO_EXTRAS = {
+    'DEFAULT_PAGINATION_CLASS': 'graphene_django_extras.paginations.LimitOffsetGraphqlPagination',
+    'DEFAULT_PAGE_SIZE': 20,
+    'MAX_PAGE_SIZE': 50,
+    'CACHE_ACTIVE': True,
+    'CACHE_TIMEOUT': 300    # seconds
+}
+
+
+CORS_ORIGIN_WHITELIST = (
+)
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST

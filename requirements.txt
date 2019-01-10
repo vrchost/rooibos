@@ -35,6 +35,8 @@ flake8-docstrings
 flake8-todo
 flickrapi==1.4.5
 flup
+graphene-django==2.2.0
+graphene-django-extras==0.4.2
 gunicorn
 ipaddr
 MySQL-Python

@@ -4,8 +4,10 @@ from django.conf import settings
 from django.views.generic.base import TemplateView
 from django.views.static import serve
 from django.views.decorators.cache import cache_control
+from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponseServerError
 from django.template import loader, RequestContext
+from graphene_django.views import GraphQLView
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
 from rooibos.legacy.views import legacy_viewer
@@ -110,6 +112,8 @@ urls = [
     ),
 
     url(r'^exception/$', raise_exception),
+
+    url(r'^graphql', csrf_exempt(GraphQLView.as_view(graphiql=True))),
 ]
 
 try:
