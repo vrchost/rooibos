@@ -12,6 +12,7 @@ from rooibos.storage import get_image_for_record
 from rooibos.data.models import Record
 from rooibos.api.views import presentation_detail
 from models import Presentation
+from .views import get_metadata
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes
 from reportlab.lib.units import inch
@@ -201,13 +202,13 @@ class FlashCardViewer(Viewer):
                 data = []
                 data.append(get_paragraph(
                     '%s/%s' % (index + 1, len(items)), styles['SlideNumber']))
-                values = item.get_fieldvalues(owner=request.user)
+                values = get_metadata(item.get_fieldvalues(owner=request.user))
                 for value in values:
-                    v = value.value \
-                        if len(value.value) < 100 \
-                        else value.value[:100] + '...'
+                    v = value['value'] \
+                        if len(value['value']) < 100 \
+                        else value['value'][:100] + '...'
                     data.append(get_paragraph(
-                        '<b>%s:</b> %s' % (value.resolved_label, v),
+                        '<b>%s:</b> %s' % (value['label'], v),
                         styles['Data'])
                     )
                 annotation = item.annotation
@@ -346,11 +347,11 @@ class PrintViewViewer(Viewer):
 
         for index, item in enumerate(items):
             text = []
-            values = item.get_fieldvalues(owner=request.user)
+            values = get_metadata(item.get_fieldvalues(owner=request.user))
             for value in values:
                 text.append(
                     '<b>%s</b>: %s<br />' % (
-                        value.resolved_label, value.value
+                        value['label'], value['value']
                     )
                 )
             annotation = item.annotation

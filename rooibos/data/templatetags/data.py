@@ -42,16 +42,7 @@ class MetaDataNode(template.Node):
             except FieldSet.DoesNotExist:
                 pass
 
-        if fieldvalues:
-            fieldvalues[0].subitem = False
         for i in range(0, len(fieldvalues)):
-            if i > 0:
-                fieldvalues[i].subitem = (
-                    fieldvalues[i].field == fieldvalues[i - 1].field and
-                    fieldvalues[i].group == fieldvalues[i - 1].group and
-                    fieldvalues[i].resolved_label ==
-                    fieldvalues[i - 1].resolved_label
-                )
             fieldvalues[i].crosslinked = (
                 crosslinks and
                 fieldvalues[i].value and

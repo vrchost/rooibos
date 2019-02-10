@@ -635,6 +635,17 @@ def get_id(request, *args):
     return 'http:%s/iiif/%s' % (server, s)
 
 
+def get_metadata(fieldvalues):
+    compact = getattr(settings, 'COMPACT_METADATA_VIEW', False)
+    result = []
+    for fv in fieldvalues:
+        if not compact or not fv.subitem:
+            result.append(dict(label=fv.resolved_label, value=fv.value))
+        else:
+            result[-1]['value'] += '; ' + fv.value
+    return result
+
+
 def slide_manifest(request, slide, owner):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
@@ -645,9 +656,7 @@ def slide_manifest(request, slide, owner):
         handler='storage-retrieve-iiif-image',
     )
 
-    metadata = [
-        dict(label=fv.resolved_label, value=fv.value) for fv in fieldvalues
-    ]
+    metadata = get_metadata(fieldvalues)
     if slide.annotation:
         metadata.insert(0, dict(label='Annotation', value=slide.annotation))
 
