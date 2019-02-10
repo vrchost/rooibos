@@ -2,12 +2,12 @@ body {
     background-color: #222222;
 }
 
-
-.mirador-container .content-container {
-    margin-top: 0;
+.mirador-container .manifest-info {
+    background-color: #222222;
+    color: #929191;
 }
 
-.mirador-container .manifest-info {
+.mirador-container .manifest-info .window-manifest-navigation {
     display: none;
 }
 
@@ -69,4 +69,16 @@ body {
 
 .annotation-large-font.mirador-container .mirador-canvas-metadata {
     font-size: 24px;
+}
+
+.mirador-container .content-container {
+    margin-top: 0;
+}
+
+.viewer-title.mirador-container .content-container {
+    margin-top: 34px;
+}
+
+.mirador-container .mirador-main-menu li {
+    padding: 0 10px;
 }

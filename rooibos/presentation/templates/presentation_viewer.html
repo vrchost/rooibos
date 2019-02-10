@@ -71,21 +71,28 @@
         },
         mainMenuSettings: {
             userButtons: [{
-                label: 'Font Size',
+                label: 'Title',
+                attributes: {
+                    id: 'toggle-viewer-title',
+                    href: 'javascript:window.viewer.toggleViewerTitle();'
+                },
+                iconClass: 'fa fa-header fa-lg fa-fw'
+            }, {
+                label: 'Font',
                 attributes: {
                     id: 'toggle-annotation-font-size',
                     href: 'javascript:window.viewer.toggleAnnotationFontSize();'
                 },
-                iconClass: 'fa fa-font fa-lg fa-fw'
+                iconClass: 'fa fa-text-height fa-lg fa-fw'
             }, {
-                label: 'Additional Window',
+                label: 'New Window',
                 attributes: {
                     id: 'additional-window',
                     href: 'javascript:window.viewer.additionalWindow();'
                 },
                 iconClass: 'fa fa-plus-square fa-lg fa-fw'
             }, {
-                label: 'Sync Viewers',
+                label: 'Sync',
                 attributes: {
                     id: 'sync-viewers',
                     href: 'javascript:window.viewer.syncViewers();'
@@ -105,7 +112,7 @@
 
     if (returnUrl) {
         options.mainMenuSettings.userButtons.unshift({
-            label: 'Close Viewer',
+            label: 'Close',
             attributes: {
                 id: 'close-viewer',
                 href: 'javascript:window.location.assign(returnUrl);'
