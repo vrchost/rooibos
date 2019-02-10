@@ -204,11 +204,8 @@ class FlashCardViewer(Viewer):
                     '%s/%s' % (index + 1, len(items)), styles['SlideNumber']))
                 values = get_metadata(item.get_fieldvalues(owner=request.user))
                 for value in values:
-                    v = value['value'] \
-                        if len(value['value']) < 100 \
-                        else value['value'][:100] + '...'
                     data.append(get_paragraph(
-                        '<b>%s:</b> %s' % (value['label'], v),
+                        '<b>%s:</b> %s' % (value['label'], value['value']),
                         styles['Data'])
                     )
                 annotation = item.annotation
