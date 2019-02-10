@@ -215,8 +215,14 @@ class FlashCardViewer(Viewer):
                         styles['Data'])
                     )
                 data = filter(None, data)
-                f.addFromList(data, p)
-                if data:
+                incomplete = False
+                while data:
+                    f.addFromList(data, p)
+                    if data:
+                        data = data[1:]
+                        incomplete = True
+
+                if incomplete:
                     p.setFont('Helvetica', 8)
                     p.setFillColorRGB(0, 0, 0)
                     p.drawRightString(width - inch / 2, inch / 2, '...')
