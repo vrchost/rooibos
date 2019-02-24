@@ -370,6 +370,17 @@ var Viewer = function (options) {
     });
 
 
+    this.mirador.eventEmitter.subscribe('TOGGLE_FULLSCREEN', function () {
+        // Mirador hides bottom panel control in fullscreen, keep it visible
+        delay(function () {
+            viewer.forEachImageView(function (imageView) {
+                imageView.element.find(
+                    '.mirador-osd-toggle-bottom-panel').show();
+            });
+        }, 500);
+    });
+
+
     var updateTitles = function () {
         var manifest = getManifest();
         var canvases = manifest.jsonLd.sequences[0].canvases;
