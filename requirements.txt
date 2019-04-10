@@ -18,7 +18,7 @@
 attrs >= 17.4.0
 beautifulsoup
 boto
-Celery
+Celery==4.2.1
 configobj >= 4.7.2,<=5.0.0
 django-cas-ng==3.5.10
 django-compressor==2.2
