@@ -13,6 +13,7 @@ from rooibos.util import unique_slug
 import random
 import types
 import re
+import unicodedata
 
 
 class CollectionManager(models.Manager):
@@ -687,6 +688,11 @@ class FieldValue(models.Model):
 
     @staticmethod
     def make_browse_value(value):
+        # try to decompose unicode characters
+        if isinstance(value, unicode):
+            value = unicodedata.normalize('NFD', value)
+            value = value.encode('latin1', 'ignore')
+        # remove other special characters
         return FieldValue.BROWSE_VALUE_REGEX.sub('', value or '')[:32]
 
     class Meta:
