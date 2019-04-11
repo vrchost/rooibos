@@ -22,6 +22,7 @@ from reportlab.platypus import flowables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
+from BeautifulSoup import BeautifulSoup
 import re
 import zipfile
 import os
@@ -47,6 +48,20 @@ def _get_presentation(obj, request, objid):
         if not obj:
             return None
     return obj
+
+
+def _clean_for_render(text):
+    whitelist = ['backColor', 'backcolor', 'bgcolor',
+                 'color', 'fg', 'fontName', 'fontSize',
+                 'fontname', 'fontsize', 'href', 'name',
+                 'textColor', 'textcolor']
+    html = BeautifulSoup(text)
+    html.attrs = None
+    for e in html.findAll(True):
+        for attribute in e.attrs:
+            if attribute[0] not in whitelist:
+                del e[attribute[0]]
+    return unicode(html)
 
 
 class PresentationViewer(Viewer):
@@ -204,12 +219,14 @@ class FlashCardViewer(Viewer):
                     '%s/%s' % (index + 1, len(items)), styles['SlideNumber']))
                 values = get_metadata(item.get_fieldvalues(owner=request.user))
                 for value in values:
+                    v = _clean_for_render(value['value'])
                     data.append(get_paragraph(
-                        '<b>%s:</b> %s' % (value['label'], value['value']),
+                        '<b>%s:</b> %s' % (value['label'], v),
                         styles['Data'])
                     )
                 annotation = item.annotation
                 if annotation:
+                    annotation = _clean_for_render(annotation)
                     data.append(get_paragraph(
                         '<b>%s:</b> %s' % ('Annotation', annotation),
                         styles['Data'])
@@ -352,13 +369,15 @@ class PrintViewViewer(Viewer):
             text = []
             values = get_metadata(item.get_fieldvalues(owner=request.user))
             for value in values:
+                v = _clean_for_render(value['value'])
                 text.append(
                     '<b>%s</b>: %s<br />' % (
-                        value['label'], value['value']
+                        value['label'], v
                     )
                 )
             annotation = item.annotation
             if annotation:
+                annotation = _clean_for_render(annotation)
                 text.append('<b>%s</b>: %s<br />' % ('Annotation', annotation))
             try:
                 p = Paragraph(''.join(text), styles['Normal'])
