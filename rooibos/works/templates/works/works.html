@@ -135,7 +135,7 @@ angular.module('clientApp', ['bw.paging'])
         var makeMetadataSidebar = function () {
             var work = $filter('encodeURIComponent')($scope.selectedRecord.works[0]);
             var imgsrc = $scope.selectedRecord.image + '400x400/';
-            var link = '<a href="/explore/explore/?c=work:' + work + '" target="_blank">';
+            var link = '<a href="/explore/explore/?s=identifier_sort&c=work:' + work + '" target="_blank">';
             var img = '<img src="' + imgsrc + '" />';
             return '<div class="metadata-sidebar">' +
                     link +
