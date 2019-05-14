@@ -194,7 +194,7 @@ class FlashCardViewer(Viewer):
 
             if record:
                 image = get_image_for_record(
-                    record, presentation.owner, 800, 800, passwords)
+                    record, self.user, 800, 800, passwords)
                 if image:
                     p.drawImage(
                         image,
@@ -387,7 +387,7 @@ class PrintViewViewer(Viewer):
                 p = None
             if p:
                 image = get_image_for_record(
-                    item.record, presentation.owner, 100, 100, passwords)
+                    item.record, self.user, 100, 100, passwords)
                 if image:
                     try:
                         i = flowables.Image(image, kind='proportional',
