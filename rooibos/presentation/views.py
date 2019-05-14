@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render_to_response
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.forms.models import modelformset_factory, ModelForm
 from django.db.models.aggregates import Count
 from django.conf import settings
@@ -27,6 +28,7 @@ from rooibos.storage import get_media_for_record
 from models import Presentation, PresentationItem
 from functions import duplicate_presentation
 import base64
+import os
 
 
 @login_required
@@ -669,7 +671,7 @@ def slide_manifest(request, slide, owner):
         canvas_height = height = media.height or 1200
     else:
         width = height = None
-        canvas_width = 1600
+        canvas_width = 1200
         canvas_height = 1200
 
     while canvas_height < 1200 or canvas_width < 1200:
@@ -692,7 +694,10 @@ def slide_manifest(request, slide, owner):
             "width": width
         },
         'on': id,
-    }] if width and height else []
+    }] if width and height else None
+
+    if not images:
+        return special_slide(request, kind='missing', label='Missing image', index=slide.id)
 
     return {
         '@id': id,
@@ -705,13 +710,16 @@ def slide_manifest(request, slide, owner):
     }
 
 
-def blank_slide(request):
-    image = reverse('presentation-blank-slide', kwargs={'extra': ''})
-    id = get_id(request, 'slide', 'canvas', 'slide0')
+def special_slide(request, kind, label, index=None):
+    image = reverse(
+        'presentation-%s-slide' % kind,
+        kwargs={'extra': str(index) if index else ''}
+    )
+    id = get_id(request, 'slide', 'canvas', 'slide%d' % (index or 0))
     return {
         '@id': id,
         '@type': 'sc:Canvas',
-        'label': 'End of presentation',
+        'label': label,
         "height": 100,
         "width": 100,
         'images': [{
@@ -733,6 +741,7 @@ def blank_slide(request):
         }],
         'metadata': [],
     }
+
 
 @json_view
 def manifest(request, id, name):
@@ -759,7 +768,7 @@ def manifest(request, id, name):
             'canvases': [
                 slide_manifest(request, slide, owner) for slide in slides
             ] + [
-                blank_slide(request)
+                special_slide(request, kind='blank', label='End of presentation')
             ]
         }],
     }
@@ -767,7 +776,7 @@ def manifest(request, id, name):
 
 def transparent_png(request, extra):
 
-    if extra == 'info.json':
+    if extra and extra.endswith('info.json'):
         return HttpResponse(
             content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 100, "width": 100, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-blank-slide', kwargs={'extra': ''}) + '"}',
             content_type='application/json',
@@ -779,3 +788,21 @@ def transparent_png(request, extra):
         content=base64.b64decode(DATA),
         content_type='image/png',
     )
+
+
+def missing_png(request, extra):
+
+    if extra and extra.endswith('info.json'):
+        return HttpResponse(
+            content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 200, "width": 200, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-missing-slide', kwargs={'extra': ''}) + '"}',
+            content_type='application/json',
+        )
+
+    path = os.path.join(
+        os.path.dirname(__file__),
+        'static', 'presentation', 'image_unavailable.jpg')
+    with open(path, 'rb') as thumbnail:
+        return HttpResponse(
+            content=thumbnail.read(),
+            content_type='image/png',
+        )
