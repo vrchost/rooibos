@@ -773,7 +773,8 @@ def retrieve_iiif_image(request, recordid, record):
         recordid,
         request.user,
         passwords=passwords,
-        force_reprocess=force_reprocess
+        force_reprocess=force_reprocess,
+        no_spaces=True,  # Loris does not deal with spaces in filenames
     )
     if not path:
         logging.error(
