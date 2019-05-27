@@ -46,8 +46,6 @@ class Storage(models.Model):
         "symlink to the actual file should be created when the file is "
         "requested e.g. for streaming."
     )
-    # TODO: This field is no longer used, do schema change
-    derivative = models.IntegerField(null=True, db_column='derivative_id')
 
     # Create storage systems only once and hold on to them to increase
     # performace, especially for cloud based storage systems
