@@ -154,10 +154,12 @@
     <field name="tag" type="string" indexed="true" stored="true" multiValued="true"/>
     <field name="ownedtag" type="string" indexed="true" stored="false" multiValued="true"/>
 
+    <!-- since we're copying everything above, no need for these specifics:
     <copyField source="tag" dest="_text_"/>
 
     <copyField source="*_t" dest="_text_"/>
     <copyField source="filecontent" dest="_text_"/>
+    -->
 
     <!-- Dynamic field definitions allow using convention over configuration
        for fields via the specification of patterns to match field names.
