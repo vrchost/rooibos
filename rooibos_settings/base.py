@@ -177,6 +177,7 @@ STORAGE_SYSTEMS = {
     'pseudostreaming':
         'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
     's3': 'rooibos.storage.s3.S3StorageSystem',
+    'b2': 'rooibos.storage.b2.B2StorageSystem',
 }
 
 GROUP_MANAGERS = {

@@ -374,7 +374,7 @@ def manage_storage(request, storageid=None, storagename=None):
 
         class Meta:
             model = Storage
-            fields = ('title', 'system', 'base', 'urlbase', 'deliverybase')
+            fields = ('title', 'system', 'base', 'credential_id', 'credential_key', 'urlbase', 'deliverybase')
 
     if request.method == "POST":
         if request.POST.get('delete-storage'):
