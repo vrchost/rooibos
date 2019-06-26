@@ -72,7 +72,11 @@ class PresentationViewer(Viewer):
     def view(self, request):
         return_url = request.GET.get('next', reverse('presentation-browse'))
         return render_to_response(
-            'presentation_viewer.html',
+            getattr(
+                settings,
+                'PRESENTATION_VIEWER_TEMPLATE',
+                'presentation_viewer.html'
+            ),
             {
                 'presentation': self.obj,
                 'return_url': return_url,
