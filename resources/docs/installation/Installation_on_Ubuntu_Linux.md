@@ -240,6 +240,8 @@ touch /opt/solr/data/mdid/core.properties \
     /opt/solr/data/mdid/synonyms.txt
 cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
     /opt/solr/data/mdid/lang
+cp /opt/solr_install/solr/example/example-DIH/solr/db/conf/mapping-FoldToASCII.txt \
+    /opt/solr/data/mdid/conf
 cp /opt/mdid/solr7/conf/* \
     /opt/solr/data/mdid/conf
 chown -R solr:solr /opt/solr/data/mdid
