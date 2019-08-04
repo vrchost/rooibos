@@ -9,7 +9,7 @@ env:
   - PYTHONPATH=.
 script: django-admin test
 before_deploy:
-  - VERSION=$(git describe)
+  - VERSION=$(git describe --always)
   - NAME=rooibos-$TRAVIS_BRANCH-$VERSION-build$TRAVIS_BUILD_NUMBER
   - mkdir -p travis-build
   - echo VERSION=\"$VERSION\" > rooibos/version.py
