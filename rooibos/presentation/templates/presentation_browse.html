@@ -152,9 +152,11 @@
 <li><a href="{% url "presentation-create" %}?next={% url "presentation-manage" %}">Create new presentation</a></li>
 {% endif %}
 
+{% if user.is_authenticated %}
 {% with usertags as actionbar_tags %}
 {% include 'ui_actionbar_tag_dropdown.html' %}
 {% endwith %}
+{% endif %}
 
 {% if manage %}
 
