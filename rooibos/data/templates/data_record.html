@@ -188,7 +188,9 @@
         <div>
 {% if can_edit and record.id and not fv_formset %}
         <a href="{% url "data-record-edit" record.id record.name %}">Edit Record</a><br />
+        {% if user|accessible_objects:"data.Collection,rw"|length %}
         <a href="{% url "data-record-copy" record.id record.name %}">Duplicate Record</a><br />
+        {% endif %}
 {% endif %}
 {% if record.id and not fv_formset %}
         <a href="{% url "data-record-edit-customize" record.id record.name %}">Customize Record</a><br />
