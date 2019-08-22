@@ -570,9 +570,12 @@
                 else
                     $("#basket-content").slideUp();
             }
-            function showBasket() {
+            function showBasket(immediate) {
                 $("#basket-toggle").text("Hide");
-                $("#basket-content").slideDown();
+                if (immediate)
+                    $("#basket-content").show();
+                else
+                    $("#basket-content").slideDown();
                 basket_scroll_arrows();
             }
 
@@ -580,8 +583,14 @@
                 e.preventDefault();
                 basket_open = !basket_open;
                 store_profile_setting('ui_basket_open', basket_open);
+                $.cookie('ui_basket_open', basket_open, {path: '/'});
                 if (basket_open) showBasket(); else hideBasket();
             });
+
+            {% if not user.is_authenticated %}
+            basket_open = $.cookie('ui_basket_open') == 'true'
+            if (basket_open) { showBasket(true); }
+            {% endif %}
 
             if (!basket_open) {
                 hideBasket(true);
