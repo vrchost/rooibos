@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from functools import wraps
 from django.contrib import messages
 from datetime import datetime
 from django import forms
@@ -15,7 +16,7 @@ from django.template import RequestContext
 from django.template.loader import render_to_string
 import json as simplejson
 from django.utils.encoding import smart_str
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, patch_cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
@@ -38,9 +39,10 @@ from .tasks import storage_match_up_media, analyze_media_task
 
 
 def add_content_length(func):
+    @wraps(func)
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
-        if type(response) == HttpResponse:
+        if type(response) == HttpResponse and hasattr(response, '_container'):
             if hasattr(response._container, 'size'):
                 response['Content-Length'] = response._container.size
             elif isinstance(response._container, file):
@@ -249,7 +251,6 @@ def media_delete(request, mediaid, medianame):
 
 
 @add_content_length
-@cache_control(private=True, max_age=3600)
 def record_thumbnail(request, id, name):
     force_reprocess = request.GET.get('reprocess') == 'true'
     filename = get_thumbnail_for_record(
@@ -266,14 +267,19 @@ def record_thumbnail(request, id, name):
             )
         )
         try:
-            return HttpResponse(
+            response = HttpResponse(
                 content=open(filename, 'rb').read(),
                 content_type='image/jpeg'
             )
+            patch_cache_control(response, private=True, max_age=3600)
+            return response
         except IOError:
             logging.error("IOError: %s" % filename)
-    return HttpResponseRedirect(
+
+    response = HttpResponseRedirect(
         reverse('static', args=('images/thumbnail_unavailable.png',)))
+    patch_cache_control(response, no_cache=True)
+    return response
 
 
 @json_view

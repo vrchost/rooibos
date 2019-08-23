@@ -320,7 +320,8 @@ def browse(request, manage=False):
     if manage and not request.user.is_authenticated():
         raise Http404()
 
-    if request.user.is_authenticated() and not request.GET.items():
+    if request.user.is_authenticated() and not request.GET.items() and \
+            not getattr(settings, 'FORGET_PRESENTATION_BROWSE_FILTER', False):
         # retrieve past settings
         qs = load_settings(
             request.user, filter='presentation_browse_querystring')
