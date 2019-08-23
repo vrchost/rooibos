@@ -1,4 +1,5 @@
 from __future__ import with_statement
+from functools import wraps
 from django.contrib import messages
 from datetime import datetime
 from django import forms
@@ -38,9 +39,10 @@ from .tasks import storage_match_up_media, analyze_media_task
 
 
 def add_content_length(func):
+    @wraps(func)
     def _add_header(request, *args, **kwargs):
         response = func(request, *args, **kwargs)
-        if type(response) == HttpResponse:
+        if type(response) == HttpResponse and hasattr(response, '_container'):
             if hasattr(response._container, 'size'):
                 response['Content-Length'] = response._container.size
             elif isinstance(response._container, file):
