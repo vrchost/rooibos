@@ -1,4 +1,5 @@
 from django.contrib.auth.models import Group, User
+from django.core.urlresolvers import reverse
 from django.contrib import auth
 from django.db.models import Q
 from django.conf import settings
@@ -94,11 +95,16 @@ def _record_as_json(record, owner=None, context=None,
                     pass
         return dc_mapping_cache.get(field.id)
 
+    # don't call record.get_thumbnail_url, since it returns CDN links,
+    # which the Desktop MediaViewer cannot handle
+    thumbnail_url = reverse(
+        'storage-thumbnail', kwargs={'id': record.id, 'name': record.name})
+
     return dict(
         id=record.id,
         name=record.name,
         title=record.title,
-        thumbnail=process_url(record.get_thumbnail_url()),
+        thumbnail=process_url(thumbnail_url),
         image=process_url(record.get_image_url()),
         metadata=[
             dict(
