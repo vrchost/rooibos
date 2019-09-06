@@ -77,7 +77,7 @@ def get_media_for_record(record, user=None, passwords={}):
 
 def get_image_for_record(
         record, user=None, width=100000, height=100000, passwords={},
-        crop_to_square=False, force_reprocess=False, no_spaces=False):
+        crop_to_square=False, force_reprocess=False, loris_name=False):
     media = get_media_for_record(record, user, passwords)
     q = Q(mimetype__startswith='image/')
     if settings.FFMPEG_EXECUTABLE:
@@ -186,20 +186,18 @@ def get_image_for_record(
 
     else:
         orig_path = m.get_absolute_file_path()
-        if no_spaces and ' ' in orig_path:
-            # need to produce a filename without spaces
-            name = '%s.jpg' % m.id
-            sp = m.storage.get_derivative_storage_path()
-            if sp:
-                path = os.path.join(sp, name)
-                if not os.path.exists(path) or os.path.getsize(path) == 0:
-                    shutil.copy(orig_path, path)
-                return path
-
-            else:
-                return None
-        else:
-            return orig_path
+        if loris_name:
+            # need to produce a filename without spaces and proper extension
+            if ' ' in orig_path or not orig_path.lower().endswith('.jpg'):
+                name = '%s.jpg' % m.id
+                sp = m.storage.get_derivative_storage_path()
+                if sp:
+                    path = os.path.join(sp, name)
+                    if not os.path.exists(path) or \
+                            os.path.getsize(path) != os.path.getsize(orig_path):
+                        shutil.copy(orig_path, path)
+                    return path
+        return orig_path
 
 
 def get_thumbnail_for_record(record, user=None, crop_to_square=False,
