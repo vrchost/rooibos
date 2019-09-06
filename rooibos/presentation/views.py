@@ -757,7 +757,7 @@ def manifest(request, id, name):
         '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
         '@type': 'sc:Manifest',
         '@id': get_id(
-            request, 'presentation', 'presentatation%d' % p.id, 'manifest'),
+            request, 'presentation', 'presentation%d' % p.id, 'manifest'),
         'label': p.title,
         'metadata': [],
         'description': p.description,
