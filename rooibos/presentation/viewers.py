@@ -21,7 +21,7 @@ from reportlab.platypus import flowables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import re
 import zipfile
 import os

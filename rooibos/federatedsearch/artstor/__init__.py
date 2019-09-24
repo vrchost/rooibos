@@ -6,7 +6,7 @@ from xml.parsers.expat import ExpatError
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from rooibos.federatedsearch import FederatedSearch
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import http.cookiejar
 import datetime
 import socket

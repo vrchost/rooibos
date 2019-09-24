@@ -108,7 +108,7 @@ document 5
 
 # TODO: unicode support is pretty sloppy. define it better.
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from http.client import HTTPConnection
 from urllib.parse import urlencode
 from urllib.parse import urlsplit
