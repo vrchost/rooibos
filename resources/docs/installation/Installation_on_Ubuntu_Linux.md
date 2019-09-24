@@ -9,14 +9,13 @@ Unless noted otherwise, all commands should be run as `root`.
 ### Packages
 ```
 apt-get update
-apt-get install python-pip libjpeg-dev libfreetype6-dev \
-    nginx mysql-server-5.5 libmysqlclient-dev python-dev \
+apt-get install libjpeg-dev libfreetype6-dev \
+    nginx mysql-server-5.5 libmysqlclient-dev python3-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     jetty8 rabbitmq-server supervisor
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
-pip install virtualenv
 ```
 ### Enable nginx
 ```
@@ -135,7 +134,7 @@ This way, updated packages can be installed by just replacing
 ```
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
-virtualenv venv
+python3 -m virtualenv -p python3 venv
 source venv/bin/activate
 pip install --allow-external --upgrade -r rooibos/requirements.txt
 ```

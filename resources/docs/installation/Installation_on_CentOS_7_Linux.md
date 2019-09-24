@@ -11,14 +11,12 @@ Unless noted otherwise, all commands should be run as `root`.
 yum update
 yum --enablerepo=extras install epel-release
 yum groupinstall 'Development Tools'
-yum install python-pip libjpeg-devel \
+yum install libjpeg-devel python3-devel \
     nginx mariadb-server mariadb-devel python-devel \
     memcached unixODBC-devel openldap-devel \
     rabbitmq-server supervisor \
     python-pillow-devel python-imaging \
     giflib-devel freetype-devel java-1.8.0-openjdk wget
-pip install --upgrade pip
-pip install virtualenv
 ```
 
 ### Enable services
@@ -139,7 +137,7 @@ mkdir scratch storage log rooibos/log static
 ```
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
-virtualenv venv
+python3 -m virtualenv -p python3 venv
 source venv/bin/activate
 pip install --upgrade -r rooibos/requirements.txt
 ```

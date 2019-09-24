@@ -17,7 +17,7 @@
 
 attrs >= 17.4.0
 b2sdk==0.1.6
-beautifulsoup
+beautifulsoup4
 boto
 Celery==4.2.1
 configobj >= 4.7.2,<=5.0.0
@@ -29,15 +29,15 @@ django-storages==1.6.6
 django-tagging
 django-contrib-comments==1.8.0
 Django==1.11.17
-django-celery-results
+django-celery-results==1.0.4
 flake8
 flake8-docstrings
 flake8-todo
-flickrapi==1.4.5
+flickrapi >= 2
 flup
 gunicorn
 ipaddr
-MySQL-Python
+pymysql
 pep8
 pep8-naming
 pika
