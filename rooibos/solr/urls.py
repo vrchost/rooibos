@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import search, search_facets, search_json, browse, overview, \
+from .views import search, search_facets, search_json, browse, overview, \
     fieldvalue_autocomplete, search_form, terms
 
 urlpatterns = [

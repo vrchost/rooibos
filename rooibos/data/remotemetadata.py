@@ -1,11 +1,11 @@
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import logging
 import shutil
 import os
 import string
 import random
 import gzip
-import StringIO
+import io
 from celery import chain
 from django.contrib.auth.models import User
 from rooibos.storage.tasks import storage_match_up_media
@@ -25,9 +25,9 @@ def check_remote_metadata():
             (source.id, source.url, source.last_modified)
         )
         try:
-            request = urllib2.Request(source.url)
+            request = urllib.request.Request(source.url)
             request.get_method = lambda : 'HEAD'
-            response = urllib2.urlopen(request)
+            response = urllib.request.urlopen(request)
         except Exception:
             logger.exception(
                 'Error while fetching HEAD for RemoteMetadata '
@@ -50,15 +50,15 @@ def check_remote_metadata():
 
 def fetch_url_to_file(url, path):
     try:
-        request = urllib2.Request(url)
-        response = urllib2.urlopen(request)
+        request = urllib.request.Request(url)
+        response = urllib.request.urlopen(request)
     except Exception:
         logger.exception(
             'Error while fetching URL "%s"' % url
         )
         return False
 
-    remote = StringIO.StringIO(response.read())
+    remote = io.StringIO(response.read())
     if url.endswith('.gz'):
         remote = gzip.GzipFile(fileobj=remote, mode='rb')
     with open(path, 'wb') as outfile:

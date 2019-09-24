@@ -35,7 +35,7 @@ class SpreadsheetImport(object):
         self.field_hash = None
         if mapping:
             self.mapping = dict((k, self._get_field(v))
-                                for k, v in mapping.iteritems())
+                                for k, v in mapping.items())
         else:
             self.mapping = dict()
         self.labels = labels or dict()
@@ -66,19 +66,19 @@ class SpreadsheetImport(object):
         if not value:
             return None
         try:
-            value = unicode(value, 'utf8')
+            value = str(value, 'utf8')
         except UnicodeDecodeError:
             self.decode_error = True
             value = ''
         if (self.separator and split):
-            return map(lambda s: s.strip(), value.split(self.separator))
+            return [s.strip() for s in value.split(self.separator)]
         else:
             return [value.strip()]
 
     def _split_values(self, row):
         return dict(
             (key, self._split_value(val, self.separate_fields.get(key)))
-            for key, val in row.iteritems()
+            for key, val in row.items()
             if key)
 
     def _get_reader(self):
@@ -121,11 +121,11 @@ class SpreadsheetImport(object):
             self.separate_fields = separate_fields
 
         rows = [self._split_values(row)
-                for i, row in zip(range(preview_rows), reader)]
+                for i, row in zip(list(range(preview_rows)), reader)]
         if not rows:
             return None
 
-        fields = filter(None, rows[0].keys())
+        fields = [_f for _f in list(rows[0].keys()) if _f]
         self.field_hash = hash('\t'.join(sorted(fields)))
         if not self.mapping:
             self.mapping = dict((field, self._guess_mapping(field))
@@ -139,7 +139,7 @@ class SpreadsheetImport(object):
     def get_identifier_field(self, mapping=None):
         if not mapping:
             mapping = self.mapping
-        for field, mapped in mapping.iteritems():
+        for field, mapped in mapping.items():
             if mapped and mapped.id in self._identifier_ids:
                 return field
         return None
@@ -175,7 +175,7 @@ class SpreadsheetImport(object):
             if not is_new:
                 record.fieldvalue_set.filter(~Q(field=system_field),
                                              owner=None).delete()
-            for field, values in row.iteritems():
+            for field, values in row.items():
                 target = self.mapping.get(field)
                 if target and values:
                     for order, value in enumerate(values):
@@ -261,7 +261,7 @@ class SpreadsheetImport(object):
                     func(ids)
 
         for skip in range(skip_rows):
-            reader.next()
+            next(reader)
 
         last_row = None
 
@@ -287,7 +287,7 @@ class SpreadsheetImport(object):
 
             if not current_id or (last_id == current_id):
                 # combine current and last rows
-                for key, values in row.iteritems():
+                for key, values in row.items():
                     v = last_row.get(key) or []
                     for value in (values or []):
                         if value not in v:
@@ -312,7 +312,7 @@ def create_import_job(mapping_file, data_file, collections):
     def get_field_id(field_name):
         f = fields.get(field_name)
         if not f:
-            print "WARNING: Field %s not found" % field_name
+            print("WARNING: Field %s not found" % field_name)
             return None
         return f.id
 
@@ -361,7 +361,7 @@ def create_import_job(mapping_file, data_file, collections):
         refinements=refinements,
     )
 
-    from tasks import csvimport
+    from .tasks import csvimport
     signature = csvimport.si(
         owner=User.objects.get(username='admin').id, **args)
     return signature

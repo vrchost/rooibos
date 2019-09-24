@@ -65,7 +65,7 @@ class Command(BaseCommand):
         if len(admins) == 1:
             return admins[0]
         else:
-            print >>sys.stderr, "No administrative user account found"
+            print("No administrative user account found", file=sys.stderr)
             sys.exit(1)
 
     def get_filename(self, presentation):
@@ -93,22 +93,21 @@ class Command(BaseCommand):
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)
-            print >>sys.stderr, \
-                "Exporting presentations modified since %s" % since
+            print("Exporting presentations modified since %s" % since, file=sys.stderr)
             presentations = presentations.filter(modified__gte=since)
         if options.get('min_id'):
             presentations = presentations.filter(id__gte=options['min_id'])
         if options.get('max_id'):
             presentations = presentations.filter(id__lte=options['max_id'])
 
-        print >>sys.stderr, "Exporting %d presentations using template %s" % (
+        print("Exporting %d presentations using template %s" % (
             presentations.count(),
             template,
-        )
+        ), file=sys.stderr)
 
         for presentation in presentations:
             filename = self.get_filename(presentation)
-            print filename
+            print(filename)
             if not options.get('list'):
                 g = PowerPointGenerator(presentation, admin)
                 if options.get('output_dir'):

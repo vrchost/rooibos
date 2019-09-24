@@ -135,13 +135,13 @@ def modify_permissions(request, app_label, model, id, name):
         )
 
         def clean_restrictions(self):
-            r = unicode(self.cleaned_data['restrictions'])
+            r = str(self.cleaned_data['restrictions'])
             if not r:
                 return None
             try:
                 return dict(
-                    map(unicode.strip, kv.split('=', 1))
-                    for kv in filter(None, map(unicode.strip, r.splitlines()))
+                    list(map(str.strip, kv.split('=', 1)))
+                    for kv in [_f for _f in map(str.strip, r.splitlines()) if _f]
                 )
             except Exception:
                 raise forms.ValidationError(
@@ -167,7 +167,8 @@ def modify_permissions(request, app_label, model, id, name):
                     ac.restrictions = ac_form.cleaned_data['restrictions']
                     ac.save()
 
-                map(set_ac, acobjects)
+                for acobject in acobjects:
+                    set_ac(acobject)
 
                 username = request.POST.get('adduser')
                 if username:

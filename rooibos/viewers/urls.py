@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import viewer_shell, viewer_script, legacy_embedded_video
+from .views import viewer_shell, viewer_script, legacy_embedded_video
 
 urlpatterns = [
     url(

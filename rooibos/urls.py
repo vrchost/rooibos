@@ -14,7 +14,7 @@ from rooibos.version import VERSION
 
 admin.autodiscover()
 
-apps = filter(lambda a: a.startswith('apps.'), settings.INSTALLED_APPS)
+apps = [a for a in settings.INSTALLED_APPS if a.startswith('apps.')]
 apps_showcases = list(s[5:].replace('.', '-') + '-showcase.html' for s in apps)
 
 # Cache static files

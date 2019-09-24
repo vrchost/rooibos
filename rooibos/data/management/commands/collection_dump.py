@@ -27,7 +27,7 @@ class Command(BaseCommand):
         prefix = kwargs.get('prefix')
 
         if not coll:
-            print "--collection is a required parameter"
+            print("--collection is a required parameter")
             return
 
         if coll.isdigit():
@@ -41,4 +41,4 @@ class Command(BaseCommand):
         else:
             admin = None
 
-        print collection_dump(admin, collection.id, prefix=prefix)
+        print(collection_dump(admin, collection.id, prefix=prefix))

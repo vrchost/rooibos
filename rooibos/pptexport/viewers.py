@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from django import forms
 from django.template.loader import render_to_string
 from rooibos.viewers import register_viewer, Viewer

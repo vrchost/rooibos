@@ -36,19 +36,19 @@ class Command(BaseCommand):
         elif prefix:
             self.replace(prefix, replace, simulate)
         else:
-            print "Error: must specify --list " \
-                  "or both --prefix and --replace-with"
+            print("Error: must specify --list " \
+                  "or both --prefix and --replace-with")
 
     def list(self, prefix):
         for storage in Storage.objects.filter(
                 system='local', base__startswith=prefix or ''):
-            print "%s: %s" % (storage.name, storage.base)
+            print("%s: %s" % (storage.name, storage.base))
 
     def replace(self, prefix, replace, simulate):
         for storage in Storage.objects.filter(
                 system='local', base__startswith=prefix or ''):
             new_base = replace + storage.base[len(prefix):]
-            print "%s: %s -> %s" % (storage.name, storage.base, new_base)
+            print("%s: %s -> %s" % (storage.name, storage.base, new_base))
             if not simulate:
                 storage.base = new_base
                 storage.save()

@@ -19,7 +19,7 @@ def format_worker_result(result):
         if 'exc_message' in data and 'exc_type' in data:
             return SafeString(
                 '<strong>%(exc_type)s:</strong> %(exc_message)s' % data)
-        for key, value in data.iteritems():
+        for key, value in data.items():
             if key == 'attachment':
                 key = '<strong>Download</strong>'
                 name = os.path.split(value)[1]
@@ -45,6 +45,6 @@ def format_worker_args(result):
     lines = [repr(arg) for arg in data['args']] + [
         '<strong class="job-arg">%s:</strong> '
         '<span class="job-arg-value">%s</span>' % (key, value)
-        for key, value in data['kwargs'].iteritems()
+        for key, value in data['kwargs'].items()
     ]
     return SafeString('<br />'.join(lines))

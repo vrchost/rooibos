@@ -74,7 +74,7 @@ def register_viewer(name, cls):
 
 def get_viewers_for_object(obj, request):
     viewers = (viewer(obj, request)
-               for viewer in get_registered_viewers().values())
+               for viewer in list(get_registered_viewers().values()))
     return (viewer for viewer in viewers if viewer)
 
 

@@ -424,6 +424,7 @@ def _get_log_handler(log_dir=None):
 
 
 handler = _get_log_handler()
+first_handler = list(handler.keys())[0]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -440,20 +441,20 @@ LOGGING = {
     'handlers': handler,
     'loggers': {
         'rooibos': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'DEBUG',
             'propagate': False,
         },
         'pika': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'WARNING',
         },
         'django': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'WARNING',
         },
         '': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'DEBUG',
         },
     },

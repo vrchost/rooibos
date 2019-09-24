@@ -25,8 +25,8 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view
 from rooibos.storage.functions import get_media_for_record
-from models import Presentation, PresentationItem
-from functions import duplicate_presentation
+from .models import Presentation, PresentationItem
+from .functions import duplicate_presentation
 import base64
 import os
 
@@ -320,7 +320,7 @@ def browse(request, manage=False):
     if manage and not request.user.is_authenticated():
         raise Http404()
 
-    if request.user.is_authenticated() and not request.GET.items() and \
+    if request.user.is_authenticated() and not list(request.GET.items()) and \
             not getattr(settings, 'FORGET_PRESENTATION_BROWSE_FILTER', False):
         # retrieve past settings
         qs = load_settings(
@@ -344,7 +344,7 @@ def browse(request, manage=False):
             )
 
     presenter = request.GET.get('presenter')
-    tags = filter(None, request.GET.getlist('t'))
+    tags = [_f for _f in request.GET.getlist('t') if _f]
     sortby = request.GET.get('sortby')
     if sortby not in ('title', 'created', 'modified'):
         sortby = 'title'
@@ -422,14 +422,14 @@ def browse(request, manage=False):
             request.POST.get('hide') or request.POST.get('unhide')
         ) and request.user.has_perm('presentation.publish_presentations'):
             hide = request.POST.get('hide') or False
-            ids = map(int, request.POST.getlist('h'))
+            ids = list(map(int, request.POST.getlist('h')))
             for presentation in Presentation.objects.filter(
                     owner=request.user, id__in=ids):
                 presentation.hidden = hide
                 presentation.save()
 
         if manage and request.POST.get('delete'):
-            ids = map(int, request.POST.getlist('h'))
+            ids = list(map(int, request.POST.getlist('h')))
             Presentation.objects.filter(
                 owner=request.user, id__in=ids).delete()
 
@@ -439,13 +439,11 @@ def browse(request, manage=False):
             del get['page']
 
         if request.POST.get('update_tags'):
-            ids = map(int, request.POST.getlist('h'))
+            ids = list(map(int, request.POST.getlist('h')))
             update_actionbar_tags(request, *presentations.filter(id__in=ids))
 
         # check for clicks on "add selected items" buttons
-        for button in filter(
-                lambda k: k.startswith('add-selected-items-'),
-                request.POST.keys()):
+        for button in [k for k in list(request.POST.keys()) if k.startswith('add-selected-items-')]:
             id = int(button[len('add-selected-items-'):])
             presentation = get_object_or_404(
                 filter_by_access(

@@ -28,7 +28,7 @@ class Command(BaseCommand):
         try:
             content_type_obj = ContentType.objects.get(model=content_type)
         except ContentType.DoesNotExist:
-            print "Cannot find given content type '%s'" % content_type
+            print("Cannot find given content type '%s'" % content_type)
             sys.exit(1)
 
         rows = AccumulatedActivity.objects.filter(
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
         count = rows.count()
 
-        print >> sys.stderr, "Exporting %d rows" % count
+        print("Exporting %d rows" % count, file=sys.stderr)
 
         fields = [
             'type',

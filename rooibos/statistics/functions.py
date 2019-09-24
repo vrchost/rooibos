@@ -1,7 +1,7 @@
 from django.db.models import Count
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from models import AccumulatedActivity, Activity
+from .models import AccumulatedActivity, Activity
 from datetime import datetime, date, timedelta
 
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Presentation, PresentationItem
+from .models import Presentation, PresentationItem
 
 
 class PresentationItemInline(admin.StackedInline):

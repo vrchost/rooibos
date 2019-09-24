@@ -16,7 +16,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **kwargs):
-        collections = map(int, kwargs.get('collections') or list())
+        collections = list(map(int, kwargs.get('collections') or list()))
 
         s = SolrIndex()
         for command in kwargs['command']:
@@ -35,4 +35,4 @@ class Command(BaseCommand):
             elif command == 'clear':
                 s.clear()
             else:
-                print "Invalid command %s" % command
+                print("Invalid command %s" % command)

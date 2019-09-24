@@ -41,7 +41,7 @@ class Service(win32serviceutil.ServiceFramework):
 
             win32event.WaitForSingleObject(
                 self.stop_event, win32event.INFINITE)
-        except Exception, ex:
+        except Exception as ex:
             self.log('Exception: %s' % ex)
             self.SvcStop()
 

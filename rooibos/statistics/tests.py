@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, AnonymousUser
-from models import Activity
+from .models import Activity
 from datetime import date, time
 from .functions import accumulate, get_history
 

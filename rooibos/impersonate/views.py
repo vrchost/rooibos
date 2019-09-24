@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.cache import cache_control
 from django.db.models import Q

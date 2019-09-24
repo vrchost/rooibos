@@ -17,13 +17,13 @@ class Command(BaseCommand):
         username = kwargs.get('user')
 
         if not username:
-            print >> sys.stderr, "--user is a required parameter"
+            print("--user is a required parameter", file=sys.stderr)
             return
 
         user = User.objects.get(username=username)
 
         s = json.loads(' '.join(sys.stdin.readlines()))
 
-        for k, v in s.iteritems():
-            print "Importing %s" % k
+        for k, v in s.items():
+            print("Importing %s" % k)
             store_settings(user, k, v[0])

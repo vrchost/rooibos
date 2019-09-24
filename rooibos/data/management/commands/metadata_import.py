@@ -29,10 +29,10 @@ class Command(BaseCommand):
 
         mapping_file = kwargs.get('mapping_file')
         data_file = kwargs.get('data_file')
-        collections = map(int, kwargs.get('collections') or list())
+        collections = list(map(int, kwargs.get('collections') or list()))
 
         if not mapping_file or not data_file or not collections:
-            print "--collection, --mapping and --data are required parameters"
+            print("--collection, --mapping and --data are required parameters")
             return
 
         filename = "".join(random.sample(string.letters + string.digits, 32))
@@ -43,4 +43,4 @@ class Command(BaseCommand):
 
         task = submit_import_job(mapping_file, filename, collections)
 
-        print "Job submitted: %s" % task.id
+        print("Job submitted: %s" % task.id)

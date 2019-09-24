@@ -10,7 +10,7 @@ from rooibos.viewers import register_viewer, Viewer
 from rooibos.storage.functions import get_image_for_record
 from rooibos.data.models import Record
 from rooibos.api.views import presentation_detail
-from models import Presentation
+from .models import Presentation
 from .views import get_metadata
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes
@@ -60,7 +60,7 @@ def _clean_for_render(text):
         for attribute in e.attrs:
             if attribute[0] not in whitelist:
                 del e[attribute[0]]
-    return unicode(html)
+    return str(html)
 
 
 class PresentationViewer(Viewer):
@@ -234,7 +234,7 @@ class FlashCardViewer(Viewer):
                         '<b>%s:</b> %s' % ('Annotation', annotation),
                         styles['Data'])
                     )
-                data = filter(None, data)
+                data = [_f for _f in data if _f]
                 incomplete = False
                 while data:
                     f.addFromList(data, p)

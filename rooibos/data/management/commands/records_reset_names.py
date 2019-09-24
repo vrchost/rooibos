@@ -28,4 +28,4 @@ class Command(BaseCommand):
 
         pb.done()
 
-        print "Updated %d record objects" % updated
+        print("Updated %d record objects" % updated)

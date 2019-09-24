@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from zipfile import ZipFile, ZIP_DEFLATED
 import os
 import xml.dom.minidom
@@ -45,12 +45,9 @@ class PowerPointGenerator:
 
     @staticmethod
     def get_templates():
-        return filter(
-            lambda f: f.endswith('.pptx'),
-            os.listdir(
+        return [f for f in os.listdir(
                 os.path.join(os.path.dirname(__file__), 'pptx_templates')
-            )
-        )
+            ) if f.endswith('.pptx')]
 
     def generate(self, template, outfile):
         if len(self.items) == 0:
@@ -134,10 +131,7 @@ class PowerPointGenerator:
                 append_text('Annotation: %s' % annotation)
 
             # update the slide number in notes
-            e = filter(
-                lambda e: e.getAttribute('type') == 'slidenum',
-                xn.getElementsByTagName('a:fld')
-            )[0]
+            e = [e for e in xn.getElementsByTagName('a:fld') if e.getAttribute('type') == 'slidenum'][0]
             e.getElementsByTagName('a:t').item(0).firstChild.nodeValue = n
 
             # insert title
@@ -166,10 +160,7 @@ class PowerPointGenerator:
                 outfile.writestr('ppt/media/' + name, content)
 
                 # find image placeholder
-                e = filter(
-                    lambda e: e.getAttribute('descr') == 'image',
-                    x.getElementsByTagName('p:cNvPr')
-                )[0]
+                e = [e for e in x.getElementsByTagName('p:cNvPr') if e.getAttribute('descr') == 'image'][0]
                 e = e.parentNode.parentNode
                 embed_id = e.getElementsByTagName(
                     'a:blip')[0].getAttribute('r:embed')
@@ -206,31 +197,22 @@ class PowerPointGenerator:
                     extent.setAttribute('cy', str(new_h))
 
                     # add image to slide relation
-                    rel = filter(
-                        lambda e: e.getAttribute('Id') == embed_id,
-                        xr.getElementsByTagName('Relationship')
-                    )[0]
+                    rel = [e for e in xr.getElementsByTagName('Relationship') if e.getAttribute('Id') == embed_id][0]
                     self.placeholder_image = 'ppt' + rel.getAttribute(
                         'Target')[2:]
                     rel.setAttribute('Target', '../media/' + name)
 
                     # add notes to slide relation
-                    rel2 = filter(
-                        lambda e: e.getAttribute('Type') ==
+                    rel2 = [e for e in xr.getElementsByTagName('Relationship') if e.getAttribute('Type') ==
                         "http://schemas.openxmlformats.org/officeDocument/"
-                        "2006/relationships/notesSlide",
-                        xr.getElementsByTagName('Relationship')
-                    )[0]
+                        "2006/relationships/notesSlide"][0]
                     rel2.setAttribute(
                         'Target', '../notesSlides/notesSlide%s.xml' % n)
 
                     # add slide to notes relation
-                    rel3 = filter(
-                        lambda e: e.getAttribute('Type') ==
+                    rel3 = [e for e in xnr.getElementsByTagName('Relationship') if e.getAttribute('Type') ==
                         "http://schemas.openxmlformats.org/officeDocument/"
-                        "2006/relationships/slide",
-                        xnr.getElementsByTagName('Relationship')
-                    )[0]
+                        "2006/relationships/slide"][0]
                     rel3.setAttribute('Target', '../slides/slide%s.xml' % n)
             else:
                 self.remove_placeholder_image = False
@@ -319,10 +301,7 @@ class PowerPointGenerator:
     def _presentation(self, name, content, outfile):
         x = xml.dom.minidom.parseString(content)
         p = x.getElementsByTagName('p:sldIdLst')[0]
-        maxid = max(map(
-            lambda e: int(e.getAttribute('id')),
-            p.getElementsByTagName('p:sldId')
-        ))
+        maxid = max([int(e.getAttribute('id')) for e in p.getElementsByTagName('p:sldId')])
         for n in range(3, len(self.items) + 2):
             e = x.createElement('p:sldId')
             e.setAttribute('id', str(maxid + n))

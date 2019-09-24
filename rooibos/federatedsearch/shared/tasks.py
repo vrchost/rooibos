@@ -4,7 +4,7 @@ from rooibos.data.models import Record
 from rooibos.storage.models import Media
 from .views import SharedSearch
 from rooibos.util import guess_extension
-from StringIO import StringIO
+from io import StringIO
 import requests
 
 

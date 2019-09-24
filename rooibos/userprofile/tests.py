@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from models import UserProfile
-from views import store_settings, load_settings
+from .models import UserProfile
+from .views import store_settings, load_settings
 
 
 class UserProfileTest(TestCase):

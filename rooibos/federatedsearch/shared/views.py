@@ -3,11 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlencode
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-import urllib2
-from urlparse import urlparse
+import urllib.request, urllib.error, urllib.parse
+from urllib.parse import urlparse
 import math
-import urllib
-import cookielib
+import urllib.request, urllib.parse, urllib.error
+import http.cookiejar
 import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
@@ -16,7 +16,7 @@ from django.core.urlresolvers import reverse
 from django import forms
 from rooibos.federatedsearch import FederatedSearch
 from rooibos.access.functions import filter_by_access, sync_access
-from models import SharedCollection
+from .models import SharedCollection
 import datetime
 import socket
 import json
@@ -24,24 +24,24 @@ import logging
 import os
 
 
-class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+class SmartRedirectHandler(urllib.request.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, headers):
-        result = urllib2.HTTPRedirectHandler.http_error_301(
+        result = urllib.request.HTTPRedirectHandler.http_error_301(
             self, req, fp, code, msg, headers)
         result.status = code
         return result
 
     def http_error_302(self, req, fp, code, msg, headers):
-        result = urllib2.HTTPRedirectHandler.http_error_302(
+        result = urllib.request.HTTPRedirectHandler.http_error_302(
             self, req, fp, code, msg, headers)
         result.status = code
         return result
 
 
 def _fetch_url(url, username, password, timeout=10):
-    opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(
-        cookielib.CookieJar()), SmartRedirectHandler())
-    request = urllib2.Request(url)
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(
+        http.cookiejar.CookieJar()), SmartRedirectHandler())
+    request = urllib.request.Request(url)
 
     if username and password:
         import base64
@@ -73,7 +73,7 @@ class SharedSearch(FederatedSearch):
     def _load(self, keyword, page=1, pagesize=30):
         url = "%s?%s" % (
             self.shared.url,
-            urllib.urlencode([
+            urllib.parse.urlencode([
                 ('kw', keyword), ('page', page), ('ps', pagesize)
             ])
         )
@@ -131,14 +131,14 @@ class SharedSearch(FederatedSearch):
                     reverse('shared-proxy-image',
                             kwargs={'id': self.shared.id,
                                     'name': self.shared.name}),
-                    urllib.urlencode([('url', record['thumbnail'])])
+                    urllib.parse.urlencode([('url', record['thumbnail'])])
                 )
             if 'image' in record and '://' not in record['image']:
                 record['image'] = '%s?%s' % (
                     reverse('shared-proxy-image',
                             kwargs={'id': self.shared.id,
                                     'name': self.shared.name}),
-                    urllib.urlencode([('url', record['image'])])
+                    urllib.parse.urlencode([('url', record['image'])])
                 )
 
         cached.results = simplejson.dumps(data, separators=(',', ':'))
@@ -242,7 +242,7 @@ def search(request, id, name):
     try:
         results = shared.search(query, page, pagesize) if query else None
         failure = False
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         results = None
         failure = True
 

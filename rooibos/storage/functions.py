@@ -1,6 +1,6 @@
-from __future__ import with_statement
+
 from pyPdf.pdf import PdfFileReader
-from StringIO import StringIO
+from io import StringIO
 from PIL import Image
 import logging
 import mimetypes
@@ -168,7 +168,8 @@ def get_image_for_record(
 
     if not media:
         return None
-    map(lambda m: m.identify(lazy=True), media)
+    for m in media:
+        m.identify(lazy=True)
     media = sorted(media, _imgsizecmp, reverse=True)
     # find matching media
     last = None
@@ -216,7 +217,7 @@ def get_image_for_record(
             ImageFile.MAXBLOCK = 16 * 1024 * 1024
             # Import here to avoid circular reference
             # TODO: need to move all these functions out of __init__.py
-            from multimedia import get_image, overlay_image_with_mimetype_icon
+            from .multimedia import get_image, overlay_image_with_mimetype_icon
             try:
                 file = get_image(master)
                 image = Image.open(file)
@@ -236,7 +237,7 @@ def get_image_for_record(
                     image = image.convert("RGB")
                 image.save(output, 'JPEG', quality=85, optimize=True)
                 return output.getvalue(), image.size
-            except Exception, e:
+            except Exception as e:
                 logging.exception(
                     'Image derivative failed for media %d (%s)' %
                     (master.id, e)
@@ -344,7 +345,7 @@ def analyze_media(storage, allow_multiple_use=False,
         # have a matching media record
         files = storage.get_files()
         # convert to dict for faster lookup
-        extra = dict(zip(files, [None] * len(files)))
+        extra = dict(list(zip(files, [None] * len(files))))
         # Find broken media, i.e. media that does not have a related file
         # on the file system
         for media in Media.objects.filter(storage=storage):
@@ -362,5 +363,5 @@ def analyze_media(storage, allow_multiple_use=False,
             for url in used:
                 if url in extra:
                     del extra[url]
-        extra = extra.keys()
+        extra = list(extra.keys())
     return broken, extra

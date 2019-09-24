@@ -53,4 +53,4 @@ class Command(BaseCommand):
             mapping_url=kwargs['mapping_url'],
         )
 
-        print 'Created %r' % metadata
+        print('Created %r' % metadata)

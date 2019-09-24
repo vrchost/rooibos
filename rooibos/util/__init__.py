@@ -38,7 +38,7 @@ def json_view(func):
         except KeyboardInterrupt:
             # Allow keyboard interrupts through for debugging.
             raise
-        except Exception, e:
+        except Exception as e:
             # Mail the admins with the error
             exc_info = sys.exc_info()
             subject = 'JSON view error: %s' % request.path
@@ -107,15 +107,14 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name',
                 slug_literal
             )
         slug = slug[:max_length]
-        slug_check = slug[:min(len(slug), max_length - len(str(sys.maxint)))]
+        slug_check = slug[:min(len(slug), max_length - len(str(sys.maxsize)))]
 
         query = item_model.objects.complex_filter(
             {'%s__startswith' % slug_field: slug_check})
 
         # check to see if slug needs to be unique together
         # with another field only
-        unique_together = filter(
-            lambda f: slug_field in f, item_model._meta.unique_together)
+        unique_together = [f for f in item_model._meta.unique_together if slug_field in f]
         # only handle simple case of one unique_together with
         # one additional field
         if len(unique_together) == 1 and len(unique_together[0]) == 2:
@@ -162,7 +161,7 @@ def xfilter(func, iterator):
     """Iterative version of builtin 'filter'."""
     iterator = iter(iterator)
     while 1:
-        next = iterator.next()
+        next = next(iterator)
         if func(next):
             yield next
 

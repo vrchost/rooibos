@@ -7,7 +7,7 @@ import re
 import logging
 import json as simplejson
 import zipfile
-from StringIO import StringIO
+from io import StringIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field
 from PIL import Image
@@ -43,7 +43,7 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         result = StringIO(file.read())
         file.close()
         return result, output, errors
-    except Exception, ex:
+    except Exception as ex:
         logging.error("%s: %s" % (cmd, ex))
         return None, None, None
     finally:
@@ -110,7 +110,7 @@ def identify(file):
         logging.debug('Identified %s: %dx%d %d' % (
             file, width or 0, height or 0, bitrate or 0))
         return width, height, bitrate
-    except Exception, e:
+    except Exception as e:
         logging.debug('Error identifying %s: %s' % (file, e))
         return None, None, None
 
@@ -145,8 +145,8 @@ def render_audio_waveform(audiofile, basecolor, background, left, top,
         lows.append(min(frames[f:t]))
         highs.append(max(frames[f:t]))
     low, high = abs(min(lows)), abs(max(highs))
-    lows = map(lambda v: v * height / low, lows)
-    highs = map(lambda v: v * height / high, highs)
+    lows = [v * height / low for v in lows]
+    highs = [v * height / high for v in highs]
     for x in range(width):
         high = middle - highs[x]
         low = middle - lows[x]

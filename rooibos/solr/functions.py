@@ -8,11 +8,12 @@ from rooibos.data.models import Record, Collection, Field, FieldValue, \
     CollectionItem, standardfield, get_system_field
 from rooibos.storage.models import Media
 from rooibos.util.models import OwnedWrapper
-from pysolr import Solr
+from .pysolr import Solr
 from rooibos.util.progressbar import ProgressBar
 from rooibos.access.models import AccessControl
 import logging
 import sys
+from functools import reduce
 
 
 logger = logging.getLogger(__name__)
@@ -124,7 +125,7 @@ class SolrIndex():
             presentations = r.get('presentations')
             if record and presentations:
                 record.solr_presentation_ids = presentations
-        return (result.hits, filter(None, map(lambda i: records.get(i), ids)),
+        return (result.hits, [_f for _f in [records.get(i) for i in ids] if _f],
                 result.facets)
 
     def terms(self):
@@ -133,7 +134,7 @@ class SolrIndex():
             fields=['text'], mincount=2, minlength=4).get('text', {})
 
     def clear(self):
-        from models import SolrIndexUpdates
+        from .models import SolrIndexUpdates
         SolrIndexUpdates.objects.filter(delete=True).delete()
         conn = Solr(settings.SOLR_URL)
         conn.delete(q='*:*')
@@ -143,7 +144,7 @@ class SolrIndex():
         conn.optimize()
 
     def index(self, verbose=False, all=False, collections=None):
-        from models import SolrIndexUpdates
+        from .models import SolrIndexUpdates
         self._build_group_tree()
         core_fields = dict(
             (f, f.get_equivalent_fields())
@@ -198,7 +199,7 @@ class SolrIndex():
                 __import__(module)
                 mod = sys.modules[module]
                 return getattr(mod, function)
-            except Exception, ex:
+            except Exception as ex:
                 logging.debug(
                     "Could not import custom Solr record indexer %s: %s",
                     method, ex)
@@ -316,7 +317,7 @@ class SolrIndex():
         to_delete = []
         pb = None
         if verbose:
-            print "Checking for indexed records no longer in database"
+            print("Checking for indexed records no longer in database")
         while True:
             if verbose and pb:
                 pb.update(start)
@@ -337,7 +338,7 @@ class SolrIndex():
             pb.done()
         pb = None
         if verbose and to_delete:
-            print "Removing unneeded records from index"
+            print("Removing unneeded records from index")
             pb = ProgressBar(len(to_delete))
         while to_delete:
             if verbose and pb:
@@ -349,7 +350,7 @@ class SolrIndex():
 
     @staticmethod
     def mark_for_update(record_id, delete=False):
-        from models import mark_for_update
+        from .models import mark_for_update
         mark_for_update(record_id, delete)
 
     def _preload_related(self, model, record_ids, filter=Q(), fields=None):
@@ -425,12 +426,12 @@ class SolrIndex():
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media,
                         image_to_works, work_to_images,
                         implicit_primary_work_records):
-        required_fields = dict((f.full_name, f) for f in core_fields.keys())
+        required_fields = dict((f.full_name, f) for f in list(core_fields.keys()))
         doc = {'id': str(record.id)}
         for v in fieldvalues:
             clean_value = self._clean_string(v.value)
             # Store Dublin Core or equivalent field for use with facets
-            for cf, cfe in core_fields.iteritems():
+            for cf, cfe in core_fields.items():
                 name = cf.name if cf.standard.prefix == 'dc' else cf.full_name
                 if v.field == cf or v.field in cfe:
                     doc.setdefault(name + '_t', []).append(clean_value)
@@ -459,7 +460,7 @@ class SolrIndex():
                         doc[v.field.name + '_sort'] = clean_value
             # For exact retrieval through browsing
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
-        for _, f in required_fields.items():
+        for _, f in list(required_fields.items()):
             doc[f.name + '_t'] = SOLR_EMPTY_FIELD_VALUE
         all_parents = [g.collection_id for g in groups]
         parents = [g.collection_id for g in groups if not g.hidden]

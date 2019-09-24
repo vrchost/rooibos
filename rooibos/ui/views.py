@@ -56,7 +56,7 @@ def main(request):
         pagesize=8,
         produce_facets=False)
 
-    order = range(1, len(records or []))
+    order = list(range(1, len(records or [])))
     random.shuffle(order)
 
     request.session.set_test_cookie()
@@ -97,7 +97,7 @@ def add_tags(request, type, id):
     if '"' in tags:
         new_tags = parse_tag_input(tags)
     else:
-        new_tags = filter(None, map(lambda s: s.strip(), tags.split(',')))
+        new_tags = [_f for _f in [s.strip() for s in tags.split(',')] if _f]
     ownedwrapper = OwnedWrapper.objects.get_for_object(
         user=request.user, type=type, object_id=id)
     for tag in new_tags:
@@ -113,11 +113,8 @@ def remove_tag(request, type, id):
             user=request.user, type=type, object_id=id)
         Tag.objects.update_tags(
             ownedwrapper, ' '.join(
-                map(
-                    lambda s: '"%s"' % s,
-                    Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
-                    .values_list('name')
-                )
+                ['"%s"' % s for s in Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
+                    .values_list('name')]
             )
         )
         if request.is_ajax():
@@ -201,7 +198,7 @@ def options(request):
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)
         if ui_form.is_valid():
-            for key in option_defaults.keys():
+            for key in list(option_defaults.keys()):
                 store_settings(
                     request.user,
                     'options_%s' % key,
@@ -222,7 +219,7 @@ def options(request):
             (key[8:], val[0])
             for (key, val) in load_settings(
                 request.user, filter='options_'
-            ).iteritems()
+            ).items()
         ))
         initial['alternate_password'] = '[unchanged]'
         ui_form = UserInterfaceForm(initial)

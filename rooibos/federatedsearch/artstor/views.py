@@ -2,7 +2,7 @@ from . import ArtstorSearch
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils.http import urlencode
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import math
 
 
@@ -22,7 +22,7 @@ def search(request):
     try:
         results = a.search(query, page, pagesize) if query else None
         failure = False
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         results = None
         failure = True
 

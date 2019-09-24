@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import joblist, download_attachment
+from .views import joblist, download_attachment
 
 urlpatterns = [
     url(r'^jobs/$', joblist, name='workers-jobs'),

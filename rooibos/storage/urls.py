@@ -1,6 +1,6 @@
 from django.conf.urls import url
-from pseudostreaming import retrieve_pseudostream
-from views import retrieve, retrieve_image, media_upload, media_delete, \
+from .pseudostreaming import retrieve_pseudostream
+from .views import retrieve, retrieve_image, media_upload, media_delete, \
     record_thumbnail, create_proxy_url_view, call_proxy_url, manage_storages, \
     import_files, manage_storage, match_up_files, analyze, \
     find_records_without_media, retrieve_iiif_image

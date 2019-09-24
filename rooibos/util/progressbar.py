@@ -72,7 +72,7 @@ class ProgressBar:
 
     def done(self):
         self.update(self.total, force=True)
-        print
+        print()
 
 
 if __name__ == "__main__":

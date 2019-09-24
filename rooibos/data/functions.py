@@ -1,6 +1,6 @@
 from rooibos.access.functions import filter_by_access
 from rooibos.userprofile.views import load_settings, store_settings
-from models import Collection, Field, MetadataStandard, FieldValue, Record, \
+from .models import Collection, Field, MetadataStandard, FieldValue, Record, \
     CollectionItem
 from django.core import serializers
 from django.core.serializers.json import Serializer as JsonSerializer
@@ -19,7 +19,7 @@ def get_collection_visibility_preferences(user):
     )
     try:
         mode, ids = setting[0].split(':')
-        ids = map(int, ids.split(',')) if ids else []
+        ids = list(map(int, ids.split(','))) if ids else []
     except ValueError:
         mode = 'show'
         ids = []

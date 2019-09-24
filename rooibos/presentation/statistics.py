@@ -1,5 +1,5 @@
 from rooibos.statistics.functions import register_statistics
-from models import Presentation
+from .models import Presentation
 
 
 @register_statistics

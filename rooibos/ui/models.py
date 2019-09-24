@@ -5,13 +5,13 @@ from django.contrib.auth import models as auth_app
 
 
 def create_site_flatpage_fixtures(*args, **kwargs):
-    print "Creating sites fixtures"
+    print("Creating sites fixtures")
     sites_app.Site.objects.get_or_create(
         domain='localhost',
         name='localhost',
     )
 
-    print "Creating flatpages fixtures"
+    print("Creating flatpages fixtures")
     p, created = flatpages_app.FlatPage.objects.get_or_create(
         url='/about/',
         defaults=dict(
@@ -27,7 +27,7 @@ def create_site_flatpage_fixtures(*args, **kwargs):
 
 
 def create_user_fixtures(*args, **kwargs):
-    print "Creating auth fixtures"
+    print("Creating auth fixtures")
     auth_app.User.objects.get_or_create(
         username='admin',
         defaults=dict(

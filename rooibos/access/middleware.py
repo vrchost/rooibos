@@ -1,5 +1,5 @@
 from django.core.exceptions import MiddlewareNotUsed
-from models import ExtendedGroup, IP_BASED_GROUP
+from .models import ExtendedGroup, IP_BASED_GROUP
 import logging
 
 

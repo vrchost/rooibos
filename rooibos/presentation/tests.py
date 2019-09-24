@@ -1,16 +1,16 @@
-from __future__ import with_statement
+
 import unittest
 import tempfile
 import os.path
 from PIL import Image
 import shutil
-from StringIO import StringIO
+from io import StringIO
 from django.contrib.auth.models import Permission
 from rooibos.data.models import Collection, CollectionItem, Record
 from rooibos.storage.models import Media, Storage
 from rooibos.access.models import AccessControl, User, Group
 from rooibos.presentation.models import Presentation, PresentationItem
-from viewers import PackageFilesViewer
+from .viewers import PackageFilesViewer
 from zipfile import ZipFile
 
 

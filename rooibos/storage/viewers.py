@@ -5,7 +5,7 @@ from rooibos.access.functions import \
     get_effective_permissions_and_restrictions, filter_by_access
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.data.models import Record, FieldValue
-from models import Storage
+from .models import Storage
 import re
 
 

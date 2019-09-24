@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, Record
 import unicodecsv as csv
@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         data_file = kwargs.get('data_file')
-        collections = map(int, kwargs.get('collections') or list())
+        collections = list(map(int, kwargs.get('collections') or list()))
         separator = kwargs.get('separator')
 
         fields = list(

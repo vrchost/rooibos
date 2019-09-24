@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 import unittest
 from django.contrib.auth.models import AnonymousUser, User
 from rooibos.data.models import Collection, CollectionItem, Record, Field, \
@@ -6,7 +6,7 @@ from rooibos.data.models import Collection, CollectionItem, Record, Field, \
 from rooibos.storage.models import Media, Storage
 from rooibos.presentation.models import Presentation, PresentationItem
 from rooibos.access.models import AccessControl
-from functions import PowerPointGenerator
+from .functions import PowerPointGenerator
 import os
 import tempfile
 import logging

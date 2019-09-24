@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import search, flickr_select_record
+from .views import search, flickr_select_record
 
 urlpatterns = [
     url(r'^search/', search, name='flickr-search'),

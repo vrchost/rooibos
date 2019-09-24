@@ -26,7 +26,7 @@ class PageTitles:
             # If the page contains Unicode characters, not converting
             # this to Unicode
             # will cause runtime errors as strip_tags forces Unicode.
-            c = unicode(response.content, 'utf8')
+            c = str(response.content, 'utf8')
             title = _find_tag(c, 'title')
             if title and response.content[title[0]:title[1]] == "MDID":
                 heading = _find_tag(c, 'h1')

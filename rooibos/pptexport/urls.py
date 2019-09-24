@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import thumbnail, download
+from .views import thumbnail, download
 
 urlpatterns = [
     url(

@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from functools import wraps
 from django.contrib import messages
 from datetime import datetime
@@ -18,7 +18,7 @@ from django.views.decorators.cache import cache_control, patch_cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
-from models import Media, Storage, TrustedSubnet, ProxyUrl
+from .models import Media, Storage, TrustedSubnet, ProxyUrl
 from rooibos.access.functions import filter_by_access
 from ipaddr import IPAddress, IPNetwork
 from ranged_fileresponse import RangedFileResponse
@@ -48,7 +48,7 @@ def add_content_length(func):
                 if os.path.exists(response._container.name):
                     response['Content-Length'] = os.path.getsize(
                         response._container.name)
-            elif isinstance(getattr(response, 'content', None), basestring):
+            elif isinstance(getattr(response, 'content', None), str):
                 response['Content-Length'] = len(response.content)
         return response
     return _add_header
@@ -68,7 +68,7 @@ def retrieve(request, recordid, record, mediaid, media):
     # Allow passing in an argument to prevent setting "attachment" content
     # disposition, which keeps e.g. the PDF viewer built into Google Chrome
     # from working
-    inline = request.GET.has_key('inline')
+    inline = 'inline' in request.GET
     name = smart_str(mediaobj.url)
 
     if mediaobj.is_local():  # support byte range requests
@@ -364,7 +364,7 @@ def manage_storage(request, storageid=None, storagename=None):
         storage = Storage(system='local')
 
     if not storage.id:
-        system_choices = [(s, s) for s in settings.STORAGE_SYSTEMS.keys()]
+        system_choices = [(s, s) for s in list(settings.STORAGE_SYSTEMS.keys())]
     else:
         system_choices = [(storage.system, storage.system)]
 

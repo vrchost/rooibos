@@ -26,9 +26,9 @@ configuration for limiting browse and faceted search fields
         fieldset, created = self.get_or_create_fieldset(
             'facet-fields', _get_facet_fields())
         if created:
-            print "Created facet-fields"
+            print("Created facet-fields")
         else:
-            print "facet-fields already exists"
+            print("facet-fields already exists")
 
         # Create browse fieldset for each collection
         for collection in Collection.objects.filter(owner=None):
@@ -36,6 +36,6 @@ configuration for limiting browse and faceted search fields
             fieldset, created = self.get_or_create_fieldset(
                 name, _get_browse_fields(collection.id))
             if created:
-                print "Created %s" % name
+                print("Created %s" % name)
             else:
-                print "%s already exists" % name
+                print("%s already exists" % name)

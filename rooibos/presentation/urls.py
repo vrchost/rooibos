@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import manage, create, edit, duplicate, browse, password, \
+from .views import manage, create, edit, duplicate, browse, password, \
     record_usage, manifest, transparent_png, missing_png
 
 

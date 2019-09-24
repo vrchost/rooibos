@@ -2,8 +2,9 @@ from django.core.urlresolvers import reverse
 from django.utils.http import urlencode
 from django.http import HttpResponse
 from wsgiref.util import FileWrapper
-from urllib2 import urlopen, HTTPError
-from localfs import LocalFileSystemStorageSystem
+from urllib.request import urlopen
+from urllib.error import HTTPError
+from .localfs import LocalFileSystemStorageSystem
 from rooibos.storage.functions import get_media_for_record
 
 
@@ -60,5 +61,5 @@ def retrieve_pseudostream(request, recordid, record, mediaid, media):
         )
         response['Content-Length'] = result.info().get('Content-Length')
         return response
-    except HTTPError, e:
+    except HTTPError as e:
         return HttpResponse(status=e.errno)

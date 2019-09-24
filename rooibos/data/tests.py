@@ -1,12 +1,12 @@
 import unittest
-from models import Collection, CollectionItem, Record, Field, FieldValue, \
+from .models import Collection, CollectionItem, Record, Field, FieldValue, \
     get_system_field, standardfield
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
 from rooibos.solr.functions import SolrIndex
-from spreadsheetimport import SpreadsheetImport
-from cStringIO import StringIO
+from .spreadsheetimport import SpreadsheetImport
+from io import StringIO
 
 
 class FieldValueTestCase(unittest.TestCase):
@@ -320,7 +320,7 @@ class CsvImportTestCase(unittest.TestCase):
 
         testimport.run()
 
-        self.assertEquals(2, self.collection.records.count())
+        self.assertEqual(2, self.collection.records.count())
 
         r1 = self.collection.records.get(name='A001'.lower())
         self.assertEqual(
@@ -863,14 +863,14 @@ class ImageWorkRecordTestCase(unittest.TestCase):
 
         # work_record does not have relation.isPartOf set, so it's not
         # part of any work
-        self.assertEquals(0, len(work_record.get_works()))
+        self.assertEqual(0, len(work_record.get_works()))
         self.assertIn('WORK', image_record.get_works())
         self.assertIn('WORK', image_record2.get_works())
 
         # same again
-        self.assertEquals(0, work_record.get_image_records_query().count())
-        self.assertEquals(2, image_record.get_image_records_query().count())
-        self.assertEquals(2, image_record2.get_image_records_query().count())
+        self.assertEqual(0, work_record.get_image_records_query().count())
+        self.assertEqual(2, image_record.get_image_records_query().count())
+        self.assertEqual(2, image_record2.get_image_records_query().count())
 
     def testSolrIndexing(self):
         work_record = Record.objects.create()

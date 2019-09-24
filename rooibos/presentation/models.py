@@ -9,6 +9,7 @@ from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, \
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
 from rooibos.access.functions import filter_by_access
+from functools import reduce
 
 
 class Presentation(models.Model):
@@ -66,10 +67,10 @@ class Presentation(models.Model):
         return [i.record for i in self.items.all()]
 
     def visible_item_count(self):
-        return len(filter(lambda i: not i.hidden, self.cached_items()))
+        return len([i for i in self.cached_items() if not i.hidden])
 
     def hidden_item_count(self):
-        return len(filter(lambda i: i.hidden, self.cached_items()))
+        return len([i for i in self.cached_items() if i.hidden])
 
     def duplicate(self):
         dup = Presentation()
@@ -89,7 +90,7 @@ class Presentation(models.Model):
                 lambda a, b: a | b,
                 (
                     Q(id=id, password=password)
-                    for id, password in passwords.iteritems()
+                    for id, password in passwords.items()
                 )
             )
             return Presentation.objects.filter(q).values_list('id', flat=True)

@@ -1,10 +1,10 @@
-from __future__ import with_statement
+
 import unittest
 import tempfile
 import os.path
 from PIL import Image
 import shutil
-from StringIO import StringIO
+from io import StringIO
 from django.test.client import Client
 import json as simplejson
 from django.conf import settings
@@ -482,10 +482,7 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
 
     def test_save_and_retrieve_file(self):
 
-        if not any(map(
-                lambda c:
-                c.endswith('.auth.middleware.BasicAuthenticationMiddleware'),
-                settings.MIDDLEWARE_CLASSES)):
+        if not any([c.endswith('.auth.middleware.BasicAuthenticationMiddleware') for c in settings.MIDDLEWARE_CLASSES]):
             return
 
         c = Client()

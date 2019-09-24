@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from views import collections, login, logout, api_search, record, \
+from .views import collections, login, logout, api_search, record, \
     presentations_for_current_user, presentation_detail, keep_alive, \
     autocomplete_group, autocomplete_user
 

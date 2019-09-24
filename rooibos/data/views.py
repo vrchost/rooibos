@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
@@ -19,16 +19,16 @@ from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
-from models import Record, Collection, FieldSet, FieldSetField, \
+from .models import Record, Collection, FieldSet, FieldSetField, \
     CollectionItem, Field, FieldValue
-from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
-from functions import set_collection_visibility_preferences, \
+from .forms import FieldSetChoiceField, get_collection_visibility_prefs_form
+from .functions import set_collection_visibility_preferences, \
     apply_collection_visibility_preferences, collection_dump
 from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
-from spreadsheetimport import SpreadsheetImport
+from .spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
@@ -142,8 +142,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         download_image = download_image or \
             m.is_downloadable_by(request.user, original=False)
 
-    media = filter(
-        lambda m: m.downloadable_in_template or m.editable_in_template, media)
+    media = [m for m in media if m.downloadable_in_template or m.editable_in_template]
 
     edit = edit and request.user.is_authenticated()
 
@@ -192,7 +191,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             choices = [('', '-' * 10)] + [
                 (set[0], [(f.id, f.label) for f in fields])
                 for set, fields in sorted(
-                    grouped.iteritems(), key=lambda s: s[0][0]
+                    iter(grouped.items()), key=lambda s: s[0][0]
                 )
             ]
             if others:
@@ -285,7 +284,7 @@ def record(request, id, name, contexttype=None, contextid=None,
                                 item.hidden = not item.hidden
                                 item.save()
                             del collections[item.collection_id]
-                    for coll in collections.values():
+                    for coll in list(collections.values()):
                         if coll['member']:
                             CollectionItem.objects.create(
                                 record=record,
@@ -384,7 +383,7 @@ def record(request, id, name, contexttype=None, contextid=None,
                     ))
 
                 collections = sorted(
-                    collections.values(), key=lambda c: c['title'])
+                    list(collections.values()), key=lambda c: c['title'])
 
                 collectionformset = collection_formset(
                     prefix='c', initial=collections)
@@ -518,7 +517,7 @@ def data_import(request):
             file = open(full_path, 'r')
             try:
                 for line in file:
-                    unicode(line, 'utf8')
+                    str(line, 'utf8')
                 return HttpResponseRedirect(
                     reverse('data-import-file', args=(filename,)))
             except UnicodeDecodeError:
@@ -542,7 +541,7 @@ class DisplayOnlyTextWidget(forms.HiddenInput):
     def render(self, name, value, attrs):
         r = super(DisplayOnlyTextWidget, self).render(name, value, attrs)
         r += mark_safe(
-            conditional_escape(getattr(self, 'initial', value or u'')))
+            conditional_escape(getattr(self, 'initial', value or '')))
         return r
 
 
@@ -588,7 +587,7 @@ def data_import_file(request, file):
         ] + [
             (set[0], [(f.id, _get_display_label(f)) for f in fields])
             for set, fields
-            in sorted(grouped.iteritems(), key=lambda s: s[0][0])
+            in sorted(iter(grouped.items()), key=lambda s: s[0][0])
         ]
 
         if others:
@@ -658,8 +657,8 @@ def data_import_file(request, file):
                 m = self.forms[i].cleaned_data['mapping']
                 if m and int(m) in _identifier_ids:
                     return
-            raise forms.ValidationError, "At least one field must be mapped " \
-                "to an identifier field."
+            raise forms.ValidationError("At least one field must be mapped " \
+                "to an identifier field.")
 
     create_mapping_formset = formset_factory(
         MappingForm, extra=0, formset=BaseMappingFormSet, can_order=True)
@@ -720,8 +719,8 @@ def data_import_file(request, file):
                 arg = dict(
                     filename=_get_filename(request, file),
                     separator=form.cleaned_data['separator'],
-                    collection_ids=map(
-                        int, form.cleaned_data['collections']),
+                    collection_ids=list(map(
+                        int, form.cleaned_data['collections'])),
                     update=form.cleaned_data['update'],
                     add=form.cleaned_data['add'],
                     test=form.cleaned_data['test'],
@@ -790,7 +789,7 @@ def data_import_file(request, file):
         else:
             mapping = [
                 dict(fieldname=f, mapping=v.id if v else 0, separate=True)
-                for f, v in imp.mapping.iteritems()
+                for f, v in imp.mapping.items()
             ]
             options = None
 

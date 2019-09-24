@@ -1,4 +1,4 @@
-from functions import get_viewer_by_name
+from .functions import get_viewer_by_name
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseForbidden

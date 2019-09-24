@@ -7,7 +7,7 @@ from rooibos.data.models import Collection, Record, standardfield, \
     CollectionItem, FieldValue
 from rooibos.federatedsearch import FederatedSearch
 import flickrapi
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import os
 
 
@@ -105,7 +105,7 @@ class FlickrSearch(FederatedSearch):
         return self.get_licenses().get(id)
 
     def get_cc_licenses(self):
-        return [id for id, license in self.get_licenses().iteritems()
+        return [id for id, license in self.get_licenses().items()
                 if license['url'].startswith('http://creativecommons.org/')]
 
     def search(self, query, page=1, pagesize=50, sort='date-posted-desc'):
@@ -139,7 +139,7 @@ class FlickrSearch(FederatedSearch):
             ] if hasattr(results.photos[0], 'photo') else []
 
             hits = int(results.photos[0]['total'])
-        except (urllib2.HTTPError, urllib2.URLError, flickrapi.FlickrError):
+        except (urllib.error.HTTPError, urllib.error.URLError, flickrapi.FlickrError):
             images = []
             hits = 0
 

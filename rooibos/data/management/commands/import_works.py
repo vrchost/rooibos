@@ -17,10 +17,10 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         mapping_file = kwargs.get('mapping_file')
-        collections = map(int, kwargs.get('collections') or list())
+        collections = list(map(int, kwargs.get('collections') or list()))
 
         if not mapping_file or not collections:
-            print "--collection and --mapping are required parameters"
+            print("--collection and --mapping are required parameters")
             return
 
         works = dict()
@@ -47,7 +47,7 @@ class Command(BaseCommand):
 
         id_fields = standardfield_ids('identifier', equiv=True)
 
-        print "Caching record identifiers"
+        print("Caching record identifiers")
         identifiers = dict()
         values = FieldValue.objects.select_related('record').filter(
             record__collection__in=collections, field__in=id_fields)
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         pb = ProgressBar(len(works))
 
         # Insert new relations
-        for count, work in enumerate(works.itervalues()):
+        for count, work in enumerate(works.values()):
             primary = work[0]
             items = work[1:]
             for item in items:

@@ -3,7 +3,7 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AnonymousUser
 from django.shortcuts import _get_queryset
-from models import AccessControl, ExtendedGroup
+from .models import AccessControl, ExtendedGroup
 
 
 restriction_precedences = dict()
@@ -75,14 +75,14 @@ def get_effective_permissions_and_restrictions(
                         key, default_restrictions_precedences)
                     restrictions[key] = func(restrictions.get(key), r.get(key))
                 restrictions = dict(
-                    (k, v) for k, v in restrictions.iteritems() if v)
+                    (k, v) for k, v in restrictions.items() if v)
             return (read, write, manage, restrictions or dict())
 
-        user_aclist = filter(lambda a: a.user, aclist)
+        user_aclist = [a for a in aclist if a.user]
         if user_aclist:
             return reduce_aclist(user_aclist)
         else:
-            return reduce_aclist(filter(lambda a: a.usergroup, aclist))
+            return reduce_aclist([a for a in aclist if a.usergroup])
 
     return calculate()
 

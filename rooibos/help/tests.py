@@ -1,5 +1,5 @@
 import unittest
-from templatetags import help
+from .templatetags import help
 
 
 class HelpTestCase(unittest.TestCase):

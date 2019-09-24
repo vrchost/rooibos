@@ -1,8 +1,8 @@
 import unittest
 from rooibos.data.models import Collection, Record, Field, FieldSet, \
     FieldSetField, CollectionItem, standardfield
-from views import _get_browse_fields, _get_facet_fields
-from models import disconnect_signals
+from .views import _get_browse_fields, _get_facet_fields
+from .models import disconnect_signals
 
 
 disconnect_signals()

@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import effective_permissions, modify_permissions
+from .views import effective_permissions, modify_permissions
 
 urlpatterns = [
     url(

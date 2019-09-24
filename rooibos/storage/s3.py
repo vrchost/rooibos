@@ -1,7 +1,7 @@
 """
 Storage system to store media files in Amazon S3
 """
-from __future__ import absolute_import
+
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -108,7 +108,7 @@ class S3StorageSystem(S3BotoStorage):
     def get_files(self):
         result = self.listdir('')
         # remove empty string
-        return filter(None, result[1])
+        return [_f for _f in result[1] if _f]
 
     def load_file(self, media):
         localpath = self.get_absolute_file_path(media)

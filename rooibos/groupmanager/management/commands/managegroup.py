@@ -54,7 +54,7 @@ class Command(BaseCommand):
             if 'output' in kwargs:
                 kwargs['output'].append(msg)
             else:
-                print msg
+                print(msg)
 
         if not usergroup:
             message("--name is a required parameter.")

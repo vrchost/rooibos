@@ -12,7 +12,7 @@ from rooibos.util import unique_slug
 from rooibos.data.models import Record
 from rooibos.access.functions import \
     get_effective_permissions_and_restrictions, check_access
-import multimedia
+from . import multimedia
 
 import logging
 
@@ -307,7 +307,7 @@ class Media(models.Model):
         if self.mimetype == 'text/plain':
             return self.load_file().read()
         elif self.mimetype == 'application/pdf':
-            from functions import extract_text_from_pdf_stream
+            from .functions import extract_text_from_pdf_stream
             return extract_text_from_pdf_stream(self.load_file())
         else:
             return ''

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from views import search, proxy_image, select, manage, edit
+from .views import search, proxy_image, select, manage, edit
 
 urlpatterns = [
     url(r'^search/(?P<id>\d+)/(?P<name>[-\w]+)/$', search,

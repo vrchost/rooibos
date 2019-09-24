@@ -1,8 +1,8 @@
-from __future__ import with_statement
+
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from zipfile import ZipFile
-from functions import PowerPointGenerator
+from .functions import PowerPointGenerator
 from rooibos.presentation.models import Presentation
 import os
 

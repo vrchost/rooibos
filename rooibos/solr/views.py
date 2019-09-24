@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .functions import SolrIndex
-from pysolr import SolrError
+from .pysolr import SolrError
 from rooibos.access.functions import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
@@ -31,6 +31,7 @@ import copy
 import random
 import logging
 from datetime import datetime
+from functools import reduce
 
 
 logger = logging.getLogger(__name__)
@@ -48,14 +49,13 @@ class SearchFacet(object):
     def set_result(self, facets):
         # break down dicts into tuples
         if hasattr(facets, 'items'):
-            self.facets = facets.items()
+            self.facets = list(facets.items())
         else:
             self.facets = facets
 
     def clean_result(self, hits, sort=True):
         # sort facet items and remove the ones that match all hits
-        self.facets = filter(lambda f: f[1] < hits,
-                             getattr(self, 'facets', None) or [])
+        self.facets = [f for f in getattr(self, 'facets', None) or [] if f[1] < hits]
         if sort:
             self.facets = sorted(self.facets,
                              key=lambda f: len(f) > 2 and f[2] or f[0])
@@ -187,7 +187,7 @@ class StorageSearchFacet(SearchFacet):
     def set_result(self, facets):
         result = {}
         if facets:
-            for f in facets.keys():
+            for f in list(facets.keys()):
                 m = StorageSearchFacet._storage_facet_re.match(f)
                 if m and int(m.group(1)) in self.available_storage:
                     # make facet available, but without frequency count
@@ -204,7 +204,7 @@ class CollectionSearchFacet(SearchFacet):
         result = []
         if facets:
             collections = Collection.objects.filter(
-                id__in=map(int, facets.keys())
+                id__in=list(map(int, list(facets.keys())))
             ).order_by('order', 'title').values_list('id', 'title')
             for id, title in collections:
                 result.append((id, facets[str(id)], title))
@@ -323,10 +323,8 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             o = search_facets[fname].process_criteria(o, user)
             fields.setdefault(f, []).append('(' + o.replace('|', ' OR ') + ')')
 
-    fields = map(
-        lambda (name, crit): '%s:(%s)' % (
-            name, (name.startswith('NOT ') and ' OR ' or ' AND ').join(crit)),
-        fields.iteritems())
+    fields = ['%s:(%s)' % (
+            name_crit[0], (name_crit[0].startswith('NOT ') and ' OR ' or ' AND ').join(name_crit[1])) for name_crit in iter(fields.items())]
 
     def build_keywords(q, k):
         k = k.lower()
@@ -487,7 +485,7 @@ def run_search(user,
 
     s = SolrIndex()
 
-    return_facets = [key for key, facet in search_facets.iteritems()
+    return_facets = [key for key, facet in search_facets.items()
                      if facet.fetch_facet_values()] if produce_facets else []
 
     try:
@@ -531,7 +529,7 @@ class DummyContent():
         return self.length
     def __getitem__(self, index):
         if isinstance(index, slice):
-            return range(index.start or 0, index.stop, index.step or 1)
+            return list(range(index.start or 0, index.stop, index.step or 1))
         else:
             return None
 
@@ -546,7 +544,7 @@ def search(request, id=None, name=None, selected=False, json=False):
         q = request.GET.copy()
         q.update(request.POST)
         q = clean_record_selection_vars(q)
-        for i, v in q.items():
+        for i, v in list(q.items()):
             if i != 'c':
                 # replace multiple values with last one
                 # except for criteria ('c')
@@ -620,7 +618,7 @@ def search(request, id=None, name=None, selected=False, json=False):
     q.setlist('c', criteria)
     hiddenfields = [('op', page)]
     qurl = q.urlencode()
-    q.setlist('c', filter(lambda c: c != orquery, criteria))
+    q.setlist('c', [c for c in criteria if c != orquery])
     qurl_orquery = q.urlencode()
     limit_url = "%s?%s%s" % (url, qurl, qurl and '&' or '')
     limit_url_orquery = "%s?%s%s" % (
@@ -704,7 +702,7 @@ def search(request, id=None, name=None, selected=False, json=False):
         request,
         'results.html',
         {
-            'criteria': map(readable_criteria, criteria),
+            'criteria': list(map(readable_criteria, criteria)),
             'query': query,
             'keywords': keywords,
             'hiddenfields': hiddenfields,
@@ -793,19 +791,19 @@ def search_facets(request, id=None, name=None, selected=False):
             facets.append(search_facets.pop(of + '_t'))
         except KeyError:
             pass
-    facets.extend(sorted(search_facets.values(), key=lambda f: f.label))
+    facets.extend(sorted(list(search_facets.values()), key=lambda f: f.label))
 
     # clean facet items
     for f in facets:
         f.clean_result(hits)
 
     # remove facets with only no filter options
-    facets = filter(lambda f: len(f.facets) > 0, facets)
+    facets = [f for f in facets if len(f.facets) > 0]
 
     # remove facets that should be hidden
     hide_facets = getattr(settings, 'HIDE_FACETS', None)
     if hide_facets:
-        facets = filter(lambda f: f.label not in hide_facets, facets)
+        facets = [f for f in facets if f.label not in hide_facets]
 
     html = render_to_string(
         'results_facets.html',
@@ -1066,7 +1064,7 @@ def terms(request):
     terms = []
     maxfreq = 0
 
-    for term, freq in s.terms().iteritems():
+    for term, freq in s.terms().items():
         terms.append([term, freq])
         if freq > maxfreq:
             maxfreq = freq
@@ -1177,7 +1175,7 @@ def search_form(request):
                 if criteria:
                     if field:
                         field = Field.objects.get(id=field)
-                        for cf, cfe in core_fields.iteritems():
+                        for cf, cfe in core_fields.items():
                             if field == cf or field in cfe:
                                 field = cf
                                 break

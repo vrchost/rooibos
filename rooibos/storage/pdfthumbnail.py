@@ -7,14 +7,14 @@ import sys
 
 
 def _pdfthumbnail(infile, outfile):
-    print "Creating PDF thumbnail: '%s' '%s'" % (infile, outfile)
-    print "sys.path=%s" % repr(sys.path)
+    print("Creating PDF thumbnail: '%s' '%s'" % (infile, outfile))
+    print("sys.path=%s" % repr(sys.path))
     try:
         import gfx
     except ImportError:
-        print >> sys.stderr, "Cannot import gfx"
+        print("Cannot import gfx", file=sys.stderr)
         sys.exit(5)
-    print "Starting"
+    print("Starting")
     doc = gfx.open("pdf", infile)
     img = gfx.ImageList()
     img.setparameter("antialise", "1")  # turn on antialising
@@ -33,6 +33,6 @@ if __name__ == '__main__':
     try:
         _pdfthumbnail(sys.argv[1], sys.argv[2])
         sys.exit(0)
-    except Exception, ex:
-        print >> sys.stderr, ex
+    except Exception as ex:
+        print(ex, file=sys.stderr)
         sys.exit(ex)

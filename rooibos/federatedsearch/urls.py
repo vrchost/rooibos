@@ -1,5 +1,5 @@
 from django.conf.urls import url
-from views import sidebar_api
+from .views import sidebar_api
 
 
 urlpatterns = [

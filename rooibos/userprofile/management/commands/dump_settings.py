@@ -17,9 +17,9 @@ class Command(BaseCommand):
         username = kwargs.get('user')
 
         if not username:
-            print >> sys.stderr, "--user is a required parameter"
+            print("--user is a required parameter", file=sys.stderr)
             return
 
         user = User.objects.get(username=username)
 
-        print json.dumps(load_settings(user))
+        print(json.dumps(load_settings(user)))

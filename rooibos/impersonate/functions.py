@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -23,7 +23,7 @@ def impersonate(request, username):
     logging.debug("Sent user impersonated signal (%s)" % user_impersonated)
 
 def endimpersonation(request):
-    if request.session.has_key(IMPERSONATION_REAL_USER_SESSION_KEY):
+    if IMPERSONATION_REAL_USER_SESSION_KEY in request.session:
         realusername = request.session.get(IMPERSONATION_REAL_USER_SESSION_KEY)
         del request.session[IMPERSONATION_REAL_USER_SESSION_KEY]
         user = User.objects.get(username=realusername)

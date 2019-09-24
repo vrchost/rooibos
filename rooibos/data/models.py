@@ -14,6 +14,7 @@ import random
 import types
 import re
 import unicodedata
+from functools import reduce
 
 
 class CollectionManager(models.Manager):
@@ -153,7 +154,7 @@ class Record(models.Model):
     def filter_by_access(user, *ids):
         records = Record.objects.distinct()
 
-        ids = map(int, ids)
+        ids = list(map(int, ids))
 
         if user and user.is_superuser:
             return records.filter(id__in=ids)
@@ -349,9 +350,9 @@ class Record(models.Model):
         return values
 
     def dump(self, owner=None, collection=None):
-        print("Created: %s" % self.created)
-        print("Modified: %s" % self.modified)
-        print("Name: %s" % self.name)
+        print(("Created: %s" % self.created))
+        print(("Modified: %s" % self.modified))
+        print(("Name: %s" % self.name))
         for v in self.fieldvalue_set.all():
             v.dump(owner, collection)
 
@@ -678,14 +679,14 @@ class FieldValue(models.Model):
         return self.label or self.field.label
 
     def dump(self, owner=None, collection=None):
-        print("%s: %s" % (self.resolved_label, self.value))
+        print(("%s: %s" % (self.resolved_label, self.value)))
 
     BROWSE_VALUE_REGEX = re.compile(r"^((a|the|an) +|[^\w]+)+", re.I)
 
     @staticmethod
     def make_browse_value(value):
         # try to decompose unicode characters
-        if isinstance(value, unicode):
+        if isinstance(value, str):
             value = unicodedata.normalize('NFD', value)
             value = value.encode('ascii', 'ignore')
         # remove other special characters
@@ -778,7 +779,7 @@ class RemoteMetadata(models.Model):
 
 
 def create_data_fixtures(*args, **kwargs):
-    print "Creating data fixtures"
+    print("Creating data fixtures")
 
     # Metadata standars
 
