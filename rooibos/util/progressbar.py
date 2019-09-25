@@ -57,8 +57,8 @@ class ProgressBar:
             len(str(percent)) - len(remainingtime) - 4
         if percent >= 100:
             self.arrowchar = ''
-        completed = barlength * percent / 100
-        remaining = barlength - completed - 1
+        completed = int(barlength * percent / 100)
+        remaining = int(barlength - completed - 1)
         sys.stdout.write("%s/%s %s%s%s %s%%%s\r" % (
             current,
             self.total,
