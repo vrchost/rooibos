@@ -380,7 +380,7 @@ class Solr(object):
                     d.set('boost', str(value))
                     continue
                 # handle lists, tuples, and other iterabes
-                if hasattr(value, '__iter__'):
+                if hasattr(value, '__iter__') and not isinstance(value, str):
                     for v in value:
                         f = ElementTree.Element('field', name=key)
                         f.text = self._from_python(v)

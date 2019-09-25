@@ -122,8 +122,10 @@ class ExtendedGroup(Group):
             values = attributes.get(attribute.attribute, [])
             for value in attribute.attributevalue_set.all().values_list(
                     'value', flat=True):
-                if (hasattr(values, '__iter__') and value in values) \
-                        or value == values:
+                if (hasattr(values, '__iter__')
+                        and not isinstance(values, str)
+                        and value in values
+                    ) or value == values:
                     break
             else:
                 return False
