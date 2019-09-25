@@ -22,6 +22,7 @@ if [ ! -e /etc/default/solr.in.sh ] ; then
     id -u solr &>/dev/null || echo -e '\\n\\n\\n\\n\\n\\n' | adduser --disabled-password solr
     mkdir -p /opt/solr_install /opt/solr
     chown solr:solr /opt/solr
+    mkdir -p /vagrant/temp
     cd /vagrant/temp
     [ -e solr-$SOLR_VERSION.tgz ] || wget https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz
     cd /opt/solr_install
