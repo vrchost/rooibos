@@ -52,7 +52,7 @@ class ProgressBar:
                     )
                 elif r > 0:
                     remainingtime = ' %ds' % r
-        percent = current * 100 / self.total
+        percent = int(current * 100 / self.total)
         barlength = self.width - len(str(current)) - len(str(self.total)) - \
             len(str(percent)) - len(remainingtime) - 4
         if percent >= 100:
