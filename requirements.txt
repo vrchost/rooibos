@@ -43,7 +43,7 @@ pep8-naming
 pika
 pillow >= 2.4.0, <5.0
 pycryptodome
-pypdf
+PyPDF2
 python-ldap
 python-memcached
 reportlab

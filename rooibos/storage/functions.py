@@ -1,5 +1,5 @@
 
-from pyPdf.pdf import PdfFileReader
+from PyPDF2.pdf import PdfFileReader
 from io import StringIO
 from PIL import Image
 import logging
