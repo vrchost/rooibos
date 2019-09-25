@@ -530,7 +530,7 @@ class SolrIndex():
             (800, 'medium'),
             (400, 'small'),
         )
-        r = max(width, height)
+        r = max(width, height) if width and height else None
         if not r:
             return 'unknown'
         for s, t in sizes:
