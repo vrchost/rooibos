@@ -778,7 +778,11 @@ class RemoteMetadata(models.Model):
     last_modified = models.CharField(max_length=100, null=True, blank=True)
 
 
-def create_data_fixtures(*args, **kwargs):
+def create_data_fixtures(sender, *args, **kwargs):
+
+    if sender.name != 'rooibos.data':
+        return
+
     print("Creating data fixtures")
 
     # Metadata standars
