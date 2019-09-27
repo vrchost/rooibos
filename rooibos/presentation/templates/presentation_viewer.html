@@ -33,12 +33,12 @@
         id: "viewer",
         buildPath: "{% static 'mirador/' %}",
         data: [{
-            manifestUri: "{% url 'presentation-manifest' presentation.id presentation.name %}",
+            manifestUri: "{{ manifest_url }}",
             location: "{{ presentation.title }}"
         }],
         windowObjects: [{
             canvasID: canvas,
-            loadedManifest: "{% url 'presentation-manifest' presentation.id presentation.name %}"
+            loadedManifest: "{{ manifest_url }}"
         }],
         workspacePanelSettings: {
             'maxRows': 2,
