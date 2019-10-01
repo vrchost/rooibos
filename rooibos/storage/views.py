@@ -44,7 +44,7 @@ def add_content_length(func):
         if type(response) == HttpResponse and hasattr(response, '_container'):
             if hasattr(response._container, 'size'):
                 response['Content-Length'] = response._container.size
-            elif isinstance(response._container, file):
+            elif hasattr(response._container, 'name'):
                 if os.path.exists(response._container.name):
                     response['Content-Length'] = os.path.getsize(
                         response._container.name)
@@ -143,7 +143,7 @@ def retrieve_image(request, recordid, record, width=None, height=None):
                             data=dict(width=width, height=height))
     try:
         response = HttpResponse(
-            content=file(path, 'rb').read(),
+            content=open(path, 'rb').read(),
             content_type='image/jpeg'
         )
         if 'forcedl' in request.GET:

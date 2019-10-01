@@ -255,7 +255,7 @@ def get_image_for_record(
             if not os.path.exists(path) or os.path.getsize(path) == 0:
                 output, (w, h) = derivative_image(m, width, height)
                 if output:
-                    with file(path, 'wb') as f:
+                    with open(path, 'wb') as f:
                         f.write(output)
                 else:
                     return None

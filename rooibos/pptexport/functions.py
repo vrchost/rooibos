@@ -152,7 +152,7 @@ class PowerPointGenerator:
                 image = None
             if image and os.path.isfile(image):
                 # add image to outfile
-                with file(image, 'rb') as f:
+                with open(image, 'rb') as f:
                     content = f.read()
                 name = 'image%s.jpg' % n
                 self.additional_content_types.setdefault(
