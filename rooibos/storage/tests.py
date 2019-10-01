@@ -2,6 +2,8 @@
 import unittest
 import tempfile
 import os.path
+from functools import cmp_to_key
+
 from PIL import Image
 import shutil
 from io import StringIO
@@ -267,7 +269,7 @@ class ImageCompareTest(unittest.TestCase):
 
         data = [Image(w, h) for w in (10, None, 20) for h in (15, 5, None)]
 
-        data = sorted(data, _imgsizecmp)[::-1]
+        data = sorted(data, key=cmp_to_key(_imgsizecmp))[::-1]
 
         self.assertEqual(data[0].width, 20)
         self.assertEqual(data[0].height, 15)

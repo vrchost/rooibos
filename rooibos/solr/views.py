@@ -31,8 +31,7 @@ import copy
 import random
 import logging
 from datetime import datetime
-from functools import reduce
-
+from functools import reduce, cmp_to_key
 
 logger = logging.getLogger(__name__)
 
@@ -1130,7 +1129,7 @@ def search_form(request):
                 f.standard.title if f.standard else 'Other', []).append(f)
         return [('', 'Any')] + [
             (g, [(f.id, f.label) for f in grouped[g]])
-            for g in sorted(grouped, _cmp)
+            for g in sorted(grouped, key=cmp_to_key(_cmp))
         ]
 
     class SearchForm(forms.Form):

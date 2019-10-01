@@ -1,3 +1,4 @@
+from functools import cmp_to_key
 
 from PyPDF2.pdf import PdfFileReader
 from io import StringIO
@@ -170,7 +171,7 @@ def get_image_for_record(
         return None
     for m in media:
         m.identify(lazy=True)
-    media = sorted(media, _imgsizecmp, reverse=True)
+    media = sorted(media, key=cmp_to_key(_imgsizecmp), reverse=True)
     # find matching media
     last = None
     for m in media:
