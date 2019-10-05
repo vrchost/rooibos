@@ -67,13 +67,15 @@ def dir2(var):
 
 
 @register.filter
-def base32(value, filler='='):
-    return b32encode(str(value)).replace('=', filler)
+def base32(value, filler=b'='):
+    return b32encode(value.encode(
+        'utf8', errors='ignore')).replace(b'=', filler)
 
 
 @register.filter
-def base64(value, filler='='):
-    return b64encode(str(value)).replace('=', filler)
+def base64(value, filler=b'='):
+    return b64encode(value.encode(
+        'utf8', errors='ignore')).replace(b'=', filler)
 
 
 @register.filter
