@@ -7,7 +7,7 @@ import re
 import logging
 import json as simplejson
 import zipfile
-from io import StringIO
+from io import StringIO, BytesIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field
 from PIL import Image
@@ -40,7 +40,7 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         )
         (output, errors) = ffmpeg.communicate()
         file = open(filename, 'rb')
-        result = StringIO(file.read())
+        result = BytesIO(file.read())
         file.close()
         return result, output, errors
     except Exception as ex:
@@ -82,7 +82,7 @@ def _pdfthumbnail(infile):
         (output, errors) = proc.communicate()
         logger.debug('output "%s" errors "%s"' % (output, errors))
         file = open(filename, 'rb')
-        result = StringIO(file.read())
+        result = BytesIO(file.read())
         file.close()
         return result, output, errors
     except:
@@ -155,7 +155,7 @@ def render_audio_waveform(audiofile, basecolor, background, left, top,
         if not max_only:
             for y in range(middle, low):
                 pix[left + x, y] = basecolor
-    output = StringIO()
+    output = BytesIO()
     image.save(output, 'JPEG', quality=85, optimize=True)
     output.seek(0)
     return output
@@ -192,7 +192,7 @@ def render_pdf(pdffile):
 def thumbnail_from_pptx(pptxfile):
     try:
         with zipfile.ZipFile(pptxfile, 'r') as pptx:
-            image = StringIO(pptx.open('docProps/thumbnail.jpeg').read())
+            image = BytesIO(pptx.open('docProps/thumbnail.jpeg').read())
             image.seek(0)
             return image
     except:
@@ -258,7 +258,7 @@ def overlay_image_with_mimetype_icon(image, mimetype):
     if isinstance(image, Image.Image):
         return image
 
-    output = StringIO()
+    output = BytesIO()
     original_image.save(output, 'JPEG', quality=85, optimize=True)
     output.seek(0)
     return output

@@ -1,7 +1,7 @@
 from functools import cmp_to_key
 
 from PyPDF2.pdf import PdfFileReader
-from io import StringIO
+from io import StringIO, BytesIO
 from PIL import Image
 import logging
 import mimetypes
@@ -88,7 +88,7 @@ def rotateImageBasedOnExif(stream):
     if mirror:
         image = image.transpose(Image.FLIP_LEFT_RIGHT)
 
-    buffer = StringIO()
+    buffer = BytesIO()
     image.save(buffer, 'jpeg', quality=85)
 
     return buffer
@@ -233,7 +233,7 @@ def get_image_for_record(
                 image.thumbnail((width, height), Image.ANTIALIAS)
                 image = overlay_image_with_mimetype_icon(
                     image, master.mimetype)
-                output = StringIO()
+                output = BytesIO()
                 if image.mode != "RGB":
                     image = image.convert("RGB")
                 image.save(output, 'JPEG', quality=85, optimize=True)

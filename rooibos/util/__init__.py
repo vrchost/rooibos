@@ -184,7 +184,7 @@ def create_link(file, link, hard=False):
 def calculate_hash(*args):
     hash = hashlib.md5()
     for arg in args:
-        hash.update(repr(arg))
+        hash.update(repr(arg).encode('utf8', errors='ignore'))
     return hash.hexdigest()
 
 
