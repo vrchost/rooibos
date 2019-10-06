@@ -7,7 +7,7 @@ from .functions import impersonate, endimpersonation, get_available_users, get_r
 
 def start(request):
     next = request.GET.get('next', '/')
-    username = request.REQUEST.get('username')
+    username = request.POST.get('username')
     if username:
         current = get_real_user(request)
         available_user = get_available_users(current or request.user.username).filter(username=username)
