@@ -459,13 +459,14 @@ class PackageFilesViewer(Viewer):
                             filename(title or 'Slide %s' % (index + 1)),
                             os.path.splitext(image)[1]
                         )
-                    ).encode('ascii', 'replace')
+                    ).encode('ascii', 'replace').decode()
                 )
 
         def metadata_file(tempfile, record):
             t = Template("{% load data %}{% metadata record %}")
             c = Context({'record': record, 'request': request})
-            tempfile.write(smart_str(t.render(c)))
+            tempfile.write(
+                smart_str(t.render(c)).encode('utf8', errors='replace'))
             tempfile.flush()
             return tempfile.name
 
@@ -506,13 +507,14 @@ class PackageFilesViewer(Viewer):
 
         output.close()
         tempfile.flush()
+        size = tempfile.file.tell()
         tempfile.seek(0)
 
         wrapper = FileWrapper(tempfile)
         response = HttpResponse(wrapper, content_type='application/zip')
         response['Content-Disposition'] = \
             'attachment; filename=%s.zip' % filename(presentation.title)
-        response['Content-Length'] = os.path.getsize(tempfile.name)
+        response['Content-Length'] = size
         return response
 
 
