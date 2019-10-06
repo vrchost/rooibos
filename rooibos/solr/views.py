@@ -810,7 +810,7 @@ def search_facets(request, id=None, name=None, selected=False):
             'limit_url': limit_url,
             'facets': facets
         },
-        context_instance=RequestContext(request))
+        request=request)
 
     mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
@@ -839,7 +839,7 @@ def search_json(request, id=None, name=None, selected=False):
             'records': records,
             'selectable': True,
         },
-        context_instance=RequestContext(request))
+        request=request)
 
     return dict(html=html)
 

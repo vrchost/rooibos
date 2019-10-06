@@ -21,7 +21,7 @@ class ImpersonationFormNode(template.Node):
                                     {'users': users,
                                      'current': current,
                                      'request': request,},
-                                    context_instance=RequestContext(request))
+                                    request=request)
         else:
             return ''
 

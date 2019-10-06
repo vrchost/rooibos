@@ -79,13 +79,12 @@ def select_record(request):
         request.session['selected_records'] = selected
 
     context = ctx_selected_records(request)
-    rc = RequestContext(request)
 
     return dict(
         basket=render_to_string(
-            'ui_basket.html', context, context_instance=rc),
+            'ui_basket.html', context, request=request),
         header=render_to_string(
-            'ui_basket_header.html', context, context_instance=rc),
+            'ui_basket_header.html', context, request=request),
     )
 
 

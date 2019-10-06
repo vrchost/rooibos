@@ -106,7 +106,7 @@ def sidebar_api_raw(request, query, cached_only=False):
                 results=sorted(results),
                 query=query
             ),
-            context_instance=RequestContext(request)
+            request=request,
         ),
         hits=total_hits,
         cache_hit=cache_hit
