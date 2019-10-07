@@ -54,13 +54,15 @@ def _clean_for_render(text):
                  'color', 'fg', 'fontName', 'fontSize',
                  'fontname', 'fontsize', 'href', 'name',
                  'textColor', 'textcolor']
-    html = BeautifulSoup(text)
-    html.attrs = None
-    for e in html.findAll(True):
-        for attribute in e.attrs:
-            if attribute[0] not in whitelist:
-                del e[attribute[0]]
-    return str(html)
+    html = BeautifulSoup(text, 'html.parser')
+    for tag in html.recursiveChildGenerator():
+        try:
+            tag.attrs = dict((key,value) for key,value in tag.attrs.items()
+                 if key in whitelist)
+        except AttributeError:
+            # 'NavigableString' object has no attribute 'attrs'
+            pass
+    return html.prettify()
 
 
 class PresentationViewer(Viewer):

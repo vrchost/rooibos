@@ -197,7 +197,7 @@ class Solr(object):
         this means scraping the html.
         """
         response_content = response.read()
-        soup = BeautifulSoup(response_content)
+        soup = BeautifulSoup(response_content, 'html.parser')
         tag = soup.find('pre') or soup.find('h1')
         if tag:
             return tag.string

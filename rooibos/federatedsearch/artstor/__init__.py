@@ -48,7 +48,7 @@ class ArtstorSearch(FederatedSearch):
             response = opener.open(request)
         except urllib.error.URLError:
             return 0
-        soup = BeautifulSoup(response)
+        soup = BeautifulSoup(response, 'html.parser')
         try:
             return int(soup.find('numberofrecords').contents[0])
         except:
