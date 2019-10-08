@@ -83,8 +83,8 @@ def retrieve(request, recordid, record, mediaid, media):
 
         retval = RangedFileResponse(
             request,
-            open(content_file, 'r'),
-            content_type=str(mediaobj.mimetype)
+            open(content_file, 'rb'),
+            content_type=mediaobj.mimetype
         )
 
     else:
