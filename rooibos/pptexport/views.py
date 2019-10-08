@@ -1,10 +1,10 @@
-
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from zipfile import ZipFile
 from .functions import PowerPointGenerator
 from rooibos.presentation.models import Presentation
 import os
+import tempfile
 
 
 def thumbnail(request, template):
@@ -27,20 +27,14 @@ def download(request, id, template):
         return HttpResponseRedirect(return_url)
 
     g = PowerPointGenerator(presentation, request.user)
-    filename = os.tempnam()
-    try:
-        g.generate(template, filename)
-        with open(filename, mode="rb") as f:
-            response = HttpResponse(
-                content=f.read(),
-                content_type='application/vnd.openxmlformats-officedocument'
-                '.presentationml.presentation'
-            )
+    with tempfile.TemporaryFile() as zipfile:
+        g.generate(template, zipfile)
+        zipfile.seek(0)
+        response = HttpResponse(
+            content=zipfile.read(),
+            content_type='application/vnd.openxmlformats-officedocument'
+            '.presentationml.presentation'
+        )
         response['Content-Disposition'] = \
             'attachment; filename=%s.pptx' % presentation.name
         return response
-    finally:
-        try:
-            os.unlink(filename)
-        except:
-            pass

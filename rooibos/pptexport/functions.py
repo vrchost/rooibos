@@ -21,9 +21,9 @@ PROCESS_FILES = {
 
 
 def standalone(xml):
-    parts = xml.split('?>', 1)
-    if parts[0].startswith('<?xml '):
-        xml = parts[0] + ' standalone="yes"?>' + parts[1]
+    parts = xml.split(b'?>', 1)
+    if parts[0].startswith(b'<?xml '):
+        xml = parts[0] + b' standalone="yes"?>' + parts[1]
     return xml
 
 
