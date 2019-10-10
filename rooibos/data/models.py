@@ -688,7 +688,7 @@ class FieldValue(models.Model):
         # try to decompose unicode characters
         if isinstance(value, str):
             value = unicodedata.normalize('NFD', value)
-            value = value.encode('ascii', 'ignore')
+            value = value.encode('ascii', 'ignore').decode()
         # remove other special characters
         return FieldValue.BROWSE_VALUE_REGEX.sub('', value or '')[:32]
 
