@@ -36,9 +36,9 @@ class Presentation(models.Model):
         )
         super(Presentation, self).save(kwargs)
 
-    def get_absolute_url(self, edit=False):
+    def get_absolute_url(self):
         return reverse(
-            edit and 'presentation-edit' or 'presentation-view',
+            'presentation-edit',
             kwargs={
                 'id': self.id,
                 'name': self.name
