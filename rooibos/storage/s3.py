@@ -84,7 +84,7 @@ class S3StorageSystem(S3BotoStorage):
             self._create_local_copy(media)
         return local
 
-    def get_available_name(self, name):
+    def get_available_name(self, name, max_length):
         (name, ext) = os.path.splitext(name)
         unique = ""
         while True:

@@ -66,7 +66,7 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
     def get_absolute_file_path(self, media):
         return self.path(media.url)
 
-    def get_available_name(self, name):
+    def get_available_name(self, name, max_length):
         (name, ext) = os.path.splitext(name)
         unique = ""
         while True:
