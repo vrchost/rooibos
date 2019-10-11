@@ -384,8 +384,7 @@ def record(request, id, name, contexttype=None, contextid=None,
                         shared=not item.hidden,
                     ))
 
-                collections = sorted(
-                    collections.values(), key=lambda c: c['title'])
+                collections = collections.values()
 
                 collectionformset = collection_formset(
                     prefix='c', initial=collections)
@@ -609,7 +608,7 @@ def data_import_file(request, file):
                         c.title
                     )
                 )
-                for c in sorted(available_collections, key=lambda c: c.title)
+                for c in available_collections
             ),
             widget=forms.CheckboxSelectMultiple
         )

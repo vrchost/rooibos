@@ -443,7 +443,7 @@ def import_files(request):
                         '*' if c.id in writable_collection_ids else '', c.title
                     )
                 )
-                for c in sorted(available_collections, key=lambda c: c.title)
+                for c in available_collections
             )
         )
         storage = forms.ChoiceField(choices=storage_choices)
@@ -634,7 +634,7 @@ def match_up_files(request):
         collection = forms.ChoiceField(
             choices=(
                 (c.id, c.title)
-                for c in sorted(available_collections, key=lambda c: c.title)
+                for c in available_collections
             )
         )
         storage = forms.ChoiceField(choices=available_storage)
@@ -715,7 +715,7 @@ def find_records_without_media(request):
         collection = forms.ChoiceField(
             choices=(
                 (c.id, c.title)
-                for c in sorted(available_collections, key=lambda c: c.title)
+                for c in available_collections
             )
         )
         storage = forms.ChoiceField(choices=available_storage)
