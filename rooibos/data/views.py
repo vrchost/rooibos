@@ -514,13 +514,13 @@ def data_import(request):
                 dest.write(chunk)
             dest.close()
 
-            file = open(full_path, 'r')
+            file = open(full_path, 'r', encoding='utf8', errors='strict')
             try:
                 for line in file:
-                    str(line, 'utf8')
+                    pass
                 return HttpResponseRedirect(
                     reverse('data-import-file', args=(filename,)))
-            except UnicodeDecodeError:
+            except ValueError:
                 utf8_error = True
             finally:
                 file.close()

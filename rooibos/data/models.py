@@ -719,7 +719,7 @@ class DisplayFieldValue(FieldValue):
             s = getattr(self, ob)
             o = getattr(other, ob)
             if s != o:
-                return cmp(s, o)
+                return (s > o) - (s < o)
         return 0
 
     @staticmethod

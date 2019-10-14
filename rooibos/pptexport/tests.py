@@ -1,5 +1,5 @@
 
-import unittest
+from django.test import TestCase
 from django.contrib.auth.models import AnonymousUser, User
 from rooibos.data.models import Collection, CollectionItem, Record, Field, \
     FieldValue
@@ -12,7 +12,7 @@ import tempfile
 import logging
 
 
-class PowerpointTestCase(unittest.TestCase):
+class PowerpointTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -49,7 +49,7 @@ class PowerpointTestCase(unittest.TestCase):
             title='Simple Presentation',
             description='This is a PowerPoint presentation created from a '
             'template and populated with data.',
-            owner=User.objects.get(username='admin')
+            owner=User.objects.get_or_create(username='admin')[0]
         )
         for n in range(1, 11):
             record = Record.objects.create()

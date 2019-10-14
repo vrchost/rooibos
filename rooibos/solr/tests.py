@@ -1,4 +1,4 @@
-import unittest
+from django.test import TestCase
 from rooibos.data.models import Collection, Record, Field, FieldSet, \
     FieldSetField, CollectionItem, standardfield
 from .views import _get_browse_fields, _get_facet_fields
@@ -8,7 +8,7 @@ from .models import disconnect_signals
 disconnect_signals()
 
 
-class BrowseTestCaseBaseClass(unittest.TestCase):
+class BrowseTestCaseBaseClass(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(
@@ -80,7 +80,7 @@ class BrowseLimitGlobalTestCase(BrowseTestCaseBaseClass):
         self.assertEqual(self.creatorField.id, fields[0].id)
 
 
-class FacetsDefaultsTestCase(unittest.TestCase):
+class FacetsDefaultsTestCase(TestCase):
 
     def test_default_facets(self):
         fields = _get_facet_fields()
@@ -89,7 +89,7 @@ class FacetsDefaultsTestCase(unittest.TestCase):
         self.assertFalse('dc.identifier' in names)
 
 
-class FacetsCustomTestCase(unittest.TestCase):
+class FacetsCustomTestCase(TestCase):
 
     def setUp(self):
         self.fieldset = FieldSet.objects.create(title='facet-fields')

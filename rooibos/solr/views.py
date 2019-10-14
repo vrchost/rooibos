@@ -1120,7 +1120,7 @@ def search_form(request):
             return 1
         if y == "Other":
             return -1
-        return cmp(x, y)
+        return (x > y) - (x < y)
 
     def _field_choices():
         grouped = {}

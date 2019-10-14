@@ -1,10 +1,10 @@
 
-import unittest
+from django.test import TestCase
 import tempfile
 import os.path
 from PIL import Image
 import shutil
-from io import StringIO
+from io import BytesIO
 from django.contrib.auth.models import Permission
 from rooibos.data.models import Collection, CollectionItem, Record
 from rooibos.storage.models import Media, Storage
@@ -14,7 +14,7 @@ from .viewers import PackageFilesViewer
 from zipfile import ZipFile
 
 
-class PackagePresentationTestCase(unittest.TestCase):
+class PackagePresentationTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -75,10 +75,10 @@ class PackagePresentationTestCase(unittest.TestCase):
         response1 = viewer1.view(FakeRequest(user1))
         response2 = viewer2.view(FakeRequest(user1))
 
-        image1 = StringIO(
-            ZipFile(StringIO(response1)).read('0001 Slide 1.jpg'))
-        image2 = StringIO(
-            ZipFile(StringIO(response2)).read('0001 Slide 1.jpg'))
+        image1 = BytesIO(
+            ZipFile(BytesIO(response1.content)).read('0001 Slide 1.jpg'))
+        image2 = BytesIO(
+            ZipFile(BytesIO(response2.content)).read('0001 Slide 1.jpg'))
 
         width1, height1 = Image.open(image1).size
         width2, height2 = Image.open(image2).size
@@ -89,7 +89,7 @@ class PackagePresentationTestCase(unittest.TestCase):
         self.assertEqual(149, height2)
 
 
-class PublishPermissionsTestCase(unittest.TestCase):
+class PublishPermissionsTestCase(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='PublishPermissionsTestCase')

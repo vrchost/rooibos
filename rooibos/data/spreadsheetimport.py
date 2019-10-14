@@ -65,11 +65,6 @@ class SpreadsheetImport(object):
     def _split_value(self, value, split=True):
         if not value:
             return None
-        try:
-            value = str(value, 'utf8')
-        except UnicodeDecodeError:
-            self.decode_error = True
-            value = ''
         if (self.separator and split):
             return [s.strip() for s in value.split(self.separator)]
         else:

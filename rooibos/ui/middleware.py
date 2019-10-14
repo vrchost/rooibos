@@ -23,10 +23,7 @@ class PageTitles:
         if response.status_code == 200 and \
                 hasattr(response, 'get') and \
                 response.get('Content-Type', '').startswith('text/html'):
-            # If the page contains Unicode characters, not converting
-            # this to Unicode
-            # will cause runtime errors as strip_tags forces Unicode.
-            c = str(response.content, 'utf8')
+            c = response.content
             title = _find_tag(c, 'title')
             if title and response.content[title[0]:title[1]] == "MDID":
                 heading = _find_tag(c, 'h1')

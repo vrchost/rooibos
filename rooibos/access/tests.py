@@ -1,4 +1,4 @@
-import unittest
+from django.test import TestCase
 from rooibos.data.models import Collection
 from rooibos.storage.models import Storage
 from .models import update_membership_by_attributes, AccessControl, \
@@ -12,7 +12,7 @@ from django.contrib.auth.models import User, Group, AnonymousUser
 from django.core.exceptions import PermissionDenied
 
 
-class AccessTestCase(unittest.TestCase):
+class AccessTestCase(TestCase):
 
     def test_get_effective_permissions(self):
         user = User.objects.create(username='test')
@@ -294,7 +294,7 @@ class AccessTestCase(unittest.TestCase):
         self.assertFalse('width' in restrictions)
 
 
-class ExtendedGroupTestCase(unittest.TestCase):
+class ExtendedGroupTestCase(TestCase):
 
     def test_attribute_based(self):
         usergroup = ExtendedGroup.objects.create(
@@ -364,7 +364,7 @@ class ExtendedGroupTestCase(unittest.TestCase):
         self.assertFalse(authgroup.id in groups.values_list('id', flat=True))
 
 
-class ShibbolethAttributesTestCase(unittest.TestCase):
+class ShibbolethAttributesTestCase(TestCase):
 
     def test_process(self):
         attributes = dict(

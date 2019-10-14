@@ -102,7 +102,9 @@ mimetypes.init([os.path.normpath(
 # sort images by area
 def _imgsizecmp(x, y):
     if x.width and x.height and y.width and y.height:
-        return cmp(x.width * x.height, y.width * y.height)
+        a = x.width * x.height
+        b = y.width * y.height
+        return (a > b) - (a < b)
     if x.width and x.height:
         return 1
     if y.width and y.height:
@@ -175,11 +177,13 @@ def get_image_for_record(
     # find matching media
     last = None
     for m in media:
-        if m.width > width or m.height > height:
+        mwidth = m.width or 0
+        mheight = m.height or 0
+        if mwidth > width or mheight > height:
             # Image still larger than given dimensions
             last = m
-        elif (m.width == width and m.height <= height) or \
-                (m.width <= width and m.height == height):
+        elif (mwidth == width and mheight <= height) or \
+                (mwidth <= width and mheight == height):
             # exact match
             break
         else:
@@ -202,7 +206,7 @@ def get_image_for_record(
                 'Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
-    if (m.width > width or m.height > height or m.mimetype != 'image/jpeg' or
+    if ((m.width or 0) > width or (m.height or 0) > height or m.mimetype != 'image/jpeg' or
             not m.is_local() or force_reprocess):
 
         def derivative_image(master, width, height):

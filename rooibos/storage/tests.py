@@ -1,12 +1,13 @@
+from base64 import b64encode
 
-import unittest
+from django.test import TestCase
 import tempfile
 import os.path
 from functools import cmp_to_key
 
 from PIL import Image
 import shutil
-from io import StringIO
+from io import StringIO, BytesIO
 from django.test.client import Client
 import json as simplejson
 from django.conf import settings
@@ -21,7 +22,7 @@ from rooibos.access.models import AccessControl
 from rooibos.presentation.models import Presentation
 
 
-class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
+class LocalFileSystemStorageSystemTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -44,13 +45,13 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         Media.objects.filter(record=self.record).delete()
         media = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
-        content = StringIO('hello world')
+        content = BytesIO(b'hello world')
         media.save_file('test.txt', content)
 
         self.assertEqual('test.txt', media.url)
 
         content = media.load_file()
-        self.assertEqual('hello world', content.read())
+        self.assertEqual(b'hello world', content.read())
 
         media.delete()
 
@@ -58,19 +59,19 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         Media.objects.filter(record=self.record).delete()
         media = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
-        content = StringIO('hello world')
+        content = BytesIO(b'hello world')
         media.save_file('test.txt', content)
 
         media2 = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
 
-        content2 = StringIO('hallo welt')
+        content2 = BytesIO(b'hallo welt')
         media2.save_file('test.txt', content2)
         self.assertNotEqual('test.txt', media2.url)
         self.assertNotEqual('test', media2.name)
 
-        self.assertEqual('hello world', media.load_file().read())
-        self.assertEqual('hallo welt', media2.load_file().read())
+        self.assertEqual(b'hello world', media.load_file().read())
+        self.assertEqual(b'hallo welt', media2.load_file().read())
 
     def test_thumbnail(self):
         Media.objects.filter(record=self.record).delete()
@@ -257,10 +258,10 @@ class LocalFileSystemStorageSystemTestCase(unittest.TestCase):
         )
 
 
-class ImageCompareTest(unittest.TestCase):
+class ImageCompareTest(TestCase):
 
     def test_compare(self):
-        from rooibos.storage import _imgsizecmp
+        from rooibos.storage.functions import _imgsizecmp
 
         class Image:
             def __init__(self, w, h):
@@ -284,7 +285,7 @@ class ImageCompareTest(unittest.TestCase):
         self.assertEqual(data[3].height, 5)
 
 
-class ProxyUrlTest(unittest.TestCase):
+class ProxyUrlTest(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='proxytest')
@@ -359,7 +360,7 @@ class ProxyUrlTest(unittest.TestCase):
         self.assertEqual('image/jpeg', response['content-type'])
 
         # make sure image dimension restrictions took effect
-        image = Image.open(StringIO(response.content))
+        image = Image.open(BytesIO(response.content))
         width, height = image.size
         self.assertEqual(50, width)
 
@@ -376,7 +377,7 @@ class ProxyUrlTest(unittest.TestCase):
         self.assertNotEqual(proxy_url.uuid, proxy_url2.uuid)
 
 
-class OnlineStorageSystemTestCase(unittest.TestCase):
+class OnlineStorageSystemTestCase(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(title='Test')
@@ -414,7 +415,7 @@ class OnlineStorageSystemTestCase(unittest.TestCase):
         media.delete()
 
 
-class PseudoStreamingStorageSystemTestCase(unittest.TestCase):
+class PseudoStreamingStorageSystemTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -440,15 +441,15 @@ class PseudoStreamingStorageSystemTestCase(unittest.TestCase):
         self.collection.delete()
 
     def test_pseudostreaming(self):
-        test_string = 'Hello world'
-        content = StringIO(test_string)
+        test_string = b'Hello world'
+        content = BytesIO(test_string)
         self.media.save_file('test.txt', content)
         c = Client()
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(test_string, response.content)
 
 
-class ProtectedContentDownloadTestCase(unittest.TestCase):
+class ProtectedContentDownloadTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -471,7 +472,7 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         Media.objects.filter(record=self.record).delete()
         self.media = Media.objects.create(
             record=self.record, name='protectedimage', storage=self.storage)
-        content = StringIO('hello world')
+        content = BytesIO(b'hello world')
         self.media.save_file('test.txt', content)
 
     def tearDown(self):
@@ -496,18 +497,18 @@ class ProtectedContentDownloadTestCase(unittest.TestCase):
         response = c.get(
             self.media.get_absolute_url(),
             HTTP_AUTHORIZATION='basic %s' %
-            'protectedtest:test'.encode('base64').strip()
+            b64encode(b'protectedtest:test').decode('ascii')
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hello world', ''.join(response.streaming_content))
+        self.assertEqual(b'hello world', b''.join(response.streaming_content))
 
         # now logged in
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertEqual('hello world', ''.join(response.streaming_content))
+        self.assertEqual(b'hello world', b''.join(response.streaming_content))
 
 
-class AutoConnectMediaTestCase(unittest.TestCase):
+class AutoConnectMediaTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -567,7 +568,7 @@ class AutoConnectMediaTestCase(unittest.TestCase):
         self.assertEqual('id_2.txt', file_url)
 
 
-class AnalyzeTestCase(unittest.TestCase):
+class AnalyzeTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -635,7 +636,7 @@ class AnalyzeTestCase(unittest.TestCase):
         self.assertEqual(os.path.join('sub', 'id_99.txt'), extra[1])
 
 
-class GetMediaForRecordTestCase(unittest.TestCase):
+class GetMediaForRecordTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -779,7 +780,7 @@ class GetMediaForRecordTestCase(unittest.TestCase):
             self.record_standalone, user=self.user).count())
 
 
-class MediaNameTestCase(unittest.TestCase):
+class MediaNameTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
