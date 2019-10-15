@@ -68,7 +68,7 @@ def dir2(var):
 
 @register.filter
 def base32(value, filler=b'='):
-    return b32encode(value.encode(
+    return b32encode(str(value).encode(
         'utf8', errors='ignore')).replace(b'=', filler)
 
 

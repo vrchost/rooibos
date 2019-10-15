@@ -23,14 +23,15 @@ class PageTitles:
         if response.status_code == 200 and \
                 hasattr(response, 'get') and \
                 response.get('Content-Type', '').startswith('text/html'):
-            c = response.content
+            c = response.content.decode('utf8')
             title = _find_tag(c, 'title')
-            if title and response.content[title[0]:title[1]] == "MDID":
+            if title and c[title[0]:title[1]] == "MDID":
                 heading = _find_tag(c, 'h1')
                 if heading:
-                    response.content = "%sMDID - %s%s" % (
+                    content = "%sMDID - %s%s" % (
                         c[:title[0]],
                         strip_tags(c[heading[0]:heading[1]]),
                         c[title[1]:]
                     )
+                    response.content = content.encode('utf8')
         return response
