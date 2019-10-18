@@ -7,7 +7,7 @@ import base64
 def update_actionbar_tags(request, *objects):
 
     # split tags on commas unless there is a quote in the input
-    nt = request.POST.get('new_tags')
+    nt = request.POST.get('new_tags', '')
     if '"' in nt:
         new_tags = parse_tag_input(nt)
     else:
