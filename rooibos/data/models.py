@@ -14,7 +14,7 @@ import random
 import types
 import re
 import unicodedata
-from functools import reduce
+from functools import reduce, total_ordering
 
 
 class CollectionManager(models.Manager):
@@ -702,6 +702,7 @@ class FieldValue(models.Model):
         ]
 
 
+@total_ordering
 class DisplayFieldValue(FieldValue):
     """
     Represents a mapped field value for display.  Cannot be saved.
@@ -721,6 +722,9 @@ class DisplayFieldValue(FieldValue):
             if s != o:
                 return (s > o) - (s < o)
         return 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
 
     @staticmethod
     def from_value(value, field):
