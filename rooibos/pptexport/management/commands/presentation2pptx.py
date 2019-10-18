@@ -6,7 +6,7 @@ import re
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from rooibos.presentation.models import Presentation
-from rooibos.pptexport.functions import PowerPointGenerator
+from rooibos.pptexport.functions import PowerPointGenerator, COLORS
 
 
 class Command(BaseCommand):
@@ -53,10 +53,23 @@ class Command(BaseCommand):
             '(to batch export)'
         )
         parser.add_argument(
-            '--template', '-t',
-            dest='template',
-            default='black',
-            help='Template file to use'
+            '--color', '-c',
+            dest='color',
+            default='white',
+            choices=COLORS.keys(),
+            help='Background color'
+        )
+        parser.add_argument(
+            '--titles', '-t',
+            dest='titles',
+            action='store_true',
+            help='Add slide titles'
+        )
+        parser.add_argument(
+            '--metadata', '-m',
+            dest='metadata',
+            action='store_true',
+            help='Add slide metadata'
         )
 
     def get_admin_user(self):
@@ -112,4 +125,9 @@ class Command(BaseCommand):
                 g = PowerPointGenerator(presentation, admin)
                 if options.get('output_dir'):
                     filename = os.path.join(options['output_dir'], filename)
-                g.generate(template, filename)
+                g.generate(
+                    filename,
+                    options.get('color'),
+                    options.get('titles'),
+                    options.get('metadata'),
+                )

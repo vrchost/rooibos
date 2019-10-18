@@ -46,6 +46,7 @@ pycryptodome
 PyPDF2
 python-ldap
 python-memcached
+python-pptx
 reportlab
 requests
 sqlparse

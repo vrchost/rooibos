@@ -1,34 +1,28 @@
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from zipfile import ZipFile
-from .functions import PowerPointGenerator
-from rooibos.presentation.models import Presentation
-import os
 import tempfile
 
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse, HttpResponseRedirect
 
-def thumbnail(request, template):
-    filename = os.path.join(
-        os.path.dirname(__file__), 'pptx_templates', template + '.pptx')
-    if not os.path.isfile(filename):
-        raise Http404()
-    template = ZipFile(filename, mode='r')
-    return HttpResponse(
-        content=template.read('docProps/thumbnail.jpeg'),
-        content_type='image/jpg'
-    )
+from rooibos.presentation.models import Presentation
+from .functions import PowerPointGenerator, COLORS
 
 
-def download(request, id, template):
+def download(request, id):
 
     return_url = request.GET.get('next', reverse('presentation-browse'))
     presentation = Presentation.get_by_id_for_request(id, request)
     if not presentation:
         return HttpResponseRedirect(return_url)
 
+    color = request.GET.get('color')
+    if not color in COLORS.keys():
+        color = sorted(COLORS.keys())[0]
+    titles = request.GET.get('titles', 'yes') == 'yes'
+    metadata = not (request.GET.get('metadata', 'no') != 'yes')
+
     g = PowerPointGenerator(presentation, request.user)
     with tempfile.TemporaryFile() as zipfile:
-        g.generate(template, zipfile)
+        g.generate(zipfile, color, titles, metadata)
         zipfile.seek(0)
         response = HttpResponse(
             content=zipfile.read(),

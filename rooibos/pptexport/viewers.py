@@ -1,6 +1,8 @@
 
 from django import forms
 from django.template.loader import render_to_string
+
+from rooibos.pptexport.functions import COLORS
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.presentation.models import Presentation
 import os
@@ -11,20 +13,24 @@ class PowerPointExportViewer(Viewer):
     title = "PowerPoint"
     weight = 15
 
-    templates = [
-        (template[:-5], template[:-5])
-        for template in sorted(
-            os.listdir(os.path.join(
-                os.path.dirname(__file__), 'pptx_templates'))
-        )
-        if template.endswith('.pptx')
-    ]
-
     def get_options_form(self):
         class OptionsForm(forms.Form):
-            template = forms.ChoiceField(
-                choices=self.templates,
-                help_text="Select the PowerPoint template to use."
+            color = forms.ChoiceField(
+                required=False,
+                initial='white',
+                label='Background color',
+                choices=((c, c) for c in COLORS.keys()),
+                help_text='Slide background color',
+            )
+            titles = forms.BooleanField(
+                required=False,
+                label='Slide titles',
+                help_text='Add titles to slides',
+            )
+            metadata = forms.BooleanField(
+                required=False,
+                label='Slide metadata',
+                help_text='Add metadata to slide',
             )
         return OptionsForm
 
@@ -35,7 +41,6 @@ class PowerPointExportViewer(Viewer):
                 'viewer': self,
                 'obj': self.obj,
                 'options': options,
-                'default_template': self.templates and self.templates[0][0],
                 'request': request,
             }
         )

@@ -1,30 +1,28 @@
-
-from zipfile import ZipFile, ZIP_DEFLATED
-import os
-import xml.dom.minidom
-from rooibos.storage.functions import get_image_for_record
 from PIL import Image
 from django.conf import settings
+from pptx import Presentation
+from pptx.dml.color import RGBColor
+
+from rooibos.storage.functions import get_image_for_record
 
 
-PROCESS_FILES = {
-    'ppt/slides/_rels/slide2.xml.rels': 'record_slide_rels',
-    'ppt/slides/slide1.xml': 'title_slide',
-    'ppt/slides/slide2.xml': 'record_slide',
-    'ppt/notesSlides/notesSlide1.xml': 'title_slide_notes',
-    'ppt/notesSlides/notesSlide2.xml': 'record_slide_notes',
-    'ppt/notesSlides/_rels/notesSlide2.xml.rels': 'record_slide_notes_rels',
-    'ppt/presentation.xml': 'presentation',
-    'ppt/_rels/presentation.xml.rels': 'presentation_rels',
-    '[Content_Types].xml': 'content_types',
+SLIDE_LAYOUT_TITLE = 0
+SLIDE_LAYOUT_TITLE_AND_CONTENT = 1
+SLIDE_LAYOUT_TWO_COLUMNS = 3
+SLIDE_LAYOUT_BLANK = 6
+
+
+COLORS = {
+    'white': RGBColor(255, 255, 255),
+    'grey': RGBColor(128, 128, 128),
+    'black': RGBColor(0, 0, 0),
 }
 
-
-def standalone(xml):
-    parts = xml.split(b'?>', 1)
-    if parts[0].startswith(b'<?xml '):
-        xml = parts[0] + b' standalone="yes"?>' + parts[1]
-    return xml
+FONT_COLORS = {
+    'white': RGBColor(0, 0, 0),
+    'grey': RGBColor(0, 0, 0),
+    'black': RGBColor(255, 255, 255),
+}
 
 
 class PowerPointGenerator:
@@ -32,302 +30,114 @@ class PowerPointGenerator:
     def __init__(self, presentation, user):
         self.presentation = presentation
         self.items = presentation.items.filter(hidden=False)
-        self.slide_template = None
-        self.slide_rel_template = None
-        self.slide_notes_template = None
-        self.slide_notes_rel_template = None
-        self.content_types = None
-        self.additional_content_types = {}
-        self.placeholder_image = None
-        self.remove_placeholder_image = True
-        self.media = {}
         self.user = user
 
-    @staticmethod
-    def get_templates():
-        return [f for f in os.listdir(
-                os.path.join(os.path.dirname(__file__), 'pptx_templates')
-            ) if f.endswith('.pptx')]
-
-    def generate(self, template, outfile):
+    def generate(self, outfile, color, titles, metadata):
         if len(self.items) == 0:
             return False
-        if not template.endswith('.pptx'):
-            template += '.pptx'
-        template = ZipFile(
-            os.path.join(
-                os.path.dirname(__file__), 'pptx_templates', template),
-            mode='r'
-        )
-        outfile = ZipFile(outfile, mode='w', compression=ZIP_DEFLATED)
-        for name in template.namelist():
-            content = template.read(name)
-            if name in PROCESS_FILES:
-                p = getattr(self, '_' + PROCESS_FILES[name])
-                p(name, content, outfile)
-            else:
-                if name.startswith('ppt/media/'):
-                    self.media[name] = content
-                else:
-                    outfile.writestr(name, content)
-        template.close()
-        self._process_slides(outfile)
-        self._process_content_types(outfile)
-        for name in self.media:
-            if name != self.placeholder_image or \
-                    not self.remove_placeholder_image:
-                outfile.writestr(name, self.media[name])
-        outfile.close()
+        pptx_file = Presentation()
+        fill = pptx_file.slide_master.background.fill
+        fill.solid()
+        fill.fore_color.rgb = COLORS[color]
+        self.text_color = FONT_COLORS[color]
+        self.make_title_slide(pptx_file)
+        self.process_slides(pptx_file, titles, metadata)
+        pptx_file.save(outfile)
         return True
 
-    def _process_slides(self, outfile):
-        for n in range(2, len(self.items) + 2):
-            item = self.items[n - 2]
+    def make_title_slide(self, pptx_file):
+        slide_layout = pptx_file.slide_layouts[SLIDE_LAYOUT_TITLE]
+        slide = pptx_file.slides.add_slide(slide_layout)
+        tf = slide.shapes.title.text_frame
+        p = tf.paragraphs[0]
+        p.font.color.rgb = self.text_color
+        p.text = self.presentation.title
 
-            x = xml.dom.minidom.parseString(self.slide_template)
-            xr = xml.dom.minidom.parseString(self.slide_rel_template)
-            xn = xml.dom.minidom.parseString(self.slide_notes_template)
-            xnr = xml.dom.minidom.parseString(self.slide_notes_rel_template)
-            record = item.record
-
-            # insert notes
-            fieldvalues = list(item.get_fieldvalues())
-            if fieldvalues:
-                fieldvalues[0]._subitem = False
-            for i in range(1, len(fieldvalues)):
-                fieldvalues[i]._subitem = (
-                    fieldvalues[i].field == fieldvalues[i - 1].field and
-                    fieldvalues[i].group == fieldvalues[i - 1].group
-                )
-
-            body = xn.getElementsByTagName('p:txBody').item(0)
-
-            def append_text(text):
-                ap1 = xn.createElement('a:p')
-                ar = xn.createElement('a:r')
-                ar_pr = xn.createElement('a:rPr')
-                ar_pr.setAttribute('dirty', '0')
-                ar_pr.setAttribute('lang', 'en-US')
-                ar_pr.setAttribute('smtClean', '0')
-                at = xn.createElement('a:t')
-                txt = xn.createTextNode(text)
-                at.appendChild(txt)
-                ar.appendChild(ar_pr)
-                ar.appendChild(at)
-                ap1.appendChild(ar)
-                body.appendChild(ap1)
-
-            for value in fieldvalues:
-                append_text(
-                    '%s%s: %s' % (
-                        value._subitem and 'sub' or '',
-                        value.resolved_label,
-                        value.value or ''
-                    )
-                )
-
-            annotation = item.annotation
-            if annotation:
-                append_text('Annotation: %s' % annotation)
-
-            # update the slide number in notes
-            e = [e for e in xn.getElementsByTagName('a:fld') if e.getAttribute('type') == 'slidenum'][0]
-            e.getElementsByTagName('a:t').item(0).firstChild.nodeValue = n
-
-            # insert title
-            for e in x.getElementsByTagName('a:t'):
-                t = e.firstChild.nodeValue
-                if t == 'title':
-                    t = item.title or ''
-                e.firstChild.nodeValue = t
-            # insert image if available
+    def process_slides(self, pptx_file, titles, metadata):
+        for item in self.items:
             try:
                 image = get_image_for_record(
-                    record,
+                    item.record,
                     self.user,
                     getattr(settings, 'PPTEXPORT_WIDTH', 800),
                     getattr(settings, 'PPTEXPORT_HEIGHT', 600)
                 )
             except:
                 image = None
-            if image and os.path.isfile(image):
-                # add image to outfile
-                with open(image, 'rb') as f:
-                    content = f.read()
-                name = 'image%s.jpg' % n
-                self.additional_content_types.setdefault(
-                    'image/jpeg;jpg', None)
-                outfile.writestr('ppt/media/' + name, content)
-
-                # find image placeholder
-                e = [e for e in x.getElementsByTagName('p:cNvPr') if e.getAttribute('descr') == 'image'][0]
-                e = e.parentNode.parentNode
-                embed_id = e.getElementsByTagName(
-                    'a:blip')[0].getAttribute('r:embed')
-
-                try:
-                    width, height = Image.open(image).size
-                except IOError:
-                    width, height = None, None
-                if width and height:
-                    offset = e.getElementsByTagName('a:off')[0]
-                    extent = e.getElementsByTagName('a:ext')[0]
-                    px = int(offset.getAttribute('x'))
-                    py = int(offset.getAttribute('y'))
-                    pw = int(extent.getAttribute('cx'))
-                    ph = int(extent.getAttribute('cy'))
-
-                    imageratio = width * 1.0 / height
-                    ratio = pw * 1.0 / ph
-
-                    if imageratio > ratio:
-                        new_h = height * pw / width
-                        new_w = pw
-                        new_x = px
-                        new_y = py + (ph - new_h) / 2
-                    else:
-                        new_h = ph
-                        new_w = width * ph / height
-                        new_x = px + (pw - new_w) / 2
-                        new_y = py
-
-                    offset.setAttribute('x', str(new_x))
-                    offset.setAttribute('y', str(new_y))
-                    extent.setAttribute('cx', str(new_w))
-                    extent.setAttribute('cy', str(new_h))
-
-                    # add image to slide relation
-                    rel = [e for e in xr.getElementsByTagName('Relationship') if e.getAttribute('Id') == embed_id][0]
-                    self.placeholder_image = 'ppt' + rel.getAttribute(
-                        'Target')[2:]
-                    rel.setAttribute('Target', '../media/' + name)
-
-                    # add notes to slide relation
-                    rel2 = [e for e in xr.getElementsByTagName('Relationship') if e.getAttribute('Type') ==
-                        "http://schemas.openxmlformats.org/officeDocument/"
-                        "2006/relationships/notesSlide"][0]
-                    rel2.setAttribute(
-                        'Target', '../notesSlides/notesSlide%s.xml' % n)
-
-                    # add slide to notes relation
-                    rel3 = [e for e in xnr.getElementsByTagName('Relationship') if e.getAttribute('Type') ==
-                        "http://schemas.openxmlformats.org/officeDocument/"
-                        "2006/relationships/slide"][0]
-                    rel3.setAttribute('Target', '../slides/slide%s.xml' % n)
+            values = item.get_fieldvalues()
+            if metadata:
+                layout = SLIDE_LAYOUT_TWO_COLUMNS
+            elif titles:
+                layout = SLIDE_LAYOUT_TITLE_AND_CONTENT
             else:
-                self.remove_placeholder_image = False
+                layout = SLIDE_LAYOUT_BLANK
+            slide_layout = pptx_file.slide_layouts[layout]
+            slide = pptx_file.slides.add_slide(slide_layout)
+            self.add_metadata_to_textframe(
+                slide.notes_slide.notes_text_frame, values)
+            if titles:
+                tf = slide.shapes.title.text_frame
+                p = tf.paragraphs[0]
+                p.font.color.rgb = self.text_color
+                p.text = item.title
+            if not image:
+                continue
 
-            outfile.writestr(
-                'ppt/slides/slide%s.xml' % n,
-                standalone(x.toxml(encoding="UTF-8"))
-            )
-            outfile.writestr(
-                'ppt/slides/_rels/slide%s.xml.rels' % n,
-                standalone(xr.toxml(encoding="UTF-8"))
-            )
-            outfile.writestr(
-                'ppt/notesSlides/notesSlide%s.xml' % n,
-                standalone(xn.toxml(encoding="UTF-8"))
-            )
-            outfile.writestr(
-                'ppt/notesSlides/_rels/notesSlide%s.xml.rels' % n,
-                standalone(xnr.toxml(encoding="UTF-8"))
-            )
+            if not metadata and not titles:
+                self.insert_image(
+                    slide, image, 0, 0,
+                    pptx_file.slide_width, pptx_file.slide_height
+                )
+                continue
 
-    def _process_content_types(self, outfile):
-        x = xml.dom.minidom.parseString(self.content_types)
-        for n in range(3, len(self.items) + 2):
-            e = x.createElement('Override')
-            e.setAttribute('PartName', '/ppt/slides/slide%s.xml' % n)
-            e.setAttribute(
-                'ContentType',
-                'application/vnd.openxmlformats-officedocument.'
-                'presentationml.slide+xml'
-            )
-            x.firstChild.appendChild(e)
-            e = x.createElement('Override')
-            e.setAttribute('PartName', '/ppt/notesSlides/notesSlide%s.xml' % n)
-            e.setAttribute(
-                'ContentType',
-                'application/vnd.openxmlformats-officedocument.'
-                'presentationml.notesSlide+xml'
-            )
-            x.firstChild.appendChild(e)
-        for e in x.getElementsByTagName('Default'):
-            # remove additional content types that already exist
-            self.additional_content_types.pop(
-                '%s;%s' % (
-                    e.getAttribute('ContentType'),
-                    e.getAttribute('Extension')
-                ),
-                None
-            )
-        for c in self.additional_content_types:
-            e = x.createElement('Default')
-            ct, ex = c.split(';')
-            e.setAttribute('ContentType', ct)
-            e.setAttribute('Extension', ex)
-            x.firstChild.appendChild(e)
-        outfile.writestr(
-            '[Content_Types].xml', standalone(x.toxml(encoding="UTF-8")))
+            def insert_image(placeholder):
+                self.insert_image(
+                    slide, image, placeholder.left,
+                    placeholder.top, placeholder.width,
+                    placeholder.height
+                )
 
-    def _title_slide(self, name, content, outfile):
-        x = xml.dom.minidom.parseString(content)
-        for e in x.getElementsByTagName('a:t'):
-            t = e.firstChild.nodeValue
-            if t == 'title':
-                t = self.presentation.title
-            elif t == 'description':
-                t = self.presentation.description or '[description]'
-            e.firstChild.nodeValue = t
-        outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))
+            def insert_metadata(placeholder):
+                self.insert_metadata(
+                    slide, values, placeholder.left,
+                    placeholder.top, placeholder.width,
+                    placeholder.height
+                )
 
-    def _record_slide(self, name, content, outfile):
-        self.slide_template = content
+            methods = [insert_image]
+            if metadata:
+                methods.append(insert_metadata)
 
-    def _record_slide_rels(self, name, content, outfile):
-        self.slide_rel_template = content
+            for shape in slide.shapes:
+                if methods and shape.is_placeholder and str(
+                        shape.placeholder_format.type).startswith('OBJECT'):
+                    methods.pop(0)(
+                        slide.placeholders[shape.placeholder_format.idx]
+                    )
 
-    def _record_slide_notes(self, name, content, outfile):
-        self.slide_notes_template = content
+    def insert_image(self, slide, image, left, top, width, height):
+        iwidth, iheight = Image.open(image).size
+        ratio = iwidth / iheight
+        if ratio > (width / height):
+            # need to center vertically
+            space = (height - width / ratio) / 2
+            slide.shapes.add_picture(
+                image, left, top + space, width, height - space * 2)
+        else:
+            # need to center horizontally
+            space = (width - height * ratio) / 2
+            slide.shapes.add_picture(
+                image, left + space, top, width - space * 2, height)
 
-    def _title_slide_notes(self, name, content, outfile):
-        x = xml.dom.minidom.parseString(content)
-        outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))
+    def insert_metadata(self, slide, values, left, top, width, height):
+        box = slide.shapes.add_textbox(left, top, width, height)
+        self.add_metadata_to_textframe(box.text_frame, values)
 
-    def _record_slide_notes_rels(self, name, content, outfile):
-        self.slide_notes_rel_template = content
-
-    def _presentation(self, name, content, outfile):
-        x = xml.dom.minidom.parseString(content)
-        p = x.getElementsByTagName('p:sldIdLst')[0]
-        maxid = max([int(e.getAttribute('id')) for e in p.getElementsByTagName('p:sldId')])
-        for n in range(3, len(self.items) + 2):
-            e = x.createElement('p:sldId')
-            e.setAttribute('id', str(maxid + n))
-            e.setAttributeNS(
-                'http://schemas.openxmlformats.org/officeDocument/'
-                '2006/relationships',
-                'r:id',
-                'rooibosId%s' % n
-            )
-            p.appendChild(e)
-        outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))
-
-    def _presentation_rels(self, name, content, outfile):
-        x = xml.dom.minidom.parseString(content)
-        p = x.getElementsByTagName('Relationships')[0]
-        for n in range(3, len(self.items) + 2):
-            e = x.createElement('Relationship')
-            e.setAttribute('Id', 'rooibosId%s' % n)
-            e.setAttribute(
-                'Type',
-                'http://schemas.openxmlformats.org/officeDocument/'
-                '2006/relationships/slide'
-            )
-            e.setAttribute('Target', 'slides/slide%s.xml' % n)
-            p.appendChild(e)
-        outfile.writestr(name, standalone(x.toxml(encoding="UTF-8")))
-
-    def _content_types(self, name, content, outfile):
-        self.content_types = content
+    def add_metadata_to_textframe(self, text_frame, values):
+        p = text_frame.paragraphs[0]
+        for value in values:
+            run = p.add_run()
+            run.font.color.rgb = self.text_color
+            run.text = '%s: %s' % (value.resolved_label, value.value)
+            p = text_frame.add_paragraph()
+        text_frame.word_wrap = True

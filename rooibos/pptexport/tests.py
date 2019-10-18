@@ -34,10 +34,10 @@ class PowerpointTestCase(TestCase):
         self.storage.delete()
 
     def test_simple_powerpoint_file(self):
-        self._generate('simple.pptx')
+        self._generate()
 
-    def _generate(self, template):
-        file = os.path.join(self.tempdir, 'test-%s' % template)
+    def _generate(self):
+        file = os.path.join(self.tempdir, 'test-presentation.pptx')
         collection = Collection.objects.create(
             title='Simple Collection', description='Simple collection')
         AccessControl.objects.create(content_object=collection, read=True)
@@ -75,4 +75,6 @@ class PowerpointTestCase(TestCase):
 
         g = PowerPointGenerator(presentation, AnonymousUser())
 
-        self.assertTrue(g.generate(template, file))
+        self.assertTrue(g.generate(file, 'white', True, True))
+        self.assertTrue(g.generate(file, 'white', True, False))
+        self.assertTrue(g.generate(file, 'white', False, False))
