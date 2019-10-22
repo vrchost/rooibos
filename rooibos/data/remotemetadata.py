@@ -75,7 +75,7 @@ def fetch_remote_metadata():
     tasks = []
 
     for source in check_remote_metadata():
-        filename = "".join(random.sample(string.letters + string.digits, 32))
+        filename = "".join(random.sample(string.ascii_lowercase + string.digits, 32))
         full_metadata_path = os.path.join(
             _get_scratch_dir(), 'remote-metadata=' + filename)
         full_mapping_path = os.path.join(

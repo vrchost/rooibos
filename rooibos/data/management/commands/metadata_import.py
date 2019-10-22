@@ -35,7 +35,7 @@ class Command(BaseCommand):
             print("--collection, --mapping and --data are required parameters")
             return
 
-        filename = "".join(random.sample(string.letters + string.digits, 32))
+        filename = "".join(random.sample(string.ascii_lowercase + string.digits, 32))
         filename = 'cmdline=' + filename
         full_path = os.path.join(_get_scratch_dir(), filename)
         shutil.copy(data_file, full_path)

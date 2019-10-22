@@ -506,7 +506,7 @@ def data_import(request):
             file = request.FILES['file']
 
             filename = "".join(
-                random.sample(string.letters + string.digits, 32))
+                random.sample(string.ascii_lowercase + string.digits, 32))
             full_path = os.path.join(
                 _get_scratch_dir(), _get_filename(request, filename))
             dest = open(full_path, 'wb+')

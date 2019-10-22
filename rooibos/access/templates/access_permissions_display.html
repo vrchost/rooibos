@@ -8,7 +8,7 @@
 <span class="{{ ac.read|yesno:"a,d,u" }}">R</span>
 <span class="{{ ac.write|yesno:"a,d,u" }}">W</span>
 <span class="{{ ac.manage|yesno:"a,d,u" }}">M</span>
-<span class="{{ ac.restrictions|yesno:"a,u,u" }}"{% if ac.restrictions %} title="{% for k,v in ac.restrictions.iteritems %}{{ k }}={{ v }}
+<span class="{{ ac.restrictions|yesno:"a,u,u" }}"{% if ac.restrictions %} title="{% for k,v in ac.restrictions.items %}{{ k }}={{ v }}
 {% endfor %}"{% endif %}>&reg;</span>
 {% if ac.user %}<img src="{% static 'images/user.png' %}" alt="User" class="user-icon" />
 <a href="{% url "access-effective-permissions" contenttype.app_label contenttype.model object.id object.name %}?user={{ ac.user.username|urlencode }}">{{ ac.user.username }}</a>
