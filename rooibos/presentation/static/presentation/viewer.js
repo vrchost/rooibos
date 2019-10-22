@@ -1,4 +1,17 @@
+/* global Mirador, jQuery */
+
 var Viewer = function (options) {
+
+    "use strict";
+    var OpenSeadragon = Mirador.OpenSeadragon;
+    Mirador.OpenSeadragon = function (options) {
+        return OpenSeadragon(jQuery.extend({}, options, {
+            minZoomImageRatio: 0.1,
+            maxZoomPixelRatio: 3.0,
+            visibilityRatio: 0.2
+        }));
+    };
+
 
     this.mirador = Mirador(options);
     var viewer = this;
@@ -13,7 +26,7 @@ var Viewer = function (options) {
         this.active = {
             window: 0,
             slot: 0
-        }
+        };
     }
 
     this.toggleAnnotationFontSize = function () {
