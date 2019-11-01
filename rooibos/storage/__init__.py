@@ -187,8 +187,10 @@ def get_image_for_record(
     else:
         orig_path = m.get_absolute_file_path()
         if loris_name:
-            # need to produce a filename without spaces and proper extension
-            if ' ' in orig_path or not orig_path.lower().endswith('.jpg'):
+            # need to produce a filename without special characters
+            # and proper extension
+            if re.match(r'.*[^\w].*', orig_path) \
+                    or not orig_path.lower().endswith('.jpg'):
                 name = '%s.jpg' % m.id
                 sp = m.storage.get_derivative_storage_path()
                 if sp:
