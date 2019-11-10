@@ -1,4 +1,17 @@
+/* global Mirador, jQuery */
+
 var Viewer = function (options) {
+
+    "use strict";
+    var OpenSeadragon = Mirador.OpenSeadragon;
+    Mirador.OpenSeadragon = function (options) {
+        return OpenSeadragon(jQuery.extend({}, options, {
+            minZoomImageRatio: 0.1,
+            maxZoomPixelRatio: 3.0,
+            visibilityRatio: 0.2
+        }));
+    };
+
 
     this.mirador = Mirador(options);
     var viewer = this;
@@ -13,7 +26,7 @@ var Viewer = function (options) {
         this.active = {
             window: 0,
             slot: 0
-        }
+        };
     }
 
     this.toggleAnnotationFontSize = function () {
@@ -393,6 +406,23 @@ var Viewer = function (options) {
                         .parents('.window')
                         .find('.window-manifest-title')
                         .text(canvas.label);
+
+                    var metadata = imageView.element
+                        .find('.mirador-canvas-metadata');
+                    if (!metadata.draggable('instance')) {
+                        metadata.draggable({
+                            axis: 'y',
+                            drag: function (event, ui) {
+                                var minTop =
+                                    metadata.offsetParent().height() / 4;
+                                var maxTop = minTop * 4 * 95 / 100;
+                                ui.position.top = Math.max(
+                                    minTop, ui.position.top);
+                                ui.position.top = Math.min(
+                                    maxTop, ui.position.top);
+                            }
+                        });
+                    }
                 }
             });
         });
