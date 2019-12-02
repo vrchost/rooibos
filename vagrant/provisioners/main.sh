@@ -8,7 +8,7 @@ apt-get install -y python python-pip libjpeg-dev libfreetype6-dev \
     nginx mysql-server libmysqlclient-dev python-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     rabbitmq-server supervisor ffmpeg openjdk-11-jre-headless \
-    python-virtualenv
+    python-virtualenv libssl-dev
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
@@ -20,7 +20,7 @@ service nginx start
 if [ ! -e /etc/default/solr.in.sh ] ; then
     SOLR_VERSION=7.4.0
     id -u solr &>/dev/null || echo -e '\\n\\n\\n\\n\\n\\n' | adduser --disabled-password solr
-    mkdir -p /opt/solr_install /opt/solr
+    mkdir -p /opt/solr_install /opt/solr /vagrant/temp
     chown solr:solr /opt/solr
     cd /vagrant/temp
     [ -e solr-$SOLR_VERSION.tgz ] || wget https://archive.apache.org/dist/lucene/solr/$SOLR_VERSION/solr-$SOLR_VERSION.tgz
