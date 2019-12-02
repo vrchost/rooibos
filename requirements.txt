@@ -38,7 +38,7 @@ flickrapi==1.4.5
 flup
 gunicorn
 ipaddr
-MySQL-Python
+pymysql
 pep8
 pep8-naming
 pika

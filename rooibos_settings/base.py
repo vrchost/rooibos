@@ -4,6 +4,10 @@
 import os
 import sys
 import re
+import pymysql
+
+
+pymysql.install_as_MySQLdb()
 
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
