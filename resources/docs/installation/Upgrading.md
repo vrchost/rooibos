@@ -2,9 +2,15 @@
 
 To upgrade an installation of MDID 3.3 or later, replace the old
 package folder with the new package, keeping your `rooibos_settings` and
-any other custom files and folders in place.
+any other custom files and folders in place.  Make sure to copy the new
+`rooibos_settings/base.py`, since it likely includes changes.
 
-Afterwards, run `django-admin migrate` to apply any database changes.
+Afterwards, run the following commands to apply any database changes.
+
+```
+django-admin migrate storage --fake-initial --noinput
+django-admin migrate --noinput
+```
 
 In your `local_settings.py`, change or add the following setting to reflect
 the new port used by Solr:
@@ -12,7 +18,6 @@ the new port used by Solr:
 ```
 SOLR_URL = 'http://localhost:8983/solr/mdid'
 ```
-
 
 # Upgrading from MDID 3.2.x
 
