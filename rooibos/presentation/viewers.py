@@ -13,6 +13,7 @@ from rooibos.data.models import Record
 from rooibos.api.views import presentation_detail
 from models import Presentation
 from .views import get_metadata
+from .mirador_package import MiradorPackageViewer
 from reportlab.pdfgen import canvas
 from reportlab.lib import pagesizes
 from reportlab.lib.units import inch
@@ -71,6 +72,8 @@ class PresentationViewer(Viewer):
 
     def view(self, request):
         return_url = request.GET.get('next', reverse('presentation-browse'))
+        manifest_url = reverse(
+            'presentation-manifest', args=(self.obj.id, self.obj.name))
         return render_to_response(
             getattr(
                 settings,
@@ -80,6 +83,7 @@ class PresentationViewer(Viewer):
             {
                 'presentation': self.obj,
                 'return_url': return_url,
+                'manifest_url': manifest_url,
             },
             context_instance=RequestContext(request)
         )
@@ -521,4 +525,11 @@ class PackageFilesViewer(Viewer):
 def packagefilesviewer(obj, request, objid=None):
     presentation = _get_presentation(obj, request, objid)
     return PackageFilesViewer(
+        presentation, request.user) if presentation else None
+
+
+@register_viewer('miradorpackageviewer', MiradorPackageViewer)
+def miradorpackageviewer(obj, request, objid=None):
+    presentation = _get_presentation(obj, request, objid)
+    return MiradorPackageViewer(
         presentation, request.user) if presentation else None
