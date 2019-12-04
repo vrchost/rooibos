@@ -27,8 +27,8 @@ class Storage(models.Model):
         help_text="Absolute path to server directory containing files."
     )
 
-    credential_id = models.CharField(max_length=100, null=True)
-    credential_key = models.CharField(max_length=100, null=True)
+    credential_id = models.CharField(max_length=100, null=True, blank=True)
+    credential_key = models.CharField(max_length=100, null=True, blank=True)
 
     urlbase = models.CharField(
         max_length=1024,

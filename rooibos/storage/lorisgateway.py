@@ -70,10 +70,12 @@ def handle_loris_request(request, filepath, record_id, record_name):
     if response.status_code != 200:
         raise Http404()
 
-    return HttpResponse(
+    http_response = HttpResponse(
         content=response.get_data(),
         content_type=response.headers['Content-Type'],
     )
+    http_response['Access-Control-Allow-Origin'] = '*'
+    return http_response
 
 
 LORIS_CONF = """

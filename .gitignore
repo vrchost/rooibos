@@ -11,3 +11,4 @@ rooibos/static/cache/*
 *.log
 temp/
 .env/
+travis-build/

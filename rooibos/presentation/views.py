@@ -657,7 +657,7 @@ def get_metadata(fieldvalues):
     return result
 
 
-def slide_manifest(request, slide, owner):
+def slide_manifest(request, slide, owner, offline=False):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
     title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
@@ -687,28 +687,41 @@ def slide_manifest(request, slide, owner):
         canvas_height *= 2
         canvas_width *= 2
 
-    images = [{
-        '@type': 'oa:Annotation',
-        'motivation': 'sc:painting',
-        'resource': {
+    if width and height:
+
+        resource = {
             '@id': image,
             '@type': 'dctypes:Image',
             'format': 'image/jpeg',
-            'service': {
+            "height": height,
+            "width": width
+        }
+
+        if not offline:
+            resource['service'] = {
                 '@context': 'http://iiif.io/api/image/2/context.json',
                 '@id': image,
                 'profile': 'http://iiif.io/api/image/2/level1.json'
-            },
-            "height": height,
-            "width": width
-        },
-        'on': id,
-    }] if width and height else None
+            }
 
-    if not images:
-        return special_slide(request, kind='missing', label='Missing image', index=slide.id)
+        images = [{
+            '@type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': resource,
+            'on': id,
+        }]
 
-    return {
+    else:
+
+        return special_slide(
+            request,
+            kind='missing',
+            label='Missing image',
+            index=slide.id,
+            offline=offline,
+        )
+
+    result = {
         '@id': id,
         '@type': 'sc:Canvas',
         'label': title,
@@ -718,14 +731,35 @@ def slide_manifest(request, slide, owner):
         'metadata': metadata,
     }
 
+    if offline:
+        result['thumbnail'] = {
+            '@id': '/thumbs' + image ,
+        }
 
-def special_slide(request, kind, label, index=None):
+    return result
+
+
+def special_slide(request, kind, label, index=None, offline=False):
     image = reverse(
         'presentation-%s-slide' % kind,
         kwargs={'extra': str(index) if index else ''}
     )
     id = get_id(request, 'slide', 'canvas', 'slide%d' % (index or 0))
-    return {
+    resource = {
+        '@id': image,
+        '@type': 'dctypes:Image',
+        'format': 'image/jpeg',
+        "height": 100,
+        "width": 100
+    }
+    if not offline:
+        resource['service'] = {
+            '@context': 'http://iiif.io/api/image/2/context.json',
+            '@id': image,
+            'profile': 'http://iiif.io/api/image/2/level1.json'
+        }
+
+    result = {
         '@id': id,
         '@type': 'sc:Canvas',
         'label': label,
@@ -734,26 +768,21 @@ def special_slide(request, kind, label, index=None):
         'images': [{
             '@type': 'oa:Annotation',
             'motivation': 'sc:painting',
-            'resource': {
-                '@id': image,
-                '@type': 'dctypes:Image',
-                'format': 'image/jpeg',
-                'service': {
-                    '@context': 'http://iiif.io/api/image/2/context.json',
-                    '@id': image,
-                    'profile': 'http://iiif.io/api/image/2/level1.json'
-                },
-                "height": 100,
-                "width": 100
-            },
+            'resource': resource,
             'on': id,
         }],
         'metadata': [],
     }
 
+    if offline:
+        result['thumbnail'] = {
+            '@id': image,
+        }
 
-@json_view
-def manifest(request, id, name):
+    return result
+
+
+def raw_manifest(request, id, name, offline=False):
     p = Presentation.get_by_id_for_request(id, request)
     if not p:
         return dict(result='error')
@@ -775,12 +804,25 @@ def manifest(request, id, name):
             '@type': 'sc:Range',
             'label': 'All slides',
             'canvases': [
-                slide_manifest(request, slide, owner) for slide in slides
+                slide_manifest(
+                    request,
+                    slide,
+                    owner,
+                    offline=offline,
+                ) for slide in slides
             ] + [
-                special_slide(request, kind='blank', label='End of presentation')
+                special_slide(
+                    request,
+                    kind='blank',
+                    label='End of presentation',
+                    offline=offline,
+                )
             ]
         }],
     }
+
+
+manifest = json_view(raw_manifest)
 
 
 def transparent_png(request, extra):
