@@ -8,13 +8,12 @@ from django.contrib.staticfiles import finders
 from django.core.files.temp import NamedTemporaryFile
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import loader, RequestContext
-from django.core.servers.basehttp import FileWrapper
+from django.template import loader
+from wsgiref.util import FileWrapper
 
 from rooibos.presentation.views import raw_manifest, transparent_png, \
     missing_png
-from rooibos.storage import get_image_for_record
+from rooibos.storage.functions import get_image_for_record
 from rooibos.viewers import Viewer
 
 
