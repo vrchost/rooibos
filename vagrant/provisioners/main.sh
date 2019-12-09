@@ -4,11 +4,11 @@ debconf-set-selections <<< 'mysql-server mysql-server/root_password password cha
 debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password changeme'
 
 apt-get update
-apt-get install -y python python-pip libjpeg-dev libfreetype6-dev \
-    nginx mysql-server libmysqlclient-dev python-dev \
+apt-get install -y python3 python3-pip libjpeg-dev libfreetype6-dev \
+    nginx mysql-server libmysqlclient-dev python3-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     rabbitmq-server supervisor ffmpeg openjdk-11-jre-headless \
-    python-virtualenv libssl-dev
+    python3-virtualenv libssl-dev
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
@@ -18,7 +18,7 @@ update-rc.d nginx enable
 service nginx start
 
 if [ ! -e /etc/default/solr.in.sh ] ; then
-    SOLR_VERSION=7.4.0
+    SOLR_VERSION=7.7.2
     id -u solr &>/dev/null || echo -e '\\n\\n\\n\\n\\n\\n' | adduser --disabled-password solr
     mkdir -p /opt/solr_install /opt/solr /vagrant/temp
     chown solr:solr /opt/solr
@@ -63,8 +63,6 @@ create database if not exists mdid character set utf8;
 grant all privileges on mdid.* to mdid@localhost identified by 'mdid';
 END
 
-
-
 mkdir -p /opt/mdid/scratch /opt/mdid/storage /opt/mdid/log /opt/mdid/static
 ln -s -f -n /vagrant /opt/mdid/rooibos
 ln -s -f -n /vagrant/rooibos_settings /opt/mdid/rooibos_settings
@@ -72,19 +70,5 @@ ln -s -f -n /vagrant/rooibos_settings /opt/mdid/rooibos_settings
 chown -R vagrant:vagrant /opt/mdid
 if [ ! -e /opt/mdid/venv ] ; then
     cd /opt/mdid
-    sudo -u vagrant virtualenv venv
-fi
-
-if [ ! -e /opt/mdid/venv/lib/python2.7/site-packages/gfx.so ] ; then
-    cd /vagrant/temp
-    if [ ! -e swftools-0.9.2.tar.gz ] ; then
-        wget -q http://www.swftools.org/swftools-0.9.2.tar.gz
-        tar xzf swftools-0.9.2.tar.gz
-    fi
-    cd swftools-0.9.2
-    if [ ! -e lib/python/gfx.so ] ; then
-        ./configure > /dev/null
-        make > /dev/null
-    fi
-    sudo -u vagrant cp lib/python/gfx.so /opt/mdid/venv/lib/python2.7/site-packages/
+    sudo -u vagrant python3 -m virtualenv -p python3 venv
 fi
