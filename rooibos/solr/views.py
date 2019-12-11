@@ -492,6 +492,7 @@ def run_search(user,
             query, sort=sort, rows=pagesize, start=(page - 1) * pagesize,
             facets=return_facets, facet_mincount=1, facet_limit=100)
     except SolrError:
+        logger.exception('SolrError: %r' % query)
         hits = -1
         records = None
         facets = dict()
