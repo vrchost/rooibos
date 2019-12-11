@@ -531,6 +531,8 @@ class DummyContent():
             return list(range(index.start or 0, index.stop, index.step or 1))
         else:
             return None
+    def count(self):
+        return self.length
 
 
 def search(request, id=None, name=None, selected=False, json=False):
