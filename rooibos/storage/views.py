@@ -115,6 +115,14 @@ def retrieve(request, recordid, record, mediaid, media):
     return retval
 
 
+def safe_filename(filename):
+    keepcharacters = (' ', '.', '_')
+    return "".join(
+        c for c in filename
+        if c.isalnum() or c in keepcharacters
+    ).rstrip()
+
+
 @add_content_length
 @cache_control(private=True, max_age=3600)
 def retrieve_image(request, recordid, record, width=None, height=None):
@@ -151,9 +159,9 @@ def retrieve_image(request, recordid, record, width=None, height=None):
             # prevent duplication
             if record.endswith('jpg'):
                 record = record[:-3]
-            name = record_obj.title or record
+            name = safe_filename(smart_str(record_obj.title or record))
             response["Content-Disposition"] = \
-                'attachment; filename="%s.jpg"' % smart_str(name)
+                'attachment; filename="%s.jpg"' % name
         return response
     except IOError:
         logging.error("IOError: %s" % path)
