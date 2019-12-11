@@ -8,7 +8,7 @@ apt-get install -y python3 python3-pip libjpeg-dev libfreetype6-dev \
     nginx mysql-server libmysqlclient-dev python3-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     rabbitmq-server supervisor ffmpeg openjdk-11-jre-headless \
-    python3-virtualenv libssl-dev
+    python3-virtualenv libssl-dev poppler-utils
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/

@@ -65,34 +65,7 @@ def _which(program):
     return None
 
 
-def _pdfthumbnail_gfx(infile):
-    logger.debug('Creating PDF thumbnail for %s' % infile)
-    handle, filename = tempfile.mkstemp('.jpg')
-    os.close(handle)
-    try:
-        executable = _which('python.exe') or _which('python') or 'python'
-        cmd = [
-            executable,
-            os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
-            infile,
-            filename,
-        ]
-        logger.debug('Running %s' % cmd)
-        proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        (output, errors) = proc.communicate()
-        logger.debug('output "%s" errors "%s"' % (output, errors))
-        file = open(filename, 'rb')
-        result = BytesIO(file.read())
-        file.close()
-        return result, output, errors
-    except:
-        logger.exception('Could not create PDF thumbnail')
-        return None, None, None
-    finally:
-        os.remove(filename)
-
-
-def _pdfthumbnail_pdftoppm(infile):
+def _pdfthumbnail(infile):
     logger.debug('Creating PDF thumbnail for %s' % infile)
     handle, filename = tempfile.mkstemp('.jpg')
     os.close(handle)
@@ -113,7 +86,7 @@ def _pdfthumbnail_pdftoppm(infile):
         (output, errors) = proc.communicate()
         logger.debug('output "%s" errors "%s"' % (output, errors))
         file = open(filename, 'rb')
-        result = StringIO(file.read())
+        result = BytesIO(file.read())
         file.close()
         return result, output, errors
     except:
@@ -121,14 +94,6 @@ def _pdfthumbnail_pdftoppm(infile):
         return None, None, None
     finally:
         os.remove(filename)
-
-
-def _pdfthumbnail(infile):
-    processor = getattr(settings, 'PDF_PROCESSOR', None)
-    if processor == 'pdftoppm':
-        return _pdfthumbnail_pdftoppm(infile)
-    else:
-        return _pdfthumbnail_gfx(infile)
 
 
 def identify(file):
