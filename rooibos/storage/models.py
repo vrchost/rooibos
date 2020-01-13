@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.core.files import File
 from django.conf import settings
@@ -16,6 +18,8 @@ import multimedia
 from functions import extract_text_from_pdf_stream
 
 import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Storage(models.Model):
@@ -88,7 +92,7 @@ class Storage(models.Model):
                 Storage.storage_systems[key] = classobj(
                     base=self.base, storage=self)
             except Exception:
-                logging.exception(
+                logger.exception(
                     "Could not initialize storage %s" % classname)
                 return None
         return Storage.storage_systems.get(key)
@@ -145,6 +149,19 @@ class Storage(models.Model):
                     raise
         return sp
 
+    def clear_derivative_storage_for_media(self, media_id):
+        path = self.get_derivative_storage_path()
+        pattern = re.compile(r'^(tmp)?%d-' % media_id)
+        count = 0
+        for name in os.listdir(path):
+            if pattern.match(name):
+                try:
+                    os.remove(os.path.join(path,  name))
+                    count += 1
+                except:
+                    pass
+        logger.debug('Cleared %d derivatives for media %d' % (count, media_id))
+
     def is_local(self):
         return self.storage_system and self.storage_system.is_local()
 
@@ -177,8 +194,6 @@ class Media(models.Model):
     width = models.IntegerField(null=True)
     height = models.IntegerField(null=True)
     bitrate = models.IntegerField(null=True)
-    # This field is no longer used
-    master = models.ForeignKey('self', null=True, related_name='derivatives')
 
     class Meta:
         unique_together = ("record", "name")
@@ -228,7 +243,12 @@ class Media(models.Model):
             content.size = content.len
         if not isinstance(content, File):
             content = File(content)
-        name = self.storage and self.storage.save_file(name, content) or None
+        if self.storage:
+            if self.id:
+                self.storage.clear_derivative_storage_for_media(self.id)
+            name = self.storage.save_file(name, content)
+        else:
+            name = None
         if name:
             self.url = name
             self.identify(save=False)
@@ -251,8 +271,9 @@ class Media(models.Model):
             return None
 
     def delete_file(self):
-        self.clear_derivatives()
         if self.storage and self.url:
+            if self.id:
+                self.storage.clear_derivative_storage_for_media(self.id)
             return self.storage.storage_system.delete(self.url)
         else:
             return False
@@ -278,11 +299,6 @@ class Media(models.Model):
             self.bitrate = bitrate
             if save:
                 self.save()
-
-    def clear_derivatives(self):
-        for m in self.derivatives.all():
-            m.delete_file()
-        self.derivatives.all().delete()
 
     def is_local(self):
         return self.storage and self.storage.is_local()
