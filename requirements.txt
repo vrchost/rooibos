@@ -18,6 +18,8 @@
 attrs >= 17.4.0
 b2sdk==0.1.6
 beautifulsoup
+bleach==3.1.0
+bleach-whitelist==0.0.10
 boto
 Celery==4.2.1
 configobj >= 4.7.2,<=5.0.0
@@ -38,6 +40,7 @@ flickrapi==1.4.5
 flup
 gunicorn
 ipaddr
+markdown==3.1.1
 pymysql
 pep8
 pep8-naming

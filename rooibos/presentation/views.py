@@ -1,3 +1,6 @@
+import bleach as bleach
+import markdown
+from bleach_whitelist import markdown_tags, markdown_attrs
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.template import RequestContext
@@ -19,6 +22,7 @@ from rooibos.util.models import OwnedWrapper
 from rooibos.access.functions import filter_by_access
 from rooibos.data.models import FieldSet, Record
 from rooibos.data.forms import FieldSetChoiceField
+from rooibos.data.functions import get_fields_for_set
 from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
@@ -640,12 +644,21 @@ def get_id(request, *args):
 
 def get_metadata(fieldvalues):
     compact = getattr(settings, 'COMPACT_METADATA_VIEW', False)
+    markdown_fields = get_fields_for_set('markdown')
     result = []
     for fv in fieldvalues:
-        if not compact or not fv.subitem:
-            result.append(dict(label=fv.resolved_label, value=fv.value))
+        if fv.field_id in markdown_fields:
+            value = bleach.clean(
+                markdown.markdown(fv.value),
+                markdown_tags,
+                markdown_attrs
+            )
         else:
-            result[-1]['value'] += '; ' + fv.value
+            value = fv.value
+        if not compact or not fv.subitem:
+            result.append(dict(label=fv.resolved_label, value=value))
+        else:
+            result[-1]['value'] += '; ' + value
     return result
 
 
