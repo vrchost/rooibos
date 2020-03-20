@@ -1,5 +1,5 @@
 from rooibos.access.functions import filter_by_access
-from rooibos.data import FieldSet
+from rooibos.data.models import FieldSet
 from rooibos.userprofile.views import load_settings, store_settings
 from .models import Collection, Field, MetadataStandard, FieldValue, Record, \
     CollectionItem
