@@ -11,10 +11,10 @@ class StorageAdmin(admin.ModelAdmin):
 
 
 class MediaAdmin(admin.ModelAdmin):
-    list_display = ('name', 'record', 'master', 'storage', 'mimetype')
+    list_display = ('name', 'record', 'storage', 'mimetype')
     fieldsets = (
         (None, {
-            'fields': ('name', 'record', 'master')
+            'fields': ('name', 'record')
         }),
         ('Media File info', {
             'fields': (

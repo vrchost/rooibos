@@ -1,4 +1,5 @@
 from rooibos.access.functions import filter_by_access
+from rooibos.data import FieldSet
 from rooibos.userprofile.views import load_settings, store_settings
 from .models import Collection, Field, MetadataStandard, FieldValue, Record, \
     CollectionItem
@@ -168,3 +169,18 @@ def collection_load(user, json, **options):
         reset_queries()
 
     logging.debug("Collection load complete")
+
+
+def get_fields_for_set(set_name):
+    fields = dict()
+    try:
+        fields.update(
+            (field.id, None)
+            for field in
+            FieldSet.objects.get(
+                name='metadata-%s' % set_name
+            ).fields.all()
+        )
+    except FieldSet.DoesNotExist:
+        pass
+    return fields

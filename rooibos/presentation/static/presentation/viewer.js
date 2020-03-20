@@ -5,11 +5,26 @@ var Viewer = function (options) {
     "use strict";
     var OpenSeadragon = Mirador.OpenSeadragon;
     Mirador.OpenSeadragon = function (options) {
-        return OpenSeadragon(jQuery.extend({}, options, {
+        var osd = OpenSeadragon(jQuery.extend({}, options, {
             minZoomImageRatio: 0.1,
             maxZoomPixelRatio: 3.0,
             visibilityRatio: 0.2
         }));
+
+        var goHome = osd.viewport.__proto__.goHome;
+        osd.viewport.__proto__.goHome = function (immediate) {
+            var world = this.viewer.world;
+            var active = world._items.filter(function (item) { return item.opacity; });
+            if (active.length) {
+                var img = active[0];
+                var rect = img.imageToViewportRectangle(0, 0, img.source.width, img.source.height);
+                img.viewport.fitBounds(rect, immediate);
+            } else {
+                goHome.apply(this, arguments);
+            }
+        };
+
+        return osd;
     };
 
 

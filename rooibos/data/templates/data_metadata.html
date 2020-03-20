@@ -26,6 +26,8 @@
 
     {% if value.crosslinked %}
             <a href="{% url "solr-search" %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
+    {% elif value.markdown_html %}
+            {{ value.markdown_html|safe }}
     {% else %}
             <span>{{ value.value|default:"&nbsp;" }}</span>
     {% endif %}
@@ -53,6 +55,8 @@
         <div class='value{% cycle '' ' altrow' %}'>
 {% if value.crosslinked %}
         <a href="{% url "solr-search" %}?c={{ value.field.full_name }}_s:{{ value.value|urlencode }}">{{ value.value }}</a>
+{% elif value.markdown_html %}
+        {{ value.markdown_html|safe }}
 {% else %}
         {{ value.value|default:"&nbsp;" }}
 {% endif %}

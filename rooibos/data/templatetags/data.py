@@ -1,9 +1,13 @@
+import markdown
+import bleach
+from bleach_whitelist import markdown_tags, markdown_attrs
+
 from django import template
 from django.template.loader import render_to_string
 from django.template import Variable
 from rooibos.data.forms import get_collection_visibility_prefs_form
-from rooibos.data.functions import get_collection_visibility_preferences
-from rooibos.data.models import FieldSet
+from rooibos.data.functions import get_collection_visibility_preferences, \
+    get_fields_for_set
 from rooibos.access.functions import filter_by_access
 
 
@@ -29,25 +33,27 @@ class MetaDataNode(template.Node):
 
         crosslinks = self.crosslinks and self.crosslinks.resolve(context)
 
-        crosslink_fields = dict()
         if crosslinks:
-            try:
-                crosslink_fields.update(
-                    (field.id, None)
-                    for field in
-                    FieldSet.objects.get(
-                        name='metadata-crosslinks'
-                    ).fields.all()
-                )
-            except FieldSet.DoesNotExist:
-                pass
+            crosslink_fields = get_fields_for_set('crosslinks')
+        else:
+            crosslink_fields = dict()
+
+        markdown_fields = get_fields_for_set('markdown')
 
         for i in range(0, len(fieldvalues)):
-            fieldvalues[i].crosslinked = (
-                crosslinks and
-                fieldvalues[i].value and
-                fieldvalues[i].field_id in crosslink_fields
-            )
+            if not fieldvalues[i].value:
+                continue
+            field_id = fieldvalues[i].field_id
+            if crosslinks:
+                fieldvalues[i].crosslinked = field_id in crosslink_fields
+            if field_id in markdown_fields:
+                fieldvalues[i].markdown_html = bleach.clean(
+                    markdown.markdown(
+                        fieldvalues[i].value
+                    ),
+                    markdown_tags,
+                    markdown_attrs
+                )
 
         collections = filter_by_access(
             context['request'].user, record.collection_set.all())
