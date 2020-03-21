@@ -86,7 +86,7 @@ class PackagePresentationTestCase(TestCase):
         self.assertEqual(615, width1)
         self.assertEqual(461, height1)
         self.assertEqual(200, width2)
-        self.assertEqual(149, height2)
+        self.assertTrue(abs(height2 - 149) < 2)
 
 
 class PublishPermissionsTestCase(TestCase):
