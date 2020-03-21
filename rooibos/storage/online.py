@@ -15,7 +15,7 @@ class OnlineStorageSystem():
 
     def open(self, url):
         # TODO: this can be a security issue if file:/// urls are allowed
-        return io.StringIO(urllib.request.urlopen(url).read())
+        return io.BytesIO(urllib.request.urlopen(url).read())
 
     def exists(self, url):
         # TODO

@@ -148,6 +148,14 @@ class Storage(models.Model):
                     raise
         return sp
 
+    def clear_derivative_storage_path(self):
+        sp = self.get_derivative_storage_path()
+        for f in os.listdir(sp):
+            try:
+                os.remove(os.path.join(sp, f))
+            except:
+                pass
+
     def clear_derivative_storage_for_media(self, media_id):
         path = self.get_derivative_storage_path()
         pattern = re.compile(r'^(tmp)?%d-' % media_id)
@@ -201,6 +209,11 @@ class Media(models.Model):
 
     def __unicode__(self):
         return self.url
+
+    def __repr__(self):
+        return '<Media %r: %r %r %r %r>' % (
+            self.id, self.record, self.storage, self.mimetype, self.url
+        )
 
     def save(self, force_update_name=False, **kwargs):
         if self.url:

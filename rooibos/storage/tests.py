@@ -383,6 +383,7 @@ class OnlineStorageSystemTestCase(TestCase):
         self.collection = Collection.objects.create(title='Test')
         self.storage = Storage.objects.create(
             title='Test', name='test', system='online')
+        self.storage.clear_derivative_storage_path()
         self.record = Record.objects.create(name='monalisa')
         CollectionItem.objects.create(
             collection=self.collection, record=self.record)
