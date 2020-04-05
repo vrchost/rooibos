@@ -31,7 +31,8 @@ var Viewer = function (options) {
     this.mirador = Mirador(options);
     var viewer = this;
 
-    if (window.opener && window.opener.viewer) {
+    if (window.opener && window.opener.viewer &&
+            window.opener.viewer.windows !== undefined) {
         this.windows = window.opener.viewer.windows;
         this.synced = window.opener.viewer.synced;
         this.active = window.opener.viewer.active;
@@ -367,11 +368,19 @@ var Viewer = function (options) {
         active.slot = positions[activePosition].slot;
     };
 
+    var countSlots = function (layout) {
+        return layout.children ? layout.children.map(countSlots).reduce(
+            function (a, b) { return a + b; }, 0) : 1;
+    };
 
     this.mirador.eventEmitter.subscribe('RESET_WORKSPACE_LAYOUT',
         function () {
             if (!metaKey) {
-                delay(fillEmptySlots);
+                var newCount = countSlots(arguments[1].layoutDescription);
+                var oldCount = countSlots(viewer.mirador.viewer.workspace.layoutDescription);
+                if (newCount > oldCount) {
+                    delay(fillEmptySlots);
+                }
             }
 
         }
