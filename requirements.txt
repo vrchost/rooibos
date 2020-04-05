@@ -23,6 +23,7 @@ bleach-whitelist==0.0.10
 boto
 Celery==4.2.1
 configobj >= 4.7.2,<=5.0.0
+django-appconf==1.0.3
 django-cas-ng==3.5.10
 django-compressor==2.2
 django-extensions==2.0.7
