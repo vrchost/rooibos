@@ -1,6 +1,3 @@
-import bleach as bleach
-import markdown
-from bleach_whitelist import markdown_tags, markdown_attrs
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.core.urlresolvers import reverse
@@ -28,6 +25,7 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view
+from rooibos.util.markdown import markdown
 from rooibos.storage.functions import get_media_for_record
 from .models import Presentation, PresentationItem
 from .functions import duplicate_presentation
@@ -656,11 +654,7 @@ def get_metadata(fieldvalues):
     result = []
     for fv in fieldvalues:
         if fv.field_id in markdown_fields:
-            value = bleach.clean(
-                markdown.markdown(fv.value),
-                markdown_tags,
-                markdown_attrs
-            )
+            value = markdown(fv.value)
         else:
             value = fv.value
         if not compact or not fv.subitem:

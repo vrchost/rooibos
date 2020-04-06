@@ -1,14 +1,10 @@
-import markdown
-import bleach
-from bleach_whitelist import markdown_tags, markdown_attrs
-
 from django import template
-from django.template.loader import render_to_string
 from django.template import Variable
 from rooibos.data.forms import get_collection_visibility_prefs_form
 from rooibos.data.functions import get_collection_visibility_preferences, \
     get_fields_for_set
 from rooibos.access.functions import filter_by_access
+from rooibos.util.markdown import markdown
 
 
 register = template.Library()
@@ -47,13 +43,7 @@ class MetaDataNode(template.Node):
             if crosslinks:
                 fieldvalues[i].crosslinked = field_id in crosslink_fields
             if field_id in markdown_fields:
-                fieldvalues[i].markdown_html = bleach.clean(
-                    markdown.markdown(
-                        fieldvalues[i].value
-                    ),
-                    markdown_tags,
-                    markdown_attrs
-                )
+                fieldvalues[i].markdown_html = markdown(fieldvalues[i].value)
 
         collections = filter_by_access(
             context['request'].user, record.collection_set.all())
