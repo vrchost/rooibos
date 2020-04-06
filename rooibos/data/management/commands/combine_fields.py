@@ -1,30 +1,20 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Count
 from rooibos.data.models import Field, FieldSetField, FieldValue
-from optparse import make_option
 
 
 class Command(BaseCommand):
-    help = 'Fields and combines equivalent fields'
+    help = 'Finds and combines equivalent fields'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
-            '--execute', action='store_true',
-            help='Combine automatically detected fields',
-        ),
-        make_option(
-            '--ignorevocabs', action='store_true',
-            help='Ignore vocabularies when comparing fields',
-        ),
-        make_option(
-            '--merge', action='store',
-            help='Field to merge into another field',
-        ),
-        make_option(
-            '--into', action='store',
-            help='Field into which to merge another field',
-        ),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument('--execute', action='store_true',
+            help='Combine automatically detected fields',)
+        parser.add_argument('--ignorevocabs', action='store_true',
+            help='Ignore vocabularies when comparing fields',)
+        parser.add_argument('--merge', action='store',
+            help='Field to merge into another field',)
+        parser.add_argument('--into', action='store',
+            help='Field into which to merge another field',)
 
     def handle(self, *commands, **options):
 
@@ -33,7 +23,7 @@ class Command(BaseCommand):
         into = options.get('into')
 
         if bool(merge) != bool(into):
-            print "--merge and --into must be specified together"
+            print("--merge and --into must be specified together")
             return
 
         execute = execute or bool(merge)
@@ -42,7 +32,7 @@ class Command(BaseCommand):
         equivalents = dict()
 
         def combine_fields(field, replace_with_field):
-            print "Replacing %s with %s" % (field, replace_with_field)
+            print("Replacing %s with %s" % (field, replace_with_field))
             deleted.append(field.id)
             eq = list(field.equivalent.values_list('id', flat=True))
             equivalents[replace_with_field] = equivalents.get(
@@ -74,9 +64,9 @@ class Command(BaseCommand):
 
             unique.setdefault(key, []).append(field)
 
-        print "\nFound %s unique fields out of %s" % (
+        print("\nFound %s unique fields out of %s" % (
             len(unique), Field.objects.count()
-        )
+        ))
 
         if merge and into:
 
@@ -85,12 +75,12 @@ class Command(BaseCommand):
 
             combine_fields(merge, into)
 
-            print "Done"
+            print("Done")
             return
 
         # for each unique field, determine replacements
 
-        for fields in unique.values():
+        for fields in list(unique.values()):
             if len(fields) < 2:
                 continue
             sorted_fields = sorted(fields, key=lambda f: f.name)
@@ -116,18 +106,18 @@ class Command(BaseCommand):
 
         if execute:
             remaining = Field.objects.exclude(id__in=deleted)
-            print "\nRemaining fields after cleanup:", len(remaining)
+            print("\nRemaining fields after cleanup:", len(remaining))
 
-        print "\nFields currently in use:\n    Values Field"
+        print("\nFields currently in use:\n    Values Field")
         query = FieldValue.objects.values_list(
             'field__id', 'field__name', 'field__standard__prefix'
         )
         query = query.annotate(dcount=Count('field'))
         query = query.order_by('field__standard__prefix', 'field__name')
         for fid, name, prefix, count in query:
-            print "%10d %s%s [%d]" % (
+            print("%10d %s%s [%d]" % (
                 count,
                 prefix + "." if prefix else "",
                 name,
                 fid,
-            )
+            ))

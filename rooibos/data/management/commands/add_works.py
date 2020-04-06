@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, FieldValue, standardfield_ids, \
     get_system_field
-from optparse import make_option
 import csv
 from rooibos.util.progressbar import ProgressBar
 
@@ -9,28 +8,35 @@ from rooibos.util.progressbar import ProgressBar
 class Command(BaseCommand):
     help = 'Import Archivision works spreadsheet'
 
-    option_list = BaseCommand.option_list + (
-        make_option('--collection', '-c', dest='collections',
-                    action='append',
-                    help='Collection identifier (multiple allowed)'),
-        make_option('--mapping', '-m', dest='mapping_file',
-                    action='store',
-                    help='File mapping identifiers to works'),
-    )
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--collection',
+            '-c',
+            dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)'
+        )
+        parser.add_argument(
+            '--mapping',
+            '-m',
+            dest='mapping_file',
+            action='store',
+            help='File mapping identifiers to works'
+        )
 
     def handle(self, *args, **kwargs):
 
         system_field = get_system_field()
 
-        collections = map(int, kwargs.get('collections') or list())
+        collections = list(map(int, kwargs.get('collections') or list()))
         mapping_file = kwargs.get('mapping_file')
 
         if not collections:
-            print "--collection is a required parameter"
+            print("--collection is a required parameter")
             return
 
         if not mapping_file:
-            print "--mapping is a required parameter"
+            print("--mapping is a required parameter")
             return
 
         mappings = dict()
@@ -51,12 +57,12 @@ class Command(BaseCommand):
         )
 
         # Clean out old relations
-        print "Deleting old works info"
+        print("Deleting old works info")
         existing_works.delete()
 
         id_fields = standardfield_ids('identifier', equiv=True)
 
-        print "Fetching records"
+        print("Fetching records")
         identifiers = FieldValue.objects.select_related('record').filter(
             record__collection__in=collections,
             field__in=id_fields,
@@ -70,8 +76,8 @@ class Command(BaseCommand):
             work, isprimary = mappings.get(identifier.value, (None, False))
             isprimary = isprimary == 'True'
             if not work:
-                print "Warning: no entry found for identifier '%s'" % \
-                      identifier.value
+                print("Warning: no entry found for identifier '%s'" % \
+                      identifier.value)
                 continue
 
             FieldValue.objects.create(

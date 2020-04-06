@@ -1,5 +1,5 @@
 from django import forms
-from models import FieldSet, Collection
+from .models import FieldSet, Collection
 from rooibos.access.functions import filter_by_access
 
 

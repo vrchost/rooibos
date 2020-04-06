@@ -52,13 +52,13 @@ class ProgressBar:
                     )
                 elif r > 0:
                     remainingtime = ' %ds' % r
-        percent = current * 100 / self.total
+        percent = int(current * 100 / self.total)
         barlength = self.width - len(str(current)) - len(str(self.total)) - \
             len(str(percent)) - len(remainingtime) - 4
         if percent >= 100:
             self.arrowchar = ''
-        completed = barlength * percent / 100
-        remaining = barlength - completed - 1
+        completed = int(barlength * percent / 100)
+        remaining = int(barlength - completed - 1)
         sys.stdout.write("%s/%s %s%s%s %s%%%s\r" % (
             current,
             self.total,
@@ -72,7 +72,7 @@ class ProgressBar:
 
     def done(self):
         self.update(self.total, force=True)
-        print
+        print()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404
@@ -13,23 +13,22 @@ from django.forms.models import modelformset_factory
 from django.forms.utils import ErrorList
 from django.http import Http404, HttpResponseRedirect, HttpResponseForbidden, \
     HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 import json as simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
-from models import Record, Collection, FieldSet, FieldSetField, \
+from .models import Record, Collection, FieldSet, FieldSetField, \
     CollectionItem, Field, FieldValue
-from forms import FieldSetChoiceField, get_collection_visibility_prefs_form
-from functions import set_collection_visibility_preferences, \
+from .forms import FieldSetChoiceField, get_collection_visibility_prefs_form
+from .functions import set_collection_visibility_preferences, \
     apply_collection_visibility_preferences, collection_dump
 from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.storage.models import Media, Storage
 from rooibos.userprofile.views import load_settings, store_settings
-from spreadsheetimport import SpreadsheetImport
+from .spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
@@ -143,8 +142,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         download_image = download_image or \
             m.is_downloadable_by(request.user, original=False)
 
-    media = filter(
-        lambda m: m.downloadable_in_template or m.editable_in_template, media)
+    media = [m for m in media if m.downloadable_in_template or m.editable_in_template]
 
     edit = edit and request.user.is_authenticated()
 
@@ -193,7 +191,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             choices = [('', '-' * 10)] + [
                 (set[0], [(f.id, f.label) for f in fields])
                 for set, fields in sorted(
-                    grouped.iteritems(), key=lambda s: s[0][0]
+                    iter(grouped.items()), key=lambda s: s[0][0]
                 )
             ]
             if others:
@@ -286,7 +284,7 @@ def record(request, id, name, contexttype=None, contextid=None,
                                 item.hidden = not item.hidden
                                 item.save()
                             del collections[item.collection_id]
-                    for coll in collections.values():
+                    for coll in list(collections.values()):
                         if coll['member']:
                             CollectionItem.objects.create(
                                 record=record,
@@ -298,8 +296,8 @@ def record(request, id, name, contexttype=None, contextid=None,
                 # Explicitly remove deleted objects
                 for instance in formset.deleted_objects:
                     instance.delete()
-                o1 = fieldvalues and max(v.order for v in fieldvalues) or 0
-                o2 = instances and max(v.order for v in instances) or 0
+                o1 = fieldvalues and max(v.order or 0 for v in fieldvalues) or 0
+                o2 = instances and max(v.order or 0 for v in instances) or 0
                 order = max(o1, o2, 0)
                 for instance in instances:
                     if not instance.value:
@@ -384,7 +382,7 @@ def record(request, id, name, contexttype=None, contextid=None,
                         shared=not item.hidden,
                     ))
 
-                collections = collections.values()
+                collections = list(collections.values())
 
                 collectionformset = collection_formset(
                     prefix='c', initial=collections)
@@ -448,7 +446,7 @@ def record(request, id, name, contexttype=None, contextid=None,
     if formset and getattr(settings, 'HIDE_RECORD_FIELDSETS', False):
         fieldsetform = None
 
-    return render_to_response(
+    return render(request,
         'data_record.html',
         {
             'record': record,
@@ -471,8 +469,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             'download_image': download_image,
             'part_of_works': part_of_works,
             'related_works': related_works,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -508,7 +505,7 @@ def data_import(request):
             file = request.FILES['file']
 
             filename = "".join(
-                random.sample(string.letters + string.digits, 32))
+                random.sample(string.ascii_lowercase + string.digits, 32))
             full_path = os.path.join(
                 _get_scratch_dir(), _get_filename(request, filename))
             dest = open(full_path, 'wb+')
@@ -516,13 +513,13 @@ def data_import(request):
                 dest.write(chunk)
             dest.close()
 
-            file = open(full_path, 'r')
+            file = open(full_path, 'r', encoding='utf8', errors='strict')
             try:
                 for line in file:
-                    unicode(line, 'utf8')
+                    pass
                 return HttpResponseRedirect(
                     reverse('data-import-file', args=(filename,)))
-            except UnicodeDecodeError:
+            except ValueError:
                 utf8_error = True
             finally:
                 file.close()
@@ -530,13 +527,12 @@ def data_import(request):
     else:
         form = UploadFileForm()
 
-    return render_to_response(
+    return render(request,
         'data_import.html',
         {
             'form': form,
             'utf8_error': utf8_error,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -544,7 +540,7 @@ class DisplayOnlyTextWidget(forms.HiddenInput):
     def render(self, name, value, attrs):
         r = super(DisplayOnlyTextWidget, self).render(name, value, attrs)
         r += mark_safe(
-            conditional_escape(getattr(self, 'initial', value or u'')))
+            conditional_escape(getattr(self, 'initial', value or '')))
         return r
 
 
@@ -590,7 +586,7 @@ def data_import_file(request, file):
         ] + [
             (set[0], [(f.id, _get_display_label(f)) for f in fields])
             for set, fields
-            in sorted(grouped.iteritems(), key=lambda s: s[0][0])
+            in sorted(iter(grouped.items()), key=lambda s: s[0][0])
         ]
 
         if others:
@@ -660,8 +656,8 @@ def data_import_file(request, file):
                 m = self.forms[i].cleaned_data['mapping']
                 if m and int(m) in _identifier_ids:
                     return
-            raise forms.ValidationError, "At least one field must be mapped " \
-                "to an identifier field."
+            raise forms.ValidationError("At least one field must be mapped " \
+                "to an identifier field.")
 
     create_mapping_formset = formset_factory(
         MappingForm, extra=0, formset=BaseMappingFormSet, can_order=True)
@@ -722,8 +718,8 @@ def data_import_file(request, file):
                 arg = dict(
                     filename=_get_filename(request, file),
                     separator=form.cleaned_data['separator'],
-                    collection_ids=map(
-                        int, form.cleaned_data['collections']),
+                    collection_ids=list(map(
+                        int, form.cleaned_data['collections'])),
                     update=form.cleaned_data['update'],
                     add=form.cleaned_data['add'],
                     test=form.cleaned_data['test'],
@@ -792,7 +788,7 @@ def data_import_file(request, file):
         else:
             mapping = [
                 dict(fieldname=f, mapping=v.id if v else 0, separate=True)
-                for f, v in imp.mapping.iteritems()
+                for f, v in imp.mapping.items()
             ]
             options = None
 
@@ -801,27 +797,25 @@ def data_import_file(request, file):
         mapping_formset = create_mapping_formset(initial=mapping, prefix='m')
         form = ImportOptionsForm(initial=options)
 
-    return render_to_response(
+    return render(request,
         'data_import_file.html',
         {
             'form': form,
             'preview_rows': preview_rows,
             'mapping_formset': mapping_formset,
             'writable_collections': bool(writable_collection_ids),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
 def record_preview(request, id):
     record = Record.get_or_404(id, request.user)
-    return render_to_response(
+    return render(request,
         'data_previewrecord.html',
         {
             'record': record,
             'none': None,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -830,12 +824,11 @@ def manage_collections(request):
 
     collections = filter_by_access(request.user, Collection, manage=True)
 
-    return render_to_response(
+    return render(request,
         'data_manage_collections.html',
         {
             'collections': collections,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -932,7 +925,7 @@ def manage_collection(request, id=None, name=None):
     else:
         form = CollectionForm(instance=collection)
 
-    return render_to_response(
+    return render(request,
         'data_collection_edit.html',
         {
             'form': form,
@@ -940,8 +933,7 @@ def manage_collection(request, id=None, name=None):
             'can_delete': collection.id and (
                 request.user.is_superuser or collection.owner == request.user
             ),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

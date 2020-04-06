@@ -41,7 +41,7 @@
     <li>Write: {{ acl.1|yesno:"Allowed,Denied,Unspecified" }}</li>
     <li>Manage: {{ acl.2|yesno:"Allowed,Denied,Unspecified" }}</li>
     <li>Restrictions: {% if acl.3 %}
-      <ul>{% for k, v in acl.3.iteritems %}
+      <ul>{% for k, v in acl.3.items %}
         <li>{{ k }}: {{ v }}</li>
         {% endfor %}
       </ul>

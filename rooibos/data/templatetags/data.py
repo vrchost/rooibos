@@ -58,13 +58,14 @@ class MetaDataNode(template.Node):
         collections = filter_by_access(
             context['request'].user, record.collection_set.all())
 
-        return render_to_string('data_metadata.html',
-                                dict(
-                                    values=fieldvalues,
-                                    record=record,
-                                    collections=collections,
-                                ),
-                                context_instance=context)
+        context.update(dict(
+            values=fieldvalues,
+            record=record,
+            collections=collections,
+        ))
+
+        t = context.template.engine.get_template('data_metadata.html')
+        return t.render(context)
 
 
 @register.tag

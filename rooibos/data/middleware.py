@@ -1,5 +1,5 @@
 from django.core.exceptions import MiddlewareNotUsed
-from models import get_system_field
+from .models import get_system_field
 
 
 class DataOnStart:

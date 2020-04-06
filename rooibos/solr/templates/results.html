@@ -4,7 +4,6 @@
 {% load humanize %}
 {% load solr %}
 {% load access_control %}
-{% load pagination_tags %}
 {% load staticfiles %}
 
 
@@ -257,8 +256,19 @@
 -->
 
 <li class="pagination">
-    {% autopaginate pagination_helper pagesize %}
-    {% paginate 3 %}
+    <div class="pagination">
+        {% if pagination_helper.has_previous %}
+            <a href="{{ limit_url }}page={{ pagination_helper.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ pagination_helper.number }} of {{ pagination_helper.paginator.num_pages }}
+        </span>
+
+        {% if pagination_helper.has_next %}
+            <a href="{{ limit_url }}page={{ pagination_helper.next_page_number }}">next</a>
+        {% endif %}
+    </div>
 </li>
 
 </ul>
@@ -286,8 +296,19 @@ Your search query is invalid.  Please go back and correct your search parameters
 {% endif %}
 
 <div style="text-align: center; clear: both;">
-{% autopaginate pagination_helper pagesize %}
-{% paginate %}
+    <div class="pagination">
+        {% if pagination_helper.has_previous %}
+            <a href="{{ limit_url }}page={{ pagination_helper.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ pagination_helper.number }} of {{ pagination_helper.paginator.num_pages }}
+        </span>
+
+        {% if pagination_helper.has_next %}
+            <a href="{{ limit_url }}page={{ pagination_helper.next_page_number }}">next</a>
+        {% endif %}
+    </div>
 </div>
 
 {% endif %}

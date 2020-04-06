@@ -1,5 +1,4 @@
 import datetime
-from optparse import make_option
 import os
 import sys
 import re
@@ -7,59 +6,71 @@ import re
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from rooibos.presentation.models import Presentation
-from rooibos.pptexport.functions import PowerPointGenerator
+from rooibos.pptexport.functions import PowerPointGenerator, COLORS
 
 
 class Command(BaseCommand):
 
     help = 'Export presentation as PPTX file'
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--list', '-l',
             dest='list',
             action='store_true',
             help='List presentations that would be exported'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--days', '-d',
             dest='days',
-            type='int',
+            type=int,
             metavar='N',
             help='Export presentations changed in the past N days'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--output-dir', '-o',
             dest='output_dir',
             help='Target directory for files'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--id', '-i',
             dest='id',
-            type='int',
+            type=int,
             help='Identifier of a specific presentation to export'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--min-id', '-n',
             dest='min_id',
-            type='int',
+            type=int,
             help='Minimum identifier of presentations to export '
             '(to batch export)'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--max-id', '-x',
             dest='max_id',
-            type='int',
+            type=int,
             help='Maximum identifier of presentations to export '
             '(to batch export)'
-        ),
-        make_option(
-            '--template', '-t',
-            dest='template',
-            default='black',
-            help='Template file to use'
-        ),
-    )
+        )
+        parser.add_argument(
+            '--color', '-c',
+            dest='color',
+            default='white',
+            choices=COLORS.keys(),
+            help='Background color'
+        )
+        parser.add_argument(
+            '--titles', '-t',
+            dest='titles',
+            action='store_true',
+            help='Add slide titles'
+        )
+        parser.add_argument(
+            '--metadata', '-m',
+            dest='metadata',
+            action='store_true',
+            help='Add slide metadata'
+        )
 
     def get_admin_user(self):
 
@@ -67,7 +78,7 @@ class Command(BaseCommand):
         if len(admins) == 1:
             return admins[0]
         else:
-            print >>sys.stderr, "No administrative user account found"
+            print("No administrative user account found", file=sys.stderr)
             sys.exit(1)
 
     def get_filename(self, presentation):
@@ -95,24 +106,28 @@ class Command(BaseCommand):
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)
-            print >>sys.stderr, \
-                "Exporting presentations modified since %s" % since
+            print("Exporting presentations modified since %s" % since, file=sys.stderr)
             presentations = presentations.filter(modified__gte=since)
         if options.get('min_id'):
             presentations = presentations.filter(id__gte=options['min_id'])
         if options.get('max_id'):
             presentations = presentations.filter(id__lte=options['max_id'])
 
-        print >>sys.stderr, "Exporting %d presentations using template %s" % (
+        print("Exporting %d presentations using template %s" % (
             presentations.count(),
             template,
-        )
+        ), file=sys.stderr)
 
         for presentation in presentations:
             filename = self.get_filename(presentation)
-            print filename
+            print(filename)
             if not options.get('list'):
                 g = PowerPointGenerator(presentation, admin)
                 if options.get('output_dir'):
                     filename = os.path.join(options['output_dir'], filename)
-                g.generate(template, filename)
+                g.generate(
+                    filename,
+                    options.get('color'),
+                    options.get('titles'),
+                    options.get('metadata'),
+                )

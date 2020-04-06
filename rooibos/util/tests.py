@@ -1,9 +1,9 @@
-import unittest
+from django.test import TestCase
 from rooibos.data.models import Collection, Record
 from rooibos.storage.models import Media, Storage
 
 
-class UniqueSlugTestCase(unittest.TestCase):
+class UniqueSlugTestCase(TestCase):
 
     def test_long_unique_slugs(self):
         for i in range(100):

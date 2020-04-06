@@ -1,8 +1,8 @@
-import unittest
-from templatetags import help
+from django.test import TestCase
+from .templatetags import help
 
 
-class HelpTestCase(unittest.TestCase):
+class HelpTestCase(TestCase):
 
     def test_append_context(self):
         self.assertEqual(

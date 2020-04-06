@@ -1,5 +1,5 @@
-import urllib2
-import StringIO
+import urllib.request, urllib.error, urllib.parse
+import io
 
 
 class OnlineStorageSystem():
@@ -15,7 +15,7 @@ class OnlineStorageSystem():
 
     def open(self, url):
         # TODO: this can be a security issue if file:/// urls are allowed
-        return StringIO.StringIO(urllib2.urlopen(url).read())
+        return io.BytesIO(urllib.request.urlopen(url).read())
 
     def exists(self, url):
         # TODO

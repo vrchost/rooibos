@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.storage.models import Media
 from django.contrib.contenttypes.models import ContentType
@@ -7,25 +6,25 @@ from rooibos.util.progressbar import ProgressBar
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--check', '-c',
             dest='check',
             action='store_true',
             help='Check for unneeded media'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--remove', '-r',
             dest='remove',
             action='store_true',
             help='Remove unneeded media'
-        ),
-    )
+        )
+
     help = "Removes unneeded media objects migrated from MDID 2"
 
     def handle(self, check, remove, *args, **options):
         if check == remove:
-            print "Error: must specify exactly one of --check or --remove"
+            print("Error: must specify exactly one of --check or --remove")
         elif check:
             self.check()
         elif remove:
@@ -33,7 +32,7 @@ class Command(BaseCommand):
 
     def check(self):
 
-        print "Checking..."
+        print("Checking...")
 
         content_type = ContentType.objects.get_for_model(Media)
         migrated = set(ObjectHistory.objects.filter(
@@ -52,24 +51,24 @@ class Command(BaseCommand):
         thumb_records = set(Media.objects.filter(
             url__startswith="thumb\\").values_list('record', flat=True))
 
-        print "Found %d migrated media objects - these are ok" % len(migrated)
-        print "Found %d full media objects" % len(full)
-        print "Found %d medium media objects" % len(medium)
-        print "Found %d thumb media objects" % len(thumb)
-        print
+        print("Found %d migrated media objects - these are ok" % len(migrated))
+        print("Found %d full media objects" % len(full))
+        print("Found %d medium media objects" % len(medium))
+        print("Found %d thumb media objects" % len(thumb))
+        print()
 
         full = full - migrated
         medium = medium - migrated
         thumb = thumb - migrated
 
-        print "Found %d non-migrated full media objects" % len(full)
-        print "Found %d non-migrated medium media objects" % len(medium)
-        print "Found %d non-migrated thumb media objects" % len(thumb)
-        print
+        print("Found %d non-migrated full media objects" % len(full))
+        print("Found %d non-migrated medium media objects" % len(medium))
+        print("Found %d non-migrated thumb media objects" % len(thumb))
+        print()
 
         common = full_records & medium_records & thumb_records
 
-        print "Found %d records with three sizes of media" % len(common)
+        print("Found %d records with three sizes of media" % len(common))
 
         return common
 
@@ -77,7 +76,7 @@ class Command(BaseCommand):
 
         common = self.check()
 
-        print "Removing unneeded media objects"
+        print("Removing unneeded media objects")
 
         pb = ProgressBar(len(common))
         count = 0

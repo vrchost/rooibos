@@ -7,7 +7,7 @@ import re
 import logging
 import json as simplejson
 import zipfile
-from StringIO import StringIO
+from io import StringIO, BytesIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field
 from PIL import Image
@@ -40,10 +40,10 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
         )
         (output, errors) = ffmpeg.communicate()
         file = open(filename, 'rb')
-        result = StringIO(file.read())
+        result = BytesIO(file.read())
         file.close()
         return result, output, errors
-    except Exception, ex:
+    except Exception as ex:
         logging.error("%s: %s" % (cmd, ex))
         return None, None, None
     finally:
@@ -70,19 +70,23 @@ def _pdfthumbnail(infile):
     handle, filename = tempfile.mkstemp('.jpg')
     os.close(handle)
     try:
-        executable = _which('python.exe') or _which('python') or 'python'
+        executable = _which('pdftoppm') or 'pdftoppm'
         cmd = [
             executable,
-            os.path.join(os.path.dirname(__file__), 'pdfthumbnail.py'),
+            '-singlefile',
+            '-scale-to', '800',
+            '-jpeg',
+            '-aa', 'yes',
+            '-aaVector', 'yes',
             infile,
-            filename,
+            os.path.splitext(filename)[0],
         ]
         logger.debug('Running %s' % cmd)
         proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
         (output, errors) = proc.communicate()
         logger.debug('output "%s" errors "%s"' % (output, errors))
         file = open(filename, 'rb')
-        result = StringIO(file.read())
+        result = BytesIO(file.read())
         file.close()
         return result, output, errors
     except:
@@ -110,7 +114,7 @@ def identify(file):
         logging.debug('Identified %s: %dx%d %d' % (
             file, width or 0, height or 0, bitrate or 0))
         return width, height, bitrate
-    except Exception, e:
+    except Exception as e:
         logging.debug('Error identifying %s: %s' % (file, e))
         return None, None, None
 
@@ -145,8 +149,8 @@ def render_audio_waveform(audiofile, basecolor, background, left, top,
         lows.append(min(frames[f:t]))
         highs.append(max(frames[f:t]))
     low, high = abs(min(lows)), abs(max(highs))
-    lows = map(lambda v: v * height / low, lows)
-    highs = map(lambda v: v * height / high, highs)
+    lows = [v * height / low for v in lows]
+    highs = [v * height / high for v in highs]
     for x in range(width):
         high = middle - highs[x]
         low = middle - lows[x]
@@ -155,7 +159,7 @@ def render_audio_waveform(audiofile, basecolor, background, left, top,
         if not max_only:
             for y in range(middle, low):
                 pix[left + x, y] = basecolor
-    output = StringIO()
+    output = BytesIO()
     image.save(output, 'JPEG', quality=85, optimize=True)
     output.seek(0)
     return output
@@ -192,7 +196,7 @@ def render_pdf(pdffile):
 def thumbnail_from_pptx(pptxfile):
     try:
         with zipfile.ZipFile(pptxfile, 'r') as pptx:
-            image = StringIO(pptx.open('docProps/thumbnail.jpeg').read())
+            image = BytesIO(pptx.open('docProps/thumbnail.jpeg').read())
             image.seek(0)
             return image
     except:
@@ -258,7 +262,7 @@ def overlay_image_with_mimetype_icon(image, mimetype):
     if isinstance(image, Image.Image):
         return image
 
-    output = StringIO()
+    output = BytesIO()
     original_image.save(output, 'JPEG', quality=85, optimize=True)
     output.seek(0)
     return output

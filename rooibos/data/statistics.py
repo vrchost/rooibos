@@ -1,5 +1,5 @@
-from rooibos.statistics import register_statistics
-from models import Collection
+from rooibos.statistics.functions import register_statistics
+from .models import Collection
 
 
 @register_statistics

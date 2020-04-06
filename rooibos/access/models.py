@@ -122,15 +122,17 @@ class ExtendedGroup(Group):
             values = attributes.get(attribute.attribute, [])
             for value in attribute.attributevalue_set.all().values_list(
                     'value', flat=True):
-                if (hasattr(values, '__iter__') and value in values) \
-                        or value == values:
+                if (hasattr(values, '__iter__')
+                        and not isinstance(values, str)
+                        and value in values
+                    ) or value == values:
                     break
             else:
                 return False
         return True
 
     def _full_type(self):
-        return filter(lambda (a, f): a == self.type, self.TYPE_CHOICES)[0][1]
+        return [a_f for a_f in self.TYPE_CHOICES if a_f[0] == self.type][0][1]
 
     def __unicode__(self):
         return '%s (%s)' % (self.name, self._full_type())
@@ -188,7 +190,7 @@ def process_shibboleth_attributes(attributes):
     :return: dict of attributes with value lists converted to single values
     """
     return dict((attribute, split_values(values))
-                for attribute, values in attributes.iteritems())
+                for attribute, values in attributes.items())
 
 
 def post_shibboleth_login(sender, **kwargs):

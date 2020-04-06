@@ -14,7 +14,7 @@ from google.appengine.api import memcache, images
 import json
 import os
 import re
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import webapp2
 
 DEBUG=os.environ.get('SERVER_SOFTWARE', '').startswith('Dev')
@@ -69,7 +69,7 @@ class UploadHandler(CORSHandler):
                 return REDIRECT_ALLOW_TARGET.match(redirect)
             referer = self.request.headers['referer']
             if referer:
-                from urlparse import urlparse
+                from urllib.parse import urlparse
                 parts = urlparse(referer)
                 redirect_allow_target = '^' + re.escape(
                     parts.scheme + '://' + parts.netloc + '/'
@@ -84,9 +84,9 @@ class UploadHandler(CORSHandler):
         return size
 
     def write_blob(self, data, info):
-        key = urllib.quote(info['type'].encode('utf-8'), '') +\
+        key = urllib.parse.quote(info['type'].encode('utf-8'), '') +\
             '/' + str(hash(data)) +\
-            '/' + urllib.quote(info['name'].encode('utf-8'), '')
+            '/' + urllib.parse.quote(info['name'].encode('utf-8'), '')
         try:
             memcache.set(key, data, time=EXPIRATION_TIME)
         except: #Failed to add to memcache
@@ -112,11 +112,11 @@ class UploadHandler(CORSHandler):
 
     def handle_upload(self):
         results = []
-        for name, fieldStorage in self.request.POST.items():
-            if type(fieldStorage) is unicode:
+        for name, fieldStorage in list(self.request.POST.items()):
+            if type(fieldStorage) is str:
                 continue
             result = {}
-            result['name'] = urllib.unquote(fieldStorage.filename)
+            result['name'] = urllib.parse.unquote(fieldStorage.filename)
             result['type'] = fieldStorage.type
             result['size'] = self.get_file_size(fieldStorage.file)
             if self.validate(result):
@@ -150,7 +150,7 @@ class UploadHandler(CORSHandler):
         redirect = self.request.get('redirect')
         if self.validate_redirect(redirect):
             return self.redirect(str(
-                redirect.replace('%s', urllib.quote(s, ''), 1)
+                redirect.replace('%s', urllib.parse.quote(s, ''), 1)
             ))
         if 'application/json' in self.request.headers.get('Accept'):
             self.response.headers['Content-Type'] = 'application/json'
@@ -158,7 +158,7 @@ class UploadHandler(CORSHandler):
 
 class FileHandler(CORSHandler):
     def normalize(self, str):
-        return urllib.quote(urllib.unquote(str), '')
+        return urllib.parse.quote(urllib.parse.unquote(str), '')
 
     def get(self, content_type, data_hash, file_name):
         content_type = self.normalize(content_type)
@@ -169,7 +169,7 @@ class FileHandler(CORSHandler):
             return self.error(404)
         # Prevent browsers from MIME-sniffing the content-type:
         self.response.headers['X-Content-Type-Options'] = 'nosniff'
-        content_type = urllib.unquote(content_type)
+        content_type = urllib.parse.unquote(content_type)
         if not IMAGE_TYPES.match(content_type):
             # Force a download dialog for non-image types:
             content_type = 'application/octet-stream'
@@ -186,7 +186,7 @@ class FileHandler(CORSHandler):
         file_name = self.normalize(file_name)
         key = content_type + '/' + data_hash + '/' + file_name
         result = {key: memcache.delete(key)}
-        content_type = urllib.unquote(content_type)
+        content_type = urllib.parse.unquote(content_type)
         if IMAGE_TYPES.match(content_type):
             thumbnail_key = key + THUMB_SUFFIX
             result[thumbnail_key] = memcache.delete(thumbnail_key)

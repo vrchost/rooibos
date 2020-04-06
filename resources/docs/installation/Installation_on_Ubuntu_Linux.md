@@ -1,6 +1,6 @@
 # Installation on Ubuntu Linux
 
-The following instructions are for Ubuntu Linux 14.04 LTS and 16.04 LTS, but
+The following instructions are for Ubuntu Linux 18.04 LTS, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
@@ -9,14 +9,14 @@ Unless noted otherwise, all commands should be run as `root`.
 ### Packages
 ```
 apt-get update
-apt-get install python-pip libjpeg-dev libfreetype6-dev \
-    nginx mysql-server-5.5 libmysqlclient-dev python-dev \
+apt-get install -y python3 python3-pip libjpeg-dev libfreetype6-dev \
+    nginx mysql-server libmysqlclient-dev python3-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
-    jetty8 rabbitmq-server supervisor
+    rabbitmq-server supervisor ffmpeg openjdk-11-jre-headless \
+    python3-virtualenv libssl-dev poppler-utils
 ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
 ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
-pip install virtualenv
 ```
 ### Enable nginx
 ```
@@ -37,54 +37,15 @@ Reload the new configuration:
 ```
 service mysql restart
 ```
-### Build GFX
-```
-mkdir -p /opt/tools
-cd /opt/tools
-wget http://www.swftools.org/swftools-0.9.2.tar.gz
-tar xzf swftools-0.9.2.tar.gz
-cd swftools-0.9.2
-./configure
-make
-```
-### Build ffmpeg
-```
-apt-get install autoconf automake build-essential \
-    libass-dev libfreetype6-dev libtheora-dev libtool \
-    libvorbis-dev pkg-config texinfo zlib1g-dev yasm \
-    libx264-dev libmp3lame-dev
-mkdir -p /opt/ffmpeg
-cd /opt/ffmpeg
-wget http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
-tar xjf ffmpeg-snapshot.tar.bz2
-cd ffmpeg
-PATH="/opt/ffmpeg/bin:$PATH" \
-    PKG_CONFIG_PATH="/opt/ffmpeg/lib/pkgconfig" \
-    ./configure \
-    --prefix="/opt/ffmpeg" \
-    --pkg-config-flags="--static" \
-    --extra-cflags="-I/opt/ffmpeg/include" \
-    --extra-ldflags="-L/opt/ffmpeg/lib" \
-    --bindir="/opt/ffmpeg/bin" \
-    --enable-gpl \
-    --enable-libass \
-    --enable-libfreetype \
-    --enable-libmp3lame \
-    --enable-libtheora \
-    --enable-libvorbis \
-    --enable-libx264
-PATH="/opt/ffmpeg/bin:$PATH" make install
-cp /opt/ffmpeg/bin/* /usr/local/bin
-```
 ### Install Solr
 MDID currently requires Solr 7; you may have to adjust the exact version as
 available when running the following commands:
 ```
 mkdir -p /opt/solr_install /opt/solr
 cd /opt/solr_install
-wget https://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1.tgz
-tar xzf solr-7.3.1.tgz solr-7.3.1/bin/install_solr_service.sh --strip-components=2
-./install_solr_service.sh solr-7.3.1.tgz -f -d /opt/solr -i /opt/solr_install -n
+wget https://archive.apache.org/dist/lucene/solr/7.7.2/solr-7.7.2.tgz
+tar xzf solr-7.7.2.tgz solr-7.7.2/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-7.7.2.tgz -f -d /opt/solr -i /opt/solr_install -n
 sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
 service solr start
 ```
@@ -135,7 +96,7 @@ This way, updated packages can be installed by just replacing
 ```
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
-virtualenv venv
+python3 -m virtualenv -p python3 venv
 source venv/bin/activate
 pip install --allow-external --upgrade -r rooibos/requirements.txt
 ```
@@ -172,9 +133,6 @@ sudo -iu mdid  # switch to mdid user
 source /opt/mdid/venv/bin/activate
 export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-# The following command may fail
-# - if so, running it a second time should work
-django-admin syncdb --noinput
 django-admin migrate
 ```
 ### Configure nginx
@@ -246,12 +204,6 @@ cp /opt/mdid/solr7/conf/* \
     /opt/solr/data/mdid/conf
 chown -R solr:solr /opt/solr/data/mdid
 service solr restart
-```
-### Install gfx
-```
-sudo -iu mdid  # switch to mdid user
-cp /opt/tools/swftools-0.9.2/lib/python/*.so \
-    /opt/mdid/venv/lib/python2.7/site-packages/
 ```
 ### Configure supervisor
 Create a new file `/etc/supervisor/conf.d/mdid.conf` with the following content:

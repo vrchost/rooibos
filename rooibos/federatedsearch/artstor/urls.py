@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, url
-from views import search
+from django.conf.urls import url
+from .views import search
 
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^artstor/$', search, name='artstor-search'),
-)
+]

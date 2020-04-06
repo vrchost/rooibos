@@ -46,7 +46,7 @@ class CookielessSessionMiddleware(object):
                     if not sessionid:
                         sessionid = ""
                     redirect_url = [
-                        x[1] for x in response.items() if x[0] == "Location"
+                        x[1] for x in list(response.items()) if x[0] == "Location"
                     ][0]
                     redirect_url = self._prepare_url(redirect_url)
                     return HttpResponseRedirect(

@@ -1,8 +1,8 @@
-# import unittest
+# from django.test import TestCase
 # from management.commands.mdid2migrate import MigrateUsers
 #
 #
-# class UserTestCase(unittest.TestCase):
+# class UserTestCase(TestCase):
 #
 #     def test_no_email(self):
 #

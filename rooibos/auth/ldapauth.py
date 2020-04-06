@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.conf import settings
 import ldap
-from baseauth import BaseAuthenticationBackend
+from .baseauth import BaseAuthenticationBackend
 import logging
 
 
@@ -14,7 +14,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                 username = username.strip()
                 l = ldap.initialize(ldap_auth['uri'])
                 l.protocol_version = ldap_auth['version']
-                for option, value in ldap_auth['options'].iteritems():
+                for option, value in ldap_auth['options'].items():
                     l.set_option(getattr(ldap, option), value)
 
                 if ldap_auth.get('bind_user'):
@@ -96,7 +96,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                 if not self._post_login_check(user, attributes):
                     continue
                 return user
-            except ldap.LDAPError, error_message:
+            except ldap.LDAPError as error_message:
                 logging.debug('LDAP error: %s' % error_message)
             finally:
                 if l:

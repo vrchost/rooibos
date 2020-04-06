@@ -1,5 +1,4 @@
 {% extends "master.html" %}
-{% load pagination_tags %}
 
 {% block stylesheets %}
 {{ block.super }}
@@ -17,8 +16,6 @@ td.limitwidth + td.limitwidth {
 
 {% block content %}
 
-{% autopaginate storages 50 %}
-
 <h1>Storage Management</h1>
 
 {% if user.is_superuser %}
@@ -26,8 +23,6 @@ td.limitwidth + td.limitwidth {
 {% endif %}
 
 {% if storages %}
-
-{% paginate %}
 
 <table class="list" summary="Storages">
     <tr>
@@ -51,8 +46,6 @@ td.limitwidth + td.limitwidth {
 {% endfor %}
 
 </table>
-
-{% paginate %}
 
 {% else %}
 

@@ -3,7 +3,7 @@ from django import forms
 from django.forms.models import inlineformset_factory
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.admin import GroupAdmin
-from models import AccessControl, Attribute, AttributeValue, ExtendedGroup, \
+from .models import AccessControl, Attribute, AttributeValue, ExtendedGroup, \
     Subnet
 
 

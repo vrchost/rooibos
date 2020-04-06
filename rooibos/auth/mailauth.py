@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import imaplib
 import poplib
-from baseauth import BaseAuthenticationBackend
+from .baseauth import BaseAuthenticationBackend
 
 
 class ImapAuthenticationBackend(BaseAuthenticationBackend):

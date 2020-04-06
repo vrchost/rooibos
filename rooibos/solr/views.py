@@ -1,6 +1,6 @@
 from django.db.models import Count
 from django.core.cache import cache
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.template.loader import render_to_string
@@ -12,8 +12,9 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from . import SolrIndex
-from pysolr import SolrError
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from .functions import SolrIndex
+from .pysolr import SolrError
 from rooibos.access.functions import filter_by_access
 import socket
 from rooibos.util import safe_int, json_view, calculate_hash
@@ -30,7 +31,7 @@ import copy
 import random
 import logging
 from datetime import datetime
-
+from functools import reduce, cmp_to_key
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +48,13 @@ class SearchFacet(object):
     def set_result(self, facets):
         # break down dicts into tuples
         if hasattr(facets, 'items'):
-            self.facets = facets.items()
+            self.facets = list(facets.items())
         else:
             self.facets = facets
 
     def clean_result(self, hits, sort=True):
         # sort facet items and remove the ones that match all hits
-        self.facets = filter(lambda f: f[1] < hits,
-                             getattr(self, 'facets', None) or [])
+        self.facets = [f for f in getattr(self, 'facets', None) or [] if f[1] < hits]
         if sort:
             self.facets = sorted(self.facets,
                              key=lambda f: len(f) > 2 and f[2] or f[0])
@@ -186,7 +186,7 @@ class StorageSearchFacet(SearchFacet):
     def set_result(self, facets):
         result = {}
         if facets:
-            for f in facets.keys():
+            for f in list(facets.keys()):
                 m = StorageSearchFacet._storage_facet_re.match(f)
                 if m and int(m.group(1)) in self.available_storage:
                     # make facet available, but without frequency count
@@ -203,7 +203,7 @@ class CollectionSearchFacet(SearchFacet):
         result = []
         if facets:
             collections = Collection.objects.filter(
-                id__in=map(int, facets.keys())
+                id__in=list(map(int, list(facets.keys())))
             ).order_by('order', 'title').values_list('id', 'title')
             for id, title in collections:
                 result.append((id, facets[str(id)], title))
@@ -322,10 +322,8 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             o = search_facets[fname].process_criteria(o, user)
             fields.setdefault(f, []).append('(' + o.replace('|', ' OR ') + ')')
 
-    fields = map(
-        lambda (name, crit): '%s:(%s)' % (
-            name, (name.startswith('NOT ') and ' OR ' or ' AND ').join(crit)),
-        fields.iteritems())
+    fields = ['%s:(%s)' % (
+            name_crit[0], (name_crit[0].startswith('NOT ') and ' OR ' or ' AND ').join(name_crit[1])) for name_crit in iter(fields.items())]
 
     def build_keywords(q, k):
         k = k.lower()
@@ -486,7 +484,7 @@ def run_search(user,
 
     s = SolrIndex()
 
-    return_facets = [key for key, facet in search_facets.iteritems()
+    return_facets = [key for key, facet in search_facets.items()
                      if facet.fetch_facet_values()] if produce_facets else []
 
     try:
@@ -494,6 +492,7 @@ def run_search(user,
             query, sort=sort, rows=pagesize, start=(page - 1) * pagesize,
             facets=return_facets, facet_mincount=1, facet_limit=100)
     except SolrError:
+        logger.exception('SolrError: %r' % query)
         hits = -1
         records = None
         facets = dict()
@@ -523,6 +522,20 @@ def run_search(user,
     return (hits, records, search_facets, orfacet, query, fields)
 
 
+class DummyContent():
+    def __init__(self, length):
+        self.length = length
+    def __len__(self):
+        return self.length
+    def __getitem__(self, index):
+        if isinstance(index, slice):
+            return list(range(index.start or 0, index.stop, index.step or 1))
+        else:
+            return None
+    def count(self):
+        return self.length
+
+
 def search(request, id=None, name=None, selected=False, json=False):
     collection = get_object_or_404(
         filter_by_access(request.user, Collection), id=id) if id else None
@@ -533,7 +546,7 @@ def search(request, id=None, name=None, selected=False, json=False):
         q = request.GET.copy()
         q.update(request.POST)
         q = clean_record_selection_vars(q)
-        for i, v in q.items():
+        for i, v in list(q.items()):
             if i != 'c':
                 # replace multiple values with last one
                 # except for criteria ('c')
@@ -607,7 +620,7 @@ def search(request, id=None, name=None, selected=False, json=False):
     q.setlist('c', criteria)
     hiddenfields = [('op', page)]
     qurl = q.urlencode()
-    q.setlist('c', filter(lambda c: c != orquery, criteria))
+    q.setlist('c', [c for c in criteria if c != orquery])
     qurl_orquery = q.urlencode()
     limit_url = "%s?%s%s" % (url, qurl, qurl and '&' or '')
     limit_url_orquery = "%s?%s%s" % (
@@ -677,10 +690,21 @@ def search(request, id=None, name=None, selected=False, json=False):
         request, federated_search_query, cached_only=True
     ) if federated_search_query else None
 
-    return render_to_response(
+    pagination_helper = DummyContent(hits)
+    paginator = Paginator(pagination_helper, pagesize)
+    page = request.GET.get('page')
+    try:
+        pagination_helper = paginator.page(page)
+    except PageNotAnInteger:
+        pagination_helper = paginator.page(1)
+    except EmptyPage:
+        pagination_helper = paginator.page(paginator.num_pages)
+
+    return render(
+        request,
         'results.html',
         {
-            'criteria': map(readable_criteria, criteria),
+            'criteria': list(map(readable_criteria, criteria)),
             'query': query,
             'keywords': keywords,
             'hiddenfields': hiddenfields,
@@ -706,13 +730,12 @@ def search(request, id=None, name=None, selected=False, json=False):
                 available_federated_sources(request.user)),
             'federated_search': federated_search,
             'federated_search_query': federated_search_query,
-            'pagination_helper': [None] * hits,
+            'pagination_helper': pagination_helper,
             'has_record_created_criteria': any(
                 f.startswith('created:') for f in criteria),
             'has_last_modified_criteria': any(
                 f.startswith('modified:') for f in criteria),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -770,19 +793,19 @@ def search_facets(request, id=None, name=None, selected=False):
             facets.append(search_facets.pop(of + '_t'))
         except KeyError:
             pass
-    facets.extend(sorted(search_facets.values(), key=lambda f: f.label))
+    facets.extend(sorted(list(search_facets.values()), key=lambda f: f.label))
 
     # clean facet items
     for f in facets:
         f.clean_result(hits)
 
     # remove facets with only no filter options
-    facets = filter(lambda f: len(f.facets) > 0, facets)
+    facets = [f for f in facets if len(f.facets) > 0]
 
     # remove facets that should be hidden
     hide_facets = getattr(settings, 'HIDE_FACETS', None)
     if hide_facets:
-        facets = filter(lambda f: f.label not in hide_facets, facets)
+        facets = [f for f in facets if f.label not in hide_facets]
 
     html = render_to_string(
         'results_facets.html',
@@ -790,7 +813,7 @@ def search_facets(request, id=None, name=None, selected=False):
             'limit_url': limit_url,
             'facets': facets
         },
-        context_instance=RequestContext(request))
+        request=request)
 
     mode, ids = get_collection_visibility_preferences(user)
     hash = calculate_hash(getattr(user, 'id', 0),
@@ -819,7 +842,7 @@ def search_json(request, id=None, name=None, selected=False):
             'records': records,
             'selectable': True,
         },
-        context_instance=RequestContext(request))
+        request=request)
 
     return dict(html=html)
 
@@ -883,10 +906,10 @@ def browse(request, id=None, name=None):
     collections = collections.order_by('order', 'title')
 
     if not collections:
-        return render_to_response(
-            'browse.html',
-            {},
-            context_instance=RequestContext(request))
+        return render(
+            request,
+            'browse.html'
+        )
 
     if 'c' in request.GET:
         collection = get_object_or_404(collections, name=request.GET['c'])
@@ -967,18 +990,18 @@ def browse(request, id=None, name=None):
         str(c.id) for c in collection_and_children
     )
 
-    class DummyContent():
-        def __init__(self, length):
-            self.length = length
-        def __len__(self):
-            return self.length
-        def __getitem__(self, index):
-            if isinstance(index, slice):
-                return range(index.start or 0, index.stop, index.step or 1)
-            else:
-                return None
+    dummyvalues = DummyContent(ivalues_length)
+    paginator = Paginator(dummyvalues, 50)
+    page = request.GET.get('page')
+    try:
+        dummyvalues = paginator.page(page)
+    except PageNotAnInteger:
+        dummyvalues = paginator.page(1)
+    except EmptyPage:
+        dummyvalues = paginator.page(paginator.num_pages)
 
-    return render_to_response(
+    return render(
+        request,
         'browse.html',
         {
             'collections': collections,
@@ -989,9 +1012,9 @@ def browse(request, id=None, name=None):
             'values': values,
             'ivalues': ivalues,
             'column_split': len(values) / 2,
-            'dummyvalues': DummyContent(ivalues_length),
-        },
-        context_instance=RequestContext(request))
+            'dummyvalues': dummyvalues,
+        }
+    )
 
 
 def overview(request):
@@ -1021,15 +1044,16 @@ def overview(request):
         for coll in record.collection_set.all().values_list('id', flat=True):
             overview_thumbs[coll] = record
 
-    return render_to_response(
+    return render(
+        request,
         'overview.html',
         {
             'collections': [
                 (coll, children[coll.id], overview_thumbs.get(coll.id))
                 for coll in collections
             ]
-        },
-        context_instance=RequestContext(request))
+        }
+    )
 
 
 @login_required
@@ -1042,7 +1066,7 @@ def terms(request):
     terms = []
     maxfreq = 0
 
-    for term, freq in s.terms().iteritems():
+    for term, freq in s.terms().items():
         terms.append([term, freq])
         if freq > maxfreq:
             maxfreq = freq
@@ -1050,12 +1074,12 @@ def terms(request):
     for term in terms:
         term[1] = term[1] * 6 / maxfreq
 
-    return render_to_response(
+    return render(
+        request,
         'terms.html',
         {
             'terms': sorted(terms, key=lambda t: t[0]),
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -1099,7 +1123,7 @@ def search_form(request):
             return 1
         if y == "Other":
             return -1
-        return cmp(x, y)
+        return (x > y) - (x < y)
 
     def _field_choices():
         grouped = {}
@@ -1108,7 +1132,7 @@ def search_form(request):
                 f.standard.title if f.standard else 'Other', []).append(f)
         return [('', 'Any')] + [
             (g, [(f.id, f.label) for f in grouped[g]])
-            for g in sorted(grouped, _cmp)
+            for g in sorted(grouped, key=cmp_to_key(_cmp))
         ]
 
     class SearchForm(forms.Form):
@@ -1153,7 +1177,7 @@ def search_form(request):
                 if criteria:
                     if field:
                         field = Field.objects.get(id=field)
-                        for cf, cfe in core_fields.iteritems():
+                        for cf, cfe in core_fields.items():
                             if field == cf or field in cfe:
                                 field = cf
                                 break
@@ -1176,9 +1200,11 @@ def search_form(request):
         collectionform = CollectionForm(prefix='coll')
         formset = search_form_formset(prefix='crit')
 
-    return render_to_response('search.html',
-                              {'collectionform': collectionform,
-                               'formset': formset,
-                               'collections': collections,
-                               },
-                              context_instance=RequestContext(request))
+    return render(
+        request,
+        'search.html',
+          {'collectionform': collectionform,
+           'formset': formset,
+           'collections': collections,
+           }
+    )

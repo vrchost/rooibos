@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *prefix, **options):
         if not prefix:
-            print self.help
+            print(self.help)
         else:
             count = updated = 0
             total = Media.objects.count()
@@ -25,4 +25,4 @@ class Command(BaseCommand):
                     pb.update(count)
                 reset_queries()
             pb.done()
-            print "Updated %d/%d media objects" % (updated, count)
+            print("Updated %d/%d media objects" % (updated, count))

@@ -1,7 +1,7 @@
 """
 Storage system to store media files in Backblaze B2
 """
-from __future__ import absolute_import
+
 
 from django.core.urlresolvers import reverse
 from django.conf import settings
@@ -97,7 +97,7 @@ class B2StorageSystem(FileSystemStorage):
         result = self.bucket.list_file_names(name, 1)
         return len(result['files']) and result['files'][0]['fileName'] == name
 
-    def get_available_name(self, name):
+    def get_available_name(self, name, max_length):
         (name, ext) = os.path.splitext(name)
         unique = ""
         while True:

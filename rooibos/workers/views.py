@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from .models import OwnedTaskResult
 from .tasks import testjob, _get_scratch_dir
 import os
@@ -28,11 +28,19 @@ def joblist(request):
 
     highlight = request.GET.get('highlight')
 
-    return render_to_response("workers_jobs.html",
+    paginator = Paginator(jobs, 25)
+    page = request.GET.get('page')
+    try:
+        jobs = paginator.page(page)
+    except PageNotAnInteger:
+        jobs = paginator.page(1)
+    except EmptyPage:
+        jobs = paginator.page(paginator.num_pages)
+
+    return render(request, "workers_jobs.html",
                               {'jobs': jobs,
                                'highlight': highlight,
-                               },
-                              context_instance=RequestContext(request))
+                               })
 
 
 @login_required

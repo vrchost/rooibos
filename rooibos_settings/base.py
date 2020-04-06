@@ -9,7 +9,6 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
-
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
 if install_dir not in sys.path:
@@ -24,7 +23,6 @@ else:
 
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 
 # Needed to enable compression JS and CSS files
@@ -77,12 +75,6 @@ MEDIA_ROOT = ''
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media-unused/'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -91,6 +83,7 @@ TEMPLATES = [
             os.path.join(package_dir, 'rooibos', 'templates'),
         ],
         'OPTIONS': {
+            'debug': DEBUG,
             'context_processors': (
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
@@ -116,7 +109,6 @@ MIDDLEWARE_CLASSES = (
     'rooibos.api.middleware.CookielessSessionMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'rooibos.ui.middleware.PageTitles',
-    'pagination.middleware.PaginationMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'rooibos.storage.middleware.StorageOnStart',
     'rooibos.access.middleware.AccessOnStart',
@@ -155,6 +147,7 @@ INSTALLED_APPS = (
     'rooibos.ui',
     'rooibos.viewers',
     'rooibos.help',
+    'rooibos.impersonate',
     'rooibos.presentation',
     'rooibos.statistics',
     'rooibos.federatedsearch',
@@ -164,13 +157,10 @@ INSTALLED_APPS = (
     'rooibos.workers',
     'rooibos.userprofile',
     'rooibos.mediaviewer',
-    'rooibos.megazine',
     'rooibos.groupmanager',
     'rooibos.pdfviewer',
     'rooibos.pptexport',
     'rooibos.works',
-    'pagination',
-    'impersonate',
     'compressor',
 )
 
@@ -258,13 +248,6 @@ FLICKR_SECRET = ''
 CUSTOM_TRACKER_HTML = ""
 
 SHOW_FRONTPAGE_LOGIN = 'yes'
-
-
-# The Megazine viewer is using a third party component that has commercial
-# licensing requirements.  To enable the component you need to enter your
-# license key, which is available for free for educational institutions.
-# See static/megazine/COPYING.
-MEGAZINE_PUBLIC_KEY = ""
 
 
 # By default, video delivery links are created as symbolic links. Some
@@ -441,6 +424,7 @@ def _get_log_handler(log_dir=None):
 
 
 handler = _get_log_handler()
+first_handler = list(handler.keys())[0]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -457,20 +441,20 @@ LOGGING = {
     'handlers': handler,
     'loggers': {
         'rooibos': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'DEBUG',
             'propagate': False,
         },
         'pika': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'WARNING',
         },
         'django': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'WARNING',
         },
         '': {
-            'handlers': [handler.keys()[0]],
+            'handlers': [first_handler],
             'level': 'DEBUG',
         },
     },

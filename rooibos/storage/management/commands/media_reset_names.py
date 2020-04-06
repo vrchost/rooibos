@@ -24,4 +24,4 @@ class Command(BaseCommand):
 
         pb.done()
 
-        print "Updated %d media objects" % updated
+        print("Updated %d media objects" % updated)

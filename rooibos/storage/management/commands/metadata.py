@@ -10,13 +10,13 @@ class Command(BaseCommand):
 
     def handle(self, *commands, **options):
         if not commands:
-            print self.help
+            print(self.help)
         else:
             for command in commands:
                 if command == 'refresh':
                     self.refresh()
                 else:
-                    print "Invalid command %s" % command
+                    print("Invalid command %s" % command)
 
     def refresh(self):
         count = 0

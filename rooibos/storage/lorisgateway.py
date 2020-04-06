@@ -1,5 +1,5 @@
 import os
-from StringIO import StringIO
+from io import StringIO
 from loris.webapp import Loris, read_config
 from loris.resolver import SimpleFSResolver
 from werkzeug.wrappers import Request

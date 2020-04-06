@@ -1,7 +1,6 @@
 {% extends "master.html" %}
 {% load ui %}
 {% load humanize %}
-{% load pagination_tags %}
 
 
 {% block sidebar %}
@@ -24,14 +23,8 @@
 
 {% block content %}
 
-{% autopaginate presentations 50 %}
-
 <h1>{{ presentations|length }} Presentation{{ presentations|pluralize }}
     using "{{ record.title }}"</h1>
-
-{% paginate %}
-
-
 
 {% if presentations %}
 
@@ -71,8 +64,6 @@
     </tr>
 {% endfor %}
 </table>
-
-{% paginate %}
 
 {% else %}
 No presentations are using this record.

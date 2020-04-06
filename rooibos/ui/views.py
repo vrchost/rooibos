@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django import forms
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseNotAllowed
 from django.template import RequestContext
@@ -34,9 +34,7 @@ import random
 @cache_control(max_age=24 * 3600)
 def css(request, stylesheet):
 
-    return render_to_response(stylesheet + '.css',
-                              {},
-                              context_instance=RequestContext(request),
+    return render(request, stylesheet + '.css',
                               content_type='text/css')
 
 
@@ -58,17 +56,16 @@ def main(request):
         pagesize=8,
         produce_facets=False)
 
-    order = range(1, len(records or []))
+    order = list(range(1, len(records or [])))
     random.shuffle(order)
 
     request.session.set_test_cookie()
     form = AuthenticationForm()
 
-    return render_to_response('main.html',
+    return render(request, 'main.html',
                               {'records': records,
                                'order': [0] + order,
-                               'login_form': form},
-                              context_instance=RequestContext(request))
+                               'login_form': form})
 
 
 @json_view
@@ -82,13 +79,12 @@ def select_record(request):
         request.session['selected_records'] = selected
 
     context = ctx_selected_records(request)
-    rc = RequestContext(request)
 
     return dict(
         basket=render_to_string(
-            'ui_basket.html', context, context_instance=rc),
+            'ui_basket.html', context, request=request),
         header=render_to_string(
-            'ui_basket_header.html', context, context_instance=rc),
+            'ui_basket_header.html', context, request=request),
     )
 
 
@@ -100,7 +96,7 @@ def add_tags(request, type, id):
     if '"' in tags:
         new_tags = parse_tag_input(tags)
     else:
-        new_tags = filter(None, map(lambda s: s.strip(), tags.split(',')))
+        new_tags = [_f for _f in [s.strip() for s in tags.split(',')] if _f]
     ownedwrapper = OwnedWrapper.objects.get_for_object(
         user=request.user, type=type, object_id=id)
     for tag in new_tags:
@@ -116,11 +112,8 @@ def remove_tag(request, type, id):
             user=request.user, type=type, object_id=id)
         Tag.objects.update_tags(
             ownedwrapper, ' '.join(
-                map(
-                    lambda s: '"%s"' % s,
-                    Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
-                    .values_list('name')
-                )
+                ['"%s"' % s for s in Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
+                    .values_list('name')]
             )
         )
         if request.is_ajax():
@@ -138,10 +131,9 @@ def remove_tag(request, type, id):
             )
             return HttpResponseRedirect(request.GET.get('next') or '/')
 
-    return render_to_response('ui_tag_remove.html',
+    return render(request, 'ui_tag_remove.html',
                               {'tag': tag,
-                               'next': request.GET.get('next')},
-                              context_instance=RequestContext(request))
+                               'next': request.GET.get('next')})
 
 
 @json_view
@@ -172,15 +164,15 @@ def manage(request):
     collection_manage = filter_by_access(
         request.user, Collection, manage=True).count() > 0
 
-    return render_to_response(
+    return render(
+        request,
         'ui_management.html',
         {
             'storage_manage': storage_manage,
             'storage_write': storage_write,
             'collection_write': collection_write,
             'collection_manage': collection_manage,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -205,7 +197,7 @@ def options(request):
     if request.method == "POST":
         ui_form = UserInterfaceForm(request.POST)
         if ui_form.is_valid():
-            for key in option_defaults.keys():
+            for key in list(option_defaults.keys()):
                 store_settings(
                     request.user,
                     'options_%s' % key,
@@ -226,17 +218,17 @@ def options(request):
             (key[8:], val[0])
             for (key, val) in load_settings(
                 request.user, filter='options_'
-            ).iteritems()
+            ).items()
         ))
         initial['alternate_password'] = '[unchanged]'
         ui_form = UserInterfaceForm(initial)
 
-    return render_to_response(
+    return render(
+        request,
         'ui_options.html',
         {
             'ui_form': ui_form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -274,12 +266,12 @@ def delete_selected_records(request):
             )
         )
 
-    return render_to_response(
+    return render(
+        request,
         'ui_delete_selected.html',
         {
             'items': deletable_items,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

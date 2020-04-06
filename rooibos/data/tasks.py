@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 import os
 from ..celeryapp import owned_task
 from .models import Collection

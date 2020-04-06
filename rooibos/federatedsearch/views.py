@@ -3,11 +3,11 @@ from django.template.loader import render_to_string
 from rooibos.util import json_view
 from datetime import datetime, timedelta
 from threading import Thread
-from models import HitCount
+from .models import HitCount
 
-from artstor import ArtstorSearch
-from flickr import FlickrSearch
-from shared import SharedSearch
+from .artstor import ArtstorSearch
+from .flickr.search import FlickrSearch
+from .shared.views import SharedSearch
 
 import logging
 
@@ -50,7 +50,7 @@ def sidebar_api_raw(request, query, cached_only=False):
 
     cache = dict(
         HitCount.current_objects.filter(
-            query=query, source__in=sources.keys()
+            query=query, source__in=list(sources.keys())
         ).values_list('source', 'hits')
     )
 
@@ -106,7 +106,7 @@ def sidebar_api_raw(request, query, cached_only=False):
                 results=sorted(results),
                 query=query
             ),
-            context_instance=RequestContext(request)
+            request=request,
         ),
         hits=total_hits,
         cache_hit=cache_hit

@@ -108,10 +108,10 @@ document 5
 
 # TODO: unicode support is pretty sloppy. define it better.
 
-from BeautifulSoup import BeautifulSoup
-from httplib import HTTPConnection
-from urllib import urlencode
-from urlparse import urlsplit
+from bs4 import BeautifulSoup
+from http.client import HTTPConnection
+from urllib.parse import urlencode
+from urllib.parse import urlsplit
 from datetime import datetime, date
 from time import strptime
 try:
@@ -197,7 +197,7 @@ class Solr(object):
         this means scraping the html.
         """
         response_content = response.read()
-        soup = BeautifulSoup(response_content)
+        soup = BeautifulSoup(response_content, 'html.parser')
         tag = soup.find('pre') or soup.find('h1')
         if tag:
             return tag.string
@@ -221,7 +221,7 @@ class Solr(object):
             else:
                 value = 'false'
         else:
-            value = unicode(value)
+            value = str(value)
         return value
 
     def bool_to_python(self, value):
@@ -237,7 +237,7 @@ class Solr(object):
         """
         Convert an 'str' field from solr's xml format to python and return it.
         """
-        return unicode(value)
+        return str(value)
 
     def int_to_python(self, value):
         """
@@ -249,7 +249,7 @@ class Solr(object):
         """
         Convert a 'long' field from solr's xml format to python and return it.
         """
-        return long(value)
+        return int(value)
 
     def date_to_python(self, value):
         """
@@ -375,12 +375,12 @@ class Solr(object):
         message = ElementTree.Element('add')
         for doc in docs:
             d = ElementTree.Element('doc')
-            for key, value in doc.items():
+            for key, value in list(doc.items()):
                 if key == 'boost':
                     d.set('boost', str(value))
                     continue
                 # handle lists, tuples, and other iterabes
-                if hasattr(value, '__iter__'):
+                if hasattr(value, '__iter__') and not isinstance(value, str):
                     for v in value:
                         f = ElementTree.Element('field', name=key)
                         f.text = self._from_python(v)

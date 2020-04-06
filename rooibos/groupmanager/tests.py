@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Group
-from management.commands.managegroup import Command
+from .management.commands.managegroup import Command
 
 
 class TestManageGroupCommand(TestCase):

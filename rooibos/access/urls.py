@@ -1,8 +1,7 @@
-from django.conf.urls import patterns, url
-from views import effective_permissions, modify_permissions
+from django.conf.urls import url
+from .views import effective_permissions, modify_permissions
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
         r'^effective-permissions/(?P<app_label>[\w-]+)/(?P<model>[\w-]+)/'
         r'(?P<id>\d+)/(?P<name>[\w-]+)/$',
@@ -15,4 +14,4 @@ urlpatterns = patterns(
         modify_permissions,
         name='access-modify-permissions'
     ),
-)
+]

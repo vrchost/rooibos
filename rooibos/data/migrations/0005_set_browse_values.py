@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
 
 from django.db import migrations, models, transaction
 import re
@@ -21,11 +21,11 @@ def update_browse_values(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     obj = FieldValue.objects.using(db_alias)
     count = obj.count()
-    print
+    print()
     idx = 0
     max_id = 0
     while idx < count:
-        print "%d/%d (id>%d)" % (idx, count, max_id)
+        print("%d/%d (id>%d)" % (idx, count, max_id))
         for f in obj.filter(id__gt=max_id).order_by('id')[:10000]:
             if f.value:
                 f.browse_value = make_browse_value(f.value)
@@ -34,7 +34,7 @@ def update_browse_values(apps, schema_editor):
         max_id = f.id if f else 0
         idx += 10000
         transaction.commit()
-    print "%d/%d" % (count, count)
+    print("%d/%d" % (count, count))
 
 
 class Migration(migrations.Migration):

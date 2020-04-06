@@ -1,4 +1,3 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from rooibos.data.models import standardfield_ids, FieldValue
 from rooibos.presentation.models import PresentationItem
@@ -6,29 +5,29 @@ from rooibos.util.progressbar import ProgressBar
 
 
 class Command(BaseCommand):
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument(
             '--from', '-f',
             dest='from_collection',
             action='store',
-            type='int',
+            type=int,
             help='Source collection'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--to', '-t',
             dest='to_collections',
             action='append',
-            type='int',
+            type=int,
             help='Target collection'
-        ),
-        make_option(
+        )
+        parser.add_argument(
             '--commit', '-c',
             dest='commit',
             action='store_true',
             default=False,
             help='Commit changes'
-        ),
-    )
+        )
+
     help = "Maps presentation items from records in one collection to " \
         "records in another collection. " \
         "Records are compared by their identifier."
@@ -37,15 +36,15 @@ class Command(BaseCommand):
             self, from_collection, to_collections, commit, *args, **options):
 
         if not from_collection or not to_collections:
-            print "Error: Must specify --from and --to arguments"
+            print("Error: Must specify --from and --to arguments")
             return
 
-        print "Mapping presentation items from collection %s to " \
-            "collection(s) %s" % (from_collection, to_collections)
+        print("Mapping presentation items from collection %s to " \
+            "collection(s) %s" % (from_collection, to_collections))
 
         idfields = standardfield_ids('identifier', equiv=True)
 
-        print "Fetching identifiers"
+        print("Fetching identifiers")
 
         query = FieldValue.objects.filter(
             field__in=idfields,
@@ -59,7 +58,7 @@ class Command(BaseCommand):
         for identifier, record in query:
             record_to_id.setdefault(record, []).append(identifier)
 
-        print "Fetching target records"
+        print("Fetching target records")
 
         query = FieldValue.objects.filter(
             field__in=idfields,
@@ -74,7 +73,7 @@ class Command(BaseCommand):
         for identifier, record in query:
             id_to_record.setdefault(identifier, []).append(record)
 
-        print "Mapping presentation items"
+        print("Mapping presentation items")
         remapped = 0
         errors = []
 
@@ -119,10 +118,10 @@ class Command(BaseCommand):
         errors = sorted(set(errors))
 
         if commit:
-            print "Remapped %s items" % remapped
+            print("Remapped %s items" % remapped)
         else:
-            print "Would have remapped %s items - rerun with --commit" % \
-                remapped
+            print("Would have remapped %s items - rerun with --commit" % \
+                remapped)
         if errors:
-            print "%s unique errors occurred:" % len(errors)
-            print '\n'.join(errors)
+            print("%s unique errors occurred:" % len(errors))
+            print('\n'.join(errors))

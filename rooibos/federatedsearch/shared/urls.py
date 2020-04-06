@@ -1,9 +1,8 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import url
 
-from views import search, proxy_image, select, manage, edit
+from .views import search, proxy_image, select, manage, edit
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^search/(?P<id>\d+)/(?P<name>[-\w]+)/$', search,
         name='shared-search'),
     url(r'^image/(?P<id>\d+)/(?P<name>[-\w]+)/$', proxy_image,
@@ -13,4 +12,4 @@ urlpatterns = patterns(
     url(r'^manage/$', manage, name='shared-manage'),
     url(r'^new/$', edit, name='shared-new'),
     url(r'^(?P<id>\d+)/(?P<name>[-\w]+)/edit/$', edit, name='shared-edit'),
-)
+]

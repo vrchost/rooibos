@@ -1,26 +1,26 @@
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 import json as simplejson
 from xml.etree.ElementTree import ElementTree
 from xml.parsers.expat import ExpatError
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from rooibos.federatedsearch.models import FederatedSearch, HitCount
-from BeautifulSoup import BeautifulSoup
-import cookielib
+from rooibos.federatedsearch import FederatedSearch
+from bs4 import BeautifulSoup
+import http.cookiejar
 import datetime
 import socket
 
 
-class SmartRedirectHandler(urllib2.HTTPRedirectHandler):
+class SmartRedirectHandler(urllib.request.HTTPRedirectHandler):
     def http_error_301(self, req, fp, code, msg, headers):
-        result = urllib2.HTTPRedirectHandler.http_error_301(
+        result = urllib.request.HTTPRedirectHandler.http_error_301(
             self, req, fp, code, msg, headers)
         result.status = code
         return result
 
     def http_error_302(self, req, fp, code, msg, headers):
-        result = urllib2.HTTPRedirectHandler.http_error_302(
+        result = urllib.request.HTTPRedirectHandler.http_error_302(
             self, req, fp, code, msg, headers)
         result.status = code
         return result
@@ -31,24 +31,24 @@ class ArtstorSearch(FederatedSearch):
     def hits_count(self, keyword):
         url = '%s?%s' % (
             settings.ARTSTOR_GATEWAY,
-            urllib.urlencode([('query', 'cql.serverChoice = "%s"' % keyword),
+            urllib.parse.urlencode([('query', 'cql.serverChoice = "%s"' % keyword),
                               ('operation', 'searchRetrieve'),
                               ('version', '1.1'),
                               ('maximumRecords', '1')])
         )
-        opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(
-                cookielib.CookieJar()
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(
+                http.cookiejar.CookieJar()
             ),
             SmartRedirectHandler()
         )
-        request = urllib2.Request(url)
+        request = urllib.request.Request(url)
         socket.setdefaulttimeout(self.timeout)
         try:
             response = opener.open(request)
-        except urllib2.URLError:
+        except urllib.error.URLError:
             return 0
-        soup = BeautifulSoup(response)
+        soup = BeautifulSoup(response, 'html.parser')
         try:
             return int(soup.find('numberofrecords').contents[0])
         except:
@@ -66,6 +66,9 @@ class ArtstorSearch(FederatedSearch):
     def search(self, keyword, page=1, pagesize=50):
         if not keyword:
             return None
+
+        from rooibos.federatedsearch.models import HitCount
+
         cached, created = HitCount.current_objects.get_or_create(
             source=self.get_source_id(),
             query='%s [%s:%s]' % (keyword, page, pagesize),
@@ -78,21 +81,21 @@ class ArtstorSearch(FederatedSearch):
         if not created and cached.results:
             return simplejson.loads(cached.results)
 
-        opener = urllib2.build_opener(
-            urllib2.HTTPCookieProcessor(cookielib.CookieJar()),
+        opener = urllib.request.build_opener(
+            urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()),
             SmartRedirectHandler()
         )
         url = '%s?query="%s"&operation=searchRetrieve&version=1.1&' \
             'maximumRecords=%s&startRecord=%s' % (
                 settings.ARTSTOR_GATEWAY,
-                urllib.quote(keyword),
+                urllib.parse.quote(keyword),
                 pagesize,
                 (page - 1) * pagesize + 1,
             )
         socket.setdefaulttimeout(self.timeout)
         try:
-            response = opener.open(urllib2.Request(url))
-        except urllib2.URLError:
+            response = opener.open(urllib.request.Request(url))
+        except urllib.error.URLError:
             return None
 
         try:

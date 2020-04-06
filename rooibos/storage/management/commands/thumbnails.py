@@ -1,24 +1,24 @@
-from optparse import make_option
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
 from rooibos.data.models import Collection
-from rooibos.storage import get_thumbnail_for_record
+from rooibos.storage.functions import get_thumbnail_for_record
 from rooibos.util.progressbar import ProgressBar
 
 
 class Command(BaseCommand):
     help = 'Pre-builds thumbnails for a collection'
-    option_list = BaseCommand.option_list + (
-        make_option('--collection', '-c', dest='collection',
-                    help='Collection'),
-    )
+
+    def add_arguments(self, parser):
+        parser.add_argument('--collection', '-c', dest='collection',
+                    help='Collection')
+
 
     def handle(self, *args, **kwargs):
 
         coll = kwargs.get('collection')
 
         if not coll:
-            print "--collection is a required parameter"
+            print("--collection is a required parameter")
             return
 
         if coll.isdigit():

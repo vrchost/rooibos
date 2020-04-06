@@ -1,15 +1,15 @@
-import unittest
-from models import Collection, CollectionItem, Record, Field, FieldValue, \
+from django.test import TestCase
+from .models import Collection, CollectionItem, Record, Field, FieldValue, \
     get_system_field, standardfield
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from rooibos.access.models import AccessControl
-from rooibos.solr import SolrIndex
-from spreadsheetimport import SpreadsheetImport
-from cStringIO import StringIO
+from rooibos.solr.functions import SolrIndex
+from .spreadsheetimport import SpreadsheetImport
+from io import StringIO
 
 
-class FieldValueTestCase(unittest.TestCase):
+class FieldValueTestCase(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(
@@ -107,7 +107,7 @@ class FieldValueTestCase(unittest.TestCase):
         self.assertEqual([], expected)
 
 
-class GroupTestCase(unittest.TestCase):
+class GroupTestCase(TestCase):
 
     def test_sub_groups(self):
         group_a = Collection.objects.create(title='A', name='a')
@@ -194,7 +194,7 @@ A002,a002.jpg,Another Test,Andreas Knab;John Doe,Virginia
 """
 
 
-class CsvImportTestCase(unittest.TestCase):
+class CsvImportTestCase(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(
@@ -320,7 +320,7 @@ class CsvImportTestCase(unittest.TestCase):
 
         testimport.run()
 
-        self.assertEquals(2, self.collection.records.count())
+        self.assertEqual(2, self.collection.records.count())
 
         r1 = self.collection.records.get(name='A001'.lower())
         self.assertEqual(
@@ -618,7 +618,7 @@ T003,Title8"""),
         self.assertTrue('Location' in testimport.mapping)
 
 
-class RecordAccessTestCase(unittest.TestCase):
+class RecordAccessTestCase(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(
@@ -632,7 +632,10 @@ class RecordAccessTestCase(unittest.TestCase):
         self.collectionmanager = User.objects.create(
             username='accesstest-manager')
         self.owner = User.objects.create(username='accesstest-owner')
-        self.admin = User.objects.get(username='admin')
+        self.admin, created = User.objects.get_or_create(username='admin')
+        if created:
+            self.admin.is_superuser = True
+            self.admin.save()
         self.user = User.objects.create(username='accesstest-user')
         AccessControl.objects.create(content_object=self.collection,
                                      user=self.collectionreader,
@@ -772,7 +775,7 @@ class RecordAccessTestCase(unittest.TestCase):
         self.assertFalse(record.editable_by(self.collectionwriter))
 
 
-class RecordNameTestCase(unittest.TestCase):
+class RecordNameTestCase(TestCase):
 
     def setUp(self):
         self.collection = Collection.objects.create(
@@ -833,7 +836,7 @@ class RecordNameTestCase(unittest.TestCase):
         self.assertEqual('identifier-407', record.name)
 
 
-class ImageWorkRecordTestCase(unittest.TestCase):
+class ImageWorkRecordTestCase(TestCase):
 
     def setUp(self):
         self.dcid = standardfield('identifier')
@@ -863,14 +866,14 @@ class ImageWorkRecordTestCase(unittest.TestCase):
 
         # work_record does not have relation.isPartOf set, so it's not
         # part of any work
-        self.assertEquals(0, len(work_record.get_works()))
+        self.assertEqual(0, len(work_record.get_works()))
         self.assertIn('WORK', image_record.get_works())
         self.assertIn('WORK', image_record2.get_works())
 
         # same again
-        self.assertEquals(0, work_record.get_image_records_query().count())
-        self.assertEquals(2, image_record.get_image_records_query().count())
-        self.assertEquals(2, image_record2.get_image_records_query().count())
+        self.assertEqual(0, work_record.get_image_records_query().count())
+        self.assertEqual(2, image_record.get_image_records_query().count())
+        self.assertEqual(2, image_record2.get_image_records_query().count())
 
     def testSolrIndexing(self):
         work_record = Record.objects.create()

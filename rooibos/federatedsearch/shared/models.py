@@ -44,7 +44,7 @@ class SharedCollection(models.Model):
 
     @staticmethod
     def decrypt(ciphertext):
-        salt, ciphertext = map(b64decode, ciphertext.split('$'))
+        salt, ciphertext = list(map(b64decode, ciphertext.split('$')))
         arc4 = ARC4.new(salt + settings.SECRET_KEY)
         plaintext = arc4.decrypt(ciphertext)
         plaintext = plaintext[3:3 + int(plaintext[:3].strip())]

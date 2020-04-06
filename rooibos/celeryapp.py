@@ -1,9 +1,8 @@
-from __future__ import absolute_import
+
 from celery import Celery
 from functools import wraps
 from kombu import Queue
 from django.conf import settings
-from rooibos.workers.models import OwnedTaskResult
 from datetime import datetime
 import json
 
@@ -17,7 +16,7 @@ app = Celery('rooibos')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 _instance_name = getattr(settings, 'INSTANCE_NAME', '')
-queue_name =  'celery-%s' % (_instance_name or 'default')
+queue_name = 'celery-%s' % (_instance_name or 'default')
 solr_queue_name = queue_name + '-solr'
 
 app.conf.task_default_queue = queue_name
@@ -32,10 +31,12 @@ app.autodiscover_tasks()
 
 @app.task(bind=True)
 def debug_task(self):
-    print('Request: {0!r}'.format(self.request))
+    print(('Request: {0!r}'.format(self.request)))
 
 
 def owned_task(*args, **kwargs):
+
+    from rooibos.workers.models import OwnedTaskResult
 
     def create_owned_task(userarg='owner', removeuserarg=False, **kwargs):
 
@@ -52,7 +53,7 @@ def owned_task(*args, **kwargs):
                         json_args = json.dumps(dict(
                             args=args, kwargs=kwargs
                         ))
-                    except TypeError, exception:
+                    except TypeError as exception:
                         json_args = repr(exception)
                     object, _ = OwnedTaskResult.objects.get_or_create(
                         task_id=self.request.id,

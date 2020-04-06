@@ -1,17 +1,16 @@
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.conf import settings
-from django.template import RequestContext
 from django.core.urlresolvers import reverse
 from django.core.files.temp import NamedTemporaryFile
-from django.core.servers.basehttp import FileWrapper
+from wsgiref.util import FileWrapper
 from django.template import Context, Template
 from django.utils.encoding import smart_str
 from rooibos.viewers import register_viewer, Viewer
-from rooibos.storage import get_image_for_record
+from rooibos.storage.functions import get_image_for_record
 from rooibos.data.models import Record
 from rooibos.api.views import presentation_detail
-from models import Presentation
+from .models import Presentation
 from .views import get_metadata
 from .mirador_package import MiradorPackageViewer
 from reportlab.pdfgen import canvas
@@ -23,7 +22,7 @@ from reportlab.platypus import flowables
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import re
 import zipfile
 import os
@@ -56,13 +55,15 @@ def _clean_for_render(text):
                  'color', 'fg', 'fontName', 'fontSize',
                  'fontname', 'fontsize', 'href', 'name',
                  'textColor', 'textcolor']
-    html = BeautifulSoup(text)
-    html.attrs = None
-    for e in html.findAll(True):
-        for attribute in e.attrs:
-            if attribute[0] not in whitelist:
-                del e[attribute[0]]
-    return unicode(html)
+    html = BeautifulSoup(text, 'html.parser')
+    for tag in html.recursiveChildGenerator():
+        try:
+            tag.attrs = dict((key,value) for key,value in tag.attrs.items()
+                 if key in whitelist)
+        except AttributeError:
+            # 'NavigableString' object has no attribute 'attrs'
+            pass
+    return html.prettify()
 
 
 class PresentationViewer(Viewer):
@@ -74,7 +75,8 @@ class PresentationViewer(Viewer):
         return_url = request.GET.get('next', reverse('presentation-browse'))
         manifest_url = reverse(
             'presentation-manifest', args=(self.obj.id, self.obj.name))
-        return render_to_response(
+        return render(
+            request,
             getattr(
                 settings,
                 'PRESENTATION_VIEWER_TEMPLATE',
@@ -84,8 +86,7 @@ class PresentationViewer(Viewer):
                 'presentation': self.obj,
                 'return_url': return_url,
                 'manifest_url': manifest_url,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -107,13 +108,13 @@ class PresentationViewerOld(Viewer):
 
     def view(self, request):
         return_url = request.GET.get('next', reverse('presentation-browse'))
-        return render_to_response(
+        return render(
+            request,
             'presentation_viewer_old.html',
             {
                 'presentation': self.obj,
                 'return_url': return_url,
-            },
-            context_instance=RequestContext(request)
+            }
         )
 
 
@@ -239,7 +240,7 @@ class FlashCardViewer(Viewer):
                         '<b>%s:</b> %s' % ('Annotation', annotation),
                         styles['Data'])
                     )
-                data = filter(None, data)
+                data = [_f for _f in data if _f]
                 incomplete = False
                 while data:
                     f.addFromList(data, p)
@@ -464,13 +465,14 @@ class PackageFilesViewer(Viewer):
                             filename(title or 'Slide %s' % (index + 1)),
                             os.path.splitext(image)[1]
                         )
-                    ).encode('ascii', 'replace')
+                    ).encode('ascii', 'replace').decode()
                 )
 
         def metadata_file(tempfile, record):
             t = Template("{% load data %}{% metadata record %}")
             c = Context({'record': record, 'request': request})
-            tempfile.write(smart_str(t.render(c)))
+            tempfile.write(
+                smart_str(t.render(c)).encode('utf8', errors='replace'))
             tempfile.flush()
             return tempfile.name
 
@@ -511,13 +513,14 @@ class PackageFilesViewer(Viewer):
 
         output.close()
         tempfile.flush()
+        size = tempfile.file.tell()
         tempfile.seek(0)
 
         wrapper = FileWrapper(tempfile)
         response = HttpResponse(wrapper, content_type='application/zip')
         response['Content-Disposition'] = \
             'attachment; filename=%s.zip' % filename(presentation.title)
-        response['Content-Length'] = os.path.getsize(tempfile.name)
+        response['Content-Length'] = size
         return response
 
 

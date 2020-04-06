@@ -70,7 +70,7 @@
 
 {% for row in preview_rows %}
 <ul>
-{% for key,values in row.iteritems %}
+{% for key,values in row.items %}
 {% for value in values %}
 <li>{{ key }}: {{ value }}</li>
 {% endfor %}

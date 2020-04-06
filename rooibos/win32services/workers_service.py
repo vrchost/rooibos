@@ -1,4 +1,4 @@
-import services
+from . import services
 
 
 class WorkersService(services.Service):

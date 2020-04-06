@@ -5,7 +5,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from django.db import reset_queries, IntegrityError
-from optparse import make_option
 from rooibos.access.models import AccessControl, ExtendedGroup, Subnet, \
     AttributeValue, ATTRIBUTE_BASED_GROUP, IP_BASED_GROUP
 from ipaddr import IPNetwork
@@ -154,10 +153,10 @@ class MigrateModel(object):
             else:
                 return historic.content_hash == current
 
-        print "\n%sMigrating %s" % (
+        print("\n%sMigrating %s" % (
             'Step %s of %s: ' % (step, steps) if step and steps else '',
             self.model_name
-        )
+        ))
         r = re.match('^SELECT (.+) FROM (.+)$', self.query)
         pb = ProgressBar(
             list(
@@ -231,7 +230,7 @@ class MigrateModel(object):
                             h.content_hash = hash
                             h.save()
                             self.updated += 1
-                        except (IntegrityError, pyodbc.IntegrityError), ex:
+                        except (IntegrityError, pyodbc.IntegrityError) as ex:
                             logging.error(
                                 "Integrity error: %s %s" % (
                                     self.model_name, self.key(row)))
@@ -260,12 +259,12 @@ class MigrateModel(object):
                                 self.model_name, self.key(row)))
                             self.errors += 1
                     except (IntegrityError, pyodbc.IntegrityError,
-                            ValueError), ex:
+                            ValueError) as ex:
                         logging.error("%s: %s %s" % (
                             type(ex).__name__, self.model_name, self.key(row)))
                         logging.error(ex)
                         self.errors += 1
-                    except MergeObjectsException, ex:
+                    except MergeObjectsException as ex:
                         merged_ids[self.key(row)] = ex.instance
                 else:
                     # need to create many-to-many relation
@@ -294,12 +293,12 @@ class MigrateModel(object):
             pb.done()
         reset_queries()
         if self.object_history and self.supports_deletion:
-            print "Removing unused objects"
+            print("Removing unused objects")
             pb = ProgressBar(len(self.object_history))
             count = 0
             # Delete many objects at once for better performance
             to_delete = []
-            for oid, o in self.object_history.iteritems():
+            for oid, o in self.object_history.items():
                 if self.preserve_memory:
                     o = ObjectHistory.objects.get(
                         content_type=self.content_type,
@@ -335,7 +334,7 @@ class MigrateModel(object):
             pb.done()
             reset_queries()
         if self.need_instance_map and not self.m2m_model:
-            print "Retrieving instances"
+            print("Retrieving instances")
             ids = dict(ObjectHistory.objects.filter(
                 content_type=self.content_type,
                 m2m_content_type=None,
@@ -345,12 +344,12 @@ class MigrateModel(object):
                 (ids.get(o.id, None), o) for o in self.model.objects.all())
             self.instance_map.update(merged_ids)
 
-        print "  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t" \
-              " Errors\tNo hist"
-        print "%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d" % (
+        print("  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t" \
+              " Errors\tNo hist")
+        print("%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d" % (
             self.added, self.recreated, self.deleted, self.updated,
             self.unchanged, len(merged_ids), self.errors, self.nohistory
-        )
+        ))
 
 
 class MigrateUsers(MigrateModel):
@@ -1336,16 +1335,17 @@ class MigrateVocabularyPermissions(MigratePermissions):
 
 class Command(BaseCommand):
     help = 'Migrates database from MDID2'
-    args = "config_file"
 
-    option_list = BaseCommand.option_list + (
-        make_option(
+    def add_arguments(self, parser):
+        parser.add_argument('config_file',
+                            help='Path to MDID2 config.xml file')
+
+        parser.add_argument(
             '--remove-full-prefix',
             dest='remove_full_prefix',
             action='store_true',
             help='Remove full/ prefix from media paths'
-        ),
-    )
+        )
 
     def read_config(self, file):
         connection = servertype = None
@@ -1357,15 +1357,12 @@ class Command(BaseCommand):
                 servertype = e.firstChild.nodeValue
         return (servertype, connection)
 
-    def handle(self, *config_files, **options):
+    def handle(self, *args, **options):
 
         logging.info("Starting migration")
 
-        if len(config_files) != 1:
-            print "Please specify exactly one configuration file."
-            return
-
-        servertype, connection = self.read_config(config_files[0])
+        config_file = options['config_file']
+        servertype, connection = self.read_config(config_file)
 
         def get_cursor():
             if servertype == "MSSQL":
@@ -1375,7 +1372,7 @@ class Command(BaseCommand):
             elif servertype == "CUSTOM":
                 conn = pyodbc.connect(connection)
             else:
-                print "Unsupported database type"
+                print("Unsupported database type")
                 return None
             return conn.cursor()
 
@@ -1383,8 +1380,8 @@ class Command(BaseCommand):
             "SELECT Version FROM databaseversion").fetchone()
         supported = ("00006", "00007", "00008")
         if row.Version not in supported:
-            print "Database version is not supported"
-            print "Found %r, supported is %r" % (row.Version, supported)
+            print("Database version is not supported")
+            print("Found %r, supported is %r" % (row.Version, supported))
             return
 
         MigrateMedia.remove_full_prefix = options.get('remove_full_prefix')
@@ -1427,11 +1424,8 @@ class Command(BaseCommand):
             MigrateFieldValues,
         ]
 
-        map(
-            lambda (i, m):
-            m(get_cursor()).run(step=i + 1, steps=len(migrations)),
-            enumerate(migrations)
-        )
+        for i, m in enumerate(migrations):
+            m(get_cursor()).run(step=i + 1, steps=len(migrations))
 
-        print "You must now run 'manage.py solr reindex' to rebuild " \
-            "the full-text index."
+        print("You must now run 'manage.py solr reindex' to rebuild " \
+            "the full-text index.")

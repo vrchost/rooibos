@@ -1,5 +1,5 @@
 from rooibos.util import json_view
-from models import UserProfile
+from .models import UserProfile
 
 
 def load_settings(user, filter=None):

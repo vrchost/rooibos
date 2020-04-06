@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import MetadataStandard, Field, FieldSet, FieldSetField, \
+from .models import MetadataStandard, Field, FieldSet, FieldSetField, \
     Record, FieldValue, Collection, Vocabulary, VocabularyTerm, \
     RemoteMetadata
 

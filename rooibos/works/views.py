@@ -1,8 +1,7 @@
 import json
 
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from rooibos.solr.views import search as solr_search
 from rooibos.data.models import Record
@@ -92,8 +91,7 @@ def metadata(request, record_id):
 
 def works(request):
 
-    return render_to_response(
+    return render(
+        request,
         'works/works.html',
-        {},
-        context_instance=RequestContext(request)
     )

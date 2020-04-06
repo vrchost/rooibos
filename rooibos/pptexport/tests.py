@@ -1,18 +1,18 @@
-from __future__ import with_statement
-import unittest
+
+from django.test import TestCase
 from django.contrib.auth.models import AnonymousUser, User
 from rooibos.data.models import Collection, CollectionItem, Record, Field, \
     FieldValue
 from rooibos.storage.models import Media, Storage
 from rooibos.presentation.models import Presentation, PresentationItem
 from rooibos.access.models import AccessControl
-from functions import PowerPointGenerator
+from .functions import PowerPointGenerator
 import os
 import tempfile
 import logging
 
 
-class PowerpointTestCase(unittest.TestCase):
+class PowerpointTestCase(TestCase):
 
     def setUp(self):
         self.tempdir = tempfile.mkdtemp()
@@ -34,10 +34,10 @@ class PowerpointTestCase(unittest.TestCase):
         self.storage.delete()
 
     def test_simple_powerpoint_file(self):
-        self._generate('simple.pptx')
+        self._generate()
 
-    def _generate(self, template):
-        file = os.path.join(self.tempdir, 'test-%s' % template)
+    def _generate(self):
+        file = os.path.join(self.tempdir, 'test-presentation.pptx')
         collection = Collection.objects.create(
             title='Simple Collection', description='Simple collection')
         AccessControl.objects.create(content_object=collection, read=True)
@@ -49,7 +49,7 @@ class PowerpointTestCase(unittest.TestCase):
             title='Simple Presentation',
             description='This is a PowerPoint presentation created from a '
             'template and populated with data.',
-            owner=User.objects.get(username='admin')
+            owner=User.objects.get_or_create(username='admin')[0]
         )
         for n in range(1, 11):
             record = Record.objects.create()
@@ -75,4 +75,6 @@ class PowerpointTestCase(unittest.TestCase):
 
         g = PowerPointGenerator(presentation, AnonymousUser())
 
-        self.assertTrue(g.generate(template, file))
+        self.assertTrue(g.generate(file, 'white', True, True))
+        self.assertTrue(g.generate(file, 'white', True, False))
+        self.assertTrue(g.generate(file, 'white', False, False))

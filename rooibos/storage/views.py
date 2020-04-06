@@ -1,4 +1,4 @@
-from __future__ import with_statement
+
 from functools import wraps
 from django.contrib import messages
 from datetime import datetime
@@ -11,23 +11,22 @@ from django.forms.utils import ErrorList
 from django.http import HttpResponse, Http404, HttpResponseRedirect, \
     HttpResponseNotAllowed, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, get_list_or_404, \
-    render_to_response
-from django.template import RequestContext
-from django.template.loader import render_to_string
+    render
 import json as simplejson
 from django.utils.encoding import smart_str
 from django.views.decorators.cache import cache_control, patch_cache_control
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from django.template.defaultfilters import filesizeformat
-from models import Media, Storage, TrustedSubnet, ProxyUrl
+from .models import Media, Storage, TrustedSubnet, ProxyUrl
 from rooibos.access.functions import filter_by_access
 from ipaddr import IPAddress, IPNetwork
 from ranged_fileresponse import RangedFileResponse
 from rooibos.data.models import Collection, Record, FieldValue, \
     CollectionItem, standardfield
-from rooibos.storage import get_media_for_record, get_image_for_record, \
-    get_thumbnail_for_record, analyze_media, analyze_records, \
+from rooibos.storage.functions import get_media_for_record, \
+    get_image_for_record, \
+    get_thumbnail_for_record, analyze_records, \
     find_record_by_identifier
 from rooibos.util import json_view
 from rooibos.statistics.models import Activity
@@ -45,11 +44,11 @@ def add_content_length(func):
         if type(response) == HttpResponse and hasattr(response, '_container'):
             if hasattr(response._container, 'size'):
                 response['Content-Length'] = response._container.size
-            elif isinstance(response._container, file):
+            elif hasattr(response._container, 'name'):
                 if os.path.exists(response._container.name):
                     response['Content-Length'] = os.path.getsize(
                         response._container.name)
-            elif isinstance(getattr(response, 'content', None), basestring):
+            elif isinstance(getattr(response, 'content', None), str):
                 response['Content-Length'] = len(response.content)
         return response
     return _add_header
@@ -69,7 +68,7 @@ def retrieve(request, recordid, record, mediaid, media):
     # Allow passing in an argument to prevent setting "attachment" content
     # disposition, which keeps e.g. the PDF viewer built into Google Chrome
     # from working
-    inline = request.GET.has_key('inline')
+    inline = 'inline' in request.GET
     name = smart_str(mediaobj.url)
 
     if mediaobj.is_local():  # support byte range requests
@@ -84,8 +83,8 @@ def retrieve(request, recordid, record, mediaid, media):
 
         retval = RangedFileResponse(
             request,
-            open(content_file, 'r'),
-            content_type=str(mediaobj.mimetype)
+            open(content_file, 'rb'),
+            content_type=mediaobj.mimetype
         )
 
     else:
@@ -152,7 +151,7 @@ def retrieve_image(request, recordid, record, width=None, height=None):
                             data=dict(width=width, height=height))
     try:
         response = HttpResponse(
-            content=file(path, 'rb').read(),
+            content=open(path, 'rb').read(),
             content_type='image/jpeg'
         )
         if 'forcedl' in request.GET:
@@ -354,12 +353,12 @@ def manage_storages(request):
     for s in storages:
         s.analysis_available = hasattr(s, 'get_files')
 
-    return render_to_response(
+    return render(
+        request,
         'storage_manage.html',
         {
             'storages': storages,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -373,7 +372,7 @@ def manage_storage(request, storageid=None, storagename=None):
         storage = Storage(system='local')
 
     if not storage.id:
-        system_choices = [(s, s) for s in settings.STORAGE_SYSTEMS.keys()]
+        system_choices = [(s, s) for s in list(settings.STORAGE_SYSTEMS.keys())]
     else:
         system_choices = [(storage.system, storage.system)]
 
@@ -416,13 +415,13 @@ def manage_storage(request, storageid=None, storagename=None):
     else:
         form = StorageForm(instance=storage)
 
-    return render_to_response(
+    return render(
+        request,
         'storage_edit.html',
         {
             'storage': storage,
             'form': form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -617,12 +616,12 @@ def import_files(request):
     else:
         form = UploadFileForm()
 
-    return render_to_response(
+    return render(
+        request,
         'storage_import_files.html',
         {
             'upload_form': form,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 
@@ -689,10 +688,11 @@ def match_up_files(request):
     else:
         form = MatchUpForm(request.GET)
 
-    return render_to_response('storage_match_up_files.html',
-                              {'form': form,
-                               },
-                              context_instance=RequestContext(request))
+    return render(request,
+                  'storage_match_up_files.html',
+                  {'form': form,
+                   }
+                  )
 
 
 @login_required
@@ -766,15 +766,15 @@ def find_records_without_media(request):
     else:
         form = SelectionForm(request.GET)
 
-    return render_to_response(
+    return render(
+        request,
         'storage_find_records_without_media.html',
         {
             'form': form,
             'identifiers': identifiers,
             'records': records,
             'analyzed': analyzed,
-        },
-        context_instance=RequestContext(request)
+        }
     )
 
 

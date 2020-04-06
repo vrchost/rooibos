@@ -1,3 +1,5 @@
+from base64 import b64decode
+
 from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
 from django.contrib.auth import login, authenticate
@@ -20,7 +22,7 @@ def basic_authenticate(authentication):
     (authmeth, auth) = authentication.split(' ', 1)
     if 'basic' != authmeth.lower():
         return None
-    auth = auth.strip().decode('base64')
+    auth = b64decode(auth.strip()).decode('ascii')
     username, password = auth.split(':', 1)
     return authenticate(username=username, password=password)
 

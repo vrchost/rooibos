@@ -1,16 +1,10 @@
-from django.conf.urls import patterns, url
-from views import thumbnail, download
+from django.conf.urls import url
+from .views import download
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(
-        r'^thumb/(?P<template>[^/]+)/$',
-        thumbnail,
-        name='pptexport-thumbnail'
-    ),
-    url(
-        r'^download/(?P<id>\d+)/(?P<template>[^/]+)/$',
+        r'^download/(?P<id>\d+)/$',
         download,
         name='pptexport-download'
     ),
-)
+]

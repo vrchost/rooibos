@@ -1,5 +1,5 @@
 from django import template
-from rooibos.statistics import get_history
+from rooibos.statistics.functions import get_history
 from datetime import datetime, timedelta
 
 
@@ -11,7 +11,7 @@ def scale(list):
     if m == 0:
         return list
     else:
-        return map(lambda v: int(v * 100 / m), list)
+        return [int(v * 100 / m) for v in list]
 
 
 @register.simple_tag
