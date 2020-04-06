@@ -1,3 +1,36 @@
+# Upgrading from MDID 3.4.x
+
+## Python
+
+MDID 3.5 now requires Python 3, so you will need to install the required
+packages for your operating system - see the installation instructions 
+for more details.  Also create a new virtual environment using Python 3.
+
+## Upgrade
+
+Replace the old package folder with the new package, keeping your 
+`rooibos_settings` and any other custom files and folders in place.  
+Make sure to copy the new `rooibos_settings/base.py`, since it likely 
+includes changes.
+
+## Database migrations
+
+Run the following commands to apply any database changes:
+
+```
+django-admin migrate federatedsearch --fake-initial --noinput
+django-admin migrate impersonate --fake-initial --noinput
+django-admin migrate migrations --fake-initial --noinput
+django-admin migrate presentation --fake-initial --noinput
+django-admin migrate solr --fake-initial --noinput
+django-admin migrate statistics --fake-initial --noinput
+django-admin migrate storage --fake-initial --noinput
+django-admin migrate userprofile --fake-initial --noinput
+django-admin migrate util --fake-initial --noinput
+django-admin migrate --noinput
+```
+
+
 # Upgrading from MDID 3.3.x
 
 To upgrade an installation of MDID 3.3 or later, replace the old
