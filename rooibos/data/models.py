@@ -49,7 +49,7 @@ class Collection(models.Model):
                     check_current_slug=kwargs.get('force_insert'))
         super(Collection, self).save(kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s (%s)' % (self.title, self.name)
 
     @property
@@ -110,7 +110,7 @@ class CollectionItem(models.Model):
 
     natural_key.dependencies = ['data.Collection', 'data.Record']
 
-    def __unicode__(self):
+    def __str__(self):
         return "Record %s Collection %s%s" % (
             self.record_id,
             self.collection_id,
@@ -220,7 +220,7 @@ class Record(models.Model):
                                      fieldvalue__index_value__in=index_values,
                                      fieldvalue__field__in=fields)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def get_absolute_url(self):
@@ -484,7 +484,7 @@ class MetadataStandard(models.Model):
     def natural_key(self):
         return (self.prefix,)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 
@@ -507,7 +507,7 @@ class VocabularyTerm(models.Model):
     class Meta:
         app_label = 'data'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.term
 
 
@@ -563,8 +563,8 @@ class Field(models.Model):
             ids.extend(more)
         return Field.objects.select_related('standard').filter(id__in=ids)
 
-    def __unicode__(self):
-        return self.full_name
+    def __str__(self):
+        return '%s [%s]' % (self.full_name, self.id)
 
     class Meta:
         unique_together = ('name', 'standard')
@@ -597,7 +597,7 @@ class FieldSet(models.Model):
         )
         super(FieldSet, self).save(kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     class Meta:
@@ -620,8 +620,8 @@ class FieldSetField(models.Model):
     order = models.IntegerField(default=0)
     importance = models.SmallIntegerField(default=1)
 
-    def __unicode__(self):
-        return self.field.__unicode__()
+    def __str__(self):
+        return self.field.__str__()
 
     class Meta:
         ordering = ['order']
@@ -666,7 +666,7 @@ class FieldValue(models.Model):
             self.record.name = self.value
             self.record.save(force_update_name=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s%s%s=%s" % (
             self.resolved_label,
             self.refinement and '.',

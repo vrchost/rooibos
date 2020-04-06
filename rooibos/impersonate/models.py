@@ -7,5 +7,5 @@ class Impersonation(models.Model):
     users = models.ManyToManyField(User, verbose_name='Allowed users', related_name='impersonated_set', blank=True)
     groups = models.ManyToManyField(Group, verbose_name='Allowed groups', related_name='impersonated_set', blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.group.name

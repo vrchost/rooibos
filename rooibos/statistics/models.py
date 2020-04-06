@@ -19,7 +19,7 @@ class Activity(models.Model):
     class Meta:
         app_label = 'statistics'
 
-    def __unicode__(self):
+    def __str__(self):
         return "Activity (%s %s) %s" % (self.date, self.time, self.event)
 
     # Override user property to allow AnonymousUser objects,
@@ -80,6 +80,6 @@ class AccumulatedActivity(models.Model):
     class Meta:
         app_label = 'statistics'
 
-    def __unicode__(self):
+    def __str__(self):
         return "AccumulatedActivity (%s) %s %s" % (
             self.date, self.event, self.count)

@@ -19,5 +19,5 @@ class HitCount(models.Model):
     objects = models.Manager()
     current_objects = CurrentHitCountManager()
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s '%s': %s" % (self.source, self.query, self.hits)

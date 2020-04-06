@@ -58,7 +58,7 @@ class SharedCollection(models.Model):
                     check_current_slug=kwargs.get('force_insert'))
         super(SharedCollection, self).save(kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s (%s)' % (self.title, self.name)
 
     url = encrypted_property('url')

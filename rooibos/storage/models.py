@@ -71,7 +71,7 @@ class Storage(models.Model):
         )
         super(Storage, self).save(kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     @property
@@ -207,7 +207,7 @@ class Media(models.Model):
         verbose_name_plural = "media"
         app_label = 'storage'
 
-    def __unicode__(self):
+    def __str__(self):
         return self.url
 
     def __repr__(self):
@@ -348,7 +348,7 @@ class TrustedSubnet(models.Model):
     class Meta:
         app_label = 'storage'
 
-    def __unicode__(self):
+    def __str__(self):
         return "TrustedSubnet (%s)" % self.subnet
 
 
@@ -364,7 +364,7 @@ class ProxyUrl(models.Model):
     class Meta:
         app_label = 'storage'
 
-    def __unicode__(self):
+    def __str__(self):
         return 'ProxyUrl %s: %s (Ctx %s, Usr %s, Sbn %s)' % (
             self.uuid, self.url, self.context, self.user, self.subnet)
 

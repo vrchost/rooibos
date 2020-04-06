@@ -26,7 +26,7 @@ class AccessControl(models.Model):
             raise ValueError("Mutually exclusive fields set")
         super(AccessControl, self).save(kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         def f(flag, char):
             if flag is True:
                 return char
@@ -134,7 +134,7 @@ class ExtendedGroup(Group):
     def _full_type(self):
         return [a_f for a_f in self.TYPE_CHOICES if a_f[0] == self.type][0][1]
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s (%s)' % (self.name, self._full_type())
 
 
@@ -142,7 +142,7 @@ class Subnet(models.Model):
     group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'I'})
     subnet = models.CharField(max_length=80)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s: %s' % (self.group.name, self.subnet)
 
     class Meta:
@@ -153,7 +153,7 @@ class Attribute(models.Model):
     group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'P'})
     attribute = models.CharField(max_length=255)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s: %s' % (self.group.name, self.attribute)
 
     class Meta:
