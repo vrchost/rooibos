@@ -82,3 +82,8 @@ body {
 .mirador-container .mirador-main-menu li {
     padding: 0 10px;
 }
+
+
+.slotIconContainer {
+    display: none;
+}
