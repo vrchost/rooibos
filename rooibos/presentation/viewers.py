@@ -456,13 +456,16 @@ class PackageFilesViewer(Viewer):
 
         def write(output, image, index, title, prefix=None):
             if image:
+                basename = os.path.basename(image)
+                name, ext = os.path.splitext(basename)
                 output.write(
                     image, (
-                        '%s%s %s%s' % (
+                        '%s%s %s %s%s' % (
                             os.path.join(prefix, '') if prefix else '',
                             str(index + 1).zfill(4),
+                            name,
                             filename(title or 'Slide %s' % (index + 1)),
-                            os.path.splitext(image)[1]
+                            ext,
                         )
                     ).encode('ascii', 'replace')
                 )
