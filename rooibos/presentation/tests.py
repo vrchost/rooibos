@@ -6,7 +6,7 @@ from PIL import Image
 import shutil
 from StringIO import StringIO
 from django.contrib.auth.models import Permission
-from rooibos.data.models import Collection, CollectionItem, Record
+from rooibos.data.models import Collection, CollectionItem, Record, Field
 from rooibos.storage.models import Media, Storage
 from rooibos.access.models import AccessControl, User, Group
 from rooibos.presentation.models import Presentation, PresentationItem
@@ -22,6 +22,10 @@ class PackagePresentationTestCase(unittest.TestCase):
         self.storage = Storage.objects.create(
             title='Test', name='test', system='local', base=self.tempdir)
         self.record = Record.objects.create(name='monalisa')
+        self.record.fieldvalue_set.create(
+            field=Field.objects.get(name='identifier', standard__prefix='dc'),
+            value='presentationrecord001',
+        )
         CollectionItem.objects.create(
             collection=self.collection, record=self.record)
         AccessControl.objects.create(content_object=self.storage, read=True)
@@ -76,9 +80,11 @@ class PackagePresentationTestCase(unittest.TestCase):
         response2 = viewer2.view(FakeRequest(user1))
 
         image1 = StringIO(
-            ZipFile(StringIO(response1)).read('0001 Slide 1.jpg'))
+            ZipFile(StringIO(response1)).read(
+                '0001 presentationrecord001 Slide 1.jpg'))
         image2 = StringIO(
-            ZipFile(StringIO(response2)).read('0001 Slide 1.jpg'))
+            ZipFile(StringIO(response2)).read(
+                '0001 presentationrecord001 Slide 1.jpg'))
 
         width1, height1 = Image.open(image1).size
         width2, height2 = Image.open(image2).size
