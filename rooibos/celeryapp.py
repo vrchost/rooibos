@@ -25,6 +25,7 @@ app.conf.task_queues = (
     Queue(queue_name, routing_key=queue_name),
     Queue(solr_queue_name, routing_key=solr_queue_name),
 )
+app.conf.result_expires = None
 
 # Load task modules from all registered Django app configs.
 app.autodiscover_tasks()
