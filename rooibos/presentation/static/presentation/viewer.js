@@ -373,6 +373,14 @@ var Viewer = function (options) {
             function (a, b) { return a + b; }, 0) : 1;
     };
 
+    var showAddItemButton = function () {
+        viewer.mirador.viewer.workspace.slots.forEach(function (slot) {
+            if (!slot.window) {
+                slot.element.find('.slotIconContainer').show();
+            }
+        });
+    };
+
     this.mirador.eventEmitter.subscribe('RESET_WORKSPACE_LAYOUT',
         function () {
             if (!metaKey) {
@@ -381,8 +389,9 @@ var Viewer = function (options) {
                 if (newCount > oldCount) {
                     delay(fillEmptySlots);
                 }
+            } else {
+                delay(showAddItemButton);
             }
-
         }
     );
 

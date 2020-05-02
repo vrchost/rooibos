@@ -455,17 +455,22 @@ class PackageFilesViewer(Viewer):
         def filename(title):
             return re.sub('[^A-Za-z0-9_. ]+', '-', title)[:32]
 
-        def write(output, image, index, title, prefix=None):
+        def write(output, image, index, title, identifier, prefix=None):
             if image:
+                basename = os.path.basename(image)
+                name, ext = os.path.splitext(basename)
+                outname = (
+                    '%s%s %s %s%s' % (
+                        os.path.join(prefix, '') if prefix else '',
+                        str(index + 1).zfill(4),
+                        identifier,
+                        filename(title or 'Slide %s' % (index + 1)),
+                        ext,
+                    )
+                )
+                print(outname)
                 output.write(
-                    image, (
-                        '%s%s %s%s' % (
-                            os.path.join(prefix, '') if prefix else '',
-                            str(index + 1).zfill(4),
-                            filename(title or 'Slide %s' % (index + 1)),
-                            os.path.splitext(image)[1]
-                        )
-                    ).encode('ascii', 'replace').decode()
+                    image, outname.encode('ascii', 'replace').decode()
                 )
 
         def metadata_file(tempfile, record):
@@ -496,7 +501,8 @@ class PackageFilesViewer(Viewer):
                 get_image_for_record(
                     item.record, self.user, passwords=passwords),
                 index,
-                item.record.title
+                item.record.title,
+                item.record.identifier,
             )
             write(
                 output,
@@ -504,12 +510,13 @@ class PackageFilesViewer(Viewer):
                     item.record, self.user, 100, 100, passwords),
                 index,
                 item.record.title,
+                item.record.identifier,
                 'thumb'
             )
 
             tempmetadatafile = NamedTemporaryFile(suffix='.html')
             write(output, metadata_file(tempmetadatafile, item.record),
-                  index, item.record.title, 'metadata')
+                  index, item.record.title, item.record.identifier, 'metadata')
 
         output.close()
         tempfile.flush()

@@ -46,7 +46,7 @@
 
 {% if active_presenter %}
   <div class="facet active-facet">
-    <div class="facet-header"><a href="{{ request.path }}?kw={{ keywords|urlencode }}&amp;t={{ active_tags|join:"||"|urlencode }}&amp;ut={{ untagged }}" title="Remove this criteria"><img src="{% static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-close" /></a>Presenter</div>
+    <div class="facet-header"><a href="{{ request.path }}?kw={{ keywords|urlencode }}&amp;t={{ active_tags|safeseq|join:"||"|urlencode }}&amp;ut={{ untagged }}" title="Remove this criteria"><img src="{% static 'images/facet_close.png' %}" alt="Remove" title="Remove" class="facet-close" /></a>Presenter</div>
     <div class="facet-body">{% if active_presenter.last_name %}{{ active_presenter.last_name }}, {{ active_presenter.first_name }}{% else %}{{ active_presenter.username }}{% endif %}</div>
   </div>
 {% endif %}
