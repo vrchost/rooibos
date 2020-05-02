@@ -468,7 +468,6 @@ class PackageFilesViewer(Viewer):
                         ext,
                     )
                 )
-                print(outname)
                 output.write(
                     image, outname.encode('ascii', 'replace').decode()
                 )
