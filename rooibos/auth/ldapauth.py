@@ -38,6 +38,8 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     )
                     if type(dn) in (tuple, list):
                         dn = dn[0]
+                    if type(dn) is bytes:
+                        dn = dn.decode('utf-8')
                 else:
                     domain = ldap_auth.get('domain')
                     if domain:
