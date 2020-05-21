@@ -8,10 +8,12 @@
     <div class="facet" id="results_sidebar_facet_{{ facet.name }}">
         <div class="facet-header collapsed">{{ facet.label }}</div>
         <div class="facet-body">
-        {% for term,freq,label in facet.facets %}
+        {% for value in facet.facets %}
+          {% with term=value.0 freq=value.1 label=value.2 %}
             <div class="facet-line" id="facet-line-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
             <a href="{{ limit_url }}c=-{{ facet.name }}:{{ term|quoteterm|urlencode }}" class="facet-exclude" rel="nofollow" title="Exclude"></a>
             <a href="{{ limit_url }}c={{ facet.name }}:{{ term|quoteterm|urlencode }}" rel="nofollow">{{ label|default:term }}</a>{% if freq %}&nbsp;{{ freq|intcomma }}{% endif %}</div>
+          {% endwith %}
         {% endfor %}
         <a class="facet-more" style="display: none;" href="#{{ facet.name|urlencode }}">more...</a>
         </div>

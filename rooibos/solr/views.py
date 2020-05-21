@@ -54,10 +54,11 @@ class SearchFacet(object):
 
     def clean_result(self, hits, sort=True):
         # sort facet items and remove the ones that match all hits
-        self.facets = [f for f in getattr(self, 'facets', None) or [] if f[1] < hits]
+        facets = getattr(self, 'facets', None) or []
+        self.facets = [f for f in facets if f[1] is not None and f[1] < hits]
         if sort:
             self.facets = sorted(self.facets,
-                             key=lambda f: len(f) > 2 and f[2] or f[0])
+                             key=lambda f: f[2 if len(f) > 2 else 0])
 
     def or_available(self):
         return True
