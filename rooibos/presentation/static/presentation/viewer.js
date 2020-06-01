@@ -443,8 +443,10 @@ var Viewer = function (options) {
                     var metadata = imageView.element
                         .find('.mirador-canvas-metadata');
                     if (!metadata.draggable('instance')) {
+                        metadata.append('<div class="metadata-drag-handle"><i class="fa fa-arrows-v"></i></div>');
                         metadata.draggable({
                             axis: 'y',
+                            handle: '.metadata-drag-handle',
                             drag: function (event, ui) {
                                 var minTop =
                                     metadata.offsetParent().height() / 4;
