@@ -172,7 +172,7 @@ def gifviewer(obj, request, objid=None):
     return GifViewer(obj, request.user) if media else None
 
 
-def _get_links(record):
+def _get_youtube_links(record):
     return FieldValue.objects.filter(
         record=record,
         index_value__startswith='https://www.youtube.com/watch?v=',
@@ -189,7 +189,7 @@ class YoutubeViewer(Viewer):
 
         divid = request.GET.get('id', 'unknown')
 
-        links = list(_get_links(self.obj))
+        links = list(_get_youtube_links(self.obj))
         if not links:
             raise Http404()
 
@@ -215,4 +215,50 @@ def youtubeviewer(obj, request, objid=None):
         except Http404:
             return None
     return YoutubeViewer(obj, request.user) \
-        if _get_links(obj).count() else None
+        if _get_youtube_links(obj).count() else None
+
+
+def _get_vimeo_links(record):
+    return FieldValue.objects.filter(
+        record=record,
+        index_value__startswith='https://vimeo.com/',
+    ).values('value')
+
+
+class VimeoViewer(Viewer):
+
+    title = "Vimeo Viewer"
+    weight = 20
+    is_embeddable = True
+
+    def embed_script(self, request):
+
+        divid = request.GET.get('id', 'unknown')
+
+        links = list(_get_vimeo_links(self.obj))
+        if not links:
+            raise Http404()
+
+        return render(
+            request,
+            'storage_vimeoviewer.js',
+            {
+                'record': self.obj,
+                'anchor_id': divid,
+                'vimeo_id': links[0]['value'].replace('https://vimeo.com/', ''),
+            }
+        )
+
+
+@register_viewer('vimeoviewer', VimeoViewer)
+def vimeoviewer(obj, request, objid=None):
+    if obj:
+        if not isinstance(obj, Record):
+            return None
+    else:
+        try:
+            obj = Record.get_or_404(objid, request.user)
+        except Http404:
+            return None
+    return VimeoViewer(obj, request.user) \
+        if _get_vimeo_links(obj).count() else None
