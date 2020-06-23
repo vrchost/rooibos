@@ -23,6 +23,7 @@ bleach-whitelist==0.0.10
 boto
 Celery==4.2.1
 configobj >= 4.7.2,<=5.0.0
+cryptography
 django-appconf==1.0.3
 django-cas-ng==3.5.10
 django-compressor==2.2
@@ -32,7 +33,7 @@ django-ranged-fileresponse==0.1.2
 django-storages==1.6.6
 django-tagging==0.4.6
 django-contrib-comments==1.8.0
-Django==1.11.28
+Django==1.11.29
 django-celery-results==1.0.4
 flake8
 flake8-docstrings
