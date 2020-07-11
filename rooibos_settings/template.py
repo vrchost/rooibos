@@ -33,7 +33,7 @@ RABBITMQ_OPTIONS = {
 # system time zone.
 TIME_ZONE = 'America/Chicago'
 
-SOLR_URL = 'http://127.0.0.1:8983/solr/'
+SOLR_URL = 'http://127.0.0.1:8983/solr/mdid'
 SOLR_RECORD_INDEXER = None
 SOLR_RECORD_PRE_INDEXER = None
 
