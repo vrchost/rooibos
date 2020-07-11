@@ -188,7 +188,7 @@ class GroupTestCase(TestCase):
         self.assertEqual('Another title', record2.title)
 
 
-csv_file = """ID,Filename,Title,Creator,Location,Unused
+csv_file = """ID,Filename,Title ,Creator ,Location,Unused
 A001,a001.jpg,Test,"Knab, Andreas","Harrisonburg, VA"
 A002,a002.jpg,Another Test,Andreas Knab;John Doe,Virginia
 """

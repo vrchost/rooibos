@@ -6,6 +6,19 @@ import csv
 import os
 
 
+class CustomDictReader(csv.DictReader):
+
+    @csv.DictReader.fieldnames.getter
+    def fieldnames(self):
+        if self._fieldnames is None:
+            try:
+                self._fieldnames = [n.strip() for n in next(self.reader)]
+            except StopIteration:
+                pass
+        self.line_num = self.reader.line_num
+        return self._fieldnames
+
+
 class SpreadsheetImport(object):
 
     events = [
@@ -85,7 +98,7 @@ class SpreadsheetImport(object):
         dialect.delimiter = ','
         dialect.doublequote = True
         self.csv_file.seek(start)
-        return csv.DictReader(self.csv_file, dialect=dialect)
+        return CustomDictReader(self.csv_file, dialect=dialect)
 
     def _guess_mapping(self, field):
         scores = {}
@@ -316,7 +329,7 @@ def create_import_job(mapping_file, data_file, collections):
 
     mappings = []
     with open(mapping_file, 'rU') as mapping_fileobj:
-        mapping = csv.DictReader(mapping_fileobj)
+        mapping = CustomDictReader(mapping_fileobj)
         for m in mapping:
             m['mapto'] = get_field_id(m['mapto'])
             mappings.append(m)
