@@ -61,8 +61,8 @@ Adjust the database name, user name, and password as needed:
 ```
 mysql -u root
 create database mdid character set utf8;
-grant all privileges on mdid.* to mdid@localhost
-    identified by 'rooibos';
+create user mdid@localhost identified by 'rooibos';
+grant all privileges on mdid.* to mdid@localhost;
 \q
 ```
 ### Create user account
@@ -98,7 +98,7 @@ sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
 python3 -m virtualenv -p python3 venv
 source venv/bin/activate
-pip install --allow-external --upgrade -r rooibos/requirements.txt
+pip install --upgrade -r rooibos/requirements.txt
 ```
 ### Configure MDID
 ```
@@ -170,7 +170,7 @@ Create a new file `/opt/mdid/wrapper.sh` with the following content:
 #!/bin/bash
 set -x
 source /opt/mdid/venv/bin/activate
-export PYTHONPATH="/opt/mdid/rooibos"
+export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
 django-admin $@
 ```
@@ -200,7 +200,7 @@ cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
     /opt/solr/data/mdid/lang
 cp /opt/solr_install/solr/example/example-DIH/solr/db/conf/mapping-FoldToASCII.txt \
     /opt/solr/data/mdid/conf
-cp /opt/mdid/solr7/conf/* \
+cp /opt/mdid/rooibos/solr7/conf/* \
     /opt/solr/data/mdid/conf
 chown -R solr:solr /opt/solr/data/mdid
 service solr restart
