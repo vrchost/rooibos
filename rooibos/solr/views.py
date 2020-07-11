@@ -636,7 +636,7 @@ def search(request, id=None, name=None, selected=False, json=False):
     if page > 1:
         q['page'] = page - 1
         prev_page_url = "%s?%s" % (url, q.urlencode())
-    if page < (hits - 1) / pagesize + 1:
+    if page < (hits - 1) // pagesize + 1:
         q['page'] = page + 1
         next_page_url = "%s?%s" % (url, q.urlencode())
 
@@ -712,7 +712,7 @@ def search(request, id=None, name=None, selected=False, json=False):
             'records': records,
             'hits': hits,
             'page': page,
-            'pages': (hits - 1) / pagesize + 1,
+            'pages': (hits - 1) // pagesize + 1,
             'pagesize': pagesize,
             'prev_page': prev_page_url,
             'next_page': next_page_url,
@@ -959,7 +959,7 @@ def browse(request, id=None, name=None):
 
     if 's' in request.GET:
         start = ivalues.filter(
-            browse_value__lt=request.GET['s']).count() / 50 + 1
+            browse_value__lt=request.GET['s']).count() // 50 + 1
         return HttpResponseRedirect(reverse(
             'solr-browse-collection',
             kwargs={'id': collection.id, 'name': collection.name}) +
@@ -1012,7 +1012,7 @@ def browse(request, id=None, name=None):
             'selected_field': field,
             'values': values,
             'ivalues': ivalues,
-            'column_split': len(values) / 2,
+            'column_split': len(values) // 2,
             'dummyvalues': dummyvalues,
         }
     )
@@ -1073,7 +1073,7 @@ def terms(request):
             maxfreq = freq
 
     for term in terms:
-        term[1] = term[1] * 6 / maxfreq
+        term[1] = term[1] * 6 // maxfreq
 
     return render(
         request,

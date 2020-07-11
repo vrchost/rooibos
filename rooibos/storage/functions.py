@@ -230,10 +230,10 @@ def get_image_for_record(
                     w, h = image.size
                     if w > h:
                         image = image.crop(
-                            ((w - h) / 2, 0, (w - h) / 2 + h, h))
+                            ((w - h) // 2, 0, (w - h) // 2 + h, h))
                     elif w < h:
                         image = image.crop(
-                            (0, (h - w) / 2, w, (h - w) / 2 + w))
+                            (0, (h - w) // 2, w, (h - w) // 2 + w))
                 image.thumbnail((width, height), Image.ANTIALIAS)
                 image = overlay_image_with_mimetype_icon(
                     image, master.mimetype)

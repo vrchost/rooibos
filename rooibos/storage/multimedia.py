@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 def _seconds_to_timestamp(seconds):
-    hours = seconds / 3600
-    minutes = seconds / 60
+    hours = seconds // 3600
+    minutes = seconds // 60
     seconds = seconds % 60
     return '%02d:%02d:%02d' % (hours, minutes, seconds)
 
@@ -135,22 +135,22 @@ def render_audio_waveform(audiofile, basecolor, background, left, top,
         return None
     file = wave.open(wave_file, 'rb')
     data = file.readframes(30 * 8192)
-    frames = struct.unpack('%sh' % (len(data) / 2), data)
+    frames = struct.unpack('%sh' % (len(data) // 2), data)
     image = Image.open(background)
     pix = image.load()
     lf = len(frames)
     if not max_only:
-        height = height / 2
+        height = height // 2
     middle = top + height
     basecolor = tuple(basecolor)
     lows, highs = [], []
     for x in range(width):
-        f, t = (x * lf) / width, ((x + 1) * lf) / width
+        f, t = (x * lf) // width, ((x + 1) * lf) // width
         lows.append(min(frames[f:t]))
         highs.append(max(frames[f:t]))
     low, high = abs(min(lows)), abs(max(highs))
-    lows = [v * height / low for v in lows]
-    highs = [v * height / high for v in highs]
+    lows = [v * height // low for v in lows]
+    highs = [v * height // high for v in highs]
     for x in range(width):
         high = middle - highs[x]
         low = middle - lows[x]

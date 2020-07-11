@@ -30,7 +30,7 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
             # closest five minute interval so that calling this method several
             # times in a short timeframe should return the same name
             valid_until = hex(
-                (int(time() + 4 * 3600) / 300) * 300
+                (int(time() + 4 * 3600) // 300) * 300
             )[2:]  # cut off 0x prefix
             code = hashlib.md5(
                 valid_until + name + settings.SECRET_KEY[:10]
