@@ -91,7 +91,7 @@ def owned_task(*args, **kwargs):
     return create_owned_task(**kwargs)
 
 
-@app.on_after_configure.connect
+@app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
     from rooibos.solr.tasks import index
     sender.add_periodic_task(30.0, index.s(), name='solr index every 30s')
