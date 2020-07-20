@@ -50,6 +50,11 @@ sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
 service solr start
 ```
 
+Please take a moment to inspect all the settings in 
+`/etc/default/solr.in.sh`; sometimes there are discrepancies
+in the default paths in the configuration file versus the
+actual locations of the installation.
+
 ## Install MDID
 ### Create database
 Create a new MySQL database or restore an existing database from a previous

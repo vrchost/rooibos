@@ -1,6 +1,6 @@
-# Installation on CentOS 7 Linux
+# Installation on CentOS 8 Linux
 
-The following instructions are for CentOS 7, but
+The following instructions are for CentOS 8, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
@@ -10,19 +10,22 @@ Unless noted otherwise, all commands should be run as `root`.
 ```
 yum update
 yum --enablerepo=extras install epel-release
+curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | bash
 yum groupinstall 'Development Tools'
 yum install libjpeg-devel python3-devel \
-    nginx mariadb-server mariadb-devel python-devel \
+    nginx mariadb-server mariadb-devel \
     memcached unixODBC-devel openldap-devel \
     rabbitmq-server supervisor \
-    python-pillow-devel python-imaging \
-    giflib-devel freetype-devel java-1.8.0-openjdk wget
+    python3-pillow firewalld \
+    freetype-devel java-1.8.0-openjdk wget
 ```
 
 ### Enable services
 ```
+systemctl enable firewalld
 systemctl enable nginx
 systemctl enable rabbitmq-server.service
+systemctl start firewalld
 systemctl start nginx
 systemctl start rabbitmq-server.service
 firewall-cmd --permanent --zone=public --add-service=http 
@@ -31,7 +34,8 @@ firewall-cmd --reload
 ```
 
 ### Configure MariaDB
-Edit `/etc/my.cnf` and add the following lines to the `[mysqld]` section:
+Edit `/etc/my.cnf.d/mariadb-server.cnf` and add the following lines 
+to the `[mysqld]` section:
 ```
 open-files-limit = 10000
 innodb_file_per_table = 1
@@ -45,47 +49,12 @@ systemctl enable mariadb
 systemctl start mariadb
 ```
 
-### Build GFX
-```
-mkdir -p /opt/tools
-cd /opt/tools
-wget http://www.swftools.org/swftools-0.9.2.tar.gz
-tar xzf swftools-0.9.2.tar.gz
-cd swftools-0.9.2
-```
-The `configure` file needs to be patched:
-
-```
-patch -l configure <<'EOF'
-7112,7113c7112,7113
-<             if test -f "/usr/lib/python$v/site-packages/PIL/_imaging.so";then
-<                 PYTHON_LIB2="$PYTHON_LIB /usr/lib/python$v/site-packages/PIL/_imaging.so"
----
->             if test -f "/usr/lib64/python$v/site-packages/_imaging.so";then
->                 PYTHON_LIB2="$PYTHON_LIB /usr/lib64/python$v/site-packages/_imaging.so"
-7118c7118
-<       PYTHON_INCLUDES="-I/usr/include/python$PY_VERSION"
----
->       PYTHON_INCLUDES="-I/usr/include/python$PY_VERSION -I/usr/include/python$PY_VERSION/Imaging"
-7203c7203
-< sys.stdout.write(distutils.sysconfig.get_python_lib(plat_specific=0,standard_lib=0))
----
-> sys.stdout.write(distutils.sysconfig.get_python_lib(plat_specific=1,standard_lib=0))
-EOF
-```
-
-```
-./configure
-make
-```
-
 ### Install ffmpeg
 ```
-rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
-rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
-yum install ffmpeg
+dnf localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm
+dnf install --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
+dnf install ffmpeg
 ```
-
 
 ### Install Solr
 MDID currently requires Solr 7; you may have to adjust the exact version as
@@ -93,11 +62,10 @@ available when running the following commands:
 ```
 mkdir -p /opt/solr_install /opt/solr
 cd /opt/solr_install
-wget https://archive.apache.org/dist/lucene/solr/7.3.1/solr-7.3.1.tgz
-tar xzf solr-7.3.1.tgz solr-7.3.1/bin/install_solr_service.sh --strip-components=2
-./install_solr_service.sh solr-7.3.1.tgz -f -d /opt/solr -i /opt/solr_install -n
+wget https://archive.apache.org/dist/lucene/solr/7.7.3/solr-7.7.3.tgz
+tar xzf solr-7.7.3.tgz solr-7.7.3/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-7.7.3.tgz -f -d /opt/solr -i /opt/solr_install -n
 sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
-systemctl start solr
 ```
 
 Please take a moment to inspect all the settings in 
@@ -142,8 +110,9 @@ mkdir scratch storage log rooibos/log static
 ```
 sudo -iu mdid  # switch to mdid user
 cd /opt/mdid
-python3 -m virtualenv -p python3 venv
+python3 -m venv venv
 source venv/bin/activate
+pip install --upgrade pip
 pip install --upgrade -r rooibos/requirements.txt
 ```
 
@@ -169,7 +138,7 @@ source /opt/mdid/venv/bin/activate
 cd /opt/mdid/rooibos
 export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-django-admin collectstatic
+django-admin collectstatic --noinput
 ```
 
 ### Create or update database schema
@@ -179,9 +148,6 @@ cd /opt/mdid/rooibos
 source /opt/mdid/venv/bin/activate
 export PYTHONPATH="/opt/mdid/rooibos"
 export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-# The following command may fail
-# - if so, running it a second time should work
-django-admin syncdb --noinput
 django-admin migrate
 ```
 
@@ -256,13 +222,9 @@ cp /opt/solr_install/solr/example/example-DIH/solr/db/conf/mapping-FoldToASCII.t
 cp /opt/mdid/rooibos/solr7/conf/* \
     /opt/solr/data/mdid/conf
 chown -R solr:solr /opt/solr/data/mdid
+# Note: this may fail if selinux is enabled. 
+# "setenforce Permissive" will work, but you may want to set exceptions properly
 systemctl restart solr
-```
-
-### Install gfx
-```
-sudo -iu mdid  # switch to mdid user
-cp /opt/tools/swftools-0.9.2/lib/python/*.so /opt/mdid/venv/lib/python2.7/site-packages/
 ```
 
 ### Configure supervisor
