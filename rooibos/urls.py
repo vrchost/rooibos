@@ -5,7 +5,7 @@ from django.views.generic.base import TemplateView
 from django.views.static import serve
 from django.views.decorators.cache import cache_control
 from django.http import HttpResponseServerError
-from django.template import loader, RequestContext
+from django.template import loader
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
 from rooibos.legacy.views import legacy_viewer
@@ -23,7 +23,7 @@ serve = cache_control(max_age=365 * 24 * 3600)(serve)
 
 def handler500_with_context(request):
     template = loader.get_template('500.html')
-    return HttpResponseServerError(template.render(RequestContext(request)))
+    return HttpResponseServerError(template.render(request=request))
 
 
 handler404 = getattr(settings, 'HANDLER404', handler404)
