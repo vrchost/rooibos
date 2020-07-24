@@ -5,6 +5,10 @@ from .baseauth import BaseAuthenticationBackend
 import logging
 
 
+def d(text):
+    return text.decode('utf-8') if type(text) is bytes else text
+
+
 class LdapAuthenticationBackend(BaseAuthenticationBackend):
 
     def authenticate(self, username=None, password=None):
@@ -38,8 +42,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     )
                     if type(dn) in (tuple, list):
                         dn = dn[0]
-                    if type(dn) is bytes:
-                        dn = dn.decode('utf-8')
+                    dn = d(dn)
                 else:
                     domain = ldap_auth.get('domain')
                     if domain:
@@ -91,9 +94,9 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     user = self._create_user(
                         username,
                         None,
-                        ' '.join(attributes[ldap_auth['firstname']]),
-                        ' '.join(attributes[ldap_auth['lastname']]),
-                        email
+                        ' '.join(d(a) for a in attributes[ldap_auth['firstname']]),
+                        ' '.join(d(a) for a in attributes[ldap_auth['lastname']]),
+                        d(email)
                     )
                 if not self._post_login_check(user, attributes):
                     continue
