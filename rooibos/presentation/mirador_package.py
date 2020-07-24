@@ -109,10 +109,11 @@ class MiradorPackageViewer(Viewer):
         output.close()
         tempfile.flush()
         tempfile.seek(0)
+        size = os.path.getsize(tempfile.name)
 
         wrapper = FileWrapper(tempfile)
         response = HttpResponse(wrapper, content_type='application/zip')
         response['Content-Disposition'] = \
             'attachment; filename=%s.zip' % filename(presentation.title)
-        response['Content-Length'] = os.path.getsize(tempfile.name)
+        response['Content-Length'] = size
         return response
