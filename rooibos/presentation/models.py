@@ -101,7 +101,7 @@ class Presentation(models.Model):
         self.unlocked = (
             (self.owner == request.user) or
             (not self.password) or
-            (request.session.get('passwords', dict()).get(self.id) ==
+            (request.session.get('passwords', dict()).get(str(self.id)) ==
              self.password)
         )
         return self.unlocked
