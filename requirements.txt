@@ -57,6 +57,8 @@ reportlab
 requests
 sqlparse
 werkzeug
+wfastcgi
+wheel
 requests
 unicodecsv==0.14.1
 

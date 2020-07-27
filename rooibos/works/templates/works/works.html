@@ -29,8 +29,10 @@ angular.module('clientApp', ['bw.paging'])
             return result;
         };
 
+        var initialLoad = true;
+
         $scope.isLoading = function () {
-           return $http.pendingRequests.length !== 0;
+           return initialLoad || $http.pendingRequests.length !== 0;
         };
 
         $scope.search = {
@@ -173,6 +175,10 @@ angular.module('clientApp', ['bw.paging'])
             if ($scope.metadataBox && !$scope.metadataBox.is(':visible')) {
                 populateMetadataBox($scope.metadataBox.html());
             }
+        });
+
+        angular.element(document).ready(function () {
+            initialLoad = false;
         });
     }
 ])
@@ -403,7 +409,10 @@ div.metadata div.label {
 <div ng-app="clientApp" ng-controller="MainController">
 
 <h1>
-    Works
+    <span ng-hide="results.hits>0">Works</span>
+    <span ng-show="results.hits===1">1 Work</span>
+    <span ng-show="results.hits>1"><span ng-bind="results.hits"></span> Works</span>
+
     <span ng-show="search.keyword" ng-cloak>
         (<span ng-bind="search.keyword"></span>)
     </span>

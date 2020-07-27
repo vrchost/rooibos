@@ -1,4 +1,0 @@
-SET ROOIBOSDIR=C:\mdid
-REM SET ROOIBOSDIR=D:\dev\rooibos
-SET PYTHONPATH=%ROOIBOSDIR%;%ROOIBOSDIR%\rooibos\contrib
-SET PATH=%PATH%;C:\python25;D:\dev

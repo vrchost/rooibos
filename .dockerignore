@@ -1,8 +1,0 @@
-.gitignore
-GPL.txt
-LICENSE.txt
-Vagrantfile
-solr4/
-sample/
-vagrant/
-viewers/
