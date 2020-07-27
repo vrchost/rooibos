@@ -65,7 +65,7 @@ setuptools.setup(
         'digital media in a wide variety of learning spaces.',
     platforms=['Linux', 'Windows'],
     license='GPL',
-    packages=['rooibos'],
+    packages=['rooibos', 'loris'],
     include_package_data=True,
     zip_safe=False,
     install_requires=REQUIRES,
