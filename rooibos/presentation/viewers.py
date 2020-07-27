@@ -33,9 +33,6 @@ from ..util import validate_next_link
 logger = logging.getLogger(__name__)
 
 
-USE_MIRADOR = not getattr(settings, 'DISABLE_MIRADOR_VIEWER', False)
-
-
 # Exceptions that may be raised when building a paragraph
 PARAGRAPH_EXCEPTIONS = (AttributeError, KeyError, IndexError, ValueError)
 
@@ -98,37 +95,8 @@ def presentationviewer(obj, request, objid=None):
         presentation, request.user) if presentation else None
 
 
-if USE_MIRADOR:
-    register_viewer('presentationviewer', PresentationViewer) \
-        (presentationviewer)
-
-
-class PresentationViewerOld(Viewer):
-
-    title = "View (classic)" if USE_MIRADOR else "View"
-    weight = 99
-
-    def view(self, request):
-        return_url = validate_next_link(
-            request.GET.get('next'), reverse('presentation-browse'))
-        return render(
-            request,
-            'presentation_viewer_old.html',
-            {
-                'presentation': self.obj,
-                'return_url': return_url,
-            }
-        )
-
-
-@register_viewer(
-    'presentationviewer' + ('_classic' if USE_MIRADOR else ''),
-    PresentationViewerOld
-)
-def presentationviewer(obj, request, objid=None):
-    presentation = _get_presentation(obj, request, objid)
-    return PresentationViewerOld(
-        presentation, request.user) if presentation else None
+register_viewer('presentationviewer', PresentationViewer) \
+    (presentationviewer)
 
 
 class FlashCardViewer(Viewer):

@@ -188,9 +188,6 @@
                             {% if not HIDE_SHOWCASES %}
                             <li><a href="{% url "showcases" %}">Showcases</a></li>
                             {% endif %}
-                            {% if user.is_authenticated %}
-                            <li><a href="{% url "mediaviewer-install" %}">MediaViewer</a></li>
-                            {% endif %}
                             <li><a href="{% url "about" %}">About</a></li>
                         </ul>
                     </li>

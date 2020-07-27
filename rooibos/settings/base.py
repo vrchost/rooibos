@@ -156,7 +156,6 @@ INSTALLED_APPS = (
     'rooibos.federatedsearch.shared',
     'rooibos.workers',
     'rooibos.userprofile',
-    'rooibos.mediaviewer',
     'rooibos.groupmanager',
     'rooibos.pdfviewer',
     'rooibos.pptexport',

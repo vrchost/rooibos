@@ -80,7 +80,6 @@ urls = [
     url(r'^shared/', include('rooibos.federatedsearch.shared.urls')),
     url(r'^impersonate/', include('rooibos.impersonate.urls')),
     url(r'^works/', include('rooibos.works.urls')),
-    url(r'^mediaviewer/', include('rooibos.mediaviewer.urls')),
     url(r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
     url(r'^pptexport/', include('rooibos.pptexport.urls')),
 
