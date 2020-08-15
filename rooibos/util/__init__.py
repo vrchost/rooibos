@@ -194,3 +194,7 @@ class IterableLazyObject(SimpleLazyObject):
         if self._wrapped is None:
             self._setup()
         return self._wrapped.__iter__()
+
+
+def validate_next_link(next, default=None):
+    return default if next and '//' in next else next or default

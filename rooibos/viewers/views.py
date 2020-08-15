@@ -3,6 +3,9 @@ from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseForbidden
 from django.conf import settings
+from django.utils.http import urlencode
+
+from ..util import validate_next_link
 
 
 def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
@@ -16,8 +19,10 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
             url = 'login'
             if getattr(settings, 'SHIB_ENABLED', False):
                 url = 'shib_login'
-            return redirect(reverse(url) +
-                            '?next=' + request.get_full_path())
+            return redirect(
+                reverse(url) + '?' +
+                urlencode((('next', request.get_full_path()),))
+            )
         raise Http404()
 
     response = viewer.view(request)
@@ -38,7 +43,7 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
         template,
         {
             'viewer': viewer,
-            'next': request.GET.get('next'),
+            'next': validate_next_link(request.GET.get('next')),
             'embed_code': viewer.embed_code(request, options),
             'options_form': options_form,
         })

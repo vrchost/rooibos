@@ -17,7 +17,7 @@ from django_comments.models import Comment
 from django.contrib.flatpages.models import FlatPage
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings
-from rooibos.util import json_view
+from rooibos.util import json_view, validate_next_link
 from rooibos.data.models import Record, Collection
 from rooibos.storage.models import Storage
 from rooibos.access.functions import filter_by_access
@@ -101,7 +101,8 @@ def add_tags(request, type, id):
         user=request.user, type=type, object_id=id)
     for tag in new_tags:
         Tag.objects.add_tag(ownedwrapper, '"%s"' % tag)
-    return HttpResponseRedirect(request.GET.get('next') or '/')
+    return HttpResponseRedirect(
+        validate_next_link(request.GET.get('next'), '/'))
 
 
 @login_required
@@ -129,11 +130,17 @@ def remove_tag(request, type, id):
                 messages.INFO,
                 message="Tag removed successfully."
             )
-            return HttpResponseRedirect(request.GET.get('next') or '/')
+            return HttpResponseRedirect(
+                validate_next_link(request.GET.get('next'), '/'))
 
-    return render(request, 'ui_tag_remove.html',
-                              {'tag': tag,
-                               'next': request.GET.get('next')})
+    return render(
+        request,
+        'ui_tag_remove.html',
+        {
+            'tag': tag,
+            'next': validate_next_link(request.GET.get('next')),
+        }
+    )
 
 
 @json_view
@@ -234,8 +241,8 @@ def options(request):
 
 def clear_selected_records(request):
     request.session['selected_records'] = ()
-    return HttpResponseRedirect(
-        request.GET.get('next', reverse('solr-search')))
+    return HttpResponseRedirect(validate_next_link(
+        request.GET.get('next'), reverse('solr-search')))
 
 
 @login_required
@@ -256,8 +263,8 @@ def delete_selected_records(request):
 
         from rooibos.middleware import HistoryMiddleware
         return HttpResponseRedirect(
-            request.GET.get(
-                'next',
+            validate_next_link(
+                request.GET.get('next'),
                 HistoryMiddleware.go_back(
                     request,
                     to_before=reverse('ui-delete-selected'),

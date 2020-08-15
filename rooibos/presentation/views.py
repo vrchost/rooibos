@@ -24,7 +24,7 @@ from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
-from rooibos.util import json_view
+from rooibos.util import json_view, validate_next_link
 from rooibos.util.markdown import markdown
 from rooibos.storage.functions import get_media_for_record
 from .models import Presentation, PresentationItem
@@ -45,7 +45,8 @@ def create(request):
     )
 
     selected = request.session.get('selected_records', ())
-    next = request.GET.get('next', '') or reverse('presentation-manage')
+    next = validate_next_link(
+        request.GET.get('next'), reverse('presentation-manage'))
 
     custom_permissions = getattr(settings, 'PRESENTATION_PERMISSIONS', None)
 
@@ -569,8 +570,8 @@ def password(request, id, name):
                 'passwords', dict()
             )[presentation.id] = form.cleaned_data.get('password')
             request.session.modified = True
-            return HttpResponseRedirect(
-                request.GET.get('next', reverse('presentation-browse')))
+            return HttpResponseRedirect(validate_next_link(
+                request.GET.get('next'), reverse('presentation-browse')))
     else:
         form = PasswordForm()
 

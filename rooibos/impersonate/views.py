@@ -4,9 +4,11 @@ from django.views.decorators.cache import cache_control
 from django.db.models import Q
 from .functions import impersonate, endimpersonation, get_available_users, get_real_user
 
+from ..util import validate_next_link
+
 
 def start(request):
-    next = request.GET.get('next', '/')
+    next = validate_next_link(request.GET.get('next'), '/')
     username = request.POST.get('username')
     if username:
         current = get_real_user(request)
@@ -17,7 +19,7 @@ def start(request):
 
 
 def stop(request):
-    next = request.GET.get('next', '/')
+    next = validate_next_link(request.GET.get('next'), '/')
     endimpersonation(request)
     return HttpResponseRedirect(next)
 

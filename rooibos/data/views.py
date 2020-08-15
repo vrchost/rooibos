@@ -32,7 +32,7 @@ from .spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
-from rooibos.util import safe_int
+from rooibos.util import safe_int, validate_next_link
 from rooibos.middleware import HistoryMiddleware
 from .tasks import csvimport
 
@@ -326,8 +326,8 @@ def record(request, id, name, contexttype=None, contextid=None,
                     kwargs=dict(id=record.id, name=record.name)
                 )
 
-                next = request.GET.get(
-                    'next',
+                next = validate_next_link(
+                    request.GET.get('next'),
                     reverse(
                         'data-record',
                         kwargs=dict(id=record.id, name=record.name)
@@ -460,7 +460,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             'c_formset': collectionformset,
             'can_edit': can_edit,
             'can_manage': can_manage,
-            'next': request.GET.get('next'),
+            'next': validate_next_link(request.GET.get('next')),
             'collection_items': collection_items,
             'upload_form': upload_form,
             'upload_url': upload_url,
@@ -953,7 +953,7 @@ def save_collection_visibility_preferences(request):
                 message="Collection visibility preferences saved."
             )
 
-    next = request.GET.get('next', reverse('main'))
+    next = validate_next_link(request.GET.get('next'), reverse('main'))
     return HttpResponseRedirect(next)
 
 

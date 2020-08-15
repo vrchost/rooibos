@@ -5,11 +5,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 
 from rooibos.presentation.models import Presentation
 from .functions import PowerPointGenerator, COLORS
+from ..util import validate_next_link
 
 
 def download(request, id):
 
-    return_url = request.GET.get('next', reverse('presentation-browse'))
+    return_url = validate_next_link(
+        request.GET.get('next'), reverse('presentation-browse'))
     presentation = Presentation.get_by_id_for_request(id, request)
     if not presentation:
         return HttpResponseRedirect(return_url)
