@@ -33,6 +33,9 @@ firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --reload
 ```
 
+Note: If `rabbitmq-server` fails to start, please check the DNS settings
+for your server, as invalid settings can cause issues with RabbitMQ.
+
 ### Configure MariaDB
 Edit `/etc/my.cnf.d/mariadb-server.cnf` and add the following lines 
 to the `[mysqld]` section:
@@ -54,6 +57,13 @@ systemctl start mariadb
 dnf localinstall --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm
 dnf install --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 dnf install ffmpeg
+```
+
+Note: If you get an error like "nothing provides libSDL2-2.0.so.0" when
+installing `ffmpeg`, run this command first:
+
+```
+dnf install http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 ```
 
 ### Install Solr
