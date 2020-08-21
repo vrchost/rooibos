@@ -22,5 +22,5 @@ class ObjectHistory(models.Model):
 def content_hash(*args):
     hash = hashlib.md5()
     for arg in args:
-        hash.update(repr(arg))
+        hash.update(repr(arg).encode('utf8'))
     return hash.hexdigest()
