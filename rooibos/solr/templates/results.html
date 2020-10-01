@@ -144,10 +144,12 @@
     <div class="facet">
         <div class="facet-header">{{ orfacet.label }}</div>
         <div class="facet-body">
-        {% for term,freq,label in orfacet.facets %}
+        {% for value in orfacet.facets %}
+          {% with term=value.0 freq=value.1 label=value.2 %}
             <div class="facet-line">
             <a href="{{ limit_url_orquery }}c={{ orquery }}|{{ term|quoteterm|urlencode }}" rel="nofollow">{{ label|default:term }}</a>{% if freq %}&nbsp;{{ freq|intcomma  }}{% endif %}
             </div>
+          {% endwith %}
         {% endfor %}
         <a class="facet-more" style="display: none;" href="#{{ orfacet.name|urlencode }}">more...</a>
         </div>
