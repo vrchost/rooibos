@@ -98,11 +98,14 @@ class Presentation(models.Model):
             return []
 
     def verify_password(self, request):
-        self.unlocked = (
+        self.unlocked = request.user.is_superuser or (
             (self.owner == request.user) or
             (not self.password) or
             (request.session.get('passwords', dict()).get(str(self.id)) ==
              self.password)
+        ) or (
+            filter_by_access(request.user, Presentation, manage=True)
+            .filter(id=id).count() > 0
         )
         return self.unlocked
 
