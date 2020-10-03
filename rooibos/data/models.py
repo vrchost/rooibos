@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.db.models import Q, signals
+from django.core.exceptions import MultipleObjectsReturned
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
@@ -14,7 +15,11 @@ import random
 import types
 import re
 import unicodedata
+import logging
 from functools import reduce, total_ordering
+
+
+logger = logging.getLogger(__name__)
 
 
 class CollectionManager(models.Manager):
@@ -574,11 +579,15 @@ class Field(models.Model):
 
 @transaction.atomic
 def get_system_field():
-    field, created = Field.objects.get_or_create(
-        name='system-value',
-        defaults=dict(label='System Value')
-    )
-    return field
+    try:
+        field, created = Field.objects.get_or_create(
+            name='system-value',
+            defaults=dict(label='System Value')
+        )
+        return field
+    except MultipleObjectsReturned:
+        logger.warning('Multiple system value fields found')
+        return Field.objects.filter(name='system-value').order_by('id')[0]
 
 
 class FieldSet(models.Model):
