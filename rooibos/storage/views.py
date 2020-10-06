@@ -319,11 +319,18 @@ def create_proxy_url_if_needed(url, request):
 def call_proxy_url(request, uuid):
     context = request.GET.get('context')
 
-    ip = IPAddress(request.META['REMOTE_ADDR'])
-    for subnet in TrustedSubnet.objects.all():
-        if ip in IPNetwork(subnet.subnet):
+    address = request.META['REMOTE_ADDR']
+    found = False
+    subnet = None
+    for addr in address.split(','):
+        ip = IPAddress(addr.strip())
+        for subnet in TrustedSubnet.objects.all():
+            if ip in IPNetwork(subnet.subnet):
+                found = True
+                break
+        if found:
             break
-    else:
+    if not found:
         return HttpResponseForbidden()
 
     proxy_url = get_object_or_404(

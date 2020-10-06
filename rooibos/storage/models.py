@@ -372,12 +372,17 @@ class ProxyUrl(models.Model):
         return reverse('storage-proxyurl', kwargs=dict(uuid=self.uuid))
 
     @staticmethod
-    def create_proxy_url(url, context, ip, user):
-        ip = IPAddress(ip)
-        for subnet in TrustedSubnet.objects.all():
-            if ip in IPNetwork(subnet.subnet):
+    def create_proxy_url(url, context, address, user):
+        found = False
+        for addr in address.split(','):
+            ip = IPAddress(addr.strip())
+            for subnet in TrustedSubnet.objects.all():
+                if ip in IPNetwork(subnet.subnet):
+                    found = True
+                    break
+            if found:
                 break
-        else:
+        if not found:
             return None
         if hasattr(user, 'backend'):
             backend = user.backend
