@@ -90,7 +90,7 @@ def _record_as_json(record, owner=None, context=None,
                     if field.standard and field.standard.prefix == 'dc'
                 )
                 try:
-                    dc_mapping_cache[field.id] = equivalents.next().name
+                    dc_mapping_cache[field.id] = next(equivalents).name
                 except StopIteration:
                     pass
         return dc_mapping_cache.get(field.id)
