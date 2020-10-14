@@ -15,7 +15,7 @@ def update_actionbar_tags(request, *objects):
     all_tags = parse_tag_input(request.POST.get('all_tags'))
     try:
         update_tags = dict(
-            (base64.b32decode(k[11:].replace('_', '=')), v)
+            (base64.b32decode(k[11:].replace('_', '=')).decode('utf8'), v)
             for k, v in request.POST.items()
             if k.startswith('update_tag_')
         )
