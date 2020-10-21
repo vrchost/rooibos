@@ -29,7 +29,7 @@ class Command(BaseCommand):
             .distinct()
         )
 
-        with open(data_file, 'w') as csvfile:
+        with open(data_file, 'wb') as csvfile:
 
             fieldnames = [field.full_name for field in fields]
             fieldnames.extend(['__file__', '__path__'])
