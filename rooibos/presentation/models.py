@@ -105,7 +105,7 @@ class Presentation(models.Model):
              self.password)
         ) or (
             filter_by_access(request.user, Presentation, manage=True)
-            .filter(id=id).count() > 0
+            .filter(id=self.id).count() > 0
         )
         return self.unlocked
 
