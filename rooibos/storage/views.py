@@ -159,7 +159,9 @@ def retrieve_image(request, recordid, record, width=None, height=None):
             # prevent duplication
             if record.endswith('jpg'):
                 record = record[:-3]
-            name = safe_filename(smart_str(record_obj.title or record))
+            if getattr(settings, 'IMAGE_DOWNLOAD_NAME', 'TITLE') == 'TITLE':
+                record = record_obj.title or record
+            name = safe_filename(smart_str(record))
             response["Content-Disposition"] = \
                 'attachment; filename="%s.jpg"' % name
         return response
