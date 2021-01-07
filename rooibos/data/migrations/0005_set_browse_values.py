@@ -45,5 +45,5 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(update_browse_values, migrations.RunPython.noop),
-        migrations.RunSQL("UPDATE data_fieldvalue SET browse_value=SUBSTRING(value,1,32) WHERE browse_value IS NULL", migrations.RunSQL.noop)
+        migrations.RunSQL("UPDATE data_fieldvalue SET browse_value=SUBSTR(value,1,32) WHERE browse_value IS NULL", migrations.RunSQL.noop)
     ]
