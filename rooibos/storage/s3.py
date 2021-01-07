@@ -21,7 +21,7 @@ class S3StorageSystem(S3BotoStorage):
 
     containers = dict()
 
-    def __init__(self, base=None, storage=None):
+    def __init__(self, base=None, storage=None, s3args=None):
 
         bucket = None
         if base.startswith('//'):
@@ -33,12 +33,13 @@ class S3StorageSystem(S3BotoStorage):
         secret_key = getattr(settings, 'AWS_SECRET_KEY', None)
         self.location = base
 
-        super(S3StorageSystem, self).__init__(
-            location=self.location,
-            access_key=access_key,
-            secret_key=secret_key,
-            bucket=bucket
-        )
+        s3args = s3args or dict()
+        s3args.setdefault('location', self.location)
+        s3args.setdefault('access_key', access_key)
+        s3args.setdefault('secret_key', secret_key)
+        s3args.setdefault('bucket', bucket)
+
+        super(S3StorageSystem, self).__init__(**s3args)
 
     def _normalize_name(self, name):
         # workaround for bug:

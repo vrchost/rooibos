@@ -172,6 +172,7 @@ STORAGE_SYSTEMS = {
         'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
     's3': 'rooibos.storage.s3.S3StorageSystem',
     'b2': 'rooibos.storage.b2.B2StorageSystem',
+    'wasabi': 'rooibos.storage.wasabi.WasabiStorageSystem',
 }
 
 GROUP_MANAGERS = {
@@ -464,3 +465,5 @@ LOGGING = {
 CELERY_RESULT_BACKEND = 'django-db'
 
 FORGET_PRESENTATION_BROWSE_FILTER = False
+
+USE_I18N = False
