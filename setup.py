@@ -70,4 +70,9 @@ setuptools.setup(
     zip_safe=False,
     install_requires=REQUIRES,
     python_requires='>=3.6',
+    entry_points={
+        'console_scripts': [
+            'mdid = rooibos.__main__:main',
+        ],
+    }
 )
