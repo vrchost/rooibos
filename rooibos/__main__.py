@@ -1,4 +1,3 @@
-import argparse
 import os
 import random
 import string
@@ -12,16 +11,9 @@ CONFIG = """
 from rooibos.settings.base import *
 
 SECRET_KEY = '%(secret_key)s'
+
+LOG_DIR = '%(log_dir)s'
 """
-
-
-def main():
-    parser = argparse.ArgumentParser(prog='mdid')
-    parser.add_argument(
-        'command', help='Command to run', choices=['init', 'admin'])
-    parser.add_argument('args', nargs='*')
-    args = parser.parse_args()
-    globals()[args.command]()
 
 
 def init():
@@ -34,6 +26,7 @@ def init():
             random.choice(string.ascii_letters + string.digits)
             for _ in range(64)
         ),
+        log_dir = os.path.abspath('log')
     )
     settings_file = os.path.join('config', 'settings.py')
     if not os.path.exists(settings_file):
@@ -43,19 +36,23 @@ def init():
         pass
 
 
-def admin():
+def main():
     """Run MDID and Django admin commands"""
     python_path = os.getenv('PYTHONPATH')
     if not python_path:
         os.putenv('PYTHONPATH', '.')
         sys.path.append('.')
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'init':
+        init()
+        sys.exit(0)
+
     settings_module = os.getenv('DJANGO_SETTINGS_MODULE')
     if not settings_module:
         try:
             import config.settings
+            os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
         except ImportError:
             print('Could not find MDID settings, have you run "mdid init"?')
-            return 1
-        os.putenv('DJANGO_SETTINGS_MODULE', 'config.settings')
-    sys.argv = ['django-admin'] + sys.argv[2:]
+    # sys.argv = ['django-admin'] + sys.argv[1:]
     sys.exit(execute_from_command_line())
