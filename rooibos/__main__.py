@@ -8,11 +8,36 @@ from django.core.management import execute_from_command_line
 DIRECTORIES = 'scratch storage log static templates config'.split()
 
 CONFIG = """
+import os
 from rooibos.settings.base import *
+
+install_dir = '%(install_dir)s'
 
 SECRET_KEY = '%(secret_key)s'
 
-LOG_DIR = '%(log_dir)s'
+LOG_DIR = os.path.join(install_dir, 'log')
+STATIC_ROOT = os.path.join(install_dir, 'static')
+SCRATCH_DIR = os.path.join(install_dir, 'scratch')
+TEMPLATES[0]['DIRS'].append(os.path.join(install_dir, 'templates'))
+
+# Add the hostname of your server, or keep '*' to allow all host names
+ALLOWED_HOSTS = ['*']
+
+# Database settings
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mdid',
+        'USER': 'mdid',
+        'PASSWORD': 'rooibos',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': {
+            'use_unicode': True,
+            'charset': 'utf8',
+        },
+    }
+}
 """
 
 
@@ -26,12 +51,13 @@ def init():
             random.choice(string.ascii_letters + string.digits)
             for _ in range(64)
         ),
-        log_dir = os.path.abspath('log')
+        install_dir = os.path.abspath('.'),
     )
     settings_file = os.path.join('config', 'settings.py')
-    if not os.path.exists(settings_file):
-        with open(settings_file, 'w') as output:
-            output.write(CONFIG % defaults)
+    if os.path.exists(settings_file):
+        settings_file += '.template'
+    with open(settings_file, 'w') as output:
+        output.write(CONFIG % defaults)
     with open(os.path.join('config', '__init__.py'), 'w') as output:
         pass
 

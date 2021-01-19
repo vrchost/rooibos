@@ -44,7 +44,7 @@ python-pptx
 reportlab
 requests
 sqlparse
-werkzeug
+werkzeug==0.16.0
 wfastcgi
 wheel
 requests
