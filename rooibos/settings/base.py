@@ -396,19 +396,6 @@ RABBITMQ_OPTIONS = {
 BROWSE_CHILDREN = False
 
 
-LOG_DIR = ''
-
-
-class LazyLogfileName(str):
-
-    def __init__(self, name):
-        super(LazyLogfileName, self).__init__()
-        self.name = name
-
-    def __str__(self) :
-        return os.path.join(LOG_DIR, self.name)
-
-
 def _get_log_handler(log_dir=None):
 
     # Can't do sys.argv since it does not exist when running under PyISAPIe
@@ -428,7 +415,7 @@ def _get_log_handler(log_dir=None):
     return {
         'file': {
             'class': 'logging.FileHandler',
-            'filename': LazyLogfileName(basename + '.log'),
+            'filename': basename + '.log',
             'formatter': 'verbose',
         },
     }
@@ -452,20 +439,20 @@ LOGGING = {
     'handlers': handler,
     'loggers': {
         'rooibos': {
-            'handlers': [first_handler],
+            'handlers': ['file'],
             'level': 'DEBUG',
             'propagate': False,
         },
         'pika': {
-            'handlers': [first_handler],
+            'handlers': ['file'],
             'level': 'WARNING',
         },
         'django': {
-            'handlers': [first_handler],
+            'handlers': ['file'],
             'level': 'WARNING',
         },
         '': {
-            'handlers': [first_handler],
+            'handlers': ['file'],
             'level': 'DEBUG',
         },
     },

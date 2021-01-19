@@ -5,7 +5,7 @@ import sys
 from django.core.management import execute_from_command_line
 
 
-DIRECTORIES = 'scratch storage log static templates config'.split()
+DIRECTORIES = 'var/scratch var/log var/static static templates config'.split()
 
 CONFIG = """
 import os
@@ -15,10 +15,12 @@ install_dir = '%(install_dir)s'
 
 SECRET_KEY = '%(secret_key)s'
 
-LOG_DIR = os.path.join(install_dir, 'log')
-STATIC_ROOT = os.path.join(install_dir, 'static')
-SCRATCH_DIR = os.path.join(install_dir, 'scratch')
+LOGGING['handlers']['file']['filename'] = os.path.join(
+    install_dir, 'var', 'log', LOGGING['handlers']['file']['filename']) 
+STATIC_ROOT = os.path.join(install_dir, 'var', 'static')
+SCRATCH_DIR = os.path.join(install_dir, 'var', 'scratch')
 TEMPLATES[0]['DIRS'].append(os.path.join(install_dir, 'templates'))
+STATICFILES_DIRS.append(os.path.join(install_dir, 'static'))
 
 # Add the hostname of your server, or keep '*' to allow all host names
 ALLOWED_HOSTS = ['*']
@@ -45,7 +47,7 @@ def init():
     """Initializes an MDID instance in the current directory"""
     print("Initializing")
     for directory in DIRECTORIES:
-        os.makedirs(directory, exist_ok=True)
+        os.makedirs(os.path.join(*directory.split('/')), exist_ok=True)
     defaults = dict(
         secret_key = ''.join(
             random.choice(string.ascii_letters + string.digits)
