@@ -58,7 +58,7 @@ def fetch_url_to_file(url, path):
         )
         return False
 
-    remote = io.StringIO(response.read())
+    remote = io.BytesIO(response.read())
     if url.endswith('.gz'):
         remote = gzip.GzipFile(fileobj=remote, mode='rb')
     with open(path, 'wb') as outfile:
