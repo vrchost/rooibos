@@ -934,6 +934,8 @@ def browse(request, id=None, name=None):
         fields = _get_browse_fields(collection.id)
 
     if not fields:
+        logger.debug('No browse fields found for collection %d, '
+                     'invalid browse field sets?' % (collection.id,))
         raise Http404()
 
     collection_and_children = \
