@@ -6,7 +6,6 @@ from sys import stdin
 
 class Command(BaseCommand):
     help = 'Load a collection dump from stdin from another installation'
-    option_list = BaseCommand.option_list + ()
 
     def handle(self, *args, **kwargs):
 

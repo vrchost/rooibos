@@ -170,6 +170,7 @@ STORAGE_SYSTEMS = {
         'rooibos.storage.pseudostreaming.PseudoStreamingStorageSystem',
     's3': 'rooibos.storage.s3.S3StorageSystem',
     'b2': 'rooibos.storage.b2.B2StorageSystem',
+    'wasabi': 'rooibos.storage.wasabi.WasabiStorageSystem',
 }
 
 GROUP_MANAGERS = {
@@ -463,7 +464,8 @@ CELERY_RESULT_BACKEND = 'django-db'
 
 FORGET_PRESENTATION_BROWSE_FILTER = False
 
-
 SOLR_URL = 'http://127.0.0.1:8983/solr/mdid'
 SOLR_RECORD_INDEXER = None
 SOLR_RECORD_PRE_INDEXER = None
+
+USE_I18N = False

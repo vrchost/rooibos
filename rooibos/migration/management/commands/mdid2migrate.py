@@ -1,5 +1,4 @@
 from datetime import datetime
-from django.conf import settings
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
@@ -1066,7 +1065,7 @@ class MigrateFieldValues(MigrateModel):
             cursor=cursor,
             model=FieldValue,
             query="SELECT fielddata.ID,ImageID,FieldID,FieldInstance,"
-            "FieldValue,OriginalValue,Type,Label,DisplayOrder "
+            "FieldValue,Type,Label,DisplayOrder "
             "FROM fielddata INNER JOIN fielddefinitions "
             "ON FieldID=fielddefinitions.ID"
         )
@@ -1374,11 +1373,15 @@ class Command(BaseCommand):
             else:
                 print("Unsupported database type")
                 return None
+            conn.setdecoding(pyodbc.SQL_CHAR, encoding='utf-8')
+            conn.setdecoding(pyodbc.SQL_WCHAR, encoding='utf-8')
+            conn.setdecoding(pyodbc.SQL_WMETADATA, encoding='utf-32le')
+            conn.setencoding(encoding='utf-8')
             return conn.cursor()
 
         row = get_cursor().execute(
             "SELECT Version FROM databaseversion").fetchone()
-        supported = ("00006", "00007", "00008")
+        supported = ("00002", "00006", "00007", "00008")
         if row.Version not in supported:
             print("Database version is not supported")
             print("Found %r, supported is %r" % (row.Version, supported))
