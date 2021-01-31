@@ -2,45 +2,31 @@ import os
 import random
 import string
 import sys
+import tempfile
+
 from django.core.management import execute_from_command_line
 
 
-DIRECTORIES = 'var/scratch var/log var/static static templates config'.split()
+DIRECTORIES = 'var/scratch var/log var/static var/etc var/tmp ' \
+              'static templates config ssl service-config'.split()
+SERVICE_CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'service-config')
 
-CONFIG = """
-import os
-from rooibos.settings.base import *
 
-install_dir = '%(install_dir)s'
+def get_service_config(name):
+    with open(os.path.join(SERVICE_CONFIG_DIR, name)) as config:
+        return config.read()
 
-SECRET_KEY = '%(secret_key)s'
 
-LOGGING['handlers']['file']['filename'] = os.path.join(
-    install_dir, 'var', 'log', LOGGING['handlers']['file']['filename']) 
-STATIC_ROOT = os.path.join(install_dir, 'var', 'static')
-SCRATCH_DIR = os.path.join(install_dir, 'var', 'scratch')
-TEMPLATES[0]['DIRS'].append(os.path.join(install_dir, 'templates'))
-STATICFILES_DIRS.append(os.path.join(install_dir, 'static'))
-
-# Add the hostname of your server, or keep '*' to allow all host names
-ALLOWED_HOSTS = ['*']
-
-# Database settings
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mdid',
-        'USER': 'mdid',
-        'PASSWORD': 'rooibos',
-        'HOST': '',
-        'PORT': '',
-        'OPTIONS': {
-            'use_unicode': True,
-            'charset': 'utf8',
-        },
-    }
-}
-"""
+def get_defaults():
+    return dict(
+        secret_key=''.join(
+            random.choice(string.ascii_letters + string.digits)
+            for _ in range(64)
+        ),
+        install_dir=os.path.abspath('.'),
+        venv_bin_dir=os.path.dirname(sys.executable),
+        temp_dir=tempfile.gettempdir(),
+    )
 
 
 def init():
@@ -48,20 +34,18 @@ def init():
     print("Initializing")
     for directory in DIRECTORIES:
         os.makedirs(os.path.join(*directory.split('/')), exist_ok=True)
-    defaults = dict(
-        secret_key = ''.join(
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(64)
-        ),
-        install_dir = os.path.abspath('.'),
-    )
+    defaults = get_defaults()
     settings_file = os.path.join('config', 'settings.py')
     if os.path.exists(settings_file):
         settings_file += '.template'
     with open(settings_file, 'w') as output:
-        output.write(CONFIG % defaults)
+        output.write(get_service_config('mdid') % defaults)
     with open(os.path.join('config', '__init__.py'), 'w') as output:
         pass
+    with open(os.path.join('service-config', 'nginx'), 'w') as output:
+        output.write(get_service_config('nginx') % defaults)
+    with open(os.path.join('service-config', 'supervisor'), 'w') as output:
+        output.write(get_service_config('supervisor') % defaults)
 
 
 def main():

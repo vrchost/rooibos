@@ -1,0 +1,32 @@
+import os
+from rooibos.settings.base import *
+
+install_dir = '%(install_dir)s'
+
+SECRET_KEY = '%(secret_key)s'
+
+LOGGING['handlers']['file']['filename'] = os.path.join(
+    install_dir, 'var', 'log', LOGGING['handlers']['file']['filename'])
+STATIC_ROOT = os.path.join(install_dir, 'var', 'static')
+SCRATCH_DIR = os.path.join(install_dir, 'var', 'scratch')
+TEMPLATES[0]['DIRS'].append(os.path.join(install_dir, 'templates'))
+STATICFILES_DIRS.append(os.path.join(install_dir, 'static'))
+
+# Add the hostname of your server, or keep '*' to allow all host names
+ALLOWED_HOSTS = ['*']
+
+# Database settings
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mdid',
+        'USER': 'mdid',
+        'PASSWORD': 'rooibos',
+        'HOST': '',
+        'PORT': '',
+        'OPTIONS': {
+            'use_unicode': True,
+            'charset': 'utf8',
+        },
+    }
+}

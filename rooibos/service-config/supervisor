@@ -1,0 +1,42 @@
+[group:mdid]
+programs=app_mdid,celery_mdid,celery_solr_mdid,celery_beat_mdid
+
+[program:app_mdid]
+environment=USER=mdid,PATH="%(venv_bin_dir)s:%%(ENV_PATH)s",PYTHONPATH="%(install_dir)s",DJANGO_SETTINGS_MODULE="config.settings"
+command=%(venv_bin_dir)s/gunicorn -t 300s -w 4 -b 127.0.0.1:8010 --max-requests 200 rooibos.wsgi:application
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=%(install_dir)s/var/log/gunicorn.log
+
+[program:celery_mdid]
+environment=USER=mdid,PATH="%(venv_bin_dir)s",PYTHONPATH="%(install_dir)s",DJANGO_SETTINGS_MODULE="config.settings"
+command=%(venv_bin_dir)s/celery -A rooibos worker -c 2 -Q celery-mdid -l info -n worker-mdid@%%%%h
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=%(install_dir)s/var/log/celery.log
+
+[program:celery_solr_mdid]
+environment=USER=mdid,PATH="%(venv_bin_dir)s",PYTHONPATH="%(install_dir)s",DJANGO_SETTINGS_MODULE="config.settings"
+command=%(venv_bin_dir)s/celery -A rooibos worker -c 1 -Q celery-mdid-solr -l info -n worker-solr-mdid@%%%%h
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=%(install_dir)s/var/log/celery-solr.log
+
+[program:celery_beat_mdid]
+environment=USER=mdid,PATH="%(venv_bin_dir)s",PYTHONPATH="%(install_dir)s",DJANGO_SETTINGS_MODULE="config.settings"
+command=%(venv_bin_dir)s/celery -A rooibos beat -s %(install_dir)s/var/etc/celerybeat-schedule -l info --pidfile=%(install_dir)s/var/tmp/celerybeat-mdid.pid
+user=mdid
+autostart=true
+autorestart=true
+stopasgroup=true
+redirect_stderr=true
+stdout_logfile=%(install_dir)s/var/log/celery-beat.log
