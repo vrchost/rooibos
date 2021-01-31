@@ -27,7 +27,7 @@ jobs:
 
       - name: Build
         run: |
-          rm -- dist/*
+          rm -f -- dist/*
           python setup.py bdist_wheel
 
       - name: Archive build artifacts
