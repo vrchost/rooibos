@@ -646,7 +646,7 @@ def get_id(request, *args):
     server = '//' + request.META.get(
         'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
     s = '/'.join(map(str, args))
-    return 'http:%s/iiif/%s' % (server, s)
+    return '%s/iiif/%s' % (server, s)
 
 
 def get_metadata(fieldvalues):
@@ -670,7 +670,9 @@ def slide_manifest(request, slide, owner, offline=False):
     fieldvalues = slide.get_fieldvalues(owner=owner)
     title = title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
-    image = slide.record.get_image_url(
+    server = '//' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    image = server + slide.record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
     )

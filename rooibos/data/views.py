@@ -987,10 +987,12 @@ def single_record_manifest(request, record, owner):
     fieldvalues = record.get_fieldvalues(owner=owner)
     title = title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(request, 'record', 'canvas', 'record%d' % record.id)
-    image = record.get_image_url(
+    server = '//' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    image = server + record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
-    )
+    ).rstrip('/')
 
     metadata = get_metadata(fieldvalues)
 
