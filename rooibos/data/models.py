@@ -791,6 +791,14 @@ class RemoteMetadata(models.Model):
     last_modified = models.CharField(max_length=100, null=True, blank=True)
 
 
+def title_from_fieldvalues(fieldvalues):
+    titlefields = standardfield_ids('title', equiv=True)
+    for fv in fieldvalues:
+        if fv.field_id in titlefields:
+            return fv.value
+    return None
+
+
 def create_data_fixtures(sender, *args, **kwargs):
 
     if sender.name != 'rooibos.data':

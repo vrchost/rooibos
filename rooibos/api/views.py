@@ -11,7 +11,7 @@ from rooibos.solr.views import filter_by_access, search
 from rooibos.storage.views import create_proxy_url_if_needed
 from rooibos.util import json_view, must_revalidate
 from rooibos.util.models import OwnedWrapper
-from rooibos.data.models import Collection, Record
+from rooibos.data.models import Collection, Record, title_from_fieldvalues
 from tagging.models import Tag
 from rooibos.ui.alternate_password import check_alternate_password
 
@@ -134,7 +134,7 @@ def _presentation_item_as_json(item, owner=None, process_url=lambda url: url):
     data = dict(
         id=item.record.id,
         name=item.record.name,
-        title=item.title_from_fieldvalues(fieldvalues) or 'Untitled',
+        title=title_from_fieldvalues(fieldvalues) or 'Untitled',
         thumbnail=process_url(item.record.get_thumbnail_url()),
         image=process_url(item.record.get_image_url(
             force_reprocess=getattr(settings, 'FORCE_SLIDE_REPROCESS', False)

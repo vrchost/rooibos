@@ -17,7 +17,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
 from rooibos.access.functions import filter_by_access
-from rooibos.data.models import FieldSet, Record
+from rooibos.data.models import FieldSet, Record, title_from_fieldvalues
 from rooibos.data.forms import FieldSetChoiceField
 from rooibos.data.functions import get_fields_for_set
 from rooibos.ui.actionbar import update_actionbar_tags
@@ -668,7 +668,7 @@ def get_metadata(fieldvalues):
 def slide_manifest(request, slide, owner, offline=False):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
-    title = slide.title_from_fieldvalues(fieldvalues) or 'Untitled',
+    title = title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
     image = slide.record.get_image_url(
         force_reprocess=False,
