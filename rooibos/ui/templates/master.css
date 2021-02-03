@@ -1047,7 +1047,7 @@ html.js-enabled .info-icon {
 
 .owner-icon {
     position: absolute;
-    bottom: 2px;
+    bottom: 18px;
     right: 18px;
     border: none !important;
 }
@@ -1070,6 +1070,15 @@ html.js-enabled .info-icon {
     position: absolute;
     bottom: 34px;
     right: 2px;
+    border: none !important;
+}
+
+.iiif-icon {
+    position: absolute;
+    bottom: 2px;
+    right: 18px;
+    width: 16px;
+    height: 16px;
     border: none !important;
 }
 
