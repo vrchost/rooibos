@@ -122,3 +122,6 @@ SECONDARY_COLOR = "rgb(118, 147, 154)"
 
 # Adjust path to ffmpeg if necessary
 # FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
+
+
+CORS_ORIGIN_ALLOW_ALL = True
