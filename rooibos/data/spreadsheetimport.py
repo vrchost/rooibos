@@ -5,6 +5,8 @@ from .models import Field, FieldValue, Record, CollectionItem, get_system_field
 import csv
 import os
 
+from ..util import calculate_hash
+
 
 class CustomDictReader(csv.DictReader):
 
@@ -134,7 +136,7 @@ class SpreadsheetImport(object):
             return None
 
         fields = [_f for _f in list(rows[0].keys()) if _f]
-        self.field_hash = hash('\t'.join(sorted(fields)))
+        self.field_hash = calculate_hash('\t'.join(sorted(fields)))
         if not self.mapping:
             self.mapping = dict((field, self._guess_mapping(field))
                                 for field in fields)
