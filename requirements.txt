@@ -61,5 +61,3 @@ wfastcgi
 wheel
 requests
 unicodecsv==0.14.1
-
-https://github.com/knabar/django-shibboleth/archive/master.zip

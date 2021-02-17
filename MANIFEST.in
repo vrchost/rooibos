@@ -8,3 +8,4 @@ recursive-include rooibos/solr *
 recursive-include rooibos/static *
 recursive-include rooibos/presentation/mirador_package *
 recursive-include rooibos/service-config *
+recursive-include django_shibboleth *
