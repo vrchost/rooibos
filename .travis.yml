@@ -5,7 +5,7 @@ python:
 install: pip install -r requirements.txt
 env:
   global:
-  - DJANGO_SETTINGS_MODULE=rooibos_settings.test
+  - DJANGO_SETTINGS_MODULE=rooibos.settings.test
   - PYTHONPATH=.
 script: django-admin test
 before_deploy:
