@@ -1,5 +1,5 @@
 import urllib.request, urllib.error, urllib.parse
-from io import StringIO
+from io import BytesIO
 
 from ...celeryapp import app
 
@@ -25,6 +25,6 @@ def flickr_download_media(record_id, url):
     )
     # should be done better: loading file into StringIO object to make it
     # seekable
-    file = StringIO(file.read())
+    file = BytesIO(file.read())
     file = rotateImageBasedOnExif(file)
     media.save_file(record.name + guess_extension(mimetype), file)

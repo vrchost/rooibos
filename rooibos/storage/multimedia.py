@@ -7,7 +7,7 @@ import re
 import logging
 import json as simplejson
 import zipfile
-from io import StringIO, BytesIO
+from io import BytesIO
 from subprocess import Popen, PIPE
 from rooibos.data.models import get_system_field
 from PIL import Image
