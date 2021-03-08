@@ -1,7 +1,7 @@
 from functools import cmp_to_key
 
 from PyPDF2.pdf import PdfFileReader
-from io import StringIO, BytesIO
+from io import BytesIO
 from PIL import Image
 import logging
 import mimetypes
