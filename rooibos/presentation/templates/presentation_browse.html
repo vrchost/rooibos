@@ -261,9 +261,16 @@
 </table>
 
 
+{% var as refine %}
+{
+    "url": "{{ request.path }}?sort={{ sortby }}&{% if active_presenter %}presenter={{ active_presenter|urlencode }}&{% endif %}kw={{ keywords|urlencode }}&{% for t in active_tags %}t={{ t|urlencode }}&{% endfor %}"
+}
+{% endvar %}
+
+
 <div class="pagination">
     {% if presentations.has_previous %}
-        <a href="?page={{ presentations.previous_page_number }}">previous</a>
+        <a href="{{ refine.url }}page={{ presentations.previous_page_number }}">previous</a>
     {% endif %}
 
     <span class="current">
@@ -271,7 +278,7 @@
     </span>
 
     {% if presentations.has_next %}
-        <a href="?page={{ presentations.next_page_number }}">next</a>
+        <a href="{{ refine.url }}page={{ presentations.next_page_number }}">next</a>
     {% endif %}
 </div>
 
