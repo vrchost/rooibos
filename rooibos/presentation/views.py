@@ -428,7 +428,7 @@ def browse(request, manage=False):
             ids = list(map(int, request.POST.getlist('h')))
             for presentation in Presentation.objects.filter(
                     owner=request.user, id__in=ids):
-                presentation.hidden = hide
+                presentation.hidden = bool(hide)
                 presentation.save()
 
         if manage and request.POST.get('delete'):
