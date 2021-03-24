@@ -642,9 +642,12 @@ def record_usage(request, id, name):
     )
 
 
-def get_id(request, *args):
-    server = '//' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+def get_id(request, *args, offline=False):
+    if not offline:
+        server = '//' + request.META.get(
+            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    else:
+        server = ''
     s = '/'.join(map(str, args))
     return '%s/iiif/%s' % (server, s)
 
@@ -669,9 +672,13 @@ def slide_manifest(request, slide, owner, offline=False):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
     title = title_from_fieldvalues(fieldvalues) or 'Untitled',
-    id = get_id(request, 'slide', 'canvas', 'slide%d' % slide.id)
-    server = '//' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    id = get_id(
+        request, 'slide', 'canvas', 'slide%d' % slide.id, offline=offline)
+    if not offline:
+        server = '//' + request.META.get(
+            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    else:
+        server = ''
     image = server + slide.record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
@@ -754,7 +761,8 @@ def special_slide(request, kind, label, index=None, offline=False):
         'presentation-%s-slide' % kind,
         kwargs={'extra': str(index) if index else ''}
     )
-    id = get_id(request, 'slide', 'canvas', 'slide%d' % (index or 0))
+    id = get_id(
+        request, 'slide', 'canvas', 'slide%d' % (index or 0), offline=offline)
     resource = {
         '@id': image,
         '@type': 'dctypes:Image',
@@ -804,13 +812,15 @@ def raw_manifest(request, id, name, offline=False):
         '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
         '@type': 'sc:Manifest',
         '@id': get_id(
-            request, 'presentation', 'presentation%d' % p.id, 'manifest'),
+            request, 'presentation', 'presentation%d' % p.id, 'manifest',
+            offline=offline),
         'label': p.title,
         'metadata': [],
         'description': p.description,
         'sequences': [{
             '@id': get_id(
-                request, 'presentation', 'presentation%d' % p.id, 'all'),
+                request, 'presentation', 'presentation%d' % p.id, 'all',
+                offline=offline),
             '@type': 'sc:Range',
             'label': 'All slides',
             'canvases': [
