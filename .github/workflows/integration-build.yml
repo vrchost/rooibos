@@ -23,7 +23,7 @@ jobs:
 
       - name: Install requirements
         run: |
-          python -m pip install -U -q pip wheel
+          python -m pip install -U -q pip wheel twine
           python -m pip install -r requirements-dev.txt
 
       - name: Build
@@ -36,3 +36,11 @@ jobs:
         with:
           name: artifacts
           path: dist/*
+
+      - name: Publish to testpypi
+        run: |
+          python3 -m twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TWINE_TEST_TOKEN }}
+          TWINE_REPOSITORY: testpypi
