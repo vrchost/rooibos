@@ -7,6 +7,11 @@ from rooibos.viewers import register_viewer, Viewer
 from rooibos.data.models import Record, FieldValue
 from .models import Storage
 import re
+import requests
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 SUPPORTED_MIMETYPES = (
@@ -202,6 +207,24 @@ class YoutubeViewer(Viewer):
                 'embed_url': links[0]['value'].replace('watch?v=', 'embed/'),
             }
         )
+
+    def get_image(self):
+        links = list(_get_youtube_links(self.obj))
+        if not links:
+            logger.debug('no links found')
+            return
+        parts = links[0]['value'].split('watch?v=')
+        if len(parts) != 2:
+            logger.debug('could not parse link %r' % links)
+            return
+        url = 'https://img.youtube.com/vi/%s/0.jpg' % parts[1]
+        try:
+            return requests.get(url).content
+        except requests.exceptions.RequestException:
+            logger.warning(
+                'Failed to load YouTube thumbnail from %s' % url,
+                exc_info=True,
+            )
 
 
 @register_viewer('youtubeviewer', YoutubeViewer)

@@ -1,3 +1,5 @@
+import os
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
@@ -23,7 +25,9 @@ class Viewer(object):
         }
         return reverse('viewers-viewer-%s' % urltype, kwargs=kwargs)
 
-    def embed_code(self, request, options):
+    def embed_code(self, request, options=None):
+        if options is None:
+            options = dict()
         return render_to_string(self.embed_template,
                                 {
                                     'viewer': self,
@@ -42,6 +46,22 @@ class Viewer(object):
 
     def view(self, request):
         return None
+
+    def get_image(self):
+        return None
+
+    def get_derivative_storage_path(self):
+        sp = os.path.join(settings.SCRATCH_DIR, 'viewer-' + type(self).__name__)
+        if not os.path.exists(sp):
+            try:
+                os.makedirs(sp)
+            except:
+                # check if directory exists now, if so another process
+                # may have created it
+                if not os.path.exists(sp):
+                    # still does not exist, raise error
+                    raise
+        return sp
 
 
 _registered_viewers = dict()

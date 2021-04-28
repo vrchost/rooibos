@@ -1,3 +1,4 @@
+from collections import namedtuple
 from functools import cmp_to_key
 
 from PyPDF2.pdf import PdfFileReader
@@ -15,6 +16,15 @@ from rooibos.access.functions import filter_by_access, \
     get_effective_permissions_and_restrictions
 from rooibos.data.models import Record, standardfield_ids
 from .models import Media, Storage
+from .multimedia import get_image, overlay_image_with_mimetype_icon
+
+from PIL import ImageFile
+
+from ..viewers import get_viewers_for_object
+
+ImageFile.MAXBLOCK = 16 * 1024 * 1024
+
+logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf_stream(stream):
@@ -156,6 +166,83 @@ def get_media_for_record(record, user=None, passwords={}):
     )
 
 
+def downsize_image(file, width, height, crop_to_square):
+    image = Image.open(file)
+    if crop_to_square:
+        w, h = image.size
+        if w > h:
+            image = image.crop(
+                ((w - h) // 2, 0, (w - h) // 2 + h, h))
+        elif w < h:
+            image = image.crop(
+                (0, (h - w) // 2, w, (h - w) // 2 + w))
+    w, h = image.size
+    if w > width or h > height:
+        image.thumbnail((width, height), Image.ANTIALIAS)
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+    return image
+
+
+def derivative_image(file, width, height, mimetype, crop_to_square):
+    image = downsize_image(file, width, height, crop_to_square)
+    if mimetype:
+        image = overlay_image_with_mimetype_icon(
+            image, mimetype)
+    output = BytesIO()
+    image.save(output, 'JPEG', quality=85, optimize=True)
+    return output.getvalue()
+
+
+def derivative_from_media(media, width, height, crop_to_square):
+    if not media.file_exists():
+        logger.error(
+            'Image derivative failed for media %d, '
+            'cannot find file "%s"' % (
+                media.id, media.get_absolute_file_path()
+            )
+        )
+        return None
+    try:
+        return derivative_image(
+            get_image(media), width, height, media.mimetype, crop_to_square)
+    except Exception as e:
+        logger.exception(
+            'Image derivative failed for media %d (%s)' %
+            (media.id, e)
+        )
+        return None
+
+
+def get_image_for_record_from_viewers(
+        record, user, width, height, crop_to_square):
+    request = namedtuple('request', 'user')(user)
+    record_id = getattr(record, 'id', record)
+    record = Record.get_or_404(record_id, user)
+    viewers = list(get_viewers_for_object(record, request))
+    logger.debug('get_image_for_record_from_viewers got viewers %r' % viewers)
+    logger.debug('user is %r' % user)
+    for viewer in viewers:
+        name = '%s-%sx%s%s.jpg' % (
+            record_id, width, height, 'sq' if crop_to_square else '')
+        logger.debug('looking for "%r" in "%r"' % (name, viewer.get_derivative_storage_path()))
+        path = os.path.join(viewer.get_derivative_storage_path(), name)
+        if not os.path.exists(path) or os.path.getsize(path) == 0:
+            logger.debug('not found, getting image')
+            image = viewer.get_image()
+            if image:
+                output = derivative_image(
+                    BytesIO(image), width, height, None, crop_to_square
+                )
+                if output:
+                    with open(path, 'wb') as f:
+                        f.write(output)
+                    return path
+        else:
+            logger.debug('found, returning %r' % path)
+            return path
+
+
 def get_image_for_record(
         record, user=None, width=100000, height=100000, passwords={},
         crop_to_square=False, force_reprocess=False, loris_name=False):
@@ -170,7 +257,8 @@ def get_image_for_record(
     media = media.select_related('storage').filter(q)
 
     if not media:
-        return None
+        return get_image_for_record_from_viewers(
+            record, user, width, height, crop_to_square)
     for m in media:
         m.identify(lazy=True)
     media = sorted(media, key=cmp_to_key(_imgsizecmp), reverse=True)
@@ -202,52 +290,12 @@ def get_image_for_record(
             width = min(width, int(restrictions.get('width', width)))
             height = min(height, int(restrictions.get('height', height)))
         except ValueError:
-            logging.exception(
+            logger.exception(
                 'Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
     if ((m.width or 0) > width or (m.height or 0) > height or m.mimetype != 'image/jpeg' or
             not m.is_local() or force_reprocess):
-
-        def derivative_image(master, width, height):
-            if not master.file_exists():
-                logging.error(
-                    'Image derivative failed for media %d, '
-                    'cannot find file "%s"' % (
-                        master.id, master.get_absolute_file_path()
-                    )
-                )
-                return None, (None, None)
-            from PIL import ImageFile
-            ImageFile.MAXBLOCK = 16 * 1024 * 1024
-            # Import here to avoid circular reference
-            # TODO: need to move all these functions out of __init__.py
-            from .multimedia import get_image, overlay_image_with_mimetype_icon
-            try:
-                file = get_image(master)
-                image = Image.open(file)
-                if crop_to_square:
-                    w, h = image.size
-                    if w > h:
-                        image = image.crop(
-                            ((w - h) // 2, 0, (w - h) // 2 + h, h))
-                    elif w < h:
-                        image = image.crop(
-                            (0, (h - w) // 2, w, (h - w) // 2 + w))
-                image.thumbnail((width, height), Image.ANTIALIAS)
-                image = overlay_image_with_mimetype_icon(
-                    image, master.mimetype)
-                output = BytesIO()
-                if image.mode != "RGB":
-                    image = image.convert("RGB")
-                image.save(output, 'JPEG', quality=85, optimize=True)
-                return output.getvalue(), image.size
-            except Exception as e:
-                logging.exception(
-                    'Image derivative failed for media %d (%s)' %
-                    (master.id, e)
-                )
-                return None, (None, None)
 
         # See if a derivative already exists
         name = '%s-%sx%s%s.jpg' % (
@@ -255,9 +303,9 @@ def get_image_for_record(
         sp = m.storage.get_derivative_storage_path()
         if sp:
             path = os.path.join(sp, name)
-
             if not os.path.exists(path) or os.path.getsize(path) == 0:
-                output, (w, h) = derivative_image(m, width, height)
+                output = derivative_from_media(
+                    m, width, height, crop_to_square)
                 if output:
                     with open(path, 'wb') as f:
                         f.write(output)

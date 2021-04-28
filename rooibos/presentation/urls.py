@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from .views import manage, create, edit, duplicate, browse, password, \
-    record_usage, manifest, transparent_png, missing_png
+    record_usage, manifest, annotation_list, transparent_png, missing_png
 
 
 urlpatterns = [
@@ -31,6 +31,11 @@ urlpatterns = [
         r'^manifest/(?P<id>\d+)/(?P<name>[-\w]+)/$',
         manifest,
         name='presentation-manifest',
+    ),
+    url(
+        r'^annotation-list/(?P<id>\d+)/(?P<name>[-\w]+)/(?P<slide_id>\d+)/$',
+        annotation_list,
+        name='presentation-annotation-list',
     ),
     url(
         r'^blank-slide/(?P<extra>.*)$',

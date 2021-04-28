@@ -407,9 +407,10 @@ var Viewer = function (options) {
         viewer.mirador.eventEmitter.subscribe(
             'DESTROY_EVENTS.' + w.id,
             function () {
-                delay(updateTitles);
+                var f = function () { updateSlots(e, w); };
+                delay(f);
                 viewer.mirador.eventEmitter.subscribe(
-                    'currentCanvasIDUpdated.' + w.id, updateTitles
+                    'currentCanvasIDUpdated.' + w.id, f
                 );
             }
         );
@@ -425,6 +426,68 @@ var Viewer = function (options) {
             });
         }, 500);
     });
+
+
+    var getImageViewById = function (id) {
+        var result;
+        forEachWindowAndImageViewer(function (imageView) {
+            if (imageView.windowId === id) {
+                result = imageView;
+            }
+        });
+        return result;
+    };
+
+
+    this.mirador.eventEmitter.subscribe('ANNOTATIONS_LIST_UPDATED', function (event, data) {
+        if (data && data.annotationsList && data.annotationsList.length) {
+            var res = data.annotationsList[0].resource;
+            var url = res.format === 'text/html' ? res['@id'] : undefined;
+            var request = jQuery.ajax({
+                url: url,
+                dataType: 'html',
+                async: true
+            });
+            request.done(function (html) {
+                var imageView = getImageViewById(data.windowId);
+
+                var embeddedViewer = function () {
+                    imageView.elemAnno
+                        .addClass('active')
+                        .html('<div class="embedded-viewer">' + html + '</div>')
+                        .on('click', function () {
+                            imageView.elemAnno
+                                .removeClass('active').off('click').html('');
+                        });
+                };
+
+                if (imageView) {
+                    var button = jQuery('<a class="hud-control embedded-viewer-button" role="button" aria-label="Show additional media"><i class="material-icons">image</i></a>');
+                    button.on('click', embeddedViewer);
+                    imageView.hud.element
+                        .find('.mirador-canvas-metadata-controls')
+                        .append(button);
+                }
+            });
+        }
+    });
+
+    var updateSlots = function (event, data) {
+        updateTitles();
+        updateEmbeddedViewers(data);
+    };
+
+
+    var updateEmbeddedViewers = function (data) {
+        var imageView = getImageViewById(data.id);
+        if (imageView) {
+            imageView.elemAnno
+                .off('click').removeClass('active').html('');
+            imageView.hud.element
+                .find('.mirador-canvas-metadata-controls .embedded-viewer-button')
+                .remove();
+        }
+    };
 
 
     var updateTitles = function () {
