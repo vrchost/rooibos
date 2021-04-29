@@ -440,7 +440,8 @@ var Viewer = function (options) {
 
 
     this.mirador.eventEmitter.subscribe('ANNOTATIONS_LIST_UPDATED', function (event, data) {
-        if (data && data.annotationsList && data.annotationsList.length) {
+        if (data && data.annotationsList && data.annotationsList.length &&
+                data.annotationsList[0]) {
             var res = data.annotationsList[0].resource;
             var url = res.format === 'text/html' ? res['@id'] : undefined;
             var request = jQuery.ajax({
