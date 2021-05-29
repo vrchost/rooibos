@@ -259,17 +259,14 @@
 
 <li class="pagination">
     <div class="pagination">
-        {% if pagination_helper.has_previous %}
-            <a href="{{ limit_url }}page={{ pagination_helper.previous_page_number }}">previous</a>
+        Page {% for p, gap in nav_pages %}
+        {% if gap %}&hellip;{% endif %}
+        {% if p != nav_page_number %}
+            <a href="{{ limit_url }}page={{ p }}">{{ p }}</a>
+        {% else %}
+            {{ p }}
         {% endif %}
-
-        <span class="current">
-            Page {{ pagination_helper.number }} of {{ pagination_helper.paginator.num_pages }}
-        </span>
-
-        {% if pagination_helper.has_next %}
-            <a href="{{ limit_url }}page={{ pagination_helper.next_page_number }}">next</a>
-        {% endif %}
+        {% endfor %}
     </div>
 </li>
 
@@ -299,17 +296,14 @@ Your search query is invalid.  Please go back and correct your search parameters
 
 <div style="text-align: center; clear: both;">
     <div class="pagination">
-        {% if pagination_helper.has_previous %}
-            <a href="{{ limit_url }}page={{ pagination_helper.previous_page_number }}">previous</a>
+        Page {% for p, gap in nav_pages %}
+        {% if gap %}&hellip;{% endif %}
+        {% if p != nav_page_number %}
+            <a href="{{ limit_url }}page={{ p }}">{{ p }}</a>
+        {% else %}
+            {{ p }}
         {% endif %}
-
-        <span class="current">
-            Page {{ pagination_helper.number }} of {{ pagination_helper.paginator.num_pages }}
-        </span>
-
-        {% if pagination_helper.has_next %}
-            <a href="{{ limit_url }}page={{ pagination_helper.next_page_number }}">next</a>
-        {% endif %}
+        {% endfor %}
     </div>
 </div>
 
