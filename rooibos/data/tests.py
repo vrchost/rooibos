@@ -132,18 +132,22 @@ class GroupTestCase(TestCase):
         group_e = Collection.objects.create(title='E', name='e')
 
         group_c.children.add(group_d)
+        group_c.children.add(group_e)
         group_c.save()
 
         group_d.children.add(group_c)
         group_d.save()
 
-        self.assertEqual(1, len(group_c.all_child_collections))
-        self.assertEqual(1, len(group_d.all_child_collections))
+        self.assertEqual(2, len(group_c.all_child_collections))
+        self.assertEqual(2, len(group_d.all_child_collections))
+        self.assertEqual(1, len(group_c.all_parent_collections))
+        self.assertEqual(1, len(group_d.all_parent_collections))
 
         group_e.children.add(group_e)
         group_e.save()
 
         self.assertEqual(0, len(group_e.all_child_collections))
+        self.assertEqual(2, len(group_e.all_parent_collections))
 
     def test_sub_group_records(self):
         group_f = Collection.objects.create(title='F', name='f')

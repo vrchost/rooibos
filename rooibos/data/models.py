@@ -84,7 +84,7 @@ class Collection(models.Model):
                 if self != collection:
                     result += (collection,)
                 for g in collection.collection_set.all():
-                    if g != self and g not in parents:
+                    if g != self and g not in parents and g not in result:
                         todo += (g,)
             if not todo:
                 break
