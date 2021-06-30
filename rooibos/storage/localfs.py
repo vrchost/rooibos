@@ -33,7 +33,7 @@ class LocalFileSystemStorageSystem(FileSystemStorage):
                 (int(time() + 4 * 3600) // 300) * 300
             )[2:]  # cut off 0x prefix
             code = hashlib.md5(
-                valid_until + name + settings.SECRET_KEY[:10]
+                (valid_until + name + settings.SECRET_KEY[:10]).encode('utf-8')
             ).hexdigest()[:16]
             filename = '-'.join([valid_until, code, name])
             symlink = os.path.join(self.storage.deliverybase, filename)

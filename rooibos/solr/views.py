@@ -701,6 +701,26 @@ def search(request, id=None, name=None, selected=False, json=False):
     except EmptyPage:
         pagination_helper = paginator.page(paginator.num_pages)
 
+    nav_page_range = paginator.page_range
+    nav_page = pagination_helper
+    nav_pages = [
+        p for p in nav_page_range
+        if p <= 3
+        or p > nav_page.paginator.num_pages - 3
+        or abs(nav_page.number - p) < 3
+    ]
+    # fill gaps of one
+    nav_pages = [
+        p for p in nav_page_range
+        if p in nav_pages
+        or ((p - 1) in nav_pages and (p + 1) in nav_pages)
+    ]
+    # add gap flag
+    nav_pages = [
+        (p, i > 0 and nav_pages[i - 1] + 1 != p)
+        for i, p in enumerate(nav_pages)
+    ]
+
     return render(
         request,
         'results.html',
@@ -731,11 +751,12 @@ def search(request, id=None, name=None, selected=False, json=False):
                 available_federated_sources(request.user)),
             'federated_search': federated_search,
             'federated_search_query': federated_search_query,
-            'pagination_helper': pagination_helper,
             'has_record_created_criteria': any(
                 f.startswith('created:') for f in criteria),
             'has_last_modified_criteria': any(
                 f.startswith('modified:') for f in criteria),
+            'nav_pages': nav_pages,
+            'nav_page_number': nav_page.number,
         }
     )
 

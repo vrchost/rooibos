@@ -29,9 +29,14 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
     handle, filename = tempfile.mkstemp(outfile_ext)
     os.close(handle)
     try:
-        cmd = 'ffmpeg -i "%s" %s -y "%s"' % (infile, parameters, filename)
+        cmd = [
+            'ffmpeg',
+            '-i', infile,
+        ] + parameters.split() + [
+            '-y',
+            filename,
+        ]
         logging.debug('_run_ffmpeg: %s' % cmd)
-        cmd = [p.strip('"') for p in cmd.split()]
         ffmpeg = Popen(
             cmd,
             executable=settings.FFMPEG_EXECUTABLE,
@@ -39,8 +44,11 @@ def _run_ffmpeg(parameters, infile, outfile_ext):
             stderr=PIPE
         )
         (output, errors) = ffmpeg.communicate()
+        logging.debug('STDOUT %s' % output)
+        logging.debug('STDERR %s' % errors)
         file = open(filename, 'rb')
         result = BytesIO(file.read())
+        logging.debug('Read %d bytes' % len(result.getbuffer()))
         file.close()
         return result, output, errors
     except Exception as ex:

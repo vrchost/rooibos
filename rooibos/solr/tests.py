@@ -3,6 +3,9 @@ from rooibos.data.models import Collection, Record, Field, FieldSet, \
     FieldSetField, CollectionItem, standardfield
 from .views import _get_browse_fields, _get_facet_fields
 from .models import disconnect_signals
+from .functions import SolrIndex
+
+from functools import reduce
 
 
 disconnect_signals()
@@ -107,3 +110,36 @@ class FacetsCustomTestCase(TestCase):
         self.assertEqual(2, len(names))
         self.assertTrue('dc.title' in names)
         self.assertTrue('dc.creator' in names)
+
+
+class CircularCollectionsTestCase(TestCase):
+
+    def test_circular_collections(self):
+        group_c = Collection.objects.create(title='C', name='c')
+        group_d = Collection.objects.create(title='D', name='d')
+        group_e = Collection.objects.create(title='E', name='e')
+
+        group_c.children.add(group_d)
+        group_c.children.add(group_e)
+        group_c.save()
+
+        group_d.children.add(group_c)
+        group_d.save()
+
+        group_e.children.add(group_e)
+        group_e.save()
+
+        s = SolrIndex()
+        s._build_group_tree()
+
+        parents = [group_c.id]
+        self.assertEqual(2, len(list(reduce(lambda x, y: set(x) | set(y),
+                   [s.parent_groups[p] for p in parents], parents))))
+
+        parents = [group_d.id]
+        self.assertEqual(2, len(list(reduce(lambda x, y: set(x) | set(y),
+                   [s.parent_groups[p] for p in parents], parents))))
+
+        parents = [group_e.id]
+        self.assertEqual(3, len(list(reduce(lambda x, y: set(x) | set(y),
+                   [s.parent_groups[p] for p in parents], parents))))
