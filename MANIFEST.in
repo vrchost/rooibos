@@ -2,9 +2,7 @@ include *.txt
 include LICENSE
 include README.md
 include rooibos/RELEASE-VERSION
-recursive-include rooibos *.html *.css *.js *.json *.ico *.png *.jpg *.gif *.tif *.svg *.ttf *.woff *.woff2 *.eot *.otf *.ijmap *.yaml *.xml
-recursive-include rooibos/settings *
-recursive-include rooibos/solr *
+recursive-include rooibos *.py *.html *.css *.js *.json *.ico *.png *.jpg *.gif *.tif *.svg *.ttf *.woff *.woff2 *.eot *.otf *.ijmap *.yaml *.xml
 recursive-include rooibos/static *
 recursive-include rooibos/presentation/mirador_package *
 recursive-include rooibos/service-config *
