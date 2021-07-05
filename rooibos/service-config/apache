@@ -1,0 +1,38 @@
+<VirtualHost 127.0.0.1:8100>
+        UseCanonicalName Off
+
+        DocumentRoot /home/mdid/www
+
+        <Directory /home/mdid/www>
+            Order allow,deny
+            Allow from all
+            Require all granted
+        </Directory>
+
+        Alias /static/ "/opt/instances/mdid/static/"
+
+        ErrorLog /opt/instances/%(instance)s/log/apache2-error.log
+        CustomLog /opt/instances/mdid/log/apache2-access.log combined
+
+        <Location /shibboleth>
+                AuthType shibboleth
+                ShibRequireSession On
+                ShibUseHeaders On
+                ShibRequestSetting applicationId mdid
+                require valid-user
+        </Location>
+
+        ProxyPreserveHost On
+        <Location />
+            ProxyPass http://127.0.0.1:8001/
+            ProxyPassReverse http://127.0.0.1:8001/
+            RequestHeader set X-FORWARDED-PROTOCOL ssl
+            RequestHeader set X-FORWARDED-SSL on
+        </Location>
+
+        <Location /Shibboleth.sso>
+                SetHandler shib
+                ShibRequestSetting applicationId mdid
+                ProxyPass "!"
+        </Location>
+</VirtualHost>

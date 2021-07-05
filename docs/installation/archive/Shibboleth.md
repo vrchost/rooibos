@@ -1,6 +1,6 @@
-# Installation on Ubuntu Linux
+# Shibboleth Installation
 
-The following instructions are for CentOS 7, but
+The following instructions were originallyn written for CentOS 7, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
@@ -99,7 +99,7 @@ your MDID server:
 
 ## Configure MDID
 
-Add the following settings to your `local_settings.py` file:
+Add the following settings to your `config/settings.py` file:
 
 ```
 SHIB_ENABLED = True
@@ -114,13 +114,13 @@ SHIB_EMAIL = "mail"
 SHIB_FIRST_NAME = "givenName"
 SHIB_LAST_NAME = "sn"
 
-MIDDLEWARE_CLASSES += ('rooibos.shib_middleware.ShibMiddleware',)
+MIDDLEWARE_CLASSES += ('config.shib_middleware.ShibMiddleware',)
 
 TEMPLATES[0]['OPTIONS']['context_processors'] += \
-    ('rooibos.shib_contextprocessors.shibboleth',)
+    ('config.shib_contextprocessors.shibboleth',)
 ```
 
-Create the file `/opt/mdid/rooibos/shib_middleware.py` with the following
+Create the file `config/shib_middleware.py` with the following
 content, replacing `YOUR.DOMAIN.EDU` with the domain name used in email
 addresses (if applicable):
 ```
@@ -139,7 +139,7 @@ class ShibMiddleware(object):
         request.META['CUSTOM_LASTNAME'] = surname
 ```
 
-Create the file `/opt/mdid/rooibos/shib_contextprocessors.py` with the
+Create the file `config/shib_contextprocessors.py` with the
 following content:
 ```
 def shibboleth(request):

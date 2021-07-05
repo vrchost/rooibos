@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import string
 import sys
 import tempfile
@@ -42,18 +43,35 @@ def init():
         output.write(get_service_config('mdid') % defaults)
     with open(os.path.join('config', '__init__.py'), 'w') as output:
         pass
-    with open(os.path.join('service-config', 'nginx'), 'w') as output:
-        output.write(get_service_config('nginx') % defaults)
-    with open(os.path.join('service-config', 'supervisor'), 'w') as output:
-        output.write(get_service_config('supervisor') % defaults)
+    for service in os.listdir(SERVICE_CONFIG_DIR):
+        if os.path.isfile(service):
+            with open(os.path.join('service-config', service), 'w') as output:
+                output.write(get_service_config(service) % defaults)
+    if not os.path.exists(os.path.join('var', 'solr')):
+        shutil.copytree(
+            os.path.join(SERVICE_CONFIG_DIR, 'solr7'),
+            os.path.join('var', 'solr')
+        )
 
 
 def main():
     """Run MDID and Django admin commands"""
     python_path = os.getenv('PYTHONPATH')
     if not python_path:
-        os.putenv('PYTHONPATH', '.')
-        sys.path.append('.')
+        paths = {'.'}
+        # look for config directory above where this file is
+        path = os.path.dirname(__file__)
+        while not os.path.exists(os.path.join(path, 'config', 'settings.py')):
+            new_path = os.path.dirname(path)
+            if new_path == path:
+                # reached top, give up and just use current directory
+                path = '.'
+                break
+            path = new_path
+        paths.add(path)
+        os.putenv('PYTHONPATH', os.pathsep.join(paths))
+        for path in paths:
+            sys.path.append(path)
 
     if len(sys.argv) > 1 and sys.argv[1] == 'init':
         init()
@@ -66,5 +84,5 @@ def main():
             os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
         except ImportError:
             print('Could not find MDID settings, have you run "mdid init"?')
-    # sys.argv = ['django-admin'] + sys.argv[1:]
+            sys.exit(1)
     sys.exit(execute_from_command_line())

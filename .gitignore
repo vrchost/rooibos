@@ -13,3 +13,7 @@ mdid.egg-info/
 rooibos/static/cache/*
 temp/
 travis-build/
+scratch/
+local/static
+local/storage
+

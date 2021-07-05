@@ -1,6 +1,6 @@
 # Installation on Ubuntu Linux
 
-The following instructions are for Ubuntu Linux 18.04 LTS, but
+The following instructions are for Ubuntu Linux 20.04 LTS, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
@@ -14,9 +14,6 @@ apt-get install -y python3 python3-pip libjpeg-dev libfreetype6-dev \
     libldap2-dev libsasl2-dev unixodbc-dev memcached \
     rabbitmq-server supervisor ffmpeg openjdk-11-jre-headless \
     python3-virtualenv libssl-dev poppler-utils
-ln -s -f /usr/lib/x86_64-linux-gnu/libjpeg.so /usr/lib/
-ln -s -f /usr/lib/x86_64-linux-gnu/libz.so /usr/lib/
-ln -s -f /usr/lib/x86_64-linux-gnu/libfreetype.so /usr/lib/
 ```
 ### Enable nginx
 ```
@@ -24,18 +21,22 @@ rm -f /etc/nginx/sites-enabled/default
 update-rc.d nginx enable
 service nginx start
 ```
-### Configure MySQL
-Edit `/etc/mysql/my.cnf` and add the following lines to the `[mysqld]` section:
+### Create user account
 ```
-open-files-limit = 10000
-innodb_file_per_table = 1
-lower_case_table_names = 1
-character-set-server = utf8
-collation-server = utf8_unicode_ci
+adduser --disabled-password mdid
+mkdir -p /opt/mdid
+chown mdid:mdid /opt/mdid
 ```
-Reload the new configuration:
+### Create virtual environment
 ```
-service mysql restart
+sudo -iu mdid  # switch to mdid user
+cd /opt/mdid  # or another directory of your choice
+python3 -m virtualenv -p python3 venv
+source venv/bin/activate
+pip install mdid
+# or to install test version:
+# pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple mdid
+mdid init
 ```
 ### Install Solr
 MDID currently requires Solr 7; you may have to adjust the exact version as
@@ -43,26 +44,22 @@ available when running the following commands:
 ```
 mkdir -p /opt/solr_install /opt/solr
 cd /opt/solr_install
-wget https://archive.apache.org/dist/lucene/solr/7.7.2/solr-7.7.2.tgz
-tar xzf solr-7.7.2.tgz solr-7.7.2/bin/install_solr_service.sh --strip-components=2
-./install_solr_service.sh solr-7.7.2.tgz -f -d /opt/solr -i /opt/solr_install -n
+wget https://archive.apache.org/dist/lucene/solr/7.7.3/solr-7.7.3.tgz
+tar xzf solr-7.7.3.tgz solr-7.7.3/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-7.7.3.tgz -f -d /opt/solr -i /opt/solr_install -n
 sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
+ln -s /opt/mdid/var/solr /opt/solr/data/mdid
+chown -R solr:solr /opt/solr/data/mdid/
 service solr start
 ```
-
-Please take a moment to inspect all the settings in 
-`/etc/default/solr.in.sh`; sometimes there are discrepancies
-in the default paths in the configuration file versus the
-actual locations of the installation.
-
-## Install MDID
+### Configure MySQL
+```
+ln -s /opt/mdid/service-config/mysql /etc/mysql/mysql.conf.d/mdid.cnf
+service mysql restart
+```
 ### Create database
 Create a new MySQL database or restore an existing database from a previous
-MDID3 installation.
-
-_Note: When migration from MDID2, create a new MySQL database at this point._
-
-Adjust the database name, user name, and password as needed:
+MDID3 installation. Adjust the database name, user name, and password as needed:
 ```
 mysql -u root
 create database mdid character set utf8;
@@ -70,205 +67,44 @@ create user mdid@localhost identified by 'rooibos';
 grant all privileges on mdid.* to mdid@localhost;
 \q
 ```
-### Create user account
-```
-adduser --disabled-password mdid
-```
-### Move MDID into place
-```
-mkdir -p /opt/mdid
-chown mdid:mdid /opt/mdid
-```
-
-Run the following commands as the `mdid` user.
-```
-sudo -iu mdid
-cd /opt/mdid
-mkdir scratch storage log static
-```
-
-Extract the package so that the contents are placed in `/opt/mdid/rooibos`:
-
-    /opt/mdid/rooibos/requirements.txt
-    /opt/mdid/rooibos/rooibos
-    /opt/mdid/rooibos/rooibos_settings
-    ...
-
-This way, updated packages can be installed by just replacing
-`/opt/mdid/rooibos` with the new version.
-
-### Create virtual environment
-```
-sudo -iu mdid  # switch to mdid user
-cd /opt/mdid
-python3 -m virtualenv -p python3 venv
-source venv/bin/activate
-pip install --upgrade -r rooibos/requirements.txt
-```
 ### Configure MDID
-```
-sudo -iu mdid  # switch to mdid user
-cd /opt/mdid
-cp -r rooibos/rooibos_settings rooibos_settings
-cd /opt/mdid/rooibos_settings
-cp template.py local_settings.py
-```
-Edit `local_settings.py` and change settings as needed, including:
-
-```
-SOLR_URL = 'http://localhost:8983/solr/mdid'
-```
-
-Make sure to change `SECRET_KEY` to a unique value and do not share it!
+Edit `/opt/mdid/config/settings.py` and change the database and other settings 
+as needed. 
 
 Also, if possible, change the asterisk in `ALLOWED_HOSTS` to your server
 host name, if you know it, for example `['mdid.yourschool.edu']`.
 
-Run the following command to initialize static files:
+Run the following command to initialize static files and migrate the database
+to the latest version:
 ```
 sudo -iu mdid  # switch to mdid user
 source /opt/mdid/venv/bin/activate
-export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
-export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-django-admin collectstatic
-```
-### Create or update database schema
-```
-sudo -iu mdid  # switch to mdid user
-source /opt/mdid/venv/bin/activate
-export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
-export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-django-admin migrate
+mdid collectstatic
+mdid migrate
 ```
 ### Configure nginx
-Create a new file `/etc/nginx/sites-available/mdid` with the following content:
 ```
-server {
-    listen   0.0.0.0:80;
-    keepalive_timeout 70;
-
-    access_log /opt/mdid/log/access.log;
-    error_log /opt/mdid/log/error.log;
-
-    location /static/ {
-        alias /opt/mdid/static/;
-        expires 30d;
-    }
-
-    location / {
-        proxy_set_header X-Real-IP  $remote_addr;
-        proxy_set_header X-Forwarded-For $remote_addr;
-        proxy_set_header Host $host;
-        proxy_pass http://127.0.0.1:8001;
-    }
-    client_max_body_size 50M;
-}
+ln -s /opt/mdid/service-config/nginx /etc/nginx/sites-enabled/mdid
 ```
-Activate the site:
+Place your server SSL certificate files named `server.key` and `server.crt`
+in `/opt/mdid/ssl`, or generate some sample self-signed certificates for
+temporary use:
 ```
-cd /etc/nginx/sites-enabled
-ln -s -f ../sites-available/mdid mdid
+openssl genrsa -out /opt/mdid/ssl/server.key
+openssl req -new -key /opt/mdid/ssl/server.key -out /opt/mdid/ssl/server.csr
+openssl x509 -req -days 365 -in /opt/mdid/ssl/server.csr -signkey /opt/mdid/ssl/server.key -out /opt/mdid/ssl/server.crt
 ```
 ### Configure crontab
-Create a new file `/opt/mdid/wrapper.sh` with the following content:
-```
-#!/bin/bash
-set -x
-source /opt/mdid/venv/bin/activate
-export PYTHONPATH="/opt/mdid:/opt/mdid/rooibos"
-export DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-django-admin $@
-```
-Create a new file `/opt/mdid/crontab` with the following content:
-```
-0 * * * * /bin/bash /opt/mdid/wrapper.sh runjobs hourly
-0 4 * * * /bin/bash /opt/mdid/wrapper.sh runjobs daily
-0 5 * * 0 /bin/bash /opt/mdid/wrapper.sh runjobs weekly
-0 6 1 * * /bin/bash /opt/mdid/wrapper.sh runjobs monthly
-0 7 1 1 * /bin/bash /opt/mdid/wrapper.sh runjobs yearly
-```
-Activate the file:
 ```
 sudo -iu mdid  # switch to mdid user
-crontab /opt/mdid/crontab
-```
-### Configure solr
-```
-mkdir -p /opt/solr/data/mdid/conf \
-    /opt/solr/data/mdid/lang \
-    /opt/solr/data/mdid/data
-touch /opt/solr/data/mdid/core.properties \
-    /opt/solr/data/mdid/protwords.txt \
-    /opt/solr/data/mdid/stopwords.txt \
-    /opt/solr/data/mdid/synonyms.txt
-cp /opt/solr_install/solr/example/files/conf/lang/stopwords_en.txt \
-    /opt/solr/data/mdid/lang
-cp /opt/solr_install/solr/example/example-DIH/solr/db/conf/mapping-FoldToASCII.txt \
-    /opt/solr/data/mdid/conf
-cp /opt/mdid/rooibos/solr7/conf/* \
-    /opt/solr/data/mdid/conf
-chown -R solr:solr /opt/solr/data/mdid
-service solr restart
+crontab /opt/mdid/service-config/crontab
 ```
 ### Configure supervisor
 Create a new file `/etc/supervisor/conf.d/mdid.conf` with the following content:
 ```
-[group:mdid]
-programs=mdid_app,celery,celery_solr,celery_beat
-
-[program:mdid_app]
-environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/gunicorn -w 4 -b 127.0.0.1:8001 rooibos.wsgi:application
-user=mdid
-autostart=true
-autorestart=true
-stopasgroup=true
-redirect_stderr=true
-stdout_logfile=/opt/mdid/log/gunicorn.log
-
-[program:celery]
-environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default -l info -n worker@localhost
-user=mdid
-autostart=true
-autorestart=true
-stopasgroup=true
-redirect_stderr=true
-stdout_logfile=/opt/mdid/log/celery.log
-
-[program:celery_solr]
-environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/celery -A rooibos worker -Q celery-default-solr -l info -n worker-solr@localhost
-user=mdid
-autostart=true
-autorestart=true
-stopasgroup=true
-redirect_stderr=true
-stdout_logfile=/opt/mdid/log/celery-solr.log
-
-[program:celery_beat]
-environment=PYTHONPATH="/opt/mdid:/opt/mdid/rooibos",DJANGO_SETTINGS_MODULE="rooibos_settings.local_settings"
-command=/opt/mdid/venv/bin/celery -A rooibos beat -s /opt/mdid/celerybeat-schedule -l info --pidfile=/tmp/celerybeat.pid
-user=mdid
-autostart=true
-autorestart=true
-stopasgroup=true
-redirect_stderr=true
-stdout_logfile=/opt/mdid/log/celery-beat.log
-```
-Load the configuration:
-```
+ln -s /opt/mdid/service-config/supervisor /etc/supervisor/conf.d/mdid.conf
 supervisorctl reload
 ```
-## Further steps
-In a production environment, the following topics should be investigated:
-* Configure swap space
-* Firewall
-MDID only requires port 80 to be open (port 443 if SSL is configured)
-* SSL certificate for nginx
-* Log rotation for log files in `/opt/mdid/log`
-* Server and process monitoring
-* Backup
 
 ## Shibboleth support
 
@@ -276,10 +112,10 @@ To use Shibboleth for user authentication, follow the steps below to
 modify your working MDID installation to connect to your IdP.
 
 ### Install additional packages
-
+```
 apt-get install apache2 apache2-utils libapache2-mod-shib2 libshibsp-dev \
     libshibsp-doc opensaml2-tools shibboleth-sp2-schemas
-
+```
 ### Configure Shibboleth
 
 Configure your Shibboleth SP in `/etc/shibboleth/shibboleth2.xml`, including
@@ -294,77 +130,26 @@ Uncomment the attributes you want to use in `attribute-map.xml`.
 Modify `/etc/apache2/ports.conf` and change all instances of port 80 to
 port 8100.
 
-Enable apache modules:
+Enable apache modules and configure site:
 ```
 a2enmod rewrite
 a2enmod proxy
 a2enmod proxy_http
 a2enmod headers
-ln -s -f /etc/apache2/mods-available/shib2.load \
-    /etc/apache2/mods-enabled/shib2.load
+ln -s -f /etc/apache2/mods-available/shib2.load /etc/apache2/mods-enabled/shib2.load
+ln -s /opt/mdid/service-config/apache /etc/apache2/sites-enabled/999-mdid.conf
 apachectl restart
-```
-Add a new apache site configuration file at
-`/etc/apache2/sites-available/mdid.conf`, replacing `your.server.domain` with
-the appropriate value:
-```
-<VirtualHost 127.0.0.1:8100>
-        UseCanonicalName Off
-
-        ServerName https://your.server.domain
-
-        DocumentRoot /home/mdid/www
-
-        <Directory /home/mdid/www>
-            Order allow,deny
-            Allow from all
-            Require all granted
-        </Directory>
-
-        Alias /static/ "/opt/instances/mdid/static/"
-
-        ErrorLog /opt/instances/%(instance)s/log/apache2-error.log
-        CustomLog /opt/instances/mdid/log/apache2-access.log combined
-
-        <Location /shibboleth>
-                AuthType shibboleth
-                ShibRequireSession On
-                ShibUseHeaders On
-                ShibRequestSetting applicationId mdid
-                require valid-user
-        </Location>
-
-        ProxyPreserveHost On
-        <Location />
-            ProxyPass http://127.0.0.1:8001/
-            ProxyPassReverse http://127.0.0.1:8001/
-            RequestHeader set X-FORWARDED-PROTOCOL ssl
-            RequestHeader set X-FORWARDED-SSL on
-            RequestHeader set Host your.server.domain
-        </Location>
-
-        <Location /Shibboleth.sso>
-                SetHandler shib
-                ShibRequestSetting applicationId mdid
-                ProxyPass "!"
-        </Location>
-</VirtualHost>
-```
-Activate the file:
-```
-ln -s -f /etc/apache2/sites-available/mdid.conf \
-    /etc/apache2/sites-enabled/999-mdid.conf
 ```
 
 ### Configure nginx
 
-In your nginx site file `/etc/nginx/sites-available/mdid`, change the port
+In your nginx site file `/opt/mdid/service-config/nginx`, change the port
 number in the `proxy_pass` statement from 8001 to 8100.
 
 ### Configure MDID
 
-Add the following settings to your MDID configuration, changing attribute
-names as required:
+Add the following settings to your MDID configuration file at
+`/opt/mdid/config/settings.py`, changing attribute names as required:
 
 ```
 SHIB_ENABLED = True
