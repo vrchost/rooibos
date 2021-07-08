@@ -112,9 +112,12 @@ body {
     height: 90%;
 }
 
-.annotation-canvas .embedded-viewer > div {
-    width: 100%;
-    height: 100%;
+.annotation-canvas .embedded-viewer > div,
+.annotation-canvas .embedded-viewer .vjs-tech,
+.annotation-canvas .embedded-viewer .video-js
+{
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .mirador-container .mirador-canvas-metadata-controls .mirador-canvas-metadata-toggle {
