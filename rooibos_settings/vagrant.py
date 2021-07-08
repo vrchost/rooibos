@@ -60,3 +60,5 @@ EXPOSE_TO_CONTEXT = (
 )
 
 CSRF_COOKIE_HTTPONLY = True
+
+FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
