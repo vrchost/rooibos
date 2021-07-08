@@ -114,7 +114,8 @@ body {
 
 .annotation-canvas .embedded-viewer > div,
 .annotation-canvas .embedded-viewer .vjs-tech,
-.annotation-canvas .embedded-viewer .video-js
+.annotation-canvas .embedded-viewer .video-js,
+.annotation-canvas .embedded-viewer iframe#ytplayer
 {
     width: 100% !important;
     height: 100% !important;
