@@ -1,7 +1,8 @@
 from django.conf.urls import url
 from .views import manage_collections, manage_collection, record_preview, \
     record, record_delete, data_import_file, data_import, \
-    save_collection_visibility_preferences, collection_dump_view
+    save_collection_visibility_preferences, collection_dump_view, \
+    mirador_embedded, record_manifest
 
 
 urlpatterns = [
@@ -85,5 +86,15 @@ urlpatterns = [
         r'^collection/(?P<identifier>\d+)/(?P<name>[-\w]+)/dump/$',
         collection_dump_view,
         name='data-collection-dump'
+    ),
+    url(
+        r'^embed/(?P<identifier>\d+)/(?P<name>[-\w]+)/$',
+        mirador_embedded,
+        name='data-mirador-embedded'
+    ),
+    url(
+        r'^manifest/(?P<identifier>\d+)/(?P<name>[-\w]+)/$',
+        record_manifest,
+        name='data-record-manifest'
     ),
 ]

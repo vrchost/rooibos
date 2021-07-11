@@ -42,6 +42,10 @@ SOLR_RECORD_PRE_INDEXER = None
 PRIMARY_COLOR = "rgb(152, 189, 198)"
 SECONDARY_COLOR = "rgb(118, 147, 154)"
 
+STATIC_ROOT = '/Users/andreas/vrchost/mdid/local/static'
+
+
+DEBUG = True
 
 # Enter your Flickr API credentials
 # FLICKR_KEY = ''
@@ -122,6 +126,3 @@ SECONDARY_COLOR = "rgb(118, 147, 154)"
 
 # Adjust path to ffmpeg if necessary
 # FFMPEG_EXECUTABLE = '/usr/bin/ffmpeg'
-
-
-CORS_ORIGIN_ALLOW_ALL = True

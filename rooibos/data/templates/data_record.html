@@ -345,6 +345,12 @@ Please save the record before uploading media.
 
 {% if not fv_formset %}
 
+
+<iframe src="{% url 'data-mirador-embedded' record.id record.name %}"
+        width="700" height="600">
+</iframe>
+
+
 <form id="metadata-form" class="submit-on-select-change" action="." method="GET">
 Display metadata as: {{ fieldsetform.fieldset }}
 <input type="submit" value="Change" />
