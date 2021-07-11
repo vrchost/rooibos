@@ -125,3 +125,4 @@ SECONDARY_COLOR = "rgb(118, 147, 154)"
 
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_URLS_REGEX = '^(data/manifest|media/iiif)/.+$'
