@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.staticfiles import finders
 import os
 import tempfile
 import wave
@@ -177,7 +178,7 @@ def render_audio_waveform_by_mimetype(audiofile, mimetype):
     path = getattr(
         settings,
         'AUDIO_THUMBNAILS',
-        os.path.join(settings.STATIC_DIR, 'images', 'audiothumbs')
+        finders.find('images/audiothumbs')
     )
     mimetype = mimetype.split('/')[1]
     formatfile = os.path.join(path, mimetype + '.json')
