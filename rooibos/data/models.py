@@ -576,6 +576,14 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
         app_label = 'data'
 
+    @staticmethod
+    def get_by_name(name):
+        if '.' in name:
+            standard, name = name.split('.')
+            return Field.objects.get(name=name, standard__prefix=standard)
+        else:
+            return Field.objects.get(name=name)
+
 
 @transaction.atomic
 def get_system_field():
