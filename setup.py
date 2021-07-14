@@ -23,6 +23,7 @@ django-tagging==0.4.6
 django-contrib-comments==1.8.0
 Django==1.11.28
 django-celery-results==1.0.4
+django-cors-headers==2.5.3
 flake8
 flake8-docstrings
 flake8-todo
