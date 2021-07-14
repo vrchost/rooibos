@@ -20,7 +20,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.core.urlresolvers import reverse
 from .models import Record, Collection, FieldSet, FieldSetField, \
-    CollectionItem, Field, FieldValue
+    CollectionItem, Field, FieldValue, title_from_fieldvalues
 from .forms import FieldSetChoiceField, get_collection_visibility_prefs_form
 from .functions import set_collection_visibility_preferences, \
     apply_collection_visibility_preferences, collection_dump
@@ -32,9 +32,11 @@ from .spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
-from rooibos.util import safe_int, validate_next_link
+from rooibos.util import safe_int, validate_next_link, json_view
 from rooibos.middleware import HistoryMiddleware
 from .tasks import csvimport
+from rooibos.presentation.views import get_id, get_metadata, special_slide
+from ..storage.functions import get_media_for_record
 
 
 @login_required
@@ -966,3 +968,117 @@ def collection_dump_view(request, identifier, name):
         prefix=request.GET.get('prefix')
     )
     return response
+
+
+def mirador_embedded(request, identifier, name):
+    record = Record.get_or_404(identifier, request.user)
+    manifest_url = reverse(record_manifest, args=(identifier, name))
+    return render(request,
+        'data/mirador_embedded.html',
+        {
+            'record': record,
+            'manifest_url': manifest_url,
+        }
+    )
+
+
+def single_record_manifest(request, record, owner):
+
+    fieldvalues = record.get_fieldvalues(owner=owner)
+    title = title_from_fieldvalues(fieldvalues) or 'Untitled',
+    id = get_id(request, 'record', 'canvas', 'record%d' % record.id)
+    server = '//' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    image = server + record.get_image_url(
+        force_reprocess=False,
+        handler='storage-retrieve-iiif-image',
+    ).rstrip('/')
+
+    metadata = get_metadata(fieldvalues)
+
+    media = get_media_for_record(record, request.user)
+    if len(media):
+        media = media[0]
+        media.identify(lazy=True)
+        canvas_width = width = media.width or 1600
+        canvas_height = height = media.height or 1200
+    else:
+        width = height = None
+        canvas_width = 1200
+        canvas_height = 1200
+
+    while canvas_height < 1200 or canvas_width < 1200:
+        canvas_height *= 2
+        canvas_width *= 2
+
+    if width and height:
+
+        resource = {
+            '@id': image,
+            '@type': 'dctypes:Image',
+            'format': 'image/jpeg',
+            "height": height,
+            "width": width,
+            'service': {
+                '@context': 'http://iiif.io/api/image/2/context.json',
+                '@id': image,
+                'profile': 'http://iiif.io/api/image/2/level1.json'
+            }
+        }
+
+        images = [{
+            '@type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': resource,
+            'on': id,
+        }]
+
+    else:
+
+        return special_slide(
+            request,
+            kind='missing',
+            label='Missing image',
+            index=record.id,
+        )
+
+    result = {
+        '@id': id,
+        '@type': 'sc:Canvas',
+        'label': title,
+        "height": canvas_height,
+        "width": canvas_width,
+        'images': images,
+        'metadata': metadata,
+    }
+
+    return result
+
+
+@json_view
+def record_manifest(request, identifier, name):
+    record = Record.get_or_404(identifier, request.user)
+
+    owner = request.user if request.user.is_authenticated() else None
+
+    return {
+        '@context': reverse(
+            record_manifest, kwargs=dict(identifier=identifier, name=name)),
+        '@type': 'sc:Manifest',
+        '@id': get_id(request, 'record', 'record%d' % record.id, 'manifest'),
+        'label': record.title,
+        'metadata': [],
+        'description': '',
+        'sequences': [{
+            '@id': get_id(request, 'record', 'record%d' % record.id),
+            '@type': 'sc:Range',
+            'label': 'Record',
+            'canvases': [
+                single_record_manifest(
+                    request,
+                    record,
+                    owner,
+                )
+            ]
+        }],
+    }

@@ -32,4 +32,7 @@
     {% if record_in_current_presentation %}
     <img src="{% static 'images/inuse.png' %}" alt="In presentation" title="In presentation" class="inuse-icon" />
     {% endif %}
+    <a href="{% url 'data-record-manifest' record.id record.name %}" target="_blank">
+        <img src="{% static 'images/iiif.png' alt="IIIF Manifest" %}" class="iiif-icon" />
+    </a>
 </div>

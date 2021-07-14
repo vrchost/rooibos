@@ -1,0 +1,103 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'mirador/css/mirador-combined.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'presentation/viewer.css' %}">
+    <style>
+        .mirador-main-menu .change-layout {
+            display: none;
+        }
+    </style>
+    {% block stylesheets %}
+    {% endblock %}
+</head>
+
+<body>
+
+<div id="viewer"></div>
+
+<script src="{% static 'mirador/mirador.js' %}"></script>
+<script src="{% static 'presentation/viewer.js' %}"></script>
+
+<script>
+
+    var match = window.location.href.match(/[?&]canvas=([^&]+)/);
+    var canvas = match ? match[1] : undefined;
+
+    var returnUrl = '{{ return_url }}';
+
+    var options = {
+        id: "viewer",
+        buildPath: "{% static 'mirador/' %}",
+        data: [{
+            manifestUri: "{{ manifest_url }}",
+            location: "{{ record.title }}"
+        }],
+        windowObjects: [{
+            canvasID: canvas,
+            loadedManifest: "{{ manifest_url }}"
+        }],
+        workspacePanelSettings: {
+            'maxRows': 2,
+            'maxColumns': 2,
+            'preserveWindows': true
+        },
+        windowSettings: {
+            availableViews: ['ImageView'],
+            viewType: 'ImageView',
+            bottomPanelVisible: false,
+            sidePanel: false,
+            overlay: false,
+            canvasControls: {
+                annotations: false,
+                imageManipulation: {
+                    manipulationLayer: true,
+                    controls: {
+                        rotate: true,
+                        brightness: true,
+                        contrast: true,
+                        saturate: true,
+                        grayscale: true,
+                        invert: false,
+                        mirror: true
+                    }
+                },
+                canvasInfo: {
+                    canvasInfoLayer: true
+                }
+            },
+            displayLayout: false
+        },
+        mainMenuSettings: {
+            userButtons: [{
+                label: 'Title',
+                attributes: {
+                    id: 'toggle-viewer-title',
+                    href: 'javascript:window.viewer.toggleViewerTitle();'
+                },
+                iconClass: 'fa fa-header fa-lg fa-fw'
+            }, {
+                label: 'Font',
+                attributes: {
+                    id: 'toggle-annotation-font-size',
+                    href: 'javascript:window.viewer.toggleAnnotationFontSize();'
+                },
+                iconClass: 'fa fa-text-height fa-lg fa-fw'
+            }]
+        },
+        autoHideControls: false  // not functional anyway, we hide it ourselves
+    };
+
+    window.viewer = new Viewer(options);
+</script>
+
+{% block javascript %}
+{% endblock %}
+
+</body>
+</html>

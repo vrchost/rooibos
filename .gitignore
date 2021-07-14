@@ -14,6 +14,5 @@ rooibos/static/cache/*
 temp/
 travis-build/
 scratch/
-local/static
-local/storage
-
+log/
+local/

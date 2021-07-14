@@ -810,9 +810,9 @@
     <script type="text/javascript">
 
         // pop-up preview
-         var media_url = "{% url "storage-retrieve-image" 0 0 PREVIEW_WIDTH|default:640 PREVIEW_HEIGHT|default:480 %}";
-         var preview_width = {{ PREVIEW_WIDTH|default:640 }};
-         var preview_height = {{ PREVIEW_HEIGHT|default:480 }};
+         var mirador_url = "{% url "data-mirador-embedded" 0 0 %}";
+         var preview_width = {{ PREVIEW_WIDTH|default:800 }};
+         var preview_height = {{ PREVIEW_HEIGHT|default:600 }};
 
          function preview_dialog(a, img, prev, next, position, total) {
              var dialog = $("#preview-dialog");
@@ -822,9 +822,9 @@
              dialog.empty();
              var record_id = img.attr('data-record-id');
              var record_name = img.attr('data-record-name');
-             var url = media_url.replace(/\/0\/0\//, '/' + record_id + '/' + record_name + '/');
+             var url = mirador_url.replace(/\/0\/0\//, '/' + record_id + '/' + record_name + '/');
              var id = img.attr('id').substring(img.attr('id').lastIndexOf('-') + 1);
-             dialog.append($("<img />").attr('src', url));
+             dialog.append($("<iframe />").attr('src', url).attr('width', preview_width).attr('height', preview_height));
              var buttons = {
                      "Close": function() {
                          $(this).dialog("close");

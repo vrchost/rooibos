@@ -576,6 +576,14 @@ class Field(models.Model):
         order_with_respect_to = 'standard'
         app_label = 'data'
 
+    @staticmethod
+    def get_by_name(name):
+        if '.' in name:
+            standard, name = name.split('.')
+            return Field.objects.get(name=name, standard__prefix=standard)
+        else:
+            return Field.objects.get(name=name)
+
 
 @transaction.atomic
 def get_system_field():
@@ -789,6 +797,14 @@ class RemoteMetadata(models.Model):
     url = models.CharField(max_length=255)
     mapping_url = models.CharField(max_length=255)
     last_modified = models.CharField(max_length=100, null=True, blank=True)
+
+
+def title_from_fieldvalues(fieldvalues):
+    titlefields = standardfield_ids('title', equiv=True)
+    for fv in fieldvalues:
+        if fv.field_id in titlefields:
+            return fv.value
+    return None
 
 
 def create_data_fixtures(sender, *args, **kwargs):

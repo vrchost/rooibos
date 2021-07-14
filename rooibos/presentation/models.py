@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, \
-    standardfield_ids
+    standardfield_ids, title_from_fieldvalues
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
 from rooibos.access.functions import filter_by_access
@@ -145,16 +145,9 @@ class PresentationItem(models.Model):
     type = models.CharField(max_length=16, blank=True)
     order = models.SmallIntegerField()
 
-    def title_from_fieldvalues(self, fieldvalues):
-        titlefields = standardfield_ids('title', equiv=True)
-        for fv in fieldvalues:
-            if fv.field_id in titlefields:
-                return fv.value
-        return None
-
     @property
     def title(self):
-        return self.title_from_fieldvalues(self.get_fieldvalues())
+        return title_from_fieldvalues(self.get_fieldvalues())
 
     def _annotation_filter(self):
         return dict(

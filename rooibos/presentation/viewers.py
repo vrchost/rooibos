@@ -456,7 +456,7 @@ class PackageFilesViewer(Viewer):
         items = presentation.items.filter(hidden=False)
 
         tempfile = NamedTemporaryFile(suffix='.zip')
-        output = zipfile.ZipFile(tempfile, 'w')
+        output = zipfile.ZipFile(tempfile, 'w', allowZip64=True)
 
         tempjsonfile = NamedTemporaryFile(suffix='.json')
         metadata = presentation_detail(request, presentation.id)
