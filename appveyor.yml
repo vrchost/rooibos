@@ -22,4 +22,4 @@ test_script:
   - django-admin test
 
 after_test:
-  - twine -u __token__ -p $TWINE_PWD dist/mdid*.whl
+  - twine upload -u __token__ -p $TWINE_PWD dist/mdid*.whl
