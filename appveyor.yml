@@ -5,7 +5,9 @@ environment:
   PYTHON: 3.6
   DJANGO_SETTINGS_MODULE: rooibos.settings.test
   PYTHONPATH: .
-  TWINE_PWD:
+  TWINE_REPOSITORY: testpypi
+  TWINE_USERNAME: __token__
+  TWINE_PASSWORD:
     secure: OROGS4klyQKNAlNz7wtLTG28KjvQpKkHVWBWfAG9oOdPlmxrP+ARpEDMH9TD+7igCxG0LAB3PZVCdBkIazZe9KtIgGTwkyobc4Rl7Dtm3e0DVw7brfc18ORf4iYs6ppiZsZsdBU+2z+gc4ob3agBbpdLQDq4LZZsOviE34xxMQ6iLU+F0Zpk0hap5v5CqnwYZxMFJwSDhjOmO13gWJZlwJYinvKazQMlZAYasojLVU0skRG+9MTYLvWpWZKRsm+Z
 
 install:
@@ -22,4 +24,4 @@ test_script:
   - django-admin test
 
 after_test:
-  - twine upload -u __token__ -p $TWINE_PWD dist/mdid*.whl
+  - twine upload dist/mdid*.whl
