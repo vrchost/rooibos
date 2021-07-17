@@ -24,4 +24,16 @@ test_script:
   - django-admin test
 
 after_test:
-  - twine upload dist/mdid*.whl
+  - if [ "$APPVEYOR_REPO_BRANCH" == "master" ]; then twine upload dist/mdid*.whl; fi
+
+artifacts:
+  - path: dist/mdid*.whl
+
+deploy:
+  provider: S3
+  access_key_id: AKIAJTFTACX5PEZXKG3Q
+  secret_access_key:
+    secure: rQGYSegd6l2CN6gcS/vOptJ7Q7v6rLjdlDCLm1MKns3StSTrAHjoIbXRIMuZymoM
+  bucket: vrchost-jenkins
+  set_public: true
+  folder: packages/$APPVEYOR_REPO_BRANCH
