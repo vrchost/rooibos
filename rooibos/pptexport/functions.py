@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from django.conf import settings
 from pptx import Presentation
 from pptx.dml.color import RGBColor
@@ -75,7 +75,7 @@ class PowerPointGenerator:
             slide = pptx_file.slides.add_slide(slide_layout)
             self.add_metadata_to_textframe(
                 slide.notes_slide.notes_text_frame, values)
-            if titles:
+            if titles and item.title:
                 tf = slide.shapes.title.text_frame
                 p = tf.paragraphs[0]
                 p.font.color.rgb = self.text_color
@@ -116,7 +116,10 @@ class PowerPointGenerator:
                     )
 
     def insert_image(self, slide, image, left, top, width, height):
-        iwidth, iheight = Image.open(image).size
+        try:
+            iwidth, iheight = Image.open(image).size
+        except UnidentifiedImageError:
+            return False
         ratio = iwidth / iheight
         if ratio > (width / height):
             # need to center vertically
@@ -128,6 +131,7 @@ class PowerPointGenerator:
             space = (width - height * ratio) / 2
             slide.shapes.add_picture(
                 image, left + space, top, width - space * 2, height)
+        return True
 
     def insert_metadata(self, slide, values, left, top, width, height):
         box = slide.shapes.add_textbox(left, top, width, height)
