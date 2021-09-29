@@ -12,6 +12,7 @@ from django.test.client import Client
 import json as simplejson
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http.response import Http404
 from rooibos.data.models import Collection, Record, CollectionItem, \
     FieldValue, standardfield
 from rooibos.storage.models import Media, ProxyUrl, Storage, TrustedSubnet
@@ -185,18 +186,18 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
 
         # user2 has no access to storage or collection,
         # so should not get result
-        result = get_image_for_record(
-            self.record, width=400, height=400, user=user2)
-        self.assertEqual(None, result)
+        with self.assertRaises(Http404):
+            result = get_image_for_record(
+                self.record, width=400, height=400, user=user2)
 
         # give access to presentation
         AccessControl.objects.create(
             content_object=presentation, user=user2, read=True)
 
         # user2 has no access to storage yet, so still should not get result
-        result = get_image_for_record(
-            self.record, width=400, height=400, user=user2)
-        self.assertEqual(None, result)
+        with self.assertRaises(Http404):
+            result = get_image_for_record(
+                self.record, width=400, height=400, user=user2)
 
         # give user2 access to storage
         user2_storage_acl = AccessControl.objects.create(
@@ -222,9 +223,9 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
 
         # user2 has not provided presentation password,
         # so should not get result
-        result = get_image_for_record(
-            self.record, width=400, height=400, user=user2)
-        self.assertEqual(None, result)
+        with self.assertRaises(Http404):
+            result = get_image_for_record(
+                self.record, width=400, height=400, user=user2)
 
         # with presentation password, image should be returned
         result = get_image_for_record(

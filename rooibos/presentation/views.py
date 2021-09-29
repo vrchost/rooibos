@@ -26,11 +26,18 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view, validate_next_link
 from rooibos.util.markdown import markdown
-from rooibos.storage.functions import get_media_for_record
+from rooibos.storage.functions import get_media_for_record, get_image_for_record
 from .models import Presentation, PresentationItem
 from .functions import duplicate_presentation
 import base64
 import os
+import logging
+from PIL import Image
+
+from ..viewers import get_viewers_for_object
+
+
+logger = logging.getLogger(__name__)
 
 
 @login_required
@@ -689,13 +696,24 @@ def slide_manifest(request, slide, owner, offline=False):
         metadata.insert(0, dict(label='Annotation', value=slide.annotation))
 
     passwords = request.session.get('passwords', dict())
-    media = get_media_for_record(slide.record, request.user, passwords)
-    if len(media):
-        media = media[0]
-        media.identify(lazy=True)
-        canvas_width = width = media.width or 1600
-        canvas_height = height = media.height or 1200
-    else:
+
+    image_path = get_image_for_record(
+        slide.record, user=request.user, passwords=passwords)
+
+    width = height = None
+
+    if image_path:
+        try:
+            width, height = Image.open(image_path).size
+            canvas_width = width
+            canvas_height = height
+        except:
+            logger.warning(
+                'Could not determine image size for "%s"' % image_path,
+                exc_info=True
+            )
+
+    if width is None or height is None:
         width = height = None
         canvas_width = 1200
         canvas_height = 1200
@@ -703,6 +721,8 @@ def slide_manifest(request, slide, owner, offline=False):
     while canvas_height < 1200 or canvas_width < 1200:
         canvas_height *= 2
         canvas_width *= 2
+
+    other_content = []
 
     if width and height:
 
@@ -720,6 +740,19 @@ def slide_manifest(request, slide, owner, offline=False):
                 '@id': image,
                 'profile': 'http://iiif.io/api/image/2/level1.json'
             }
+
+            viewers = list(get_viewers_for_object(slide.record, request))
+            if len(viewers) > 0:
+                other_content.append({
+                    '@id': reverse(
+                        'presentation-annotation-list',
+                        kwargs={
+                            'id': slide.presentation.id,
+                            'name': slide.presentation.name,
+                            'slide_id': slide.id,
+                        }),
+                    '@type': 'sc:AnnotationList',
+                })
 
         images = [{
             '@type': 'oa:Annotation',
@@ -745,6 +778,7 @@ def slide_manifest(request, slide, owner, offline=False):
         "height": canvas_height,
         "width": canvas_width,
         'images': images,
+        'otherContent': other_content,
         'metadata': metadata,
     }
 
@@ -843,6 +877,43 @@ def raw_manifest(request, id, name, offline=False):
 
 
 manifest = json_view(raw_manifest)
+
+
+@json_view
+def annotation_list(request, id, name, slide_id):
+    p = Presentation.get_by_id_for_request(id, request)
+    if not p:
+        return dict(result='error')
+
+    owner = request.user if request.user.is_authenticated() else None
+    slides = p.items.select_related('record').filter(hidden=False, id=slide_id)
+
+    resources = []
+
+    if slides:
+        record = slides[0].record
+        viewers = list(get_viewers_for_object(record, request))
+        for viewer in viewers:
+            resources.append({
+                '@type': 'oa:Annotation',
+                'motivation': 'sc:painting',
+                'resource': {
+                    '@id': viewer.url('embed'),
+                    '@type': 'dctypes:Text',
+                    'format': 'text/html',
+                },
+            })
+
+    return {
+        '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
+        '@type': 'sc:Manifest',
+        '@id': get_id(
+            request, 'presentation', 'presentation%d' % p.id,
+            'annotation-list', 'slide%s' % slide_id,
+        ),
+        'resources': resources,
+        'on': get_id(request, 'slide', 'canvas', 'slide%s' % slide_id)
+    }
 
 
 def transparent_png(request, extra):

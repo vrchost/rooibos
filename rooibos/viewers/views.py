@@ -1,7 +1,7 @@
 from .functions import get_viewer_by_name
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
-from django.http import Http404, HttpResponseForbidden
+from django.http import Http404, HttpResponseForbidden, HttpResponse
 from django.conf import settings
 from django.utils.http import urlencode
 
@@ -63,6 +63,26 @@ def viewer_script(request, viewer, objid):
 
     try:
         return viewer.embed_script(request)
+    except Http404:
+        if not request.user.is_authenticated():
+            return HttpResponseForbidden()
+        raise
+
+
+def viewer_embed(request, viewer, objid):
+
+    viewer_cls = get_viewer_by_name(viewer)
+    if not viewer_cls:
+        raise Http404()
+    viewer = viewer_cls(None, request, objid=objid)
+    if not viewer:
+        if not request.user.is_authenticated():
+            return HttpResponseForbidden()
+        else:
+            raise Http404()
+
+    try:
+        return HttpResponse(viewer.embed_code(request))
     except Http404:
         if not request.user.is_authenticated():
             return HttpResponseForbidden()
