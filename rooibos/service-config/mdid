@@ -1,7 +1,10 @@
 import os
+import sys
 from rooibos.settings.base import *
 
 install_dir = '%(install_dir)s'
+
+sys.path.append(os.path.join(install_dir, 'lib'))
 
 SECRET_KEY = '%(secret_key)s'
 

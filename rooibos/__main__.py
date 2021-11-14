@@ -9,7 +9,8 @@ from django.core.management import execute_from_command_line
 
 
 DIRECTORIES = 'var/scratch var/log var/static var/etc var/tmp ' \
-              'static templates config ssl service-config'.split()
+              'static templates ssl service-config'.split()
+CODE_DIRECTORIES = 'config lib'.split()
 SERVICE_CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'service-config')
 
 
@@ -33,16 +34,17 @@ def get_defaults():
 def init():
     """Initializes an MDID instance in the current directory"""
     print("Initializing")
-    for directory in DIRECTORIES:
+    for directory in DIRECTORIES + CODE_DIRECTORIES:
         os.makedirs(os.path.join(*directory.split('/')), exist_ok=True)
+    for code_directory in CODE_DIRECTORIES:
+        with open(os.path.join(*code_directory.split('/'), '__init__.py'), 'w') as output:
+            pass
     defaults = get_defaults()
     settings_file = os.path.join('config', 'settings.py')
     if os.path.exists(settings_file):
         settings_file += '.template'
     with open(settings_file, 'w') as output:
         output.write(get_service_config('mdid') % defaults)
-    with open(os.path.join('config', '__init__.py'), 'w') as output:
-        pass
     for service in os.listdir(SERVICE_CONFIG_DIR):
         if os.path.isfile(service):
             with open(os.path.join('service-config', service), 'w') as output:
