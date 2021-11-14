@@ -8,7 +8,7 @@ import tempfile
 from django.core.management import execute_from_command_line
 
 
-DIRECTORIES = 'var/scratch var/log var/static var/etc var/tmp ' \
+DIRECTORIES = 'var/scratch var/log var/static var/etc var/tmp var/www ' \
               'static templates ssl service-config'.split()
 CODE_DIRECTORIES = 'config lib'.split()
 SERVICE_CONFIG_DIR = os.path.join(os.path.dirname(__file__), 'service-config')
@@ -37,7 +37,7 @@ def init():
     for directory in DIRECTORIES + CODE_DIRECTORIES:
         os.makedirs(os.path.join(*directory.split('/')), exist_ok=True)
     for code_directory in CODE_DIRECTORIES:
-        with open(os.path.join(*code_directory.split('/'), '__init__.py'), 'w') as output:
+        with open(os.path.join(*code_directory.split('/'), '__init__.py'), 'w'):
             pass
     defaults = get_defaults()
     settings_file = os.path.join('config', 'settings.py')
@@ -46,7 +46,7 @@ def init():
     with open(settings_file, 'w') as output:
         output.write(get_service_config('mdid') % defaults)
     for service in os.listdir(SERVICE_CONFIG_DIR):
-        if os.path.isfile(service):
+        if os.path.isfile(os.path.join(SERVICE_CONFIG_DIR, service)) and service != 'mdid':
             with open(os.path.join('service-config', service), 'w') as output:
                 output.write(get_service_config(service) % defaults)
     if not os.path.exists(os.path.join('var', 'solr')):

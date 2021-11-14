@@ -1,18 +1,18 @@
 <VirtualHost 127.0.0.1:8100>
         UseCanonicalName Off
 
-        DocumentRoot /home/mdid/www
+        DocumentRoot %(install_dir)s/var/www
 
-        <Directory /home/mdid/www>
+        <Directory %(install_dir)s/var/www>
             Order allow,deny
             Allow from all
             Require all granted
         </Directory>
 
-        Alias /static/ "/opt/instances/mdid/static/"
+        Alias /static/ "%(install_dir)s/static/"
 
-        ErrorLog /opt/instances/%(instance)s/log/apache2-error.log
-        CustomLog /opt/instances/mdid/log/apache2-access.log combined
+        ErrorLog %(install_dir)s/var/log/apache2-error.log
+        CustomLog %(install_dir)s/var/log/apache2-access.log combined
 
         <Location /shibboleth>
                 AuthType shibboleth
