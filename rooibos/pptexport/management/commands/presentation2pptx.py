@@ -71,6 +71,12 @@ class Command(BaseCommand):
             action='store_true',
             help='Add slide metadata'
         )
+        parser.add_argument(
+            '--skip-existing',
+            dest='skip_existing',
+            action='store_true',
+            help='Skip existing files'
+        )
 
     def get_admin_user(self):
 
@@ -102,7 +108,7 @@ class Command(BaseCommand):
 
         if options.get('id'):
             presentations = presentations.filter(id=options['id'])
-        if options.get('days') > 0:
+        if (options.get('days') or 0) > 0:
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)
@@ -120,14 +126,18 @@ class Command(BaseCommand):
 
         for presentation in presentations:
             filename = self.get_filename(presentation)
-            print(filename)
+            print(filename, end='')
             if not options.get('list'):
-                g = PowerPointGenerator(presentation, admin)
                 if options.get('output_dir'):
                     filename = os.path.join(options['output_dir'], filename)
+                if options.get('skip_existing') and os.path.exists(filename):
+                    print(' exists, skipping')
+                    continue
+                g = PowerPointGenerator(presentation, admin)
                 g.generate(
                     filename,
                     options.get('color'),
                     options.get('titles'),
                     options.get('metadata'),
                 )
+                print()
