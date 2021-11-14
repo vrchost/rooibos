@@ -1,9 +1,6 @@
 class Middleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if 'master_template' in view_kwargs:
-            request.master_template = view_kwargs['master_template']
-            del view_kwargs['master_template']
         return None
 
     def process_request(self, request):

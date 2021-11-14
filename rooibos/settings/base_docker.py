@@ -264,9 +264,6 @@ PDF_PAGESIZE = 'letter'  # 'A4'
 
 SHOW_FRONTPAGE_LOGIN = "yes"
 
-MASTER_TEMPLATE = 'master_root.html'
-
-
 ARTSTOR_GATEWAY = None
 
 
@@ -353,7 +350,6 @@ EXPOSE_TO_CONTEXT = (
     'COPYRIGHT',
     'TITLE',
     'SHOW_FRONTPAGE_LOGIN',
-    'MASTER_TEMPLATE',
     'PREVIEW_WIDTH',
     'PREVIEW_HEIGHT',
     'SHOW_TERMS',
@@ -454,9 +450,6 @@ AUTHENTICATION_BACKENDS = (
     'rooibos.auth.mailauth.ImapAuthenticationBackend',
     'rooibos.auth.mailauth.PopAuthenticationBackend',
 )
-
-
-MASTER_TEMPLATE = 'master_root.html'
 
 
 RECORD_DEFAULT_FIELDSET = 'dc'

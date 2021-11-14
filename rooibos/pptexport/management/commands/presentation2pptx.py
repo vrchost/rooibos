@@ -102,7 +102,7 @@ class Command(BaseCommand):
 
         if options.get('id'):
             presentations = presentations.filter(id=options['id'])
-        if options.get('days', 0) > 0:
+        if options.get('days') > 0:
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)

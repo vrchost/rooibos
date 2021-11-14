@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models.query import Q
 from django.http import Http404
 from django.shortcuts import render
 from rooibos.access.functions import \
@@ -177,11 +178,19 @@ def gifviewer(obj, request, objid=None):
     return GifViewer(obj, request.user) if media else None
 
 
-def _get_youtube_links(record):
-    return FieldValue.objects.filter(
-        record=record,
-        index_value__startswith='https://www.youtube.com/watch?v=',
-    ).values('value')
+def _get_youtube_ids(record):
+    return [
+        url.split('=')[-1].split('/')[-1]
+        for url in FieldValue.objects.filter(
+            Q(index_value__startswith='https://www.youtube.com/watch?v=') |
+            Q(index_value__startswith='https://youtu.be/'),
+            record=record,
+        ).exclude(value__contains=' ').values_list('value', flat=True)
+    ]
+
+
+def _get_youtube_embed_url(video):
+    return 'https://www.youtube.com/embed/%s' % video
 
 
 class YoutubeViewer(Viewer):
@@ -194,7 +203,7 @@ class YoutubeViewer(Viewer):
 
         divid = request.GET.get('id', 'unknown')
 
-        links = list(_get_youtube_links(self.obj))
+        links = list(_get_youtube_ids(self.obj))
         if not links:
             raise Http404()
 
@@ -204,20 +213,16 @@ class YoutubeViewer(Viewer):
             {
                 'record': self.obj,
                 'anchor_id': divid,
-                'embed_url': links[0]['value'].replace('watch?v=', 'embed/'),
+                'embed_url': _get_youtube_embed_url(links[0]),
             }
         )
 
     def get_image(self):
-        links = list(_get_youtube_links(self.obj))
+        links = list(_get_youtube_ids(self.obj))
         if not links:
             logger.debug('no links found')
             return
-        parts = links[0]['value'].split('watch?v=')
-        if len(parts) != 2:
-            logger.debug('could not parse link %r' % links)
-            return
-        url = 'https://img.youtube.com/vi/%s/0.jpg' % parts[1]
+        url = 'https://img.youtube.com/vi/%s/0.jpg' % links[0]
         try:
             return requests.get(url).content
         except requests.exceptions.RequestException:
@@ -238,7 +243,7 @@ def youtubeviewer(obj, request, objid=None):
         except Http404:
             return None
     return YoutubeViewer(obj, request.user) \
-        if _get_youtube_links(obj).count() else None
+        if _get_youtube_ids(obj) else None
 
 
 def _get_vimeo_links(record):
