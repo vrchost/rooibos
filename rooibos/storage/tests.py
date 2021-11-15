@@ -512,7 +512,6 @@ class ProtectedContentDownloadTestCase(TestCase):
         self.assertEqual(b'hello world', b''.join(response.streaming_content))
 
         # now logged in
-        print('\n\n' + self.media.get_absolute_url() + '\n\n')
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertEqual(b'hello world', b''.join(response.streaming_content))
