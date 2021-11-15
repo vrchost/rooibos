@@ -28,7 +28,7 @@ class Activity(models.Model):
         return self.user_field
 
     def _user_set(self, value):
-        self.user_field = value if value and not value.is_anonymous() else None
+        self.user_field = value if value and not value.is_anonymous else None
     user = property(_user_get, _user_set)
 
     # Override data property to take a dict() object

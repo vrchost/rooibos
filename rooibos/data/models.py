@@ -185,7 +185,7 @@ class Record(models.Model):
                    collectionitem__hidden=False)
             mq = Q(collectionitem__collection__in=writable,
                    owner=None)
-            oq = Q(owner=user) if user and not user.is_anonymous() else Q()
+            oq = Q(owner=user) if user and not user.is_anonymous else Q()
             records = records.filter(cq | mq | oq)
             checked = records.filter(
                 id__in=to_check).values_list('id', flat=True)

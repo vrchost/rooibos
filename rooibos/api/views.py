@@ -185,7 +185,7 @@ def presentations_for_current_user(request):
             for tag in Tag.objects.get_for_object(ownedwrapper)
         ]
 
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         return dict(presentations=[])
     presentations = Presentation.objects \
         .filter(owner=request.user).order_by('title')

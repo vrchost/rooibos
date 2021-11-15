@@ -35,7 +35,7 @@ def get_effective_permissions_and_restrictions(
     model_type = ContentType.objects.get_for_model(model_instance)
 
     def calculate():
-        if not user.is_anonymous():
+        if not user.is_anonymous:
             q = Q(user=user) | Q(
                 usergroup__in=ExtendedGroup.objects.get_extra_groups(
                     user, assume_authenticated)
@@ -112,13 +112,13 @@ def filter_by_access(user, queryset, read=True, write=False, manage=False):
     model_type = ContentType.objects.get_for_model(queryset.model)
     usergroups_q = Q(
         usergroup__in=ExtendedGroup.objects.get_extra_groups(user))
-    if not user.is_anonymous():
+    if not user.is_anonymous:
         usergroups_q = usergroups_q | Q(usergroup__in=user.groups.all())
     user_q = Q(user__isnull=True, usergroup__isnull=True) \
-        if user.is_anonymous() else Q(user=user)
+        if user.is_anonymous else Q(user=user)
     owner_q = Q(owner=user) \
         if 'owner' in (f.name for f in queryset.model._meta.fields) \
-           and not user.is_anonymous() else None
+           and not user.is_anonymous else None
 
     def build_query(**kwargs):
         (field, check) = kwargs.popitem()
