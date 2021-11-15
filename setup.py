@@ -7,7 +7,7 @@ attrs>=17.4.0
 b2sdk==0.1.6
 beautifulsoup4
 bleach==3.1.4
-bleach-whitelist==0.0.10
+bleach-allowlist==1.0.3
 boto
 Celery==4.2.1
 configobj>=4.7.2,<=5.0.0

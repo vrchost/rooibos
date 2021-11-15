@@ -1,6 +1,6 @@
 import bleach as bleach
 import markdown as py_markdown
-from bleach_whitelist import markdown_tags, markdown_attrs
+from bleach_allowlist import markdown_tags, markdown_attrs
 
 
 # allow link targets
