@@ -53,6 +53,7 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
 
         content = media.load_file()
         self.assertEqual(b'hello world', content.read())
+        content.close()
 
         media.delete()
 
