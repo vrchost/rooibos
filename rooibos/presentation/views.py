@@ -327,10 +327,10 @@ def manage(request):
 
 def browse(request, manage=False):
 
-    if manage and not request.user.is_authenticated():
+    if manage and not request.user.is_authenticated:
         raise Http404()
 
-    if request.user.is_authenticated() and not list(request.GET.items()) and \
+    if request.user.is_authenticated and not list(request.GET.items()) and \
             not getattr(settings, 'FORGET_PRESENTATION_BROWSE_FILTER', False):
         # retrieve past settings
         qs = load_settings(
@@ -374,7 +374,7 @@ def browse(request, manage=False):
     elif 'ut' in get:
         del get['ut']
 
-    if untagged and request.user.is_authenticated():
+    if untagged and request.user.is_authenticated:
         qs = TaggedItem.objects.filter(
             content_type=OwnedWrapper.t(OwnedWrapper)
         ).values('object_id').distinct()
@@ -504,7 +504,7 @@ def browse(request, manage=False):
     else:
         tags = ()
 
-    if presentations and request.user.is_authenticated():
+    if presentations and request.user.is_authenticated:
         usertags = Tag.objects.usage_for_queryset(
             OwnedWrapper.objects.filter(
                 user=request.user,
@@ -520,7 +520,7 @@ def browse(request, manage=False):
         .annotate(presentations=Count('presentation')) \
         .order_by('last_name', 'first_name')
 
-    if request.user.is_authenticated() and presentations:
+    if request.user.is_authenticated and presentations:
         # save current settings
         querystring = request.GET.urlencode()
         store_settings(
@@ -839,7 +839,7 @@ def raw_manifest(request, id, name, offline=False):
     if not p:
         return dict(result='error')
 
-    owner = request.user if request.user.is_authenticated() else None
+    owner = request.user if request.user.is_authenticated else None
     slides = p.items.select_related('record').filter(hidden=False)
 
     return {
@@ -885,7 +885,7 @@ def annotation_list(request, id, name, slide_id):
     if not p:
         return dict(result='error')
 
-    owner = request.user if request.user.is_authenticated() else None
+    owner = request.user if request.user.is_authenticated else None
     slides = p.items.select_related('record').filter(hidden=False, id=slide_id)
 
     resources = []

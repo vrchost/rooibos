@@ -14,7 +14,7 @@ class ProfileSettingsNode(template.Node):
 
     def render(self, context):
         user = context['request'].user if 'request' in context else None
-        if user and user.is_authenticated():
+        if user and user.is_authenticated:
             try:
                 profile = UserProfile.objects.get(user=user)
             except UserProfile.DoesNotExist:
@@ -44,7 +44,7 @@ def profile_settings(parser, token):
 
 @register.filter
 def profile_setting(user, setting):
-    if user and user.is_authenticated():
+    if user and user.is_authenticated:
         settings = load_settings(user, filter=setting)
         return settings.get(setting, [None])[0]
     else:

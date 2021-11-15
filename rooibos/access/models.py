@@ -78,7 +78,7 @@ class ExtendedGroupManager(models.Manager):
         # authenticated users membership for those types of groups
         # is not stored explicitly
         q = Q(type=EVERYBODY_GROUP)
-        if assume_authenticated or user.is_authenticated():
+        if assume_authenticated or user.is_authenticated:
             q = q | Q(type=AUTHENTICATED_GROUP)
         ip_group_memberships = getattr(
             user, '_cached_ip_group_memberships', [])

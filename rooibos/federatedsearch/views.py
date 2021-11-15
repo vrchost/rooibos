@@ -38,7 +38,7 @@ def sidebar_api_raw(request, query, cached_only=False):
     if not sources:
         return dict(html='', hits=0)
 
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return dict(html="Please log in to see additional content.", hits=0)
 
     if not query:

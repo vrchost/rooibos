@@ -61,7 +61,7 @@ def search(request):
 
 def flickr_select_record(request):
 
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         raise Http404()
 
     if request.method == "POST":

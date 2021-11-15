@@ -31,7 +31,7 @@ class BasicAuthenticationMiddleware:
 
     def process_request(self, request):
         if ('HTTP_AUTHORIZATION' in request.META and
-                not request.user.is_authenticated()):
+                not request.user.is_authenticated):
             user = basic_authenticate(request.META['HTTP_AUTHORIZATION'])
             if user is None:
                 return basic_challenge()
@@ -41,7 +41,7 @@ class BasicAuthenticationMiddleware:
 
     def process_response(self, request, response):
         if (type(response) == HttpResponseForbidden and
-                not request.user.is_authenticated() and
+                not request.user.is_authenticated and
                 not response.content):
             return basic_challenge()
         else:

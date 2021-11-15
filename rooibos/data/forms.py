@@ -7,7 +7,7 @@ class FieldSetChoiceField(forms.ChoiceField):
 
     def __init__(self, *args, **kwargs):
         self._for_user = kwargs.pop('user', None)
-        if self._for_user and not self._for_user.is_authenticated():
+        if self._for_user and not self._for_user.is_authenticated:
             self._for_user = None
         kwargs['choices'] = [
             (

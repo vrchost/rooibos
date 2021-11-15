@@ -282,7 +282,7 @@ def proxy_image(request, id, name):
 
 
 def select(request, id, name):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         raise Http404()
 
     if request.method == "POST":

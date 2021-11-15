@@ -31,7 +31,7 @@ def autocomplete_user(request):
         limit = max(10, min(25, int(request.GET.get('limit', '10'))))
     except ValueError:
         limit = 10
-    if not query or not request.user.is_authenticated():
+    if not query or not request.user.is_authenticated:
         return HttpResponse(content='')
 
     current = get_real_user(request)

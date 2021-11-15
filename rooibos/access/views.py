@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
           *args, **kwargs):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         request.session.modified = True
         # Similar redirect_to processing as in django.contrib.auth.views.login
         redirect_to = request.GET.get(redirect_field_name, '')

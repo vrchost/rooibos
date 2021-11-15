@@ -220,14 +220,14 @@ def presentation_detail(request, id):
     def add_flash_parameter(url, request):
         u = create_proxy_url_if_needed(url, request)
         if flash:
-            userid = request.user.id if request.user.is_authenticated() else -1
+            userid = request.user.id if request.user.is_authenticated else -1
             joiner = '&' if u.find('?') > -1 else '?'
             u = u + joiner + ('flash=1&user=%s' % userid)
         return u
 
     content = _presentation_items_as_json(
         p.items.select_related('record').filter(hidden=False),
-        owner=request.user if request.user.is_authenticated() else None,
+        owner=request.user if request.user.is_authenticated else None,
         process_url=lambda url: add_flash_parameter(url, request)
     )
 
@@ -256,7 +256,7 @@ def autocomplete_user(request):
         limit = max(10, min(25, int(request.GET.get('limit', '10'))))
     except ValueError:
         limit = 10
-    if not query or not request.user.is_authenticated():
+    if not query or not request.user.is_authenticated:
         return HttpResponse(content='')
     users = list(User.objects
                  .filter(username__istartswith=query)
@@ -279,7 +279,7 @@ def autocomplete_group(request):
         limit = max(10, min(25, int(request.GET.get('limit', '10'))))
     except ValueError:
         limit = 10
-    if not query or not request.user.is_authenticated():
+    if not query or not request.user.is_authenticated:
         return HttpResponse(content='')
     groups = list(Group.objects
                   .filter(name__istartswith=query)

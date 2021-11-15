@@ -88,7 +88,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         .values_list('id', flat=True)
     )
     personal_collections = None
-    can_edit = request.user.is_authenticated()
+    can_edit = request.user.is_authenticated
     can_manage = False
 
     if id and name:
@@ -96,7 +96,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         can_edit = can_edit and record.editable_by(request.user)
         can_manage = record.manageable_by(request.user)
     else:
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             if personal:
                 personal_collections = \
                     get_allowed_collections_for_personal_records(
@@ -146,7 +146,7 @@ def record(request, id, name, contexttype=None, contextid=None,
 
     media = [m for m in media if m.downloadable_in_template or m.editable_in_template]
 
-    edit = edit and request.user.is_authenticated()
+    edit = edit and request.user.is_authenticated
 
     copyrecord = Record.get_or_404(copyid, request.user) if copyid else None
 
@@ -1059,7 +1059,7 @@ def single_record_manifest(request, record, owner):
 def record_manifest(request, identifier, name):
     record = Record.get_or_404(identifier, request.user)
 
-    owner = request.user if request.user.is_authenticated() else None
+    owner = request.user if request.user.is_authenticated else None
 
     return {
         '@context': reverse(

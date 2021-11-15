@@ -3,7 +3,7 @@ from .models import UserProfile
 
 
 def load_settings(user, filter=None):
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         return {}
     try:
         profile = UserProfile.objects.get(user=user)
@@ -20,7 +20,7 @@ def load_settings(user, filter=None):
 
 
 def store_settings(user, key, value):
-    if not user.is_authenticated():
+    if not user.is_authenticated:
         return False
     try:
         profile = UserProfile.objects.get(user=user)
@@ -37,14 +37,14 @@ def store_settings(user, key, value):
 
 @json_view
 def load_settings_view(request, filter=None):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return dict(error='Not logged in')
     return dict(settings=load_settings(request.user, filter))
 
 
 @json_view
 def store_settings_view(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         return dict(error='Not logged in')
     result = store_settings(
         request.user, request.POST.get('key'), request.POST.get('value'))

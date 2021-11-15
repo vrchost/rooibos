@@ -299,7 +299,7 @@ class Record(models.Model):
             contenttype = ContentType.objects.get_for_model(context.__class__)
             qc = qc | Q(context_type=contenttype, context_id=context.id)
         qo = Q(owner=None) if not hide_default_data else Q()
-        if owner and owner.is_authenticated():
+        if owner and owner.is_authenticated:
             qo = qo | Q(owner=owner)
         if context and include_context_owner and hasattr(context, 'owner') \
                 and context.owner:
@@ -626,7 +626,7 @@ class FieldSet(models.Model):
         return FieldSet.objects.filter(
             Q(owner=None) |
             Q(standard=True) |
-            (Q(owner=user) if user and user.is_authenticated() else Q())
+            (Q(owner=user) if user and user.is_authenticated else Q())
         )
 
 

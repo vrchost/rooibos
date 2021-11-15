@@ -15,7 +15,7 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
         raise Http404()
     viewer = viewer_cls(None, request, objid=objid)
     if not viewer:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             url = 'login'
             if getattr(settings, 'SHIB_ENABLED', False):
                 url = 'shib_login'
@@ -56,7 +56,7 @@ def viewer_script(request, viewer, objid):
         raise Http404()
     viewer = viewer_cls(None, request, objid=objid)
     if not viewer:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponseForbidden()
         else:
             raise Http404()
@@ -64,7 +64,7 @@ def viewer_script(request, viewer, objid):
     try:
         return viewer.embed_script(request)
     except Http404:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponseForbidden()
         raise
 
@@ -76,7 +76,7 @@ def viewer_embed(request, viewer, objid):
         raise Http404()
     viewer = viewer_cls(None, request, objid=objid)
     if not viewer:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponseForbidden()
         else:
             raise Http404()
@@ -84,7 +84,7 @@ def viewer_embed(request, viewer, objid):
     try:
         return HttpResponse(viewer.embed_code(request))
     except Http404:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             return HttpResponseForbidden()
         raise
 

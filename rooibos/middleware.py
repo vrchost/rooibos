@@ -32,7 +32,7 @@ class HistoryMiddleware:
         try:
             if (
                 request.user and
-                request.user.is_authenticated() and
+                request.user.is_authenticated and
                 not request.is_ajax() and
                 response.status_code == 200 and
                 response.get('Content-Type', '').startswith('text/html')
