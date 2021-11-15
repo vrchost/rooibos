@@ -23,8 +23,8 @@ class Migration(migrations.Migration):
                 ('width', models.IntegerField(null=True)),
                 ('height', models.IntegerField(null=True)),
                 ('bitrate', models.IntegerField(null=True)),
-                ('master', models.ForeignKey(related_name='derivatives', to='storage.Media', null=True)),
-                ('record', models.ForeignKey(to='data.Record')),
+                ('master', models.ForeignKey(related_name='derivatives', to='storage.Media', null=True, on_delete=models.CASCADE)),
+                ('record', models.ForeignKey(to='data.Record', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name_plural': 'media',
@@ -67,17 +67,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='proxyurl',
             name='subnet',
-            field=models.ForeignKey(to='storage.TrustedSubnet'),
+            field=models.ForeignKey(to='storage.TrustedSubnet', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='proxyurl',
             name='user',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='media',
             name='storage',
-            field=models.ForeignKey(to='storage.Storage'),
+            field=models.ForeignKey(to='storage.Storage', on_delete=models.CASCADE),
         ),
         migrations.AlterUniqueTogether(
             name='media',

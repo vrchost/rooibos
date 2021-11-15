@@ -16,12 +16,12 @@ class Presentation(models.Model):
 
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50, unique=True)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False)
     source = models.CharField(max_length=1024, null=True)
     description = models.TextField(blank=True, null=True)
     password = models.CharField(max_length=32, blank=True, null=True)
-    fieldset = models.ForeignKey(FieldSet, null=True)
+    fieldset = models.ForeignKey(FieldSet, null=True, on_delete=models.CASCADE)
     hide_default_data = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -139,8 +139,8 @@ class Presentation(models.Model):
 
 class PresentationItem(models.Model):
 
-    presentation = models.ForeignKey('Presentation', related_name='items')
-    record = models.ForeignKey(Record)
+    presentation = models.ForeignKey('Presentation', related_name='items', on_delete=models.CASCADE)
+    record = models.ForeignKey(Record, on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False)
     type = models.CharField(max_length=16, blank=True)
     order = models.SmallIntegerField()
@@ -225,6 +225,6 @@ class PresentationItem(models.Model):
 
 class PresentationItemInfo(models.Model):
 
-    item = models.ForeignKey('PresentationItem', related_name='media')
-    media = models.ForeignKey(Media)
+    item = models.ForeignKey('PresentationItem', related_name='media', on_delete=models.CASCADE)
+    media = models.ForeignKey(Media, on_delete=models.CASCADE)
     info = models.TextField(blank=True)

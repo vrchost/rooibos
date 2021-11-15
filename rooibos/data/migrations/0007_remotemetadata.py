@@ -19,8 +19,8 @@ class Migration(migrations.Migration):
                 ('url', models.CharField(max_length=255)),
                 ('mapping_url', models.CharField(max_length=255)),
                 ('last_modified', models.CharField(max_length=100, null=True, blank=True)),
-                ('collection', models.ForeignKey(to='data.Collection')),
-                ('storage', models.ForeignKey(to='storage.Storage')),
+                ('collection', models.ForeignKey(to='data.Collection', on_delete=models.CASCADE)),
+                ('storage', models.ForeignKey(to='storage.Storage', on_delete=models.CASCADE)),
             ],
         ),
     ]

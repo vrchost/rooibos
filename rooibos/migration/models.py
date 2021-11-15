@@ -5,12 +5,12 @@ import hashlib
 
 
 class ObjectHistory(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey(
         'content_type', 'object_id')
     m2m_content_type = models.ForeignKey(
-        ContentType, null=True, related_name='m2m_objecthistory_set')
+        ContentType, null=True, related_name='m2m_objecthistory_set', on_delete=models.CASCADE)
     m2m_object_id = models.PositiveIntegerField(null=True)
     m2m_content_object = GenericForeignKey(
         'm2m_content_type', 'm2m_object_id')

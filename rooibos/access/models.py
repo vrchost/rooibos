@@ -7,11 +7,11 @@ from ipaddr import IPAddress, IPNetwork
 
 
 class AccessControl(models.Model):
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(User, null=True, blank=True)
-    usergroup = models.ForeignKey(Group, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    usergroup = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
     read = models.NullBooleanField()
     write = models.NullBooleanField()
     manage = models.NullBooleanField()
@@ -140,7 +140,7 @@ class ExtendedGroup(Group):
 
 
 class Subnet(models.Model):
-    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'I'})
+    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'I'}, on_delete=models.CASCADE)
     subnet = models.CharField(max_length=80)
 
     def __str__(self):
@@ -151,7 +151,7 @@ class Subnet(models.Model):
 
 
 class Attribute(models.Model):
-    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'P'})
+    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'P'}, on_delete=models.CASCADE)
     attribute = models.CharField(max_length=255)
 
     def __str__(self):
@@ -162,7 +162,7 @@ class Attribute(models.Model):
 
 
 class AttributeValue(models.Model):
-    attribute = models.ForeignKey(Attribute)
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
     value = models.CharField(max_length=255)
 
     class Meta:

@@ -193,10 +193,10 @@ class Storage(models.Model):
 
 
 class Media(models.Model):
-    record = models.ForeignKey(Record)
+    record = models.ForeignKey(Record, on_delete=models.CASCADE)
     name = models.SlugField(max_length=50)
     url = models.CharField(max_length=1024)
-    storage = models.ForeignKey(Storage)
+    storage = models.ForeignKey(Storage, on_delete=models.CASCADE)
     mimetype = models.CharField(max_length=128, default='application/binary')
     width = models.IntegerField(null=True)
     height = models.IntegerField(null=True)
@@ -354,10 +354,10 @@ class TrustedSubnet(models.Model):
 
 class ProxyUrl(models.Model):
     uuid = models.CharField(max_length=36, unique=True)
-    subnet = models.ForeignKey(TrustedSubnet)
+    subnet = models.ForeignKey(TrustedSubnet, on_delete=models.CASCADE)
     url = models.CharField(max_length=1024)
     context = models.CharField(max_length=256, null=True, blank=True)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_backend = models.CharField(max_length=256, null=True, blank=True)
     last_access = models.DateTimeField(null=True, blank=True)
 

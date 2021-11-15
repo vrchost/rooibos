@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('function', models.CharField(max_length=64)),
                 ('args', models.TextField(default=None, null=True, editable=False)),
                 ('created', models.DateTimeField(auto_now=True)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             bases=('django_celery_results.taskresult',),
         ),

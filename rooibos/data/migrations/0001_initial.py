@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('password', models.CharField(max_length=32, blank=True)),
                 ('order', models.IntegerField(default=100)),
                 ('children', models.ManyToManyField(to='data.Collection', serialize=False, blank=True)),
-                ('owner', models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('owner', models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['order', 'title'],
@@ -37,7 +37,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('hidden', models.BooleanField(default=False)),
-                ('collection', models.ForeignKey(to='data.Collection')),
+                ('collection', models.ForeignKey(to='data.Collection', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -77,8 +77,8 @@ class Migration(migrations.Migration):
                 ('label', models.CharField(max_length=100, null=True, blank=True)),
                 ('order', models.IntegerField(default=0)),
                 ('importance', models.SmallIntegerField(default=1)),
-                ('field', models.ForeignKey(to='data.Field')),
-                ('fieldset', models.ForeignKey(to='data.FieldSet')),
+                ('field', models.ForeignKey(to='data.Field', on_delete=models.CASCADE)),
+                ('fieldset', models.ForeignKey(to='data.FieldSet', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['order'],
@@ -138,8 +138,8 @@ class Migration(migrations.Migration):
                 ('source', models.CharField(max_length=1024, null=True, blank=True)),
                 ('manager', models.CharField(max_length=50, null=True, blank=True)),
                 ('next_update', models.DateTimeField(serialize=False, null=True, blank=True)),
-                ('owner', models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True)),
-                ('parent', models.ForeignKey(blank=True, to='data.Record', null=True)),
+                ('owner', models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
+                ('parent', models.ForeignKey(blank=True, to='data.Record', null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -165,7 +165,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('term', models.TextField()),
-                ('vocabulary', models.ForeignKey(to='data.Vocabulary')),
+                ('vocabulary', models.ForeignKey(to='data.Vocabulary', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -174,25 +174,25 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fieldvalue',
             name='context_type',
-            field=models.ForeignKey(serialize=False, blank=True, to='contenttypes.ContentType', null=True),
+            field=models.ForeignKey(serialize=False, blank=True, to='contenttypes.ContentType', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fieldvalue',
             name='field',
-            field=models.ForeignKey(to='data.Field'),
+            field=models.ForeignKey(to='data.Field', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fieldvalue',
             name='owner',
-            field=models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(serialize=False, blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='fieldvalue',
             name='record',
-            field=models.ForeignKey(editable=False, to='data.Record'),
+            field=models.ForeignKey(editable=False, to='data.Record', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -204,19 +204,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='fieldset',
             name='owner',
-            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True),
+            field=models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='field',
             name='standard',
-            field=models.ForeignKey(blank=True, to='data.MetadataStandard', null=True),
+            field=models.ForeignKey(blank=True, to='data.MetadataStandard', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='field',
             name='vocabulary',
-            field=models.ForeignKey(serialize=False, blank=True, to='data.Vocabulary', null=True),
+            field=models.ForeignKey(serialize=False, blank=True, to='data.Vocabulary', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
@@ -230,7 +230,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='collectionitem',
             name='record',
-            field=models.ForeignKey(to='data.Record'),
+            field=models.ForeignKey(to='data.Record', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(

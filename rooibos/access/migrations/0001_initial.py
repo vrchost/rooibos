@@ -23,8 +23,8 @@ class Migration(migrations.Migration):
                 ('write', models.NullBooleanField()),
                 ('manage', models.NullBooleanField()),
                 ('restrictions_repr', models.TextField(default=b'', blank=True)),
-                ('content_type', models.ForeignKey(to='contenttypes.ContentType')),
-                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True)),
+                ('content_type', models.ForeignKey(to='contenttypes.ContentType', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(blank=True, to=settings.AUTH_USER_MODEL, null=True, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('value', models.CharField(max_length=255)),
-                ('attribute', models.ForeignKey(to='access.Attribute')),
+                ('attribute', models.ForeignKey(to='access.Attribute', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('subnet', models.CharField(max_length=80)),
-                ('group', models.ForeignKey(to='access.ExtendedGroup')),
+                ('group', models.ForeignKey(to='access.ExtendedGroup', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -75,13 +75,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='attribute',
             name='group',
-            field=models.ForeignKey(to='access.ExtendedGroup'),
+            field=models.ForeignKey(to='access.ExtendedGroup', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='accesscontrol',
             name='usergroup',
-            field=models.ForeignKey(blank=True, to='auth.Group', null=True),
+            field=models.ForeignKey(blank=True, to='auth.Group', null=True, on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(

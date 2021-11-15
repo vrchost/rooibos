@@ -30,10 +30,10 @@ class OwnedWrapper(models.Model):
     Used to connect a user to an object, currently used for tagging purposes to
     keep track of tag owners
     """
-    content_type = models.ForeignKey(ContentType)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     taggeditem = GenericRelation('tagging.TaggedItem')
 
     objects = OwnedWrapperManager()

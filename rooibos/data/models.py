@@ -35,7 +35,7 @@ class Collection(models.Model):
     children = models.ManyToManyField(
         'self', symmetrical=False, blank=True, serialize=False)
     records = models.ManyToManyField('Record', through='CollectionItem')
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False, serialize=False)
     description = models.TextField(blank=True)
     agreement = models.TextField(blank=True, null=True)
@@ -106,8 +106,8 @@ class CollectionItemManager(models.Manager):
 class CollectionItem(models.Model):
     objects = CollectionItemManager()
 
-    collection = models.ForeignKey('Collection')
-    record = models.ForeignKey('Record')
+    collection = models.ForeignKey('Collection', on_delete=models.CASCADE)
+    record = models.ForeignKey('Record', on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False)
 
     def natural_key(self):
@@ -143,11 +143,11 @@ class Record(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
-    parent = models.ForeignKey('self', null=True, blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
     source = models.CharField(max_length=1024, null=True, blank=True)
     manager = models.CharField(max_length=50, null=True, blank=True)
     next_update = models.DateTimeField(null=True, blank=True, serialize=False)
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'data'
@@ -506,7 +506,7 @@ class Vocabulary(models.Model):
 
 
 class VocabularyTerm(models.Model):
-    vocabulary = models.ForeignKey(Vocabulary)
+    vocabulary = models.ForeignKey(Vocabulary, on_delete=models.CASCADE)
     term = models.TextField()
 
     class Meta:
@@ -529,11 +529,11 @@ class Field(models.Model):
     name = models.SlugField(max_length=50)
     old_name = models.CharField(
         max_length=100, null=True, blank=True, serialize=False)
-    standard = models.ForeignKey(MetadataStandard, null=True, blank=True)
+    standard = models.ForeignKey(MetadataStandard, null=True, blank=True, on_delete=models.CASCADE)
     equivalent = models.ManyToManyField("self", blank=True)
     # TODO: serialize vocabularies
     vocabulary = models.ForeignKey(
-        Vocabulary, null=True, blank=True, serialize=False)
+        Vocabulary, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
 
     def natural_key(self):
         return (self.standard.prefix if self.standard else '', self.name,)
@@ -602,7 +602,7 @@ class FieldSet(models.Model):
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
     fields = models.ManyToManyField(Field, through='FieldSetField')
-    owner = models.ForeignKey(User, null=True, blank=True)
+    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
     standard = models.BooleanField(default=False)
 
     def save(self, **kwargs):
@@ -631,8 +631,8 @@ class FieldSet(models.Model):
 
 
 class FieldSetField(models.Model):
-    fieldset = models.ForeignKey(FieldSet)
-    field = models.ForeignKey(Field)
+    fieldset = models.ForeignKey(FieldSet, on_delete=models.CASCADE)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
     label = models.CharField(max_length=100, null=True, blank=True)
     order = models.IntegerField(default=0)
     importance = models.SmallIntegerField(default=1)
@@ -646,10 +646,10 @@ class FieldSetField(models.Model):
 
 
 class FieldValue(models.Model):
-    record = models.ForeignKey(Record, editable=False)
-    field = models.ForeignKey(Field)
+    record = models.ForeignKey(Record, editable=False, on_delete=models.CASCADE)
+    field = models.ForeignKey(Field, on_delete=models.CASCADE)
     refinement = models.CharField(max_length=100, null=True, blank=True)
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False)
+    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
     label = models.CharField(max_length=100, null=True, blank=True)
     hidden = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
@@ -667,7 +667,7 @@ class FieldValue(models.Model):
         max_digits=18, decimal_places=4, null=True, blank=True)
     language = models.CharField(max_length=5, null=True, blank=True)
     context_type = models.ForeignKey(
-        ContentType, null=True, blank=True, serialize=False)
+        ContentType, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
     context_id = models.PositiveIntegerField(
         null=True, blank=True, serialize=False)
     context = GenericForeignKey('context_type', 'context_id')
@@ -792,8 +792,8 @@ def standardfield_ids(field, standard='dc', equiv=False):
 
 class RemoteMetadata(models.Model):
 
-    collection = models.ForeignKey('Collection')
-    storage = models.ForeignKey('storage.Storage')
+    collection = models.ForeignKey('Collection', on_delete=models.CASCADE)
+    storage = models.ForeignKey('storage.Storage', on_delete=models.CASCADE)
     url = models.CharField(max_length=255)
     mapping_url = models.CharField(max_length=255)
     last_modified = models.CharField(max_length=100, null=True, blank=True)

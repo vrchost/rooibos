@@ -5,7 +5,7 @@ from django_celery_results.models import TaskResult
 
 class OwnedTaskResult(TaskResult):
 
-    owner = models.ForeignKey(User, null=False, blank=False)
+    owner = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     function = models.CharField(max_length=64)
     args = models.TextField(null=True, default=None, editable=False)
     created = models.DateTimeField(auto_now=True)
