@@ -11,7 +11,7 @@ class Preference(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     preferences = models.ManyToManyField(Preference, blank=True)
 
     def __str__(self):

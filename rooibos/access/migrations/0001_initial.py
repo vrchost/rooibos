@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='ExtendedGroup',
             fields=[
-                ('group_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='auth.Group')),
+                ('group_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='auth.Group', on_delete=models.CASCADE)),
                 ('type', models.CharField(max_length=1, choices=[(b'A', b'Authenticated'), (b'I', b'IP Address based'), (b'P', b'Attribute based'), (b'E', b'Everybody')])),
             ],
             options={

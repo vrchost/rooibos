@@ -16,7 +16,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OwnedTaskResult',
             fields=[
-                ('taskresult_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='django_celery_results.TaskResult')),
+                ('taskresult_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='django_celery_results.TaskResult', on_delete=models.CASCADE)),
                 ('function', models.CharField(max_length=64)),
                 ('args', models.TextField(default=None, null=True, editable=False)),
                 ('created', models.DateTimeField(auto_now=True)),

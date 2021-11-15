@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='DisplayFieldValue',
             fields=[
-                ('fieldvalue_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='data.FieldValue')),
+                ('fieldvalue_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='data.FieldValue', on_delete=models.CASCADE)),
             ],
             options={
             },
