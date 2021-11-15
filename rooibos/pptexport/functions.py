@@ -117,7 +117,8 @@ class PowerPointGenerator:
 
     def insert_image(self, slide, image, left, top, width, height):
         try:
-            iwidth, iheight = Image.open(image).size
+            with Image.open(image) as i:
+                iwidth, iheight = i.size
         except UnidentifiedImageError:
             return False
         ratio = iwidth / iheight

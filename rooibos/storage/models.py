@@ -296,8 +296,8 @@ class Media(models.Model):
         type = self.mimetype.split('/')[0]
         if type == 'image':
             try:
-                im = Image.open(self.get_absolute_file_path())
-                (self.width, self.height) = im.size
+                with Image.open(self.get_absolute_file_path()) as im:
+                    self.width, self.height = im.size
             except:
                 self.width = None
                 self.height = None

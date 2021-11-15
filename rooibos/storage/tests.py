@@ -47,9 +47,9 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         media = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
         content = BytesIO(b'hello world')
-        media.save_file('test.txt', content)
+        media.save_file('test-98gf.txt', content)
 
-        self.assertEqual('test.txt', media.url)
+        self.assertEqual('test-98gf.txt', media.url)
 
         content = media.load_file()
         self.assertEqual(b'hello world', content.read())
@@ -62,18 +62,20 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         media = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
         content = BytesIO(b'hello world')
-        media.save_file('test.txt', content)
+        media.save_file('test-o2vd.txt', content)
 
         media2 = Media.objects.create(
             record=self.record, name='image', storage=self.storage)
 
         content2 = BytesIO(b'hallo welt')
-        media2.save_file('test.txt', content2)
-        self.assertNotEqual('test.txt', media2.url)
-        self.assertNotEqual('test', media2.name)
+        media2.save_file('test-o2vd.txt', content2)
+        self.assertNotEqual('test-o2vd.txt', media2.url)
+        self.assertNotEqual('test-o2vd', media2.name)
 
-        self.assertEqual(b'hello world', media.load_file().read())
-        self.assertEqual(b'hallo welt', media2.load_file().read())
+        with media.load_file() as f1:
+            self.assertEqual(b'hello world', f1.read())
+        with media2.load_file() as f2:
+            self.assertEqual(b'hallo welt', f2.read())
 
     def test_thumbnail(self):
         Media.objects.filter(record=self.record).delete()
@@ -89,14 +91,14 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record)
-        width, height = Image.open(thumbnail).size
+        with Image.open(thumbnail) as i:
+            width, height = i.size
         self.assertTrue(width == 100)
         self.assertTrue(height < 100)
 
         media.delete()
 
     def test_crop_to_square(self):
-
         Media.objects.filter(record=self.record).delete()
         media = Media.objects.create(
             record=self.record,
@@ -110,7 +112,8 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
             media.save_file('dcmetro.tif', f)
 
         thumbnail = get_thumbnail_for_record(self.record, crop_to_square=True)
-        width, height = Image.open(thumbnail).size
+        with Image.open(thumbnail) as i:
+            width, height = i.size
         self.assertTrue(width == 100)
         self.assertTrue(height == 100)
 
@@ -151,8 +154,10 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         result2 = get_image_for_record(
             self.record, width=400, height=400, user=user2)
 
-        self.assertEqual(400, Image.open(result1).size[0])
-        self.assertEqual(200, Image.open(result2).size[0])
+        with Image.open(result1) as i1:
+            self.assertEqual(400, i1.size[0])
+        with Image.open(result2) as i2:
+            self.assertEqual(200, i2.size[0])
 
         result3 = get_image_for_record(
             self.record, width=400, height=400, user=user2)
@@ -207,7 +212,8 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         # now user2 should get the image
         result = get_image_for_record(
             self.record, width=400, height=400, user=user2)
-        self.assertEqual(400, Image.open(result).size[0])
+        with Image.open(result) as i:
+            self.assertEqual(400, i.size[0])
 
         # limit user2 image size
         user2_storage_acl.restrictions = dict(width=200, height=200)
@@ -216,7 +222,8 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         # we should now get a smaller image
         result = get_image_for_record(
             self.record, width=400, height=400, user=user2)
-        self.assertEqual(200, Image.open(result).size[0])
+        with Image.open(result) as i:
+            self.assertEqual(200, i.size[0])
 
         # password protect the presentation
         presentation.password = 'secret'
@@ -225,7 +232,7 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
         # user2 has not provided presentation password,
         # so should not get result
         with self.assertRaises(Http404):
-            result = get_image_for_record(
+            get_image_for_record(
                 self.record, width=400, height=400, user=user2)
 
         # with presentation password, image should be returned
@@ -236,7 +243,8 @@ class LocalFileSystemStorageSystemTestCase(TestCase):
             user=user2,
             passwords={presentation.id: 'secret'}
         )
-        self.assertEqual(200, Image.open(result).size[0])
+        with Image.open(result) as i:
+            self.assertEqual(200, i.size[0])
 
     def test_delivery_url(self):
         s = Storage.objects.create(
@@ -327,7 +335,6 @@ class ProxyUrlTest(TestCase):
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
     def test_proxy_url(self):
-
         c = Client()
         response = c.post('/media/proxy/create/')
         # Response is JSON, should always be 200
@@ -367,7 +374,6 @@ class ProxyUrlTest(TestCase):
         self.assertEqual(50, width)
 
     def test_duplicate_proxy_url(self):
-
         TrustedSubnet.objects.create(subnet='127.0.0.1')
         proxy_url = ProxyUrl.create_proxy_url(
             '/some/url', 'ctx1', '127.0.0.1', self.user)
@@ -411,7 +417,8 @@ class OnlineStorageSystemTestCase(TestCase):
             mimetype='image/tiff'
         )
         thumbnail = get_thumbnail_for_record(self.record)
-        width, height = Image.open(thumbnail).size
+        with Image.open(thumbnail) as i:
+            width, height = i.size
         self.assertTrue(width == 100)
         self.assertTrue(height < 100)
 
@@ -446,7 +453,7 @@ class PseudoStreamingStorageSystemTestCase(TestCase):
     def test_pseudostreaming(self):
         test_string = b'Hello world'
         content = BytesIO(test_string)
-        self.media.save_file('test.txt', content)
+        self.media.save_file('test-mnln.txt', content)
         c = Client()
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(test_string, response.content)
@@ -476,7 +483,7 @@ class ProtectedContentDownloadTestCase(TestCase):
         self.media = Media.objects.create(
             record=self.record, name='protectedimage', storage=self.storage)
         content = BytesIO(b'hello world')
-        self.media.save_file('test.txt', content)
+        self.media.save_file('test-rtx2.txt', content)
 
     def tearDown(self):
         self.media.delete()
@@ -487,7 +494,6 @@ class ProtectedContentDownloadTestCase(TestCase):
         shutil.rmtree(self.tempdir, ignore_errors=True)
 
     def test_save_and_retrieve_file(self):
-
         if not any([c.endswith('.auth.middleware.BasicAuthenticationMiddleware') for c in settings.MIDDLEWARE_CLASSES]):
             return
 
@@ -500,12 +506,13 @@ class ProtectedContentDownloadTestCase(TestCase):
         response = c.get(
             self.media.get_absolute_url(),
             HTTP_AUTHORIZATION='basic %s' %
-            b64encode(b'protectedtest:test').decode('ascii')
+                               b64encode(b'protectedtest:test').decode('ascii')
         )
         self.assertEqual(200, response.status_code)
         self.assertEqual(b'hello world', b''.join(response.streaming_content))
 
         # now logged in
+        print('\n\n' + self.media.get_absolute_url() + '\n\n')
         response = c.get(self.media.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertEqual(b'hello world', b''.join(response.streaming_content))
@@ -806,8 +813,8 @@ class MediaNameTestCase(TestCase):
 
     def test_media_name_from_url(self):
         media = self.record.media_set.create(
-            url='test.txt', storage=self.storage)
-        self.assertEqual('test', media.name)
+            url='test-lokh.txt', storage=self.storage)
+        self.assertEqual('test-lokh', media.name)
 
     def test_media_name_from_save(self):
         media = self.record.media_set.create(storage=self.storage)

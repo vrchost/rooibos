@@ -204,8 +204,9 @@ def derivative_from_media(media, width, height, crop_to_square):
         )
         return None
     try:
-        return derivative_image(
-            get_image(media), width, height, media.mimetype, crop_to_square)
+        with get_image(media) as media_image:
+            return derivative_image(
+                media_image, width, height, media.mimetype, crop_to_square)
     except Exception as e:
         logger.exception(
             'Image derivative failed for media %d (%s)' %

@@ -276,10 +276,11 @@ def record_thumbnail(request, id, name):
             )
         )
         try:
-            response = HttpResponse(
-                content=open(filename, 'rb').read(),
-                content_type='image/jpeg'
-            )
+            with open(filename, 'rb') as f:
+                response = HttpResponse(
+                    content=f.read(),
+                    content_type='image/jpeg'
+                )
             patch_cache_control(response, private=True, max_age=3600)
             return response
         except IOError:
