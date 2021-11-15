@@ -152,7 +152,6 @@ INSTALLED_APPS = (
     'rooibos.presentation',
     'rooibos.statistics',
     'rooibos.federatedsearch',
-    'rooibos.federatedsearch.artstor',
     'rooibos.federatedsearch.flickr',
     'rooibos.federatedsearch.shared',
     'rooibos.workers',
@@ -211,8 +210,6 @@ FFMPEG_EXECUTABLE = '/usr/local/bin/ffmpeg'
 PDF_PAGESIZE = 'letter'  # 'A4'
 
 SHOW_FRONTPAGE_LOGIN = "yes"
-
-ARTSTOR_GATEWAY = None
 
 
 LOGO_URL = None

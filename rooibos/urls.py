@@ -76,7 +76,6 @@ urls = [
     url(r'^profile/', include('rooibos.userprofile.urls')),
     url(r'^federated/', include('rooibos.federatedsearch.urls')),
     url(r'^flickr/', include('rooibos.federatedsearch.flickr.urls')),
-    url(r'^artstor/', include('rooibos.federatedsearch.artstor.urls')),
     url(r'^shared/', include('rooibos.federatedsearch.shared.urls')),
     url(r'^impersonate/', include('rooibos.impersonate.urls')),
     url(r'^works/', include('rooibos.works.urls')),

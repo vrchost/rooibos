@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from threading import Thread
 from .models import HitCount
 
-from .artstor import ArtstorSearch
 from .flickr.search import FlickrSearch
 from .shared.views import SharedSearch
 
@@ -13,7 +12,6 @@ import logging
 
 
 source_classes = [
-    ArtstorSearch,
     FlickrSearch,
     SharedSearch,
 ]

@@ -47,9 +47,6 @@ SECONDARY_COLOR = "rgb(118, 147, 154)"
 # FLICKR_KEY = ''
 # FLICKR_SECRET = ''
 
-# Uncomment if you subscribe to ARTstor
-# ARTSTOR_GATEWAY = 'http://sru.artstor.org/SRU/artstor.htm'
-
 
 # Uncomment and complete relevant user authentication settings
 
