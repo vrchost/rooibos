@@ -496,7 +496,7 @@ class ProtectedContentDownloadTestCase(TestCase):
     def test_save_and_retrieve_file(self):
         if not any([
                 c.endswith('.auth.middleware.BasicAuthenticationMiddleware')
-                for c in settings.MIDDLEWARE_CLASSES]):
+                for c in settings.MIDDLEWARE]):
             return
 
         c = Client()

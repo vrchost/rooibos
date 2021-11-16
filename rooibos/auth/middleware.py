@@ -3,6 +3,7 @@ from base64 import b64decode
 from django.http import HttpResponse, HttpResponseForbidden
 from django.conf import settings
 from django.contrib.auth import login, authenticate
+from django.utils.deprecation import MiddlewareMixin
 
 
 def basic_challenge(realm=None):
@@ -27,7 +28,7 @@ def basic_authenticate(authentication):
     return authenticate(username=username, password=password)
 
 
-class BasicAuthenticationMiddleware:
+class BasicAuthenticationMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         if ('HTTP_AUTHORIZATION' in request.META

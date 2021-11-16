@@ -4,7 +4,7 @@ from django.db import models
 from django.core.files import File
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import random
 from PIL import Image
 import os

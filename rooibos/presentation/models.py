@@ -1,7 +1,7 @@
 from django.db import models, connection
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.fields import GenericRelation
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
 from rooibos.data.models import Record, FieldSet, FieldValue, \

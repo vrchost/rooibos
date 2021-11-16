@@ -1,7 +1,8 @@
+from django.utils.deprecation import MiddlewareMixin
 from django.utils.html import strip_tags
 
 
-class PageTitles:
+class PageTitles(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         return None

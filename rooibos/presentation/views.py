@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required

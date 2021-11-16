@@ -114,7 +114,7 @@ SHIB_EMAIL = "mail"
 SHIB_FIRST_NAME = "givenName"
 SHIB_LAST_NAME = "sn"
 
-MIDDLEWARE_CLASSES += ('config.shib_middleware.ShibMiddleware',)
+MIDDLEWARE += ('config.shib_middleware.ShibMiddleware',)
 
 TEMPLATES[0]['OPTIONS']['context_processors'] += \
     ('config.shib_contextprocessors.shibboleth',)
@@ -124,7 +124,8 @@ Create the file `config/shib_middleware.py` with the following
 content, replacing `YOUR.DOMAIN.EDU` with the domain name used in email
 addresses (if applicable):
 ```
-class ShibMiddleware(object):
+from django.utils.deprecation import MiddlewareMixin
+class ShibMiddleware(MiddlewareMixin):
     def process_request(self, request):
         if not request.META.get('HTTP_SHIB_IDENTITY_PROVIDER'):
             return

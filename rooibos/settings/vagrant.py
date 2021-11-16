@@ -1,5 +1,5 @@
 from .base import *  # NOQA
-from .base import MIDDLEWARE_CLASSES, INSTALLED_APPS
+from .base import MIDDLEWARE, INSTALLED_APPS
 
 
 DEBUG = True
@@ -44,7 +44,7 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     # "django_cas_ng.backends.CASBackend",
 )
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE += (
     "rooibos.auth.middleware.BasicAuthenticationMiddleware",
     # "django_cas_ng.middleware.CASMiddleware",
 )

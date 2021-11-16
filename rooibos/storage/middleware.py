@@ -4,7 +4,7 @@ from rooibos.access.functions import add_restriction_precedence
 
 class StorageOnStart:
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
 
         def download_precedence(a, b):
             if a == 'yes' or b == 'yes':

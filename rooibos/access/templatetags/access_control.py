@@ -1,5 +1,5 @@
 from django import template
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 from rooibos.access.functions import get_accesscontrols_for_object, \
     filter_by_access

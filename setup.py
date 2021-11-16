@@ -14,14 +14,14 @@ configobj>=4.7.2,<=5.0.0
 cryptography
 django-appconf==1.0.3
 django-cas-ng==3.5.10
-django-compressor==2.2
+django-compressor==2.4.1
 django-extensions==2.0.7
 django-pagination==1.0.7
 django-ranged-fileresponse==0.1.2
 django-storages==1.6.6
 django-tagging==0.4.6
 django-contrib-comments==1.8.0
-Django==1.11.28
+Django==2.0.13
 django-celery-results==1.0.4
 django-cors-headers==2.5.3
 flake8

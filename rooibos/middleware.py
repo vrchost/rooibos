@@ -1,4 +1,7 @@
-class Middleware:
+from django.utils.deprecation import MiddlewareMixin
+
+
+class Middleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         return None
@@ -23,7 +26,7 @@ class Middleware:
         return response
 
 
-class HistoryMiddleware:
+class HistoryMiddleware(MiddlewareMixin):
 
     def process_response(self, request, response):
         # Keep track of most recent URLs to allow going back after

@@ -4,7 +4,7 @@ from loris.webapp import Loris, read_config
 from loris.resolver import SimpleFSResolver
 from werkzeug.wrappers import Request
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse, Http404
 
 

@@ -6,7 +6,7 @@ import zipfile
 from django.conf import settings
 from django.contrib.staticfiles import finders
 from django.core.files.temp import NamedTemporaryFile
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.template import loader
 from wsgiref.util import FileWrapper

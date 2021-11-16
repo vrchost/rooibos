@@ -1,6 +1,6 @@
 from django import template
 from django.utils.safestring import SafeString
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 import json
 import os
 

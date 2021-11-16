@@ -1,6 +1,6 @@
 from .functions import get_viewer_by_name
 from django.shortcuts import render, redirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import Http404, HttpResponseForbidden, HttpResponse
 from django.conf import settings
 from django.utils.http import urlencode

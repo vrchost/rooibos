@@ -1,5 +1,6 @@
 from django.conf.urls import url, handler404, include
 from django.contrib import admin
+from django.urls import path
 from django.conf import settings
 from django.views.generic.base import TemplateView
 from django.views.static import serve
@@ -58,7 +59,7 @@ urls = [
         name='showcases'
     ),
 
-    url(r'^admin/', include(admin.site.urls)),
+    path('admin/', admin.site.urls),
 
     # Legacy URL for presentation viewer in earlier version
     url(r'^viewers/view/(?P<record>\d+)/.+/$', legacy_viewer),

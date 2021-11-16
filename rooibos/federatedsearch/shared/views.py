@@ -13,7 +13,7 @@ import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
     Field, FieldValue, standardfield
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django import forms
 from rooibos.federatedsearch import FederatedSearch
 from rooibos.access.functions import filter_by_access, sync_access

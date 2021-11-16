@@ -3,7 +3,7 @@ Storage system to store media files in Backblaze B2
 """
 
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from b2sdk.account_info.sqlite_account_info import SqliteAccountInfo
 from b2sdk.api import B2Api

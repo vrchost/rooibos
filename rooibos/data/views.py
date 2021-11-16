@@ -18,7 +18,7 @@ import json as simplejson
 from django.utils.html import conditional_escape
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from .models import Record, Collection, FieldSet, FieldSetField, \
     CollectionItem, Field, FieldValue, title_from_fieldvalues
 from .forms import FieldSetChoiceField, get_collection_visibility_prefs_form

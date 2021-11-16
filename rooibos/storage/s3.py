@@ -3,7 +3,7 @@ Storage system to store media files in Amazon S3
 """
 
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.conf import settings
 from storages.backends.s3boto import S3BotoStorage
 import os

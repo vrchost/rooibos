@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.views import login as dj_login, logout as dj_logout
 from django.conf import settings
 from django import forms
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from .models import AccessControl
 from .functions import check_access, \

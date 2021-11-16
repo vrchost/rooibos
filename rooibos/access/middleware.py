@@ -1,4 +1,6 @@
 from django.core.exceptions import MiddlewareNotUsed
+from django.utils.deprecation import MiddlewareMixin
+
 from .models import ExtendedGroup, IP_BASED_GROUP
 import logging
 
@@ -8,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class AccessOnStart:
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
 
         try:
             # Remove IP based group members
@@ -23,7 +25,7 @@ class AccessOnStart:
         raise MiddlewareNotUsed
 
 
-class AnonymousIpGroupMembershipMiddleware():
+class AnonymousIpGroupMembershipMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
         cached_ip = request.session.get('_cached_remote_addr')
