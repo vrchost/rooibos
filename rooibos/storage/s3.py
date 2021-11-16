@@ -76,7 +76,7 @@ class S3StorageSystem(S3BotoStorage):
             # we must have downloaded the same file twice
             try:
                 os.remove(tempname)
-            except:
+            except IOError:
                 pass
 
     def get_absolute_file_path(self, media):

@@ -5,7 +5,6 @@ from django.template.loader import render_to_string
 from rooibos.pptexport.functions import COLORS
 from rooibos.viewers import register_viewer, Viewer
 from rooibos.presentation.models import Presentation
-import os
 
 
 class PowerPointExportViewer(Viewer):

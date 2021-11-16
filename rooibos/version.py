@@ -63,7 +63,7 @@ _GIT_DESCRIPTION_RE = r'^v(?P<ver>%s)-(?P<commits>\d+)-g(?P<sha>[\da-f]+)$' % (
     _PEP386_SHORT_VERSION_RE)
 
 
-def readGitVersion():
+def read_git_version():
     try:
         proc = subprocess.Popen(('git', 'describe', '--long',
                                  '--match', 'v[0-9]*.*'),
@@ -72,7 +72,7 @@ def readGitVersion():
         if proc.returncode:
             return None
         ver = data.splitlines()[0].strip()
-    except:
+    except IOError:
         return None
 
     if not ver:
@@ -93,7 +93,7 @@ def readGitVersion():
         return '%s.%s' % (m.group('ver'), suffix)
 
 
-def readReleaseVersion():
+def read_release_version():
     try:
         fd = open(RELEASE_VERSION_FILE)
         try:
@@ -104,25 +104,25 @@ def readReleaseVersion():
             sys.stderr.write('version: release version (%s) is invalid, '
                              'will use it anyway\n' % ver)
         return ver
-    except:
+    except IOError:
         return None
 
 
-def writeReleaseVersion(version):
+def write_release_version(version):
     fd = open(RELEASE_VERSION_FILE, 'w')
     fd.write('%s\n' % version)
     fd.close()
 
 
-def getVersion():
-    release_version = readReleaseVersion()
-    version = readGitVersion() or release_version
+def get_version():
+    release_version = read_release_version()
+    version = read_git_version() or release_version
     if not version:
         version = '0.0.0'
     elif version != release_version:
-        writeReleaseVersion(version)
+        write_release_version(version)
     return version
 
 
 if __name__ == '__main__':
-    print(getVersion())
+    print(get_version())

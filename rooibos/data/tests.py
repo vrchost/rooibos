@@ -849,12 +849,12 @@ class ImageWorkRecordTestCase(TestCase):
     def tearDown(self):
         pass
 
-    def testNoRelation(self):
+    def test_no_relation(self):
         record = Record.objects.create()
         self.assertEqual(0, len(record.get_works()))
         self.assertEqual(0, record.get_image_records_query().count())
 
-    def testRelation(self):
+    def test_relation(self):
         work_record = Record.objects.create()
         image_record = Record.objects.create()
         image_record2 = Record.objects.create()
@@ -879,7 +879,7 @@ class ImageWorkRecordTestCase(TestCase):
         self.assertEqual(2, image_record.get_image_records_query().count())
         self.assertEqual(2, image_record2.get_image_records_query().count())
 
-    def testSolrIndexing(self):
+    def test_solr_indexing(self):
         work_record = Record.objects.create()
         image_record = Record.objects.create()
         image_record2 = Record.objects.create()
@@ -904,7 +904,7 @@ class ImageWorkRecordTestCase(TestCase):
         self.assertEqual([work_record.id], image_to_works[image_record.id])
         self.assertEqual([work_record.id], image_to_works[image_record2.id])
 
-    def testImageRecordsOnlySolrIndexing(self):
+    def test_image_records_only_solr_indexing(self):
         image_record = Record.objects.create()
         image_record2 = Record.objects.create()
 

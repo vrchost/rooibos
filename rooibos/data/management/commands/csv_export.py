@@ -9,13 +9,16 @@ class Command(BaseCommand):
     help = 'Export collection metadata'
 
     def add_arguments(self, parser):
-        parser.add_argument('--data', '-d', dest='data_file',
-                    help='Output data CSV file')
-        parser.add_argument('--collection', '-c', dest='collections',
-                    action='append',
-                    help='Collection identifier (multiple allowed)')
-        parser.add_argument('--separator', '-s', dest='separator',
-                    help='Separator for multi-value fields')
+        parser.add_argument(
+            '--data', '-d', dest='data_file',
+            help='Output data CSV file')
+        parser.add_argument(
+            '--collection', '-c', dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)')
+        parser.add_argument(
+            '--separator', '-s', dest='separator',
+            help='Separator for multi-value fields')
 
     def handle(self, *args, **kwargs):
 

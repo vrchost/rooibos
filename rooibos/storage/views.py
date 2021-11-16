@@ -254,7 +254,8 @@ def media_delete(request, mediaid, medianame):
         raise Http404()
     if request.method == 'POST':
         media.delete()
-        return HttpResponseRedirect(validate_next_link(request.GET.get('next'), '.'))
+        return HttpResponseRedirect(
+            validate_next_link(request.GET.get('next'), '.'))
     else:
         return HttpResponseNotAllowed(['POST'])
 
@@ -281,7 +282,8 @@ def record_thumbnail(request, id, name):
                     content=f.read(),
                     content_type='image/jpeg'
                 )
-            patch_cache_control(response, private=True, max_age=3600)
+            patch_cache_control(
+                response, private=True, max_age=3600)
             return response
         except IOError:
             logging.error("IOError: %s" % filename)
@@ -382,7 +384,8 @@ def manage_storage(request, storageid=None, storagename=None):
         storage = Storage(system='local')
 
     if not storage.id:
-        system_choices = [(s, s) for s in list(settings.STORAGE_SYSTEMS.keys())]
+        system_choices = [
+            (s, s) for s in list(settings.STORAGE_SYSTEMS.keys())]
     else:
         system_choices = [(storage.system, storage.system)]
 
@@ -397,7 +400,10 @@ def manage_storage(request, storageid=None, storagename=None):
 
         class Meta:
             model = Storage
-            fields = ('title', 'system', 'base', 'credential_id', 'credential_key', 'urlbase', 'deliverybase')
+            fields = (
+                'title', 'system', 'base', 'credential_id', 'credential_key',
+                'urlbase', 'deliverybase',
+            )
 
     if request.method == "POST":
         if request.POST.get('delete-storage'):

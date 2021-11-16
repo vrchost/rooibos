@@ -2,7 +2,8 @@
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.decorators.cache import cache_control
 from django.db.models import Q
-from .functions import impersonate, endimpersonation, get_available_users, get_real_user
+from .functions import impersonate, endimpersonation, get_available_users, \
+    get_real_user
 
 from ..util import validate_next_link
 
@@ -12,7 +13,8 @@ def start(request):
     username = request.POST.get('username')
     if username:
         current = get_real_user(request)
-        available_user = get_available_users(current or request.user.username).filter(username=username)
+        available_user = get_available_users(
+            current or request.user.username).filter(username=username)
         if available_user.count() == 1:
             impersonate(request, username)
     return HttpResponseRedirect(next)
@@ -36,8 +38,12 @@ def autocomplete_user(request):
 
     current = get_real_user(request)
     available_users = get_available_users(current or request.user.username)
-    users = list(available_users.filter(username__istartswith=query).values_list('username', flat=True)[:limit])
+    users = list(available_users.filter(
+        username__istartswith=query
+    ).values_list('username', flat=True)[:limit])
     if len(users) < limit:
-        users.extend(available_users.filter(~Q(username__istartswith=query), username__icontains=query)
-                     .values_list('username', flat=True)[:limit - len(users)])
+        users.extend(
+            available_users.filter(
+                ~Q(username__istartswith=query), username__icontains=query
+            ).values_list('username', flat=True)[:limit - len(users)])
     return HttpResponse(content='\n'.join(users))

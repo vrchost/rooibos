@@ -51,17 +51,9 @@ class Viewer(object):
         return None
 
     def get_derivative_storage_path(self):
-        sp = os.path.join(settings.SCRATCH_DIR, 'viewer-' + type(self).__name__)
-        if not os.path.exists(sp):
-            try:
-                os.makedirs(sp)
-            except:
-                # check if directory exists now, if so another process
-                # may have created it
-                if not os.path.exists(sp):
-                    # still does not exist, raise error
-                    raise
-        return sp
+        sp = os.path.join(
+            settings.SCRATCH_DIR, 'viewer-' + type(self).__name__)
+        os.makedirs(sp, exist_ok=True)
 
 
 _registered_viewers = dict()

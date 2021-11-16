@@ -10,8 +10,10 @@ class AccessControl(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
-    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
-    usergroup = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.CASCADE)
+    usergroup = models.ForeignKey(
+        Group, null=True, blank=True, on_delete=models.CASCADE)
     read = models.NullBooleanField()
     write = models.NullBooleanField()
     manage = models.NullBooleanField()
@@ -123,10 +125,11 @@ class ExtendedGroup(Group):
             values = attributes.get(attribute.attribute, [])
             for value in attribute.attributevalue_set.all().values_list(
                     'value', flat=True):
-                if (hasattr(values, '__iter__')
+                if (
+                        hasattr(values, '__iter__')
                         and not isinstance(values, str)
                         and value in values
-                    ) or value == values:
+                ) or value == values:
                     break
             else:
                 return False
@@ -140,7 +143,9 @@ class ExtendedGroup(Group):
 
 
 class Subnet(models.Model):
-    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'I'}, on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        ExtendedGroup, limit_choices_to={'type': 'I'},
+        on_delete=models.CASCADE)
     subnet = models.CharField(max_length=80)
 
     def __str__(self):
@@ -151,7 +156,9 @@ class Subnet(models.Model):
 
 
 class Attribute(models.Model):
-    group = models.ForeignKey(ExtendedGroup, limit_choices_to={'type': 'P'}, on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        ExtendedGroup, limit_choices_to={'type': 'P'},
+        on_delete=models.CASCADE)
     attribute = models.CharField(max_length=255)
 
     def __str__(self):

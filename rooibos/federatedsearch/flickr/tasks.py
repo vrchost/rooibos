@@ -1,11 +1,11 @@
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
 from io import BytesIO
 
 from ...celeryapp import app
 
 from rooibos.data.models import Record
 from rooibos.storage.models import Media
-from rooibos.storage.functions import rotateImageBasedOnExif
+from rooibos.storage.functions import rotate_image_based_on_exif
 from .search import FlickrSearch
 from rooibos.util import guess_extension
 
@@ -26,5 +26,5 @@ def flickr_download_media(record_id, url):
     # should be done better: loading file into StringIO object to make it
     # seekable
     file = BytesIO(file.read())
-    file = rotateImageBasedOnExif(file)
+    file = rotate_image_based_on_exif(file)
     media.save_file(record.name + guess_extension(mimetype), file)

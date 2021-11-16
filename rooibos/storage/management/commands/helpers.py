@@ -1,7 +1,6 @@
 # helpers.py - DIDO image import and processing tool helper functions
 # Author: James Gray <grayj@uvic.ca>
 
-import glob
 import os
 import smtplib
 import subprocess
@@ -11,7 +10,6 @@ from contextlib import contextmanager
 from email.mime.text import MIMEText
 from rooibos.data.models import Record
 from rooibos.solr.models import mark_for_update
-from rooibos.storage.models import Media
 
 from config import ARCHIVE_DIR
 from config import COLLECTION_DIR
@@ -19,6 +17,7 @@ from config import FROM_ADDR
 from config import INCOMING_DIR
 from config import SERVER
 from config import TO_ADDRS
+
 
 @contextmanager
 def lock_file(lock):
@@ -39,6 +38,7 @@ def lock_file(lock):
         finally:
             os.remove(lock)
 
+
 def generate_paths(file_name, file_id):
     """
     Generate and return a dict containing absolute paths to files relevant
@@ -53,6 +53,7 @@ def generate_paths(file_name, file_id):
 
     return paths
 
+
 def convert_image(orig_file, new_file, quality=100):
     """
     Converts an image file to JPEG and scales it based on the specified
@@ -66,6 +67,7 @@ def convert_image(orig_file, new_file, quality=100):
             img.thumbnail(size=(4000, 4000))
         img.save(new_file, format='JPEG', quality=quality)
         del img
+
 
 def add_record_to_database(file_id, storage, field, image_number):
     """
@@ -100,6 +102,7 @@ def add_record_to_database(file_id, storage, field, image_number):
     # Index the new record in solr
     mark_for_update(record.id)
 
+
 def delete_thumbs(record, thumb_dir):
     """
     Remove thumbnails for the given record so mdid3 will regenerate them.
@@ -110,6 +113,7 @@ def delete_thumbs(record, thumb_dir):
         for filename in os.listdir(path):
             if filename.startswith('%s-' % media.id):
                 os.remove(os.path.join(path, filename))
+
 
 def send_report(meta=None, exception=None):
     """
@@ -159,6 +163,7 @@ def send_report(meta=None, exception=None):
     s.sendmail(FROM_ADDR, TO_ADDRS, msg.as_string())
     s.quit()
 
+
 def extract_mimetype(filename):
     """
     Extracts the mimetype from a given file using the unix ``file`` command.
@@ -172,7 +177,7 @@ def extract_mimetype(filename):
     )
     output, _ = p.communicate()
 
-    _, mimetype, _ = output.split(' ') # Extract the mimetype
-    mimetype = mimetype[:-1] # Strip off trailing semicolon
+    _, mimetype, _ = output.split(' ')  # Extract the mimetype
+    mimetype = mimetype[:-1]  # Strip off trailing semicolon
 
     return mimetype

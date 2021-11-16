@@ -9,9 +9,9 @@ class Command(BaseCommand):
     help = 'Pre-builds thumbnails for a collection'
 
     def add_arguments(self, parser):
-        parser.add_argument('--collection', '-c', dest='collection',
-                    help='Collection')
-
+        parser.add_argument(
+            '--collection', '-c', dest='collection',
+            help='Collection')
 
     def handle(self, *args, **kwargs):
 

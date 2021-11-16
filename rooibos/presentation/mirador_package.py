@@ -62,7 +62,8 @@ class MiradorPackageViewer(Viewer):
             'manifest_url': '/presentation/manifest.json',
         })
 
-        manifest = raw_manifest(request, self.obj.id, self.obj.name, offline=True)
+        manifest = raw_manifest(
+            request, self.obj.id, self.obj.name, offline=True)
 
         output.writestr('presentation/index.html', page)
         output.writestr('presentation/manifest.json', json.dumps(manifest))
@@ -81,7 +82,7 @@ class MiradorPackageViewer(Viewer):
 
         for item in items:
             image = get_image_for_record(
-                    item.record, self.user, passwords=passwords)
+                item.record, self.user, passwords=passwords)
             outpath = item.record.get_image_url(
                 force_reprocess=False,
                 handler='storage-retrieve-iiif-image',
@@ -90,7 +91,7 @@ class MiradorPackageViewer(Viewer):
                 output.write(image, outpath)
 
             image = get_image_for_record(
-                    item.record, self.user, 100, 100, passwords=passwords)
+                item.record, self.user, 100, 100, passwords=passwords)
             if image:
                 output.write(
                     image,
@@ -98,11 +99,15 @@ class MiradorPackageViewer(Viewer):
                 )
 
         output.writestr(
-            reverse('presentation-blank-slide', kwargs=dict(extra='')).strip('/'),
+            reverse(
+                'presentation-blank-slide', kwargs=dict(extra='')).strip('/'),
             transparent_png(request, None).content
         )
         output.writestr(
-            reverse('presentation-missing-slide', kwargs=dict(extra='')).strip('/'),
+            reverse(
+                'presentation-missing-slide',
+                kwargs=dict(extra='')
+            ).strip('/'),
             missing_png(request, None).content
         )
 

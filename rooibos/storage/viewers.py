@@ -59,8 +59,7 @@ class MediaPlayer(Viewer):
 
         def media_choices():
             return (
-                (('', 'default'),) +
-                tuple(
+                (('', 'default'),) + tuple(
                     (media.id, media_label(media))
                     for media in _supported_media(self.obj, self.user)
                 )
@@ -90,7 +89,8 @@ class MediaPlayer(Viewer):
         streaming_server = None
         streaming_media = None
 
-        server = '//' + request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+        server = '//' + request.META.get(
+            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
 
         if delivery_url.startswith('rtmp://'):
             try:
@@ -150,7 +150,8 @@ class GifViewer(Viewer):
 
         selectedmedia = media[0]
 
-        server = '//' + request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+        server = '//' + request.META.get(
+            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
 
         return render(
             request,
@@ -185,10 +186,10 @@ def _get_youtube_links(record):
             .replace('//youtu.be/', '//www.youtube.com/watch?v=')
 
     q = (
-            Q(index_value__startswith='https://www.youtube.com/watch?v=') |
-            Q(index_value__startswith='http://www.youtube.com/watch?v=') |
-            Q(index_value__startswith='https://youtu.be/') |
-            Q(index_value__startswith='http://youtu.be/')
+        Q(index_value__startswith='https://www.youtube.com/watch?v=')
+        | Q(index_value__startswith='http://www.youtube.com/watch?v=')
+        | Q(index_value__startswith='https://youtu.be/')
+        | Q(index_value__startswith='http://youtu.be/')
     )
 
     return [
@@ -278,13 +279,15 @@ class VimeoViewer(Viewer):
         if not links:
             raise Http404()
 
+        vimeo_id = links[0]['value'].replace('https://vimeo.com/', '')
+
         return render(
             request,
             'storage_vimeoviewer.js',
             {
                 'record': self.obj,
                 'anchor_id': divid,
-                'vimeo_id': links[0]['value'].replace('https://vimeo.com/', ''),
+                'vimeo_id': vimeo_id,
             }
         )
 

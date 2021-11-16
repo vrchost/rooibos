@@ -85,8 +85,8 @@ LORIS_CONF = """
 #
 # <http://www.voidspace.org.uk/python/configobj.html>
 #
-# ConfigObj uses an ini-like syntax with a few important changes and extensions,
-# which are explained here:
+# ConfigObj uses an ini-like syntax with a few important changes and
+# extensions, which are explained here:
 #
 # <http://www.voidspace.org.uk/python/configobj.html#config-files>
 #
@@ -151,14 +151,16 @@ src_img_root = '/usr/local/share/images' # r--
 #pw='<if needed else remove this line>'
 #cert='<SSL client cert for authentication>'
 #key='<SSL client key for authentication>'
-#ssl_check='<Check for SSL errors. Defaults to True. Set to False to ignore issues with self signed certificates>'
+#ssl_check='<Check for SSL errors. Defaults to True.
+#           Set to False to ignore issues with self signed certificates>'
 
 # Sample config for TemplateHTTResolver config
 # [resolver]
 # impl = 'loris.resolver.TemplateHTTPResolver'
 # cache_root='/usr/local/share/images/loris'
 ## optional settings
-# delimiter = "|" # optional delimiter for splitting identifier, allowing for n-values to be inserted into the template
+# delimiter = "|" # optional delimiter for splitting identifier, allowing for
+#                   n-values to be inserted into the template
 # default_format
 # head_resolvable = False
 # templates = 'a, b, fedora, devfedora, fedora_obj_ds'
@@ -175,7 +177,8 @@ src_img_root = '/usr/local/share/images' # r--
 # cert='/path/to/client.pem'
 # key='/path/to/client.key'
 # [[fedora_obj_ds]]
-# url = 'http://<server>/fedora/objects/%s/datastreams/%s/content' # as used with delimiter option below
+# url = 'http://<server>/fedora/objects/%s/datastreams/%s/content' # as used
+#                                                  with delimiter option below
 
 [img.ImageCache]
 cache_dp = '/var/cache/loris' # rwx

@@ -26,7 +26,8 @@ def update_actionbar_tags(request, *objects):
     remove_tags = [
         tag_name
         for tag_name in all_tags
-        if tag_name not in list(update_tags.keys()) and tag_name not in new_tags
+        if tag_name not in list(update_tags.keys())
+        and tag_name not in new_tags
     ]
 
     for obj in objects:

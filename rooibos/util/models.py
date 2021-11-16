@@ -16,11 +16,11 @@ class OwnedWrapperManager(models.Manager):
             pass
 
         with transaction.atomic():
+            ct = OwnedWrapper.t(object.__class__) if object else type
             obj, created = self.get_or_create(
                 user=user,
                 object_id=object and object.id or object_id,
-                content_type=object and
-                OwnedWrapper.t(object.__class__) or type
+                content_type=ct
             )
         return obj
 

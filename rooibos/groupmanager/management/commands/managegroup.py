@@ -8,33 +8,43 @@ from rooibos.access.models import AccessControl, ContentType
 
 class Command(BaseCommand):
     def add_arguments(self, parser):
-        parser.add_argument('--name', '-n', dest='usergroup',
-                    help='Name of user group to be managed')
-        parser.add_argument('--storage', '-s', dest='storagepath',
-                    help='Create storage at specified path')
-        parser.add_argument('--storageurlbase', dest='storageurlbase',
-                    help='Storage URL base')
-        parser.add_argument('--storageserverbase', dest='storageserverbase',
-                    help='Storage server base')
-        parser.add_argument('--collection', '-c', dest='createcollection',
-                    action='store_true', help='Create collection')
-        parser.add_argument('--collectiongroup', '-g', dest='collectiongroup',
-                    help='Name of optional collection group')
-        parser.add_argument('--users', '-u', dest='users',
-                    help='Comma-separated list of usernames for group ' +
-                    '(removes all others)')
-        parser.add_argument('--adduser', '-a', dest='addusers', action='append',
-                    help='Add user(s) to group (comma-separated list ' +
-                    'or repeated argument')
-        parser.add_argument('--removeuser', '-r', dest='removeusers', action='append',
-                    help='Remove user(s) from group (comma-separated list ' +
-                    'or repeated argument')
-        parser.add_argument('--createusers', dest='createusers', action='store_true',
-                    help='Create missing user accounts. If specified, list ' +
-                    'users as username:email:firstname:lastname:password ' +
-                    'with anything other than username being optional')
+        parser.add_argument(
+            '--name', '-n', dest='usergroup',
+            help='Name of user group to be managed')
+        parser.add_argument(
+            '--storage', '-s', dest='storagepath',
+            help='Create storage at specified path')
+        parser.add_argument(
+            '--storageurlbase', dest='storageurlbase',
+            help='Storage URL base')
+        parser.add_argument(
+            '--storageserverbase', dest='storageserverbase',
+            help='Storage server base')
+        parser.add_argument(
+            '--collection', '-c', dest='createcollection',
+            action='store_true', help='Create collection')
+        parser.add_argument(
+            '--collectiongroup', '-g', dest='collectiongroup',
+            help='Name of optional collection group')
+        parser.add_argument(
+            '--users', '-u', dest='users',
+            help='Comma-separated list of usernames for group '
+                 '(removes all others)')
+        parser.add_argument(
+            '--adduser', '-a', dest='addusers', action='append',
+            help='Add user(s) to group (comma-separated list '
+                 'or repeated argument')
+        parser.add_argument(
+            '--removeuser', '-r', dest='removeusers', action='append',
+            help='Remove user(s) from group (comma-separated list '
+                 'or repeated argument')
+        parser.add_argument(
+            '--createusers', dest='createusers', action='store_true',
+            help='Create missing user accounts. If specified, list '
+                 'users as username:email:firstname:lastname:password '
+                 'with anything other than username being optional')
 
-    help = "Creates groups, manages memberships and optionally creates " + \
+    help = "Creates groups, manages memberships and optionally creates " \
            "associated storage and collection"
 
     def handle(self, *args, **kwargs):

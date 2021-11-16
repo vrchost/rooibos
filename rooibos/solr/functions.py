@@ -56,8 +56,8 @@ class PrimaryWorkRecordManager(object):
     def get_implicit_primary_work_records(self, record_ids):
         self._fetch_works_with_primary_records()
         works_without_primary_records = (
-            self._works_for_records(record_ids) -
-            self._works_with_primary_records
+            self._works_for_records(record_ids)
+            - self._works_with_primary_records
         )
 
         # get records for works without primary records
@@ -125,8 +125,11 @@ class SolrIndex():
             presentations = r.get('presentations')
             if record and presentations:
                 record.solr_presentation_ids = presentations
-        return (result.hits, [_f for _f in [records.get(i) for i in ids] if _f],
-                result.facets)
+        return (
+            result.hits,
+            [_f for _f in [records.get(i) for i in ids] if _f],
+            result.facets
+        )
 
     def terms(self):
         conn = Solr(settings.SOLR_URL)
@@ -426,7 +429,8 @@ class SolrIndex():
     def _record_to_solr(self, record, core_fields, groups, fieldvalues, media,
                         image_to_works, work_to_images,
                         implicit_primary_work_records):
-        required_fields = dict((f.full_name, f) for f in list(core_fields.keys()))
+        required_fields = dict(
+            (f.full_name, f) for f in list(core_fields.keys()))
         doc = {'id': str(record.id)}
         for v in fieldvalues:
             clean_value = self._clean_string(v.value)
@@ -447,8 +451,8 @@ class SolrIndex():
                             doc.setdefault('work', []).append(clean_value)
                     break
             else:
-                if (v.field == self.system_field and
-                        v.label == 'primary-work-record'):
+                if (v.field == self.system_field
+                        and v.label == 'primary-work-record'):
                     doc.setdefault(
                         'primary_work_record', []
                     ).append(v.value)
@@ -489,7 +493,7 @@ class SolrIndex():
                     self._determine_resolution_label(m.width, m.height)))
             try:
                 doc.setdefault('filecontent', []).append(m.extract_text())
-            except:
+            except Exception:
                 pass
         # Index tags
         for ownedwrapper in OwnedWrapper.objects.select_related('user').filter(

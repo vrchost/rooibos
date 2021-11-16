@@ -98,7 +98,7 @@ def _pdfthumbnail(infile):
         result = BytesIO(file.read())
         file.close()
         return result, output, errors
-    except:
+    except Exception:
         logger.exception('Could not create PDF thumbnail')
         return None, None, None
     finally:
@@ -208,7 +208,7 @@ def thumbnail_from_pptx(pptxfile):
             image = BytesIO(pptx.open('docProps/thumbnail.jpeg').read())
             image.seek(0)
             return image
-    except:
+    except IOError:
         logging.debug(
             'Cannot extract thumbnail from PPTX file %s' % pptxfile,
             exc_info=True,

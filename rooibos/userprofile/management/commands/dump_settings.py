@@ -9,8 +9,9 @@ class Command(BaseCommand):
     help = 'Print user profile settings in JSON format'
 
     def add_arguments(self, parser):
-        parser.add_argument('--user', '-u', dest='user',
-                    help='User name'),
+        parser.add_argument(
+            '--user', '-u', dest='user',
+            help='User name'),
 
     def handle(self, *args, **kwargs):
 

@@ -37,16 +37,19 @@ def joblist(request):
     except EmptyPage:
         jobs = paginator.page(paginator.num_pages)
 
-    return render(request, "workers_jobs.html",
-                              {'jobs': jobs,
-                               'highlight': highlight,
-                               })
+    return render(
+        request,
+        "workers_jobs.html",
+        {
+            'jobs': jobs,
+            'highlight': highlight,
+        }
+    )
 
 
 @login_required
 def download_attachment(request, url):
     attachment = os.path.join(_get_scratch_dir(), url)
     retval = HttpResponse(content=open(attachment, 'rb'))
-    retval["Content-Disposition"] = \
-            'attachment; filename="%s"' % url
+    retval["Content-Disposition"] = 'attachment; filename="%s"' % url
     return retval

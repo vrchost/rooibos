@@ -1,4 +1,4 @@
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
 import logging
 import shutil
 import os
@@ -26,7 +26,7 @@ def check_remote_metadata():
         )
         try:
             request = urllib.request.Request(source.url)
-            request.get_method = lambda : 'HEAD'
+            request.get_method = lambda: 'HEAD'
             response = urllib.request.urlopen(request)
         except Exception:
             logger.exception(
@@ -75,7 +75,8 @@ def fetch_remote_metadata():
     tasks = []
 
     for source in check_remote_metadata():
-        filename = "".join(random.sample(string.ascii_lowercase + string.digits, 32))
+        filename = "".join(
+            random.sample(string.ascii_lowercase + string.digits, 32))
         full_metadata_path = os.path.join(
             _get_scratch_dir(), 'remote-metadata=' + filename)
         full_mapping_path = os.path.join(
@@ -108,4 +109,3 @@ def fetch_remote_metadata():
         'Submitted import job for remote metadata %r with task %s' %
         (ids, task.id)
     )
-

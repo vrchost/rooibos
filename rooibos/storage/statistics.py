@@ -13,7 +13,7 @@ def storages():
         for m in media:
             try:
                 total += storage.size(m)
-            except:
+            except Exception:
                 pass
 
         values_dict = dict(count=media.count(), size=total)

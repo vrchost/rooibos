@@ -85,8 +85,11 @@ class MigrateModel(object):
             )
         )
         self.instance_map = MigrateModel.instance_maps.setdefault(
-            model._meta.verbose_name_raw.replace(' ', '') +
-            ('' if not m2m_model else '_' + m2m_model._meta.verbose_name_raw),
+            model._meta.verbose_name_raw.replace(' ', '')
+            + (
+                '' if not m2m_model
+                else '_' + m2m_model._meta.verbose_name_raw
+            ),
             dict()
         )
         self.content_type = ContentType.objects.get_for_model(model)
@@ -136,10 +139,10 @@ class MigrateModel(object):
 
     def m2m_create(self, row):
         # needs to return (object_id, m2m_object_id) tuple
-        raise NotImplemented
+        raise NotImplementedError
 
     def m2m_delete(self, object_id, m2m_object_id):
-        raise NotImplemented
+        raise NotImplementedError
 
     def key(self, row):
         return str(row.ID)
@@ -243,16 +246,16 @@ class MigrateModel(object):
                     try:
                         instance = self.create(row)
                         if instance:
-                                instance.save()
-                                self.post_save(instance, row)
-                                ObjectHistory.objects.create(
-                                    content_type=self.content_type,
-                                    object_id=instance.id,
-                                    type=self.type,
-                                    original_id=self.key(row),
-                                    content_hash=hash,
-                                )
-                                self.added += 1
+                            instance.save()
+                            self.post_save(instance, row)
+                            ObjectHistory.objects.create(
+                                content_type=self.content_type,
+                                object_id=instance.id,
+                                type=self.type,
+                                original_id=self.key(row),
+                                content_hash=hash,
+                            )
+                            self.added += 1
                         else:
                             logging.error("No instance created: %s %s" % (
                                 self.model_name, self.key(row)))
@@ -343,7 +346,7 @@ class MigrateModel(object):
                 (ids.get(o.id, None), o) for o in self.model.objects.all())
             self.instance_map.update(merged_ids)
 
-        print("  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t" \
+        print("  Added\tReadded\tDeleted\tUpdated\t  Unch.\t Merged\t"
               " Errors\tNo hist")
         print("%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d\t%7d" % (
             self.added, self.recreated, self.deleted, self.updated,
@@ -717,8 +720,8 @@ class MigrateCollectionItems(MigrateModel):
             raise IntegrityError()
         instance.collection = self.collections[str(row.CollectionID)]
         instance.hidden = bool(
-            self.records[str(row.ID)].owner and
-            not ((row.Flags or 0) & IMAGE_SHARED)
+            self.records[str(row.ID)].owner
+            and not ((row.Flags or 0) & IMAGE_SHARED)
         )
 
     def create_instance(self, row):
@@ -1177,7 +1180,8 @@ class MigratePermissions(MigrateModel):
     def __init__(self, cursor, type, code, instances, query=None, label=None):
         if not query:
             query = "SELECT ID,ObjectID,UserID,GroupID,GrantPriv,DenyPriv " \
-            "FROM accesscontrol WHERE ObjectType='%s' AND ObjectID>0" % code
+                "FROM accesscontrol WHERE ObjectType='%s' AND ObjectID>0" % \
+                code
         super(MigratePermissions, self).__init__(
             cursor=cursor,
             model=AccessControl,
@@ -1430,5 +1434,5 @@ class Command(BaseCommand):
         for i, m in enumerate(migrations):
             m(get_cursor()).run(step=i + 1, steps=len(migrations))
 
-        print("You must now run 'manage.py solr reindex' to rebuild " \
-            "the full-text index.")
+        print("You must now run 'manage.py solr reindex' to rebuild "
+              "the full-text index.")

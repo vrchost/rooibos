@@ -1,6 +1,6 @@
 import tempfile
 from .base import *  # NOQA
-from .base import _get_log_handler
+from .base import LOGGING, _get_log_handler
 
 
 DEBUG = False

@@ -7,13 +7,17 @@ class Command(BaseCommand):
     help = 'Finds and combines equivalent fields'
 
     def add_arguments(self, parser):
-        parser.add_argument('--execute', action='store_true',
+        parser.add_argument(
+            '--execute', action='store_true',
             help='Combine automatically detected fields',)
-        parser.add_argument('--ignorevocabs', action='store_true',
+        parser.add_argument(
+            '--ignorevocabs', action='store_true',
             help='Ignore vocabularies when comparing fields',)
-        parser.add_argument('--merge', action='store',
+        parser.add_argument(
+            '--merge', action='store',
             help='Field to merge into another field',)
-        parser.add_argument('--into', action='store',
+        parser.add_argument(
+            '--into', action='store',
             help='Field into which to merge another field',)
 
     def handle(self, *commands, **options):

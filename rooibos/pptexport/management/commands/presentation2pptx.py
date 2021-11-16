@@ -112,7 +112,9 @@ class Command(BaseCommand):
             since = datetime.datetime.combine(
                 datetime.date.today() - datetime.timedelta(options['days']),
                 datetime.time.min)
-            print("Exporting presentations modified since %s" % since, file=sys.stderr)
+            print(
+                "Exporting presentations modified since %s" % since,
+                file=sys.stderr)
             presentations = presentations.filter(modified__gte=since)
         if options.get('min_id'):
             presentations = presentations.filter(id__gte=options['min_id'])

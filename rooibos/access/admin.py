@@ -38,13 +38,13 @@ class UsernameField(forms.CharField):
     def prepare_value(self, value):
         try:
             return User.objects.get(id=value).username
-        except:
+        except User.DoesNotExist:
             return super(UsernameField, self).prepare_value(value)
 
     def clean(self, value):
         try:
             return User.objects.get(username=value)
-        except:
+        except User.DoesNotExist:
             raise forms.ValidationError('Invalid or non-existent username.')
 
 

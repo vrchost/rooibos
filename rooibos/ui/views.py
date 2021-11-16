@@ -3,7 +3,6 @@ from django import forms
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseNotAllowed
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
@@ -33,9 +32,7 @@ import random
 
 @cache_control(max_age=24 * 3600)
 def css(request, stylesheet):
-
-    return render(request, stylesheet + '.css',
-                              content_type='text/css')
+    return render(request, stylesheet + '.css', content_type='text/css')
 
 
 @csrf_protect
@@ -62,10 +59,14 @@ def main(request):
     request.session.set_test_cookie()
     form = AuthenticationForm()
 
-    return render(request, 'main.html',
-                              {'records': records,
-                               'order': [0] + order,
-                               'login_form': form})
+    return render(
+        request, 'main.html',
+        {
+            'records': records,
+            'order': [0] + order,
+            'login_form': form
+        }
+    )
 
 
 @json_view
@@ -112,10 +113,11 @@ def remove_tag(request, type, id):
         ownedwrapper = OwnedWrapper.objects.get_for_object(
             user=request.user, type=type, object_id=id)
         Tag.objects.update_tags(
-            ownedwrapper, ' '.join(
-                ['"%s"' % s for s in Tag.objects.get_for_object(ownedwrapper).exclude(name=tag)
-                    .values_list('name')]
-            )
+            ownedwrapper, ' '.join([
+                '"%s"' % s
+                for s in Tag.objects.get_for_object(ownedwrapper)
+                .exclude(name=tag).values_list('name')
+            ])
         )
         if request.is_ajax():
             return HttpResponse(

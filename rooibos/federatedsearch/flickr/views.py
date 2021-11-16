@@ -46,7 +46,8 @@ def search(request):
     else:
         next_page_url = None
 
-    return render(request,
+    return render(
+        request,
         'flickr-results.html',
         {
             'query': query,

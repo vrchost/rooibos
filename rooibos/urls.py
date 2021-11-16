@@ -9,7 +9,7 @@ from django.template import loader
 from rooibos.ui.views import main
 from rooibos.access.views import login, logout
 from rooibos.legacy.views import legacy_viewer
-from rooibos.version import getVersion
+from rooibos.version import get_version
 
 
 admin.autodiscover()
@@ -49,7 +49,7 @@ urls = [
     url(
         r'^about/',
         TemplateView.as_view(template_name='about.html'),
-        kwargs={'version': getVersion()},
+        kwargs={'version': get_version()},
         name='about'
     ),
     url(

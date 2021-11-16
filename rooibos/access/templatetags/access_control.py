@@ -50,7 +50,8 @@ def permissions_modify_url(parser, token):
     try:
         tag_name, object = token.split_contents()
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires a single argument" % token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires a single argument" % token.contents.split()[0])
     return PermissionsModifyUrlNode(object)
 
 

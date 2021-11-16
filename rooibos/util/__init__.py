@@ -44,7 +44,7 @@ def json_view(func):
             subject = 'JSON view error: %s' % request.path
             try:
                 request_repr = repr(request)
-            except:
+            except Exception:
                 request_repr = 'Request repr() unavailable'
             import traceback
             message = 'Traceback:\n%s\n\nRequest:\n%s' % (
@@ -102,9 +102,8 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name',
             slug = slugify(getattr(item, slug_field))
         else:
             slug = slugify(
-                slug_source and
-                getattr(item, slug_source, slug_literal) or
-                slug_literal
+                getattr(item, slug_source, slug_literal)
+                if slug_source else slug_literal
             )
         slug = slug[:max_length]
         slug_check = slug[:min(len(slug), max_length - len(str(sys.maxsize)))]
@@ -114,13 +113,16 @@ def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name',
 
         # check to see if slug needs to be unique together
         # with another field only
-        unique_together = [f for f in item_model._meta.unique_together if slug_field in f]
+        unique_together = [
+            f for f in item_model._meta.unique_together
+            if slug_field in f
+        ]
         # only handle simple case of one unique_together with
         # one additional field
         if len(unique_together) == 1 and len(unique_together[0]) == 2:
-            l = list(unique_together[0])
-            l.remove(slug_field)
-            unique_with = l[0]
+            lst = list(unique_together[0])
+            lst.remove(slug_field)
+            unique_with = lst[0]
             query = query & item_model.objects.complex_filter(
                 {unique_with: getattr(item, unique_with)})
 
@@ -161,9 +163,9 @@ def xfilter(func, iterator):
     """Iterative version of builtin 'filter'."""
     iterator = iter(iterator)
     while 1:
-        next = next(iterator)
-        if func(next):
-            yield next
+        nxt = next(iterator)
+        if func(nxt):
+            yield nxt
 
 
 def create_link(file, link, hard=False):

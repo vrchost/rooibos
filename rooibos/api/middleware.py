@@ -35,10 +35,10 @@ class CookielessSessionMiddleware(object):
 
     def process_response(self, request, response):
 
-        if (not request.path.startswith("/admin") and
-                hasattr(response, 'cookies') and
-                'sessionid' in response.cookies and
-                'fake-session' not in request.COOKIES):
+        if (not request.path.startswith("/admin")
+                and hasattr(response, 'cookies')
+                and 'sessionid' in response.cookies
+                and 'fake-session' not in request.COOKIES):
             try:
                 sessionid = response.cookies['sessionid'].coded_value
                 if type(response) is HttpResponseRedirect:
@@ -46,7 +46,8 @@ class CookielessSessionMiddleware(object):
                     if not sessionid:
                         sessionid = ""
                     redirect_url = [
-                        x[1] for x in list(response.items()) if x[0] == "Location"
+                        x[1] for x in list(response.items())
+                        if x[0] == "Location"
                     ][0]
                     redirect_url = self._prepare_url(redirect_url)
                     return HttpResponseRedirect(
@@ -79,7 +80,7 @@ class CookielessSessionMiddleware(object):
                     repl_form, response.content)
 
                 return response
-            except:
+            except Exception:
 
                 return response
         else:

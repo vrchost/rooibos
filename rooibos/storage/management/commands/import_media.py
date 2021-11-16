@@ -213,7 +213,7 @@ class Command(BaseCommand):
 
                     print()
                     print()
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             raise
         finally:

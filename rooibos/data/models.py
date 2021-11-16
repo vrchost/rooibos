@@ -35,7 +35,8 @@ class Collection(models.Model):
     children = models.ManyToManyField(
         'self', symmetrical=False, blank=True, serialize=False)
     records = models.ManyToManyField('Record', through='CollectionItem')
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False, serialize=False)
     description = models.TextField(blank=True)
     agreement = models.TextField(blank=True, null=True)
@@ -143,11 +144,13 @@ class Record(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
     name = models.SlugField(max_length=50, unique=True)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+    parent = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.CASCADE)
     source = models.CharField(max_length=1024, null=True, blank=True)
     manager = models.CharField(max_length=50, null=True, blank=True)
     next_update = models.DateTimeField(null=True, blank=True, serialize=False)
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
 
     class Meta:
         app_label = 'data'
@@ -345,11 +348,10 @@ class Record(models.Model):
 
         for i in range(0, len(values)):
             values[i].subitem = (
-                i > 0 and
-                values[i].field == values[i - 1].field and
-                values[i].group == values[i - 1].group and
-                values[i].resolved_label ==
-                values[i - 1].resolved_label
+                i > 0
+                and values[i].field == values[i - 1].field
+                and values[i].group == values[i - 1].group
+                and values[i].resolved_label == values[i - 1].resolved_label
             )
 
         return values
@@ -529,11 +531,13 @@ class Field(models.Model):
     name = models.SlugField(max_length=50)
     old_name = models.CharField(
         max_length=100, null=True, blank=True, serialize=False)
-    standard = models.ForeignKey(MetadataStandard, null=True, blank=True, on_delete=models.CASCADE)
+    standard = models.ForeignKey(
+        MetadataStandard, null=True, blank=True, on_delete=models.CASCADE)
     equivalent = models.ManyToManyField("self", blank=True)
     # TODO: serialize vocabularies
     vocabulary = models.ForeignKey(
-        Vocabulary, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
+        Vocabulary, null=True, blank=True, serialize=False,
+        on_delete=models.CASCADE)
 
     def natural_key(self):
         return (self.standard.prefix if self.standard else '', self.name,)
@@ -602,7 +606,8 @@ class FieldSet(models.Model):
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
     fields = models.ManyToManyField(Field, through='FieldSetField')
-    owner = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.CASCADE)
     standard = models.BooleanField(default=False)
 
     def save(self, **kwargs):
@@ -624,9 +629,9 @@ class FieldSet(models.Model):
     @staticmethod
     def for_user(user):
         return FieldSet.objects.filter(
-            Q(owner=None) |
-            Q(standard=True) |
-            (Q(owner=user) if user and user.is_authenticated else Q())
+            Q(owner=None)
+            | Q(standard=True)
+            | (Q(owner=user) if user and user.is_authenticated else Q())
         )
 
 
@@ -646,10 +651,12 @@ class FieldSetField(models.Model):
 
 
 class FieldValue(models.Model):
-    record = models.ForeignKey(Record, editable=False, on_delete=models.CASCADE)
+    record = models.ForeignKey(
+        Record, editable=False, on_delete=models.CASCADE)
     field = models.ForeignKey(Field, on_delete=models.CASCADE)
     refinement = models.CharField(max_length=100, null=True, blank=True)
-    owner = models.ForeignKey(User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
+    owner = models.ForeignKey(
+        User, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
     label = models.CharField(max_length=100, null=True, blank=True)
     hidden = models.BooleanField(default=False)
     order = models.IntegerField(default=0)
@@ -667,7 +674,8 @@ class FieldValue(models.Model):
         max_digits=18, decimal_places=4, null=True, blank=True)
     language = models.CharField(max_length=5, null=True, blank=True)
     context_type = models.ForeignKey(
-        ContentType, null=True, blank=True, serialize=False, on_delete=models.CASCADE)
+        ContentType, null=True, blank=True, serialize=False,
+        on_delete=models.CASCADE)
     context_id = models.PositiveIntegerField(
         null=True, blank=True, serialize=False)
     context = GenericForeignKey('context_type', 'context_id')
@@ -782,8 +790,8 @@ def standardfield_ids(field, standard='dc', equiv=False):
         return []
     if equiv:
         ids = Field.objects.filter(
-            Q(id=f.id) |
-            Q(id__in=f.get_equivalent_fields())
+            Q(id=f.id)
+            | Q(id__in=f.get_equivalent_fields())
         ).values_list('id', flat=True)
     else:
         ids = [f.id]

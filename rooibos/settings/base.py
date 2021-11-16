@@ -14,12 +14,6 @@ install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 if install_dir not in sys.path:
     sys.path.insert(0, install_dir)
 
-# Detect if we installed in an extra sub-directory or not
-# (Windows and Ubuntu instructions differ here)
-#if os.path.exists(os.path.join(install_dir, 'rooibos', 'urls.py')):
-#    package_dir = install_dir
-#else:
-#    package_dir = os.path.join(install_dir, 'rooibos')
 package_dir = install_dir
 
 DEBUG = False

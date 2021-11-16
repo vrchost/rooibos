@@ -144,7 +144,10 @@ def record(request, id, name, contexttype=None, contextid=None,
         download_image = download_image or \
             m.is_downloadable_by(request.user, original=False)
 
-    media = [m for m in media if m.downloadable_in_template or m.editable_in_template]
+    media = [
+        m for m in media
+        if m.downloadable_in_template or m.editable_in_template
+    ]
 
     edit = edit and request.user.is_authenticated
 
@@ -298,7 +301,8 @@ def record(request, id, name, contexttype=None, contextid=None,
                 # Explicitly remove deleted objects
                 for instance in formset.deleted_objects:
                     instance.delete()
-                o1 = fieldvalues and max(v.order or 0 for v in fieldvalues) or 0
+                o1 = max(v.order or 0 for v in fieldvalues) \
+                    if fieldvalues else 0
                 o2 = instances and max(v.order or 0 for v in instances) or 0
                 order = max(o1, o2, 0)
                 for instance in instances:
@@ -448,7 +452,8 @@ def record(request, id, name, contexttype=None, contextid=None,
     if formset and getattr(settings, 'HIDE_RECORD_FIELDSETS', False):
         fieldsetform = None
 
-    return render(request,
+    return render(
+        request,
         'data_record.html',
         {
             'record': record,
@@ -529,7 +534,8 @@ def data_import(request):
     else:
         form = UploadFileForm()
 
-    return render(request,
+    return render(
+        request,
         'data_import.html',
         {
             'form': form,
@@ -658,8 +664,8 @@ def data_import_file(request, file):
                 m = self.forms[i].cleaned_data['mapping']
                 if m and int(m) in _identifier_ids:
                     return
-            raise forms.ValidationError("At least one field must be mapped " \
-                "to an identifier field.")
+            raise forms.ValidationError(
+                "At least one field must be mapped to an identifier field.")
 
     create_mapping_formset = formset_factory(
         MappingForm, extra=0, formset=BaseMappingFormSet, can_order=True)
@@ -799,7 +805,8 @@ def data_import_file(request, file):
         mapping_formset = create_mapping_formset(initial=mapping, prefix='m')
         form = ImportOptionsForm(initial=options)
 
-    return render(request,
+    return render(
+        request,
         'data_import_file.html',
         {
             'form': form,
@@ -812,7 +819,8 @@ def data_import_file(request, file):
 
 def record_preview(request, id):
     record = Record.get_or_404(id, request.user)
-    return render(request,
+    return render(
+        request,
         'data_previewrecord.html',
         {
             'record': record,
@@ -826,7 +834,8 @@ def manage_collections(request):
 
     collections = filter_by_access(request.user, Collection, manage=True)
 
-    return render(request,
+    return render(
+        request,
         'data_manage_collections.html',
         {
             'collections': collections,
@@ -901,8 +910,8 @@ def manage_collection(request, id=None, name=None):
     if request.method == "POST":
         if request.POST.get('delete-collection'):
             if not (
-                    request.user.is_superuser or
-                    request.user == collection.owner):
+                    request.user.is_superuser
+                    or request.user == collection.owner):
                 raise HttpResponseForbidden()
             messages.add_message(
                 request,
@@ -927,7 +936,8 @@ def manage_collection(request, id=None, name=None):
     else:
         form = CollectionForm(instance=collection)
 
-    return render(request,
+    return render(
+        request,
         'data_collection_edit.html',
         {
             'form': form,
@@ -973,7 +983,8 @@ def collection_dump_view(request, identifier, name):
 def mirador_embedded(request, identifier, name):
     record = Record.get_or_404(identifier, request.user)
     manifest_url = reverse(record_manifest, args=(identifier, name))
-    return render(request,
+    return render(
+        request,
         'data/mirador_embedded.html',
         {
             'record': record,

@@ -90,13 +90,16 @@ def effective_permissions(request, app_label, model, id, name):
         acluser = None
         acl = None
 
-    return render(request, 'access_effective_permissions.html',
-                              {'object': object,
-                               'contenttype': contenttype,
-                               'acluser': acluser,
-                               'acl': acl,
-                               'qsuser': username,
-                               })
+    return render(
+        request, 'access_effective_permissions.html',
+        {
+            'object': object,
+            'contenttype': contenttype,
+            'acluser': acluser,
+            'acl': acl,
+            'qsuser': username,
+        }
+    )
 
 
 def modify_permissions(request, app_label, model, id, name):
@@ -144,7 +147,9 @@ def modify_permissions(request, app_label, model, id, name):
             try:
                 return dict(
                     list(map(str.strip, kv.split('=', 1)))
-                    for kv in [_f for _f in map(str.strip, r.splitlines()) if _f]
+                    for kv in [
+                        _f for _f in map(str.strip, r.splitlines()) if _f
+                    ]
                 )
             except Exception:
                 raise forms.ValidationError(
@@ -224,9 +229,12 @@ def modify_permissions(request, app_label, model, id, name):
     else:
         ac_form = ACForm()
 
-    return render(request, 'access_modify_permissions.html',
-                              {'object': object,
-                               'contenttype': contenttype,
-                               'permissions': permissions,
-                               'ac_form': ac_form,
-                               })
+    return render(
+        request, 'access_modify_permissions.html',
+        {
+            'object': object,
+            'contenttype': contenttype,
+            'permissions': permissions,
+            'ac_form': ac_form,
+        }
+    )

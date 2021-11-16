@@ -4,8 +4,8 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from rooibos.data.models import Record, FieldSet, FieldValue, standardfield, \
-    standardfield_ids, title_from_fieldvalues
+from rooibos.data.models import Record, FieldSet, FieldValue, \
+    standardfield, title_from_fieldvalues
 from rooibos.storage.models import Media
 from rooibos.util import unique_slug
 from rooibos.access.functions import filter_by_access
@@ -21,7 +21,8 @@ class Presentation(models.Model):
     source = models.CharField(max_length=1024, null=True)
     description = models.TextField(blank=True, null=True)
     password = models.CharField(max_length=32, blank=True, null=True)
-    fieldset = models.ForeignKey(FieldSet, null=True, on_delete=models.CASCADE)
+    fieldset = models.ForeignKey(
+        FieldSet, null=True, on_delete=models.CASCADE)
     hide_default_data = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -98,14 +99,17 @@ class Presentation(models.Model):
             return []
 
     def verify_password(self, request):
-        self.unlocked = request.user.is_superuser or (
-            (self.owner == request.user) or
-            (not self.password) or
-            (request.session.get('passwords', dict()).get(str(self.id)) ==
-             self.password)
-        ) or (
-            filter_by_access(request.user, Presentation, manage=True)
-            .filter(id=self.id).count() > 0
+        passwords = request.session.get('passwords', dict())
+        self.unlocked = (
+            request.user.is_superuser
+            or (
+                (self.owner == request.user)
+                or (not self.password)
+                or passwords.get(str(self.id)) == self.password
+            ) or (
+                filter_by_access(request.user, Presentation, manage=True)
+                .filter(id=self.id).count() > 0
+            )
         )
         return self.unlocked
 
@@ -114,9 +118,9 @@ class Presentation(models.Model):
         publish_permission = Permission.objects.get(
             codename='publish_presentations')
         valid_publishers = User.objects.filter(
-            Q(id__in=publish_permission.user_set.all()) |
-            Q(groups__id__in=publish_permission.group_set.all()) |
-            Q(is_superuser=True)
+            Q(id__in=publish_permission.user_set.all())
+            | Q(groups__id__in=publish_permission.group_set.all())
+            | Q(is_superuser=True)
         )
         q = Q(owner__in=valid_publishers) & Q(hidden=False)
         if owner and not owner.is_anonymous:
@@ -139,7 +143,8 @@ class Presentation(models.Model):
 
 class PresentationItem(models.Model):
 
-    presentation = models.ForeignKey('Presentation', related_name='items', on_delete=models.CASCADE)
+    presentation = models.ForeignKey(
+        'Presentation', related_name='items', on_delete=models.CASCADE)
     record = models.ForeignKey(Record, on_delete=models.CASCADE)
     hidden = models.BooleanField(default=False)
     type = models.CharField(max_length=16, blank=True)
@@ -225,6 +230,7 @@ class PresentationItem(models.Model):
 
 class PresentationItemInfo(models.Model):
 
-    item = models.ForeignKey('PresentationItem', related_name='media', on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        'PresentationItem', related_name='media', on_delete=models.CASCADE)
     media = models.ForeignKey(Media, on_delete=models.CASCADE)
     info = models.TextField(blank=True)

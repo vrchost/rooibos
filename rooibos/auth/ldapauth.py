@@ -13,20 +13,20 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
 
     def authenticate(self, username=None, password=None):
         for ldap_auth in settings.LDAP_AUTH:
-            l = None
+            conn = None
             try:
                 username = username.strip()
-                l = ldap.initialize(ldap_auth['uri'])
-                l.protocol_version = ldap_auth['version']
+                conn = ldap.initialize(ldap_auth['uri'])
+                conn.protocol_version = ldap_auth['version']
                 for option, value in ldap_auth['options'].items():
-                    l.set_option(getattr(ldap, option), value)
+                    conn.set_option(getattr(ldap, option), value)
 
                 if ldap_auth.get('bind_user'):
-                    l.simple_bind_s(
+                    conn.simple_bind_s(
                         ldap_auth['bind_user'],
                         ldap_auth.get('bind_password')
                     )
-                    result = l.search_s(
+                    result = conn.search_s(
                         ldap_auth['base'],
                         ldap_auth['scope'],
                         '%s=%s' % (ldap_auth['cn'], username),
@@ -51,11 +51,12 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                         dn = '%s=%s,%s' % (ldap_auth['cn'],
                                            username, ldap_auth['base'])
 
-                l.simple_bind_s(dn, password)
-                result = l.search_s(ldap_auth['base'],
-                                    ldap_auth['scope'],
-                                    '%s=%s' % (ldap_auth['cn'], username),
-                                    attrlist=ldap_auth['attributes'])
+                conn.simple_bind_s(dn, password)
+                result = conn.search_s(
+                    ldap_auth['base'],
+                    ldap_auth['scope'],
+                    '%s=%s' % (ldap_auth['cn'], username),
+                    attrlist=ldap_auth['attributes'])
                 # filter results to hits only
                 result = [r[1] for r in result if r[0]]
                 if len(result) != 1:
@@ -71,7 +72,7 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                 # fetch membership in specified groups
                 attributes['_groups'] = []
                 for group in ldap_auth.get('groups', ()):
-                    result = l.search_s(
+                    result = conn.search_s(
                         ldap_auth['base'],
                         ldap_auth['scope'],
                         '(&(objectClass=user)(%s=%s)(memberof=%s))' % (
@@ -94,8 +95,10 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
                     user = self._create_user(
                         username,
                         None,
-                        ' '.join(d(a) for a in attributes[ldap_auth['firstname']]),
-                        ' '.join(d(a) for a in attributes[ldap_auth['lastname']]),
+                        ' '.join(
+                            d(a) for a in attributes[ldap_auth['firstname']]),
+                        ' '.join(
+                            d(a) for a in attributes[ldap_auth['lastname']]),
                         d(email)
                     )
                 if not self._post_login_check(user, attributes):
@@ -104,6 +107,6 @@ class LdapAuthenticationBackend(BaseAuthenticationBackend):
             except ldap.LDAPError as error_message:
                 logging.debug('LDAP error: %s' % error_message)
             finally:
-                if l:
-                    l.unbind_s()
+                if conn:
+                    conn.unbind_s()
         return None

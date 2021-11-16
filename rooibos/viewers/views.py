@@ -20,8 +20,8 @@ def viewer_shell(request, viewer, objid, template='viewers_shell.html'):
             if getattr(settings, 'SHIB_ENABLED', False):
                 url = 'shib_login'
             return redirect(
-                reverse(url) + '?' +
-                urlencode((('next', request.get_full_path()),))
+                reverse(url) + '?'
+                + urlencode((('next', request.get_full_path()),))
             )
         raise Http404()
 

@@ -17,7 +17,7 @@ def download(request, id):
         return HttpResponseRedirect(return_url)
 
     color = request.GET.get('color')
-    if not color in COLORS.keys():
+    if color not in COLORS.keys():
         color = sorted(COLORS.keys())[0]
     titles = request.GET.get('titles', 'yes') == 'yes'
     metadata = not (request.GET.get('metadata', 'no') != 'yes')

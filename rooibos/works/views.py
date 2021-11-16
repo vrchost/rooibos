@@ -29,9 +29,9 @@ def search(request):
             record, owner=None, context=None,
             process_url=lambda url: url):
 
-        largeThumb = (
-            record.get_thumbnail_url('large', force_cdn=True) or
-            record.get_image_url(width=250, height=250)
+        large_thumb = (
+            record.get_thumbnail_url('large', force_cdn=True)
+            or record.get_image_url(width=250, height=250)
         )
 
         return dict(
@@ -40,7 +40,7 @@ def search(request):
             title=record.work_title,
             identifier=record.identifier,
             thumbnail=process_url(record.get_thumbnail_url()),
-            largeThumb=process_url(largeThumb),
+            largeThumb=process_url(large_thumb),
             image=process_url(record.get_image_url()),
             works=list(record.get_works()),
             work_images=record.get_image_records_query().count(),

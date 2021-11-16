@@ -8,11 +8,13 @@ class Command(BaseCommand):
     help = 'Import Archivision works spreadsheet'
 
     def add_arguments(self, parser):
-        parser.add_argument('--mapping', '-m', dest='mapping_file',
-                    help='Mapping CSV file')
-        parser.add_argument('--collection', '-c', dest='collections',
-                    action='append',
-                    help='Collection identifier (multiple allowed)')
+        parser.add_argument(
+            '--mapping', '-m', dest='mapping_file',
+            help='Mapping CSV file')
+        parser.add_argument(
+            '--collection', '-c', dest='collections',
+            action='append',
+            help='Collection identifier (multiple allowed)')
 
     def handle(self, *args, **kwargs):
 

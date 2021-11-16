@@ -79,7 +79,7 @@ EXIF_ROTATION = [
 ]
 
 
-def rotateImageBasedOnExif(stream):
+def rotate_image_based_on_exif(stream):
     image = Image.open(stream)
 
     try:
@@ -139,9 +139,10 @@ def get_media_for_record(record, user=None, passwords={}):
         # that owner doesn't have access to the record.
         pw_q = Q(
             # Presentation must not have password
-            Q(password=None) | Q(password='') |
+            Q(password=None)
+            | Q(password='')
             # or must know password
-            Q(id__in=Presentation.check_passwords(passwords))
+            | Q(id__in=Presentation.check_passwords(passwords))
         )
         access_q = Q(
             # Must have access to presentation
@@ -226,7 +227,8 @@ def get_image_for_record_from_viewers(
     for viewer in viewers:
         name = '%s-%sx%s%s.jpg' % (
             record_id, width, height, 'sq' if crop_to_square else '')
-        logger.debug('looking for "%r" in "%r"' % (name, viewer.get_derivative_storage_path()))
+        logger.debug('looking for "%r" in "%r"' % (
+            name, viewer.get_derivative_storage_path()))
         path = os.path.join(viewer.get_derivative_storage_path(), name)
         if not os.path.exists(path) or os.path.getsize(path) == 0:
             logger.debug('not found, getting image')
@@ -295,8 +297,9 @@ def get_image_for_record(
                 'Invalid height/width restrictions: %s' % repr(restrictions))
 
     # see if image needs resizing
-    if ((m.width or 0) > width or (m.height or 0) > height or m.mimetype != 'image/jpeg' or
-            not m.is_local() or force_reprocess):
+    if ((m.width or 0) > width or (m.height or 0) > height
+            or m.mimetype != 'image/jpeg'
+            or not m.is_local() or force_reprocess):
 
         # See if a derivative already exists
         name = '%s-%sx%s%s.jpg' % (
@@ -328,8 +331,9 @@ def get_image_for_record(
                 sp = m.storage.get_derivative_storage_path()
                 if sp:
                     path = os.path.join(sp, name)
-                    if not os.path.exists(path) or \
-                            os.path.getsize(path) != os.path.getsize(orig_path):
+                    psize = os.path.getsize(path)
+                    opsize = os.path.getsize(orig_path)
+                    if not os.path.exists(path) or psize != opsize:
                         shutil.copy(orig_path, path)
                     return path
         return orig_path

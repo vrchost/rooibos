@@ -2,7 +2,6 @@ from django.db.models import Count
 from django.core.cache import cache
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.core.urlresolvers import reverse
 from django.utils.http import urlquote
@@ -30,7 +29,6 @@ import re
 import copy
 import random
 import logging
-from datetime import datetime
 from functools import reduce, cmp_to_key
 
 logger = logging.getLogger(__name__)
@@ -57,8 +55,8 @@ class SearchFacet(object):
         facets = getattr(self, 'facets', None) or []
         self.facets = [f for f in facets if f[1] is not None and f[1] < hits]
         if sort:
-            self.facets = sorted(self.facets,
-                             key=lambda f: f[2 if len(f) > 2 else 0])
+            self.facets = sorted(
+                self.facets, key=lambda f: f[2 if len(f) > 2 else 0])
 
     def or_available(self):
         return True
@@ -323,8 +321,14 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             o = search_facets[fname].process_criteria(o, user)
             fields.setdefault(f, []).append('(' + o.replace('|', ' OR ') + ')')
 
-    fields = ['%s:(%s)' % (
-            name_crit[0], (name_crit[0].startswith('NOT ') and ' OR ' or ' AND ').join(name_crit[1])) for name_crit in iter(fields.items())]
+    fields = [
+        '%s:(%s)' % (
+            name_crit[0],
+            (name_crit[0].startswith('NOT ') and ' OR ' or ' AND ').join(
+                name_crit[1])
+        )
+        for name_crit in iter(fields.items())
+    ]
 
     def build_keywords(q, k):
         k = k.lower()
@@ -340,7 +344,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
             return q + ' AND ' + k
 
     if keywords:
-        keywords = re.sub('[+\\\|!()\{}\[\]^"~:]', ' ', keywords)
+        keywords = re.sub(r'[+\\|!(){}[\]^"~:]', ' ', keywords)
     if keywords:
         keywords = reduce(build_keywords, keywords.split())
 
@@ -524,15 +528,19 @@ def run_search(user,
 
 
 class DummyContent():
+
     def __init__(self, length):
         self.length = length
+
     def __len__(self):
         return self.length
+
     def __getitem__(self, index):
         if isinstance(index, slice):
             return list(range(index.start or 0, index.stop, index.step or 1))
         else:
             return None
+
     def count(self):
         return self.length
 
@@ -899,7 +907,7 @@ def _get_browse_fields(collection_id, child_collection_ids=None):
         if fieldset:
             order = dict(
                 FieldSetField.objects.filter(fieldset=fieldset)
-                    .values_list('field', 'order')
+                .values_list('field', 'order')
             )
         else:
             order = dict()
@@ -985,12 +993,12 @@ def browse(request, id=None, name=None):
             browse_value__lt=request.GET['s']).count() // 50 + 1
         return HttpResponseRedirect(reverse(
             'solr-browse-collection',
-            kwargs={'id': collection.id, 'name': collection.name}) +
-            "?f=%s&page=%s" % (field.id, start))
+            kwargs={'id': collection.id, 'name': collection.name})
+            + "?f=%s&page=%s" % (field.id, start))
 
     try:
         page = int(request.GET['page'])
-    except:
+    except (KeyError, ValueError, TypeError):
         page = 1
 
     start = (page - 1) * 50
@@ -1227,8 +1235,9 @@ def search_form(request):
     return render(
         request,
         'search.html',
-          {'collectionform': collectionform,
-           'formset': formset,
-           'collections': collections,
-           }
+        {
+            'collectionform': collectionform,
+            'formset': formset,
+            'collections': collections,
+        }
     )

@@ -78,8 +78,8 @@ class Storage(models.Model):
     def storage_system(self):
         key = (self.system, self.base)
         if (
-            key not in Storage.storage_systems and
-            self.system in settings.STORAGE_SYSTEMS
+            key not in Storage.storage_systems
+            and self.system in settings.STORAGE_SYSTEMS
         ):
             (modulename, classname) = \
                 settings.STORAGE_SYSTEMS[self.system].rsplit('.', 1)
@@ -137,15 +137,7 @@ class Storage(models.Model):
 
     def get_derivative_storage_path(self):
         sp = os.path.join(settings.SCRATCH_DIR, self.name)
-        if not os.path.exists(sp):
-            try:
-                os.makedirs(sp)
-            except:
-                # check if directory exists now, if so another process
-                # may have created it
-                if not os.path.exists(sp):
-                    # still does not exist, raise error
-                    raise
+        os.makedirs(sp, exist_ok=True)
         return sp
 
     def clear_derivative_storage_path(self):
@@ -153,7 +145,7 @@ class Storage(models.Model):
         for f in os.listdir(sp):
             try:
                 os.remove(os.path.join(sp, f))
-            except:
+            except OSError:
                 pass
 
     def clear_derivative_storage_for_media(self, media_id):
@@ -163,9 +155,9 @@ class Storage(models.Model):
         for name in os.listdir(path):
             if pattern.match(name):
                 try:
-                    os.remove(os.path.join(path,  name))
+                    os.remove(os.path.join(path, name))
                     count += 1
-                except:
+                except OSError:
                     pass
         logger.debug('Cleared %d derivatives for media %d' % (count, media_id))
 
@@ -298,7 +290,7 @@ class Media(models.Model):
             try:
                 with Image.open(self.get_absolute_file_path()) as im:
                     self.width, self.height = im.size
-            except:
+            except Exception:
                 self.width = None
                 self.height = None
             if save:
@@ -320,10 +312,14 @@ class Media(models.Model):
             user, self.storage)
         # if size or download restrictions exist, no direct download of a
         # media file is allowed
-        if (restrictions and
-                ((original and 'width' in restrictions) or
-                 (original and 'height' in restrictions) or
-                 restrictions.get('download', 'yes') == 'no')):
+        if (
+            restrictions
+            and (
+                (original and 'width' in restrictions)
+                or (original and 'height' in restrictions)
+                or restrictions.get('download', 'yes') == 'no'
+            )
+        ):
             return False
         else:
             return r

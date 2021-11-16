@@ -1,5 +1,5 @@
 import setuptools
-from rooibos.version import getVersion
+from rooibos.version import get_version
 
 
 REQUIRES = """
@@ -55,7 +55,7 @@ unicodecsv==0.14.1
 
 setuptools.setup(
     name='mdid',
-    version=getVersion(),
+    version=get_version(),
     url='https://mdid.org',
     author='vrcHost LLC',
     author_email='info@vrchost.com',

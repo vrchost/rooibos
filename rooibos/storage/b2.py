@@ -4,7 +4,6 @@ Storage system to store media files in Backblaze B2
 
 
 from django.core.urlresolvers import reverse
-from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from b2sdk.account_info.sqlite_account_info import SqliteAccountInfo
 from b2sdk.api import B2Api
@@ -13,7 +12,6 @@ from b2sdk.download_dest import DownloadDestLocalFile
 import re
 import os
 import random
-import shutil
 import tempfile
 import mimetypes
 
@@ -83,7 +81,7 @@ class B2StorageSystem(FileSystemStorage):
             # we must have downloaded the same file twice
             try:
                 os.remove(tempname)
-            except:
+            except IOError:
                 pass
 
     def get_absolute_file_path(self, media):

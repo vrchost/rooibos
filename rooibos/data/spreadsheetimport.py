@@ -313,7 +313,6 @@ class SpreadsheetImport(object):
             process_row(last_row)
 
 
-
 def create_import_job(mapping_file, data_file, collections):
     fields = dict(
         (f.full_name, f) for f in Field.objects.all()

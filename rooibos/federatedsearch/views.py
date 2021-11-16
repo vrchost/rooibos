@@ -1,4 +1,3 @@
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from rooibos.util import json_view
 from datetime import datetime, timedelta

@@ -6,11 +6,13 @@ from datetime import datetime
 
 
 class Activity(models.Model):
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(
+        ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True, db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     user_field = models.ForeignKey(
-        User, null=True, blank=True, db_column='user_id', on_delete=models.CASCADE)
+        User, null=True, blank=True, db_column='user_id',
+        on_delete=models.CASCADE)
     date = models.DateField(db_index=True)
     time = models.TimeField()
     event = models.CharField(max_length=64, db_index=True)
@@ -69,7 +71,8 @@ class Activity(models.Model):
 
 
 class AccumulatedActivity(models.Model):
-    content_type = models.ForeignKey(ContentType, null=True, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(
+        ContentType, null=True, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(null=True, db_index=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     date = models.DateField(db_index=True)

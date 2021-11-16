@@ -3,10 +3,11 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.utils.http import urlencode
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 from urllib.parse import urlparse
 import math
-import urllib.request, urllib.parse, urllib.error
 import http.cookiejar
 import json as simplejson
 from rooibos.data.models import Collection, CollectionItem, Record, \
@@ -252,7 +253,8 @@ def search(request, id, name):
     next_page_url = ("?" + urlencode((('q', query), ('p', page + 1)))
                      if page < pages else None)
 
-    return render(request,
+    return render(
+        request,
         'federatedsearch/shared/results.html', {
             'shared': shared.shared,
             'query': query,
@@ -315,7 +317,8 @@ def manage(request):
     if not request.user.is_superuser:
         raise Http404()
 
-    return render(request,
+    return render(
+        request,
         'federatedsearch/shared/manage.html',
         {
             'collections': SharedCollection.objects.all(),
@@ -374,7 +377,8 @@ def edit(request, id=None, name=None):
     else:
         form = SharedCollectionForm(instance=collection)
 
-    return render(request,
+    return render(
+        request,
         'federatedsearch/shared/edit.html',
         {
             'form': form,

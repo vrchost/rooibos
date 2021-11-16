@@ -39,8 +39,10 @@ class Command(BaseCommand):
             print("Error: Must specify --from and --to arguments")
             return
 
-        print("Mapping presentation items from collection %s to " \
-            "collection(s) %s" % (from_collection, to_collections))
+        print(
+            "Mapping presentation items from collection %s to "
+            "collection(s) %s" % (from_collection, to_collections)
+        )
 
         idfields = standardfield_ids('identifier', equiv=True)
 
@@ -120,8 +122,10 @@ class Command(BaseCommand):
         if commit:
             print("Remapped %s items" % remapped)
         else:
-            print("Would have remapped %s items - rerun with --commit" % \
-                remapped)
+            print(
+                "Would have remapped %s items - rerun with --commit" %
+                remapped
+            )
         if errors:
             print("%s unique errors occurred:" % len(errors))
             print('\n'.join(errors))

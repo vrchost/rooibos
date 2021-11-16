@@ -85,7 +85,7 @@ def scale(value, params):
     try:
         omin, omax, nmin, nmax = list(map(float, params.split()))
         return (float(value) - omin) / (omax - omin) * (nmax - nmin) + nmin
-    except:
+    except Exception:
         return ''
 
 
@@ -125,10 +125,12 @@ def owned_tags_for_object(parser, token):
     try:
         tag_name, arg = token.contents.split(None, 1)
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires arguments" % token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires arguments" % token.contents.split()[0])
     m = re.search(r'(.*?) (for|except) (.*?) as (\w+)', arg)
     if not m:
-        raise template.TemplateSyntaxError("%r tag had invalid arguments" % tag_name)
+        raise template.TemplateSyntaxError(
+            "%r tag had invalid arguments" % tag_name)
     object, rule, user, var_name = m.groups()
     return OwnedTagsForObjectNode(
         Variable(object), Variable(user), var_name, rule == 'for')
@@ -177,10 +179,12 @@ def recent_presentation(parser, token):
     try:
         tag_name, arg = token.contents.split(None, 1)
     except ValueError:
-        raise template.TemplateSyntaxError("%r tag requires arguments" % token.contents.split()[0])
+        raise template.TemplateSyntaxError(
+            "%r tag requires arguments" % token.contents.split()[0])
     m = re.search(r'(.*?) as (\w+)', arg)
     if not m:
-        raise template.TemplateSyntaxError("%r tag had invalid arguments" % tag_name)
+        raise template.TemplateSyntaxError(
+            "%r tag had invalid arguments" % tag_name)
     user, var_name = m.groups()
     return RecentPresentationNode(Variable(user), var_name)
 

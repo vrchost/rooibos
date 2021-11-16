@@ -132,14 +132,23 @@ class CircularCollectionsTestCase(TestCase):
         s = SolrIndex()
         s._build_group_tree()
 
+        def or_set(x, y):
+            return set(x) | set(y)
+
         parents = [group_c.id]
-        self.assertEqual(2, len(list(reduce(lambda x, y: set(x) | set(y),
-                   [s.parent_groups[p] for p in parents], parents))))
+        self.assertEqual(
+            2,
+            len(reduce(or_set, [s.parent_groups[p] for p in parents], parents))
+        )
 
         parents = [group_d.id]
-        self.assertEqual(2, len(list(reduce(lambda x, y: set(x) | set(y),
-                   [s.parent_groups[p] for p in parents], parents))))
+        self.assertEqual(
+            2,
+            len(reduce(or_set, [s.parent_groups[p] for p in parents], parents))
+        )
 
         parents = [group_e.id]
-        self.assertEqual(3, len(list(reduce(lambda x, y: set(x) | set(y),
-                   [s.parent_groups[p] for p in parents], parents))))
+        self.assertEqual(
+            3,
+            len(reduce(or_set, [s.parent_groups[p] for p in parents], parents))
+        )

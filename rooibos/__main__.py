@@ -36,8 +36,8 @@ def init():
     print("Initializing")
     for directory in DIRECTORIES + CODE_DIRECTORIES:
         os.makedirs(os.path.join(*directory.split('/')), exist_ok=True)
-    for code_directory in CODE_DIRECTORIES:
-        with open(os.path.join(*code_directory.split('/'), '__init__.py'), 'w'):
+    for code_dir in CODE_DIRECTORIES:
+        with open(os.path.join(*code_dir.split('/'), '__init__.py'), 'w'):
             pass
     defaults = get_defaults()
     settings_file = os.path.join('config', 'settings.py')
@@ -46,7 +46,8 @@ def init():
     with open(settings_file, 'w') as output:
         output.write(get_service_config('mdid') % defaults)
     for service in os.listdir(SERVICE_CONFIG_DIR):
-        if os.path.isfile(os.path.join(SERVICE_CONFIG_DIR, service)) and service != 'mdid':
+        service_path = os.path.join(SERVICE_CONFIG_DIR, service)
+        if os.path.isfile(service_path) and service != 'mdid':
             with open(os.path.join('service-config', service), 'w') as output:
                 output.write(get_service_config(service) % defaults)
     if not os.path.exists(os.path.join('var', 'solr')):
@@ -82,7 +83,7 @@ def main():
     settings_module = os.getenv('DJANGO_SETTINGS_MODULE')
     if not settings_module:
         try:
-            import config.settings
+            import config.settings  # noqa: F401
             os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
         except ImportError:
             print('Could not find MDID settings, have you run "mdid init"?')

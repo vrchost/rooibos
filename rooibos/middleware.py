@@ -31,16 +31,16 @@ class HistoryMiddleware:
         # (e.g. deleting a record)
         try:
             if (
-                request.user and
-                request.user.is_authenticated and
-                not request.is_ajax() and
-                response.status_code == 200 and
-                response.get('Content-Type', '').startswith('text/html')
+                request.user
+                and request.user.is_authenticated
+                and not request.is_ajax()
+                and response.status_code == 200
+                and response.get('Content-Type', '').startswith('text/html')
             ):
                 history = request.session.get('page-history', [])
                 history.insert(0, request.get_full_path())
                 request.session['page-history'] = history[:10]
-        except:
+        except AttributeError:
             # for some reason, with some clients, on some pages,
             # request.session does not exist and request.user throws an error
             pass

@@ -36,7 +36,7 @@ class Command(BaseCommand):
         elif prefix:
             self.replace(prefix, replace, simulate)
         else:
-            print("Error: must specify --list " \
+            print("Error: must specify --list "
                   "or both --prefix and --replace-with")
 
     def list(self, prefix):

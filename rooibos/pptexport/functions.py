@@ -62,7 +62,7 @@ class PowerPointGenerator:
                     getattr(settings, 'PPTEXPORT_WIDTH', 800),
                     getattr(settings, 'PPTEXPORT_HEIGHT', 600)
                 )
-            except:
+            except Exception:
                 image = None
             values = item.get_fieldvalues()
             if metadata:

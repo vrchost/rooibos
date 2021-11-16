@@ -7,7 +7,7 @@ from rooibos.data.models import Collection, Record, standardfield, \
     CollectionItem, FieldValue
 from rooibos.federatedsearch import FederatedSearch
 import flickrapi
-import urllib.request, urllib.error, urllib.parse
+from urllib.error import HTTPError, URLError
 import os
 
 
@@ -94,8 +94,11 @@ class FlickrSearch(FederatedSearch):
                     format='xmlnode',
                 )
                 self._licenses = dict(
-                    (l['id'], dict(name=l['name'], url=l['url']))
-                    for l in results.licenses[0].license
+                    (
+                        lic['id'],
+                        dict(name=lic['name'], url=lic['url'])
+                    )
+                    for lic in results.licenses[0].license
                 )
                 cache.set(
                     'flickr.photos.licenses.getInfo', self._licenses, 3600)
@@ -139,7 +142,7 @@ class FlickrSearch(FederatedSearch):
             ] if hasattr(results.photos[0], 'photo') else []
 
             hits = int(results.photos[0]['total'])
-        except (urllib.error.HTTPError, urllib.error.URLError, flickrapi.FlickrError):
+        except (HTTPError, URLError, flickrapi.FlickrError):
             images = []
             hits = 0
 

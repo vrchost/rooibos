@@ -4,7 +4,6 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.decorators import login_required
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from django.forms.models import modelformset_factory, ModelForm
 from django.db.models.aggregates import Count
 from django.conf import settings
@@ -26,7 +25,7 @@ from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
 from rooibos.userprofile.views import load_settings, store_settings
 from rooibos.util import json_view, validate_next_link
 from rooibos.util.markdown import markdown
-from rooibos.storage.functions import get_media_for_record, get_image_for_record
+from rooibos.storage.functions import get_image_for_record
 from .models import Presentation, PresentationItem
 from .functions import duplicate_presentation
 import base64
@@ -407,10 +406,15 @@ def browse(request, manage=False):
         qp = Q()
 
     if keywords:
-        qk = Q(*(Q(title__icontains=kw) | Q(description__icontains=kw) |
-                 Q(owner__last_name__icontains=kw) |
-                 Q(owner__first_name__icontains=kw) |
-                 Q(owner__username__icontains=kw) for kw in keywords.split()))
+        qk = Q(
+            *(
+                Q(title__icontains=kw)
+                | Q(description__icontains=kw)
+                | Q(owner__last_name__icontains=kw)
+                | Q(owner__first_name__icontains=kw)
+                | Q(owner__username__icontains=kw) for kw in keywords.split()
+            )
+        )
     else:
         qk = Q()
 
@@ -453,7 +457,8 @@ def browse(request, manage=False):
             update_actionbar_tags(request, *presentations.filter(id__in=ids))
 
         # check for clicks on "add selected items" buttons
-        for button in [k for k in list(request.POST.keys()) if k.startswith('add-selected-items-')]:
+        for button in [k for k in list(request.POST.keys())
+                       if k.startswith('add-selected-items-')]:
             id = int(button[len('add-selected-items-'):])
             presentation = get_object_or_404(
                 filter_by_access(
@@ -707,7 +712,7 @@ def slide_manifest(request, slide, owner, offline=False):
             width, height = Image.open(image_path).size
             canvas_width = width
             canvas_height = height
-        except:
+        except Exception:
             logger.warning(
                 'Could not determine image size for "%s"' % image_path,
                 exc_info=True
@@ -784,7 +789,7 @@ def slide_manifest(request, slide, owner, offline=False):
 
     if offline:
         result['thumbnail'] = {
-            '@id': '/thumbs' + image ,
+            '@id': '/thumbs' + image,
         }
 
     return result
@@ -885,7 +890,6 @@ def annotation_list(request, id, name, slide_id):
     if not p:
         return dict(result='error')
 
-    owner = request.user if request.user.is_authenticated else None
     slides = p.items.select_related('record').filter(hidden=False, id=slide_id)
 
     resources = []
@@ -916,18 +920,32 @@ def annotation_list(request, id, name, slide_id):
     }
 
 
+def _get_info_json_for_png(size, url):
+    return '{"profile": ["http://iiif.io/api/image/2/level2.json", ' \
+           '{"supports": ["canonicalLinkHeader", "profileLinkHeader", ' \
+           '"mirroring", "rotationArbitrary", "regionSquare", ' \
+           '"sizeAboveFull"], "qualities": ["default"], ' \
+           '"formats": ["png"]}], "protocol": "http://iiif.io/api/image", ' \
+           '"sizes": [], "height": %d, "width": %d, ' \
+           '"@context": "http://iiif.io/api/image/2/context.json", ' \
+           '"@id": "%s"}' % (size, size, url)
+
+
 def transparent_png(request, extra):
 
     if extra and extra.endswith('info.json'):
         return HttpResponse(
-            content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 100, "width": 100, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-blank-slide', kwargs={'extra': ''}) + '"}',
+            content=_get_info_json_for_png(
+                100,
+                reverse('presentation-blank-slide', kwargs={'extra': ''})
+            ),
             content_type='application/json',
         )
 
-    DATA = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42' \
+    data = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42' \
            'mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
     return HttpResponse(
-        content=base64.b64decode(DATA),
+        content=base64.b64decode(data),
         content_type='image/png',
     )
 
@@ -936,7 +954,10 @@ def missing_png(request, extra):
 
     if extra and extra.endswith('info.json'):
         return HttpResponse(
-            content='{"profile": ["http://iiif.io/api/image/2/level2.json", {"supports": ["canonicalLinkHeader", "profileLinkHeader", "mirroring", "rotationArbitrary", "regionSquare", "sizeAboveFull"], "qualities": ["default"], "formats": ["png"]}], "protocol": "http://iiif.io/api/image", "sizes": [], "height": 200, "width": 200, "@context": "http://iiif.io/api/image/2/context.json", "@id": "' + reverse('presentation-missing-slide', kwargs={'extra': ''}) + '"}',
+            content=_get_info_json_for_png(
+                200,
+                reverse('presentation-missing-slide', kwargs={'extra': ''})
+            ),
             content_type='application/json',
         )
 

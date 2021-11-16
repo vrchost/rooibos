@@ -16,7 +16,7 @@ class AccessOnStart:
                 logger.debug("deleting users from group %s" % group.id)
                 group.user_set.clear()
                 logger.debug("done")
-        except:
+        except Exception:
             logger.exception("error deleting users")
 
         # Only need to run once
