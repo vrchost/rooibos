@@ -331,9 +331,9 @@ def get_image_for_record(
                 sp = m.storage.get_derivative_storage_path()
                 if sp:
                     path = os.path.join(sp, name)
-                    psize = os.path.getsize(path)
                     opsize = os.path.getsize(orig_path)
-                    if not os.path.exists(path) or psize != opsize:
+                    if not os.path.exists(path) \
+                            or os.path.getsize(path) != opsize:
                         shutil.copy(orig_path, path)
                     return path
         return orig_path
