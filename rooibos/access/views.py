@@ -4,64 +4,42 @@ from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User, Group
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.views import login as dj_login, logout as dj_logout
-from django.conf import settings
+from django.contrib.auth.views import LoginView, LogoutView
 from django import forms
-from django.urls import reverse
-from django.contrib.auth import REDIRECT_FIELD_NAME
 from .models import AccessControl
 from .functions import check_access, \
     get_effective_permissions_and_restrictions, get_accesscontrols_for_object
 from rooibos.statistics.models import Activity
-import re
 import logging
-
-from ..util import validate_next_link
 
 logger = logging.getLogger(__name__)
 
 
-def login(request, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME,
-          *args, **kwargs):
-    if request.user.is_authenticated:
-        request.session.modified = True
-        # Similar redirect_to processing as in django.contrib.auth.views.login
-        redirect_to = request.GET.get(redirect_field_name, '')
-        # Light security check -- make sure redirect_to isn't garbage.
-        if not redirect_to or ' ' in redirect_to:
-            redirect_to = settings.LOGIN_REDIRECT_URL
-        # Heavier security check -- redirects to http://example.com should
-        # not be allowed, but things like /view/?param=http://example.com
-        # should be allowed. This regex checks if there is a '//' *before* a
-        # question mark.
-        elif '//' in redirect_to and re.match(r'[^\?]*//', redirect_to):
-            redirect_to = settings.LOGIN_REDIRECT_URL
-        return HttpResponseRedirect(redirect_to)
-    try:
-        response = dj_login(request, *args, **kwargs)
-    except ValueError:
-        # Certain values in the database password field can cause a ValueError
-        # in that case, return a redirect back to the login page
-        return HttpResponseRedirect(
-            (login_url or reverse('login')) + '?' + request.GET.urlencode())
-    if type(response) == HttpResponseRedirect:
-        # Successful login, add user to IP based groups
-        Activity.objects.create(event='login',
-                                request=request,
-                                content_object=request.user)
+class LocalLoginView(LoginView):
 
-    return response
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            request.session.modified = True
+            redirect_to = self.get_success_url()
+            return HttpResponseRedirect(redirect_to)
+        return super().get(request, *args, **kwargs)
 
-
-def logout(request, *args, **kwargs):
-    if request.session.get('unsafe_logout'):
-        return render(request, 'unsafe_logout.html')
-    else:
-        kwargs['next_page'] = validate_next_link(
-            request.GET.get('next'),
-            kwargs.get('next_page', settings.LOGOUT_URL)
+    def form_valid(self, form):
+        Activity.objects.create(
+            event='login',
+            request=self.request,
+            content_object=self.request.user
         )
-        return dj_logout(request, *args, **kwargs)
+        return super().form_valid(form)
+
+
+class LocalLogoutView(LogoutView):
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        if request.session.get('unsafe_logout'):
+            return render(request, 'unsafe_logout.html')
+        return response
 
 
 def effective_permissions(request, app_label, model, id, name):

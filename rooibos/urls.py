@@ -8,7 +8,7 @@ from django.views.decorators.cache import cache_control
 from django.http import HttpResponseServerError
 from django.template import loader
 from rooibos.ui.views import main
-from rooibos.access.views import login, logout
+from rooibos.access.views import LocalLoginView, LocalLogoutView
 from rooibos.legacy.views import legacy_viewer
 from rooibos.version import get_version
 
@@ -133,7 +133,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
         ),
         url(
             r'^local-login/$',
-            login,
+            LocalLoginView.as_view(),
             {
                 'HELP': 'logging-in',
             },
@@ -144,7 +144,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
             django_cas_ng.views.logout,
             {
                 'HELP': 'logging-out',
-                'next_page': settings.LOGOUT_URL
+                'next_page': settings.LOGOUT_REDIRECT_URL
             },
             name='logout'
         ),
@@ -153,7 +153,7 @@ else:
     urls += [
         url(
             r'^login/$',
-            login,
+            LocalLoginView.as_view(),
             {
                 'HELP': 'logging-in',
             },
@@ -161,10 +161,10 @@ else:
         ),
         url(
             r'^logout/$',
-            logout,
+            LocalLogoutView.as_view(),
             {
                 'HELP': 'logging-out',
-                'next_page': settings.LOGOUT_URL
+                'next_page': settings.LOGOUT_REDIRECT_URL
             },
             name='logout'
         ),
