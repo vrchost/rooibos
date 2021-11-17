@@ -11,9 +11,6 @@ pymysql.install_as_MySQLdb()
 
 install_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 
-if install_dir not in sys.path:
-    sys.path.insert(0, install_dir)
-
 package_dir = install_dir
 
 DEBUG = False
