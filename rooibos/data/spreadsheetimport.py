@@ -158,7 +158,7 @@ class SpreadsheetImport(object):
         query = (FieldValue.objects.filter(
             record__collection__in=self.collections,
             field__in=self._identifier_ids)
-            .values('value').annotate(c=Count('id')).exclude(c=1))
+            .values('value').annotate(c=Count('id')).order_by('order').exclude(c=1))
         identifiers = query.values_list('value', flat=True)
         return identifiers
 
