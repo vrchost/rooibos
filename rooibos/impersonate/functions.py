@@ -39,8 +39,8 @@ def get_real_user(request):
 
 def can_impersonate(realusername, username):
     return (
-        User.objects.get(username=realusername).is_superuser or
-        Impersonation.objects.filter(
+        User.objects.get(username=realusername).is_superuser
+        or Impersonation.objects.filter(
             Q(users__username=username) | Q(groups__user__username=username),
             group__user__username=realusername
         ).count() > 0
