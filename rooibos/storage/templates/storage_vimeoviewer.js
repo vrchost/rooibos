@@ -1,5 +1,5 @@
 {% load ui %}
-{% load staticfiles %}
+{% load static %}
 
 (function() {
 {% include "viewers_loadscripts.js" %}

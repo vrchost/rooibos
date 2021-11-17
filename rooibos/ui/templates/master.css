@@ -1,5 +1,5 @@
 {% load ui %}
-{% load staticfiles %}
+{% load static %}
 
 {% var as colors %}
 {

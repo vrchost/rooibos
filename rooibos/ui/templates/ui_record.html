@@ -1,5 +1,5 @@
 {% load data %}
-{% load staticfiles %}
+{% load static %}
 
 <div class="record{% if notitle %} notitle{% endif %}">
     <a href="{{ record.get_absolute_url }}"><img class="thumbnail record-anchor" id="record-id-{{ record.id }}" data-record-id="{{ record.id }}" data-record-name="{{ record.name }}" src="{{ record.get_thumbnail_url }}{% if request.GET.refreshthumb %}?reprocess=true&{% now "U" %}{% endif %}" alt="{{ record.alt_text }}" /></a>
