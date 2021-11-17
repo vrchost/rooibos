@@ -24,8 +24,6 @@ COMPRESS = True
 COMPRESS_VERBOSE = True
 
 
-STATIC_ROOT = os.path.join(install_dir, 'static')
-
 SCRATCH_DIR = os.path.join(install_dir, 'scratch')
 
 
@@ -56,7 +54,7 @@ SESSION_SAVE_EVERY_REQUEST = False
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 
 # Absolute path to the directory that holds media.

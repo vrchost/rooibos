@@ -32,4 +32,6 @@ RABBITMQ_OPTIONS = None
 
 SCRATCH_DIR = tempfile.mkdtemp()
 
+STATIC_ROOT = tempfile.mkdtemp()
+
 LOGGING['handlers'] = _get_log_handler(SCRATCH_DIR)
