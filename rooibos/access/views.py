@@ -28,7 +28,8 @@ class LocalLoginView(LoginView):
         Activity.objects.create(
             event='login',
             request=self.request,
-            content_object=self.request.user
+            content_type=ContentType.objects.get_for_model(User),
+            object_id=self.request.user.id,
         )
         return super().form_valid(form)
 
