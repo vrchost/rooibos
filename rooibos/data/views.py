@@ -545,8 +545,8 @@ def data_import(request):
 
 
 class DisplayOnlyTextWidget(forms.HiddenInput):
-    def render(self, name, value, attrs):
-        r = super(DisplayOnlyTextWidget, self).render(name, value, attrs)
+    def render(self, name, value, attrs, renderer=None):
+        r = super(DisplayOnlyTextWidget, self).render(name, value, attrs, renderer)
         r += mark_safe(
             conditional_escape(getattr(self, 'initial', value or '')))
         return r
