@@ -3,7 +3,7 @@ programs=app_mdid,celery_mdid,celery_solr_mdid,celery_beat_mdid
 
 [program:app_mdid]
 environment=USER=mdid,PATH="%(venv_bin_dir)s:%%(ENV_PATH)s",PYTHONPATH="%(install_dir)s",DJANGO_SETTINGS_MODULE="config.settings"
-command=%(venv_bin_dir)s/gunicorn -t 300s -w 4 -b 127.0.0.1:8010 --max-requests 200 rooibos.wsgi:application
+command=%(venv_bin_dir)s/gunicorn -t 300 -w 4 -b 127.0.0.1:8010 --max-requests 200 rooibos.wsgi:application
 user=mdid
 autostart=true
 autorestart=true
