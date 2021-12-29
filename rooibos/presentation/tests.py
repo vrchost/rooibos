@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+from django.test.client import RequestFactory
 import tempfile
 import os.path
 from PIL import Image
@@ -12,6 +13,8 @@ from rooibos.access.models import AccessControl, User, Group
 from rooibos.presentation.models import Presentation, PresentationItem
 from .viewers import PackageFilesViewer
 from zipfile import ZipFile
+
+from .views import raw_manifest
 
 
 class PackagePresentationTestCase(TestCase):
@@ -151,3 +154,57 @@ class PublishPermissionsTestCase(TestCase):
             list(self.user.get_all_permissions())
         )
         self.assert_published()
+
+
+class InaccessibleStorageTestCase(TestCase):
+
+    def setUp(self):
+        self.tempdir = tempfile.mkdtemp()
+        self.user = User.objects.create(username='InaccessibleStorageTestCase')
+        self.presentation = Presentation.objects.create(
+            name='InaccessibleStorageTestCase', owner=self.user, hidden=False)
+        self.collection = Collection.objects.create(title='InaccessibleStorageTestCase')
+        self.storage = Storage.objects.create(
+            title='InaccessibleStorageTestCase', name='InaccessibleStorageTestCase', system='local', base=self.tempdir)
+        self.record = Record.objects.create(name='InaccessibleStorageTestCase')
+        self.record.fieldvalue_set.create(
+            field=Field.objects.get(name='identifier', standard__prefix='dc'),
+            value='InaccessibleStorageTestCase',
+        )
+        CollectionItem.objects.create(
+            collection=self.collection, record=self.record)
+        self.storage_acl = AccessControl.objects.create(content_object=self.storage, user=self.user, read=True)
+        AccessControl.objects.create(content_object=self.collection, user=self.user, read=True)
+        self.factory = RequestFactory()
+        self.presentation.items.create(record=self.record, order=1)
+
+        media = Media.objects.create(
+            record=self.record, name='tiff', mimetype='image/tiff',
+            storage=self.storage)
+        with open(os.path.join(os.path.dirname(__file__), '..', 'storage',
+                               'test_data', 'dcmetro.tif'), 'rb') as f:
+            media.save_file('dcmetro.tif', f)
+
+
+    def tearDown(self):
+        self.record.delete()
+        self.storage.delete()
+        self.collection.delete()
+        shutil.rmtree(self.tempdir, ignore_errors=True)
+
+    def test_manifest_readable(self):
+        self.storage_acl.read = True
+        self.storage_acl.save()
+        request = self.factory.get('/testing')
+        request.user = self.user
+        request.session = dict()
+        raw_manifest(request, self.presentation.id, self.presentation.name, offline=True)
+
+    def test_manifest_unreadable(self):
+        self.storage_acl.read = False
+        self.storage_acl.save()
+        request = self.factory.get('/testing')
+        request.user = self.user
+        request.session = dict()
+        # this should not raise an exception:
+        raw_manifest(request, self.presentation.id, self.presentation.name, offline=True)
