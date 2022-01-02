@@ -967,5 +967,8 @@ def create_data_fixtures(sender, *args, **kwargs):
             )
         )
 
+    from .vracore5 import create_data_fixtures as vracore5_create_data_fixtures
+    vracore5_create_data_fixtures(sender, *args, **kwargs)
+
 
 signals.post_migrate.connect(create_data_fixtures)
