@@ -774,6 +774,19 @@ class DisplayFieldValue(FieldValue):
         return dfv
 
 
+class VRACore5FieldValue(FieldValue):
+    notes = models.TextField(blank=True)
+    dataDate = models.DateTimeField(auto_now=True)
+    extent = models.TextField(blank=True)
+    href = models.TextField(blank=True)
+    pref = models.BooleanField(null=True, blank=True)
+    refid = models.CharField(max_length=255, blank=True)
+    rules = models.CharField(max_length=255, blank=True)
+    source = models.TextField(blank=True)
+    vocab = models.CharField(max_length=255, blank=True)
+    lang = models.CharField(max_length=255, blank=True)
+
+
 def standardfield(field, standard='dc', equiv=False):
     f = Field.objects.get(standard__prefix=standard, name=field)
     if equiv:

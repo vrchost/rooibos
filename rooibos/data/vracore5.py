@@ -1,7 +1,6 @@
 import re
 
-from .models import Field, MetadataStandard, FieldSetField, FieldSet
-
+from .models import Field, MetadataStandard, FieldSetField, FieldSet, FieldValue
 
 STANDARD = 'vra-core-5'
 STANDARD_PREFIX = 'vra5'
