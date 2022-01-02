@@ -82,6 +82,7 @@ urls = [
     url(r'^works/', include('rooibos.works.urls')),
     url(r'^pdfviewer/', include('rooibos.pdfviewer.urls')),
     url(r'^pptexport/', include('rooibos.pptexport.urls')),
+    url(r'^vracore4/', include('rooibos.vracore4.urls')),
 
     url(
         r'^favicon.ico$',

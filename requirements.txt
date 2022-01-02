@@ -73,3 +73,4 @@ wcwidth==0.2.5
 werkzeug==2.0.2
 wfastcgi==3.0.0
 wheel==0.37.1
+xmlschema==1.9.2
