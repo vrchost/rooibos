@@ -23,7 +23,7 @@ attrs>=17.4.0
 b2sdk==0.1.6
 beautifulsoup4
 bleach-allowlist==1.0.3
-bleach==3.2.3
+bleach==3.3.1
 boto
 cached-property==1.5.2
 click-didyoumean==0.3.0
