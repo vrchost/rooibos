@@ -39,14 +39,15 @@ pip install mdid
 mdid init
 ```
 ### Install Solr
-MDID currently requires Solr 7; you may have to adjust the exact version as
-available when running the following commands:
+MDID currently requires Solr 8; you may have to adjust the exact version as
+available when running the following commands.
+Please note that you want to use at least version 8.11.1 of Solr to avoid the Log4j vulnerability.
 ```
 mkdir -p /opt/solr_install /opt/solr
 cd /opt/solr_install
-wget https://archive.apache.org/dist/lucene/solr/7.7.3/solr-7.7.3.tgz
-tar xzf solr-7.7.3.tgz solr-7.7.3/bin/install_solr_service.sh --strip-components=2
-./install_solr_service.sh solr-7.7.3.tgz -f -d /opt/solr -i /opt/solr_install -n
+wget https://archive.apache.org/dist/lucene/solr/8.11.1/solr-8.11.1.tgz
+tar xzf solr-8.11.1.tgz solr-8.11.1/bin/install_solr_service.sh --strip-components=2
+./install_solr_service.sh solr-8.11.1.tgz -f -d /opt/solr -i /opt/solr_install -n
 sed -i -E 's/#SOLR_HEAP="512m"/SOLR_HEAP="2048m"/' /etc/default/solr.in.sh
 ln -s /opt/mdid/var/solr /opt/solr/data/mdid
 chown -R solr:solr /opt/solr/data/mdid/
