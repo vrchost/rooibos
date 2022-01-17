@@ -16,7 +16,7 @@
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
 Celery==5.2.3
-Django==2.2.24
+Django==2.2.26
 PyPDF2
 amqp==5.0.9
 attrs>=17.4.0
