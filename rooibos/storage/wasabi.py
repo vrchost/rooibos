@@ -17,6 +17,6 @@ class WasabiStorageSystem(S3StorageSystem):
             s3args=dict(
                 access_key=storage.credential_id,
                 secret_key=storage.credential_key,
-                host='s3.wasabisys.com',
+                endpoint_url='https://s3.wasabisys.com',
             )
         )
