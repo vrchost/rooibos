@@ -11,7 +11,7 @@ from django.db.models import Q
 from rooibos.data.models import Collection, standardfield, FieldValue, Record, get_system_field, Field, CollectionItem
 from rooibos.vracore4.models import STANDARD_NAMESPACE, STANDARD_MANAGER, VRACore4FieldValue, STANDARD
 
-NAMESPACES = {'vra4': STANDARD_NAMESPACE}
+NAMESPACES = {'vra4': STANDARD_NAMESPACE, 'xml': 'http://www.w3.org/XML/1998/namespace'}
 
 VRA_ATTRIBUTES = (
     'dataDate',
@@ -172,7 +172,8 @@ class FieldSetProcessor(object):
         self._process_basic_subelements(field, self.record, group, extra_attrs=('type', 'name'))
 
     def process_title(self, field, group):
-        self._process_basic_subelements(field, self.record, group, extra_attrs=('type',))
+        self.record['title'][group]['value'] = get_text(field)
+        set_if_not_empty(self.record['title'][group], 'type', field.attrib.get('type'))
 
     def process_worktype(self, field, group):
         self.record['worktype'][group]['value'] = get_text(field)
@@ -195,6 +196,9 @@ class FieldSetProcessor(object):
                 attrib, map_to_attrib = attrib
             else:
                 map_to_attrib = attrib
+            if ':' in attrib:
+                ns, attrib = attrib.split(':')
+                attrib = f'{{{NAMESPACES[ns]}}}{attrib}'
             value = field.attrib.get(attrib)
             if attrib == 'pref' and value:
                 value = value == 'true'
@@ -252,8 +256,11 @@ def empty(result):
 
 
 def convert_to_field_values(record):
-    for field_name, groups in record.items():
-        for group, attrs in groups.items():
+    order = count(100)
+    for field_name in sorted(record.keys()):
+        groups = record[field_name]
+        for group in sorted(groups.keys()):
+            attrs = groups[group]
             attr_keys = attrs.keys()
             attr_values = [values if type(values) is list else [values] for values in attrs.values()]
             for instance in zip(*attr_values):
@@ -261,7 +268,7 @@ def convert_to_field_values(record):
                 if not empty(result):
                     result['group'] = group
                     result['_field'] = field_name
-                    result['order'] = 123
+                    result['order'] = next(order) * 100
                     result['hidden'] = not field_name.endswith('Set')
                     yield result
 

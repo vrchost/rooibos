@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from .views import record
+from .views import record_as_json
 
 urlpatterns = [
-    url(r'^record/(?P<id>\d+)/?$', record, name='vracore4-record'),
+    url(r'^record/(?P<identifier>\d+)/?$', record_as_json, name='vracore4-record'),
 ]
