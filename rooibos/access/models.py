@@ -14,9 +14,9 @@ class AccessControl(models.Model):
         User, null=True, blank=True, on_delete=models.CASCADE)
     usergroup = models.ForeignKey(
         Group, null=True, blank=True, on_delete=models.CASCADE)
-    read = models.NullBooleanField()
-    write = models.NullBooleanField()
-    manage = models.NullBooleanField()
+    read = models.BooleanField(null=True)
+    write = models.BooleanField(null=True)
+    manage = models.BooleanField(null=True)
     restrictions_repr = models.TextField(blank=True, default='')
 
     class Meta:
