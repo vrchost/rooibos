@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('data', '0015_delete_vracore4fieldvalue'),
+        ('data', '0014_auto_20220119_1055'),
     ]
 
     operations = [
