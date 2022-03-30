@@ -54,6 +54,7 @@ class Viewer(object):
         sp = os.path.join(
             settings.SCRATCH_DIR, 'viewer-' + type(self).__name__)
         os.makedirs(sp, exist_ok=True)
+        return sp
 
 
 _registered_viewers = dict()
