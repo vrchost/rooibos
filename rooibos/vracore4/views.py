@@ -7,6 +7,7 @@ from .models import STANDARD_PREFIX, VRACore4FieldValue, STANDARD_MANAGER
 
 def _field_value_as_json(value):
     result = dict(
+        id=value.id,
         field=value.field.full_name,
         value=value.value,
         group=value.group,
