@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.core.files.storage import FileSystemStorage
 from b2sdk.account_info.sqlite_account_info import SqliteAccountInfo
 from b2sdk.api import B2Api
-from b2sdk.download_dest import DownloadDestLocalFile
+from b2sdk.v1.download_dest import DownloadDestLocalFile
 
 import re
 import os

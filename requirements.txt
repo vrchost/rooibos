@@ -20,7 +20,7 @@ Django==2.2.27
 PyPDF2
 amqp==5.0.9
 attrs>=17.4.0
-b2sdk==0.1.6
+b2sdk==1.14.1
 beautifulsoup4
 bleach-allowlist==1.0.3
 bleach==3.3.1
