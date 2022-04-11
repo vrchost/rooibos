@@ -5,14 +5,14 @@ Storage system to store media files in Amazon S3
 
 from django.urls import reverse
 from django.conf import settings
-from storages.backends.s3boto import S3BotoStorage
+from storages.backends.s3boto3 import S3Boto3Storage
 import os
 import random
 import shutil
 import tempfile
 
 
-class S3StorageSystem(S3BotoStorage):
+class S3StorageSystem(S3Boto3Storage):
     """
     Storage system to store media files in Rackspace's cloud files
     """
@@ -37,7 +37,7 @@ class S3StorageSystem(S3BotoStorage):
         s3args.setdefault('location', self.location)
         s3args.setdefault('access_key', access_key)
         s3args.setdefault('secret_key', secret_key)
-        s3args.setdefault('bucket', bucket)
+        s3args.setdefault('bucket_name', bucket)
 
         super(S3StorageSystem, self).__init__(**s3args)
 
@@ -99,7 +99,7 @@ class S3StorageSystem(S3BotoStorage):
         # TODO: need to create unique name, not random
         name = name or self.get_available_name(
             "file-%s" % random.randint(1000000, 9999999))
-        return super(S3BotoStorage, self).save(name, content)
+        return super(S3Boto3Storage, self).save(name, content)
 
     def is_local(self):
         # Disable "could be a function" report

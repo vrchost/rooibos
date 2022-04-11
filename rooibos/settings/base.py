@@ -16,6 +16,8 @@ package_dir = install_dir
 DEBUG = False
 
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 # Needed to enable compression JS and CSS files
 COMPRESS = True
 COMPRESS_VERBOSE = True

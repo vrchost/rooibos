@@ -499,7 +499,7 @@ class Vocabulary(models.Model):
     title = models.CharField(max_length=100)
     name = models.SlugField(max_length=50)
     description = models.TextField(null=True, blank=True)
-    standard = models.NullBooleanField()
+    standard = models.BooleanField(null=True)
     origin = models.TextField(null=True, blank=True)
 
     class Meta:
