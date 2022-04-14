@@ -146,7 +146,7 @@ class SolrIndex():
         conn = Solr(settings.SOLR_URL)
         conn.optimize()
 
-    def index(self, verbose=False, all=False, collections=None):
+    def index(self, verbose=False, all=False, collections=None, record_ids=None, handler=None):
         from .models import SolrIndexUpdates
         self._build_group_tree()
         core_fields = dict(
@@ -162,7 +162,11 @@ class SolrIndex():
         count = 0
         batch_size = 100
         process_thread = None
-        if all:
+        if record_ids:
+            total_count = len(record_ids)
+            to_update = None
+            to_delete = None
+        elif all:
             query = Record.objects.all()
             if collections:
                 query = query.filter(collection__in=collections)
@@ -183,13 +187,15 @@ class SolrIndex():
                     to_update.append(record)
             total_count = len(to_update)
 
-        if not all and not to_update and not to_delete:
+        if not record_ids and not all and not to_update and not to_delete:
             logger.info("Nothing to update in index, returning early")
             return 0
 
-        conn = Solr(settings.SOLR_URL)
-        if to_delete:
-            conn.delete(q='id:(%s)' % ' '.join(map(str, to_delete)))
+        if not handler:
+            conn = Solr(settings.SOLR_URL)
+            if to_delete:
+                conn.delete(q='id:(%s)' % ' '.join(map(str, to_delete)))
+            handler = lambda docs: conn.add(docs)
 
         primary_work_record_manager = PrimaryWorkRecordManager()
 
@@ -225,20 +231,22 @@ class SolrIndex():
         while True:
             if verbose:
                 pb.update(count)
-            if all:
+            if record_ids:
+                records = Record.objects.filter(id__in=record_ids)
+            elif all:
                 records = Record.objects.all()
                 if collections:
                     records = records.filter(collection__in=collections)
             else:
                 records = Record.objects.filter(id__in=to_update)
             records = records[count:count + batch_size]
-            record_ids = records.values_list('id', flat=True)
-            if not record_ids:
+            record_ids_todo = records.values_list('id', flat=True)
+            if not record_ids_todo:
                 break
             # convert to plain list, because Django's value lists will add a
             # LIMIT clause when used in an __in query, which causes MySQL to
             # break.  (ph): also, made an explicit separate value for this
-            record_id_list = list(record_ids)
+            record_id_list = list(record_ids_todo)
             media_dict = self._preload_related(Media, record_id_list)
             fieldvalue_dict = self._preload_related(FieldValue, record_id_list,
                                                     fields=('field',))
@@ -258,7 +266,8 @@ class SolrIndex():
 
             def process_data(groups, fieldvalues, media, record_id_list,
                              image_to_works, work_to_images,
-                             implicit_primary_work_records):
+                             implicit_primary_work_records,
+                             handler):
                 def process():
                     docs = []
                     for record in Record.objects.filter(id__in=record_id_list):
@@ -287,7 +296,7 @@ class SolrIndex():
                             media=m,
                         )
                         docs.append(doc)
-                    conn.add(docs)
+                    handler(docs)
                 return process
 
             if process_thread:
@@ -296,7 +305,8 @@ class SolrIndex():
                 target=process_data(groups_dict, fieldvalue_dict,
                                     media_dict, record_id_list,
                                     image_to_works, work_to_images,
-                                    implicit_primary_work_records))
+                                    implicit_primary_work_records,
+                                    handler))
             process_thread.start()
             reset_queries()
 
@@ -309,7 +319,7 @@ class SolrIndex():
             # TODO: this will remove objects that have been added
             # in the meantime
             SolrIndexUpdates.objects.filter(delete=False).delete()
-        else:
+        elif not record_ids:
             SolrIndexUpdates.objects.filter(id__in=processed_updates).delete()
 
         return count
