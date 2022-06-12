@@ -811,10 +811,10 @@
 
         // pop-up preview
          var mirador_url = "{% url "data-mirador-embedded" 0 0 %}";
-         var preview_width = {{ PREVIEW_WIDTH|default:800 }};
-         var preview_height = {{ PREVIEW_HEIGHT|default:600 }};
 
          function preview_dialog(a, img, prev, next, position, total) {
+             var preview_width = {% if PREVIEW_WIDTH %}{{ PREVIEW_WIDTH }}{% else %}Math.max(800, window.innerWidth - 160){% endif %};
+             var preview_height = {% if PREVIEW_HEIGHT %}{{ PREVIEW_HEIGHT }}{% else %}Math.max(600, window.innerHeight - 220){% endif %};
              var dialog = $("#preview-dialog");
              if (dialog.data("dialog") || dialog.data("ui-dialog")) {
                  dialog.dialog("destroy");
