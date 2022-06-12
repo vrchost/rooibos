@@ -135,6 +135,8 @@ def record(request, id, name, contexttype=None, contextid=None,
 
     # Can any media be downloaded?
     download_image = False
+    # Should insert media viewer in page?
+    display_image = False
 
     # Only list media that is downloadable or editable
     for m in media:
@@ -143,6 +145,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         m.editable_in_template = m.editable_by(request.user)
         download_image = download_image or \
             m.is_downloadable_by(request.user, original=False)
+        display_image = display_image or (m.width and m.height and m.mimetype and m.mimetype.startswith('image/'))
 
     media = [
         m for m in media
@@ -474,6 +477,7 @@ def record(request, id, name, contexttype=None, contextid=None,
             'record_usage': record_usage,
             'back_url': back_url,
             'download_image': download_image,
+            'display_image': display_image,
             'part_of_works': part_of_works,
             'related_works': related_works,
         }

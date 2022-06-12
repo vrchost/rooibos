@@ -345,7 +345,13 @@ Please save the record before uploading media.
 
 {% if not fv_formset %}
 
-<form id="metadata-form" class="submit-on-select-change" action="." method="GET">
+{% if display_image %}
+    <div style="position:relative; width: calc(100% - 220px); padding-bottom: 50%;">
+        <iframe src="{% url "data-mirador-embedded" record.id record.name %}" style="position:absolute; left:0; top:0; width:100%; height:100%"></iframe>
+    </div>
+{% endif %}
+
+<form id="metadata-form" class="submit-on-select-change" action="." method="GET" style="margin-top: 20px;">
 Display metadata as: {{ fieldsetform.fieldset }}
 <input type="submit" value="Change" />
 </form>
