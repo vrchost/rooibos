@@ -898,15 +898,16 @@ def annotation_list(request, id, name, slide_id):
         record = slides[0].record
         viewers = list(get_viewers_for_object(record, request))
         for viewer in viewers:
-            resources.append({
-                '@type': 'oa:Annotation',
-                'motivation': 'sc:painting',
-                'resource': {
-                    '@id': viewer.url('embed'),
-                    '@type': 'dctypes:Text',
-                    'format': 'text/html',
-                },
-            })
+            if viewer.is_embeddable:
+                resources.append({
+                    '@type': 'oa:Annotation',
+                    'motivation': 'sc:painting',
+                    'resource': {
+                        '@id': viewer.url('embed'),
+                        '@type': 'dctypes:Text',
+                        'format': 'text/html',
+                    },
+                })
 
     return {
         '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
