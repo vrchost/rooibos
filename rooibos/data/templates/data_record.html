@@ -346,7 +346,7 @@ Please save the record before uploading media.
 {% if not fv_formset %}
 
 {% if display_image %}
-    <div style="position:relative; width: calc(100% - 220px); padding-bottom: 50%;">
+    <div style="position:relative; width: calc(100% - 220px); padding-bottom: min(60vh, 50%);">
         <iframe src="{% url "data-mirador-embedded" record.id record.name %}" style="position:absolute; left:0; top:0; width:100%; height:100%"></iframe>
     </div>
 {% endif %}
