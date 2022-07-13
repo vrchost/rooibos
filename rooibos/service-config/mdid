@@ -12,7 +12,7 @@ LOGGING['handlers']['file']['filename'] = os.path.join(
     install_dir, 'var', 'log', LOGGING['handlers']['file']['filename'])
 STATIC_ROOT = os.path.join(install_dir, 'var', 'static')
 SCRATCH_DIR = os.path.join(install_dir, 'var', 'scratch')
-TEMPLATES[0]['DIRS'].append(os.path.join(install_dir, 'templates'))
+TEMPLATES[0]['DIRS'].insert(0, os.path.join(install_dir, 'templates'))
 
 # Add the hostname of your server, or keep '*' to allow all host names
 ALLOWED_HOSTS = ['*']
