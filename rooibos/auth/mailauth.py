@@ -6,7 +6,7 @@ from .baseauth import BaseAuthenticationBackend
 
 
 class ImapAuthenticationBackend(BaseAuthenticationBackend):
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         for imap_auth in settings.IMAP_AUTH:
             imap = None
             try:
@@ -40,7 +40,7 @@ class ImapAuthenticationBackend(BaseAuthenticationBackend):
 
 
 class PopAuthenticationBackend(BaseAuthenticationBackend):
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         for pop_auth in settings.POP_AUTH:
             pop = None
             try:

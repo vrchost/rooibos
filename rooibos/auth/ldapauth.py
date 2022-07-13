@@ -11,7 +11,7 @@ def d(text):
 
 class LdapAuthenticationBackend(BaseAuthenticationBackend):
 
-    def authenticate(self, username=None, password=None):
+    def authenticate(self, request, username=None, password=None):
         for ldap_auth in settings.LDAP_AUTH:
             conn = None
             try:
