@@ -459,6 +459,37 @@ Z003,Title8"""),
 
         self.assertEqual('Title7', t3[0].value)
 
+    def test_record_multi_row_import3(self):
+        title = Field.objects.get(name='title', standard__prefix='dc')
+        testimport1 = SpreadsheetImport(StringIO("Identifier,Title\nZ101,Title1\n,Title2"), [self.collection])
+        testimport2 = SpreadsheetImport(StringIO("Identifier,Title\nZ101,Title3\n,Title4"), [self.collection])
+
+        testimport1.name_field = 'Identifier'
+        testimport1.run()
+
+        self.assertEqual(1, testimport1.added)
+        self.assertEqual(0, testimport1.updated)
+        self.assertEqual(0, testimport1.duplicate_in_file_skipped)
+        self.assertEqual(0, testimport1.no_id_skipped)
+
+        t1 = self.collection.records.get(name='z101').fieldvalue_set.filter(field=title)
+        self.assertEqual('Title1', t1[0].value)
+        self.assertEqual('Title2', t1[1].value)
+        self.assertEqual(2, len(t1))
+
+        testimport2.name_field = 'Identifier'
+        testimport2.run()
+
+        self.assertEqual(0, testimport2.added)
+        self.assertEqual(1, testimport2.updated)
+        self.assertEqual(0, testimport2.duplicate_in_file_skipped)
+        self.assertEqual(0, testimport2.no_id_skipped)
+
+        t2 = self.collection.records.get(name='z101').fieldvalue_set.filter(field=title)
+        self.assertEqual('Title3', t2[0].value)
+        self.assertEqual('Title4', t2[1].value)
+        self.assertEqual(2, len(t2))
+
     def test_skip_updates(self):
         identifier = Field.objects.get(
             name='identifier', standard__prefix='dc')
