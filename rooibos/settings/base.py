@@ -352,6 +352,8 @@ UPLOAD_LIMIT = 5 * 1024 * 1024
 
 
 CAS_SERVER_URL = None
+CAS_LOGIN_URL_NAME = 'login'
+# CAS_CHECK_NEXT = False  # if CAS server redirects to full URL with domain name
 
 
 WWW_AUTHENTICATION_REALM = "Please log in to access media from MDID " \

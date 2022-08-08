@@ -125,7 +125,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
     urls += [
         url(
             r'^login/$',
-            django_cas_ng.views.login,
+            django_cas_ng.views.LoginView.as_view(),
             {
                 'HELP': 'logging-in',
             },
@@ -141,7 +141,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
         ),
         url(
             r'^logout/$',
-            django_cas_ng.views.logout,
+            django_cas_ng.views.LogoutView.as_view(),
             {
                 'HELP': 'logging-out',
                 'next_page': settings.LOGOUT_REDIRECT_URL
