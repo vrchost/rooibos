@@ -70,14 +70,14 @@ def dir2(var):
 def base32(value, filler='='):
     filler = str(filler).encode('utf8', errors='ignore')
     value = str(value).encode('utf8', errors='ignore')
-    return b32encode(value).replace(b'=', filler)
+    return b32encode(value).replace(b'=', filler).decode('utf8')
 
 
 @register.filter
 def base64(value, filler='='):
     filler = str(filler).encode('utf8', errors='ignore')
     value = str(value).encode('utf8', errors='ignore')
-    return b64encode(value).replace(b'=', filler)
+    return b64encode(value).replace(b'=', filler).decode('utf8')
 
 
 @register.filter
