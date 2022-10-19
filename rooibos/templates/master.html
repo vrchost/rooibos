@@ -297,7 +297,7 @@
         }
 
         function bindSelectRecordCheckboxes() {
-            $(".record-select").click(function() { recordSelection($(this).attr('value'), $(this).attr('checked')); });
+            $(".record-select").click(function() { recordSelection($(this).attr('value'), $(this).prop('checked')); });
         }
 
 

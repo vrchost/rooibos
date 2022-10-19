@@ -28,7 +28,7 @@
 
     $(document).ready(function() {
         $("#submit_record_selections").hide();
-        $(".remote-record-select").click(function() { remoteRecordSelection($(this).attr('value'), $(this).attr('checked')); });
+        $(".remote-record-select").click(function() { remoteRecordSelection($(this).attr('value'), $(this).prop('checked')); });
     });
 
 </script>

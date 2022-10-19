@@ -55,7 +55,7 @@ function importAll() {
 
 function bindSelectFlickrCheckboxes() {
     $(".flickr-select").click(function() { 
-        flickrSelection($(this).attr('value'), $(this).attr('checked'));
+        flickrSelection($(this).attr('value'), $(this).prop('checked'));
     });
 }
 
