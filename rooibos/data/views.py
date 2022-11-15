@@ -37,6 +37,7 @@ from rooibos.middleware import HistoryMiddleware
 from .tasks import csvimport
 from rooibos.presentation.views import get_id, get_metadata, special_slide
 from ..storage.functions import get_media_for_record
+from ..viewers import get_viewers_for_object
 
 
 @login_required
@@ -1026,6 +1027,8 @@ def single_record_manifest(request, record, owner):
         canvas_height *= 2
         canvas_width *= 2
 
+    other_content = []
+
     if width and height:
 
         resource = {
@@ -1040,6 +1043,18 @@ def single_record_manifest(request, record, owner):
                 'profile': 'http://iiif.io/api/image/2/level1.json'
             }
         }
+
+        viewers = list(get_viewers_for_object(record, request))
+        if len(viewers) > 0:
+            other_content.append({
+                '@id': reverse(
+                    'data-annotation-list',
+                    kwargs={
+                        'id': record.id,
+                        'name': record.name,
+                    }),
+                '@type': 'sc:AnnotationList',
+            })
 
         images = [{
             '@type': 'oa:Annotation',
@@ -1064,10 +1079,42 @@ def single_record_manifest(request, record, owner):
         "height": canvas_height,
         "width": canvas_width,
         'images': images,
+        'otherContent': other_content,
         'metadata': metadata,
     }
 
     return result
+
+
+@json_view
+def annotation_list(request, id, name):
+    record = Record.get_or_404(id, request.user)
+
+    resources = []
+
+    viewers = list(get_viewers_for_object(record, request))
+    for viewer in viewers:
+        if viewer.is_embeddable:
+            resources.append({
+                '@type': 'oa:Annotation',
+                'motivation': 'sc:painting',
+                'resource': {
+                    '@id': viewer.url('embed'),
+                    '@type': 'dctypes:Text',
+                    'format': 'text/html',
+                },
+            })
+
+    return {
+        '@context': reverse('data-record-manifest', kwargs=dict(identifier=id, name=name)),
+        '@type': 'sc:Manifest',
+        '@id': get_id(
+            request, 'record', 'record%d' % record.id,
+            'annotation-list',
+        ),
+        'resources': resources,
+        'on': get_id(request, 'record', 'canvas', 'record%d' % record.id),
+    }
 
 
 @json_view

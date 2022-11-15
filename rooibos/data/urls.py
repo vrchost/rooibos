@@ -2,7 +2,7 @@ from django.conf.urls import url
 from .views import manage_collections, manage_collection, record_preview, \
     record, record_delete, data_import_file, data_import, \
     save_collection_visibility_preferences, collection_dump_view, \
-    mirador_embedded, record_manifest
+    mirador_embedded, record_manifest, annotation_list
 
 
 urlpatterns = [
@@ -97,4 +97,10 @@ urlpatterns = [
         record_manifest,
         name='data-record-manifest'
     ),
+    url(
+        r'^annotation-list/(?P<id>\d+)/(?P<name>[-\w]+)/$',
+        annotation_list,
+        name='data-annotation-list',
+    ),
+
 ]
