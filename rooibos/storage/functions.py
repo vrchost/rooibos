@@ -321,7 +321,11 @@ def get_image_for_record(
             return None
 
     else:
-        orig_path = m.get_absolute_file_path()
+        try:
+            orig_path = m.get_absolute_file_path()
+        except IOError:
+            logger.error("get_absolute_file_path() failed for media.id %s" % m.id, exc_info=True)
+            return None
         if loris_name:
             # need to produce a filename without special characters
             # and proper extension
