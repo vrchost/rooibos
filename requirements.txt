@@ -56,7 +56,7 @@ markdown==3.2.2
 pep8==1.7.1
 pep8-naming==0.12.1
 pika==1.2.0
-pillow==9.0.1
+pillow>=9.2.0
 prompt-toolkit==3.0.24
 pycryptodome==3.12.0
 pymysql==1.0.2
@@ -65,11 +65,11 @@ python-memcached
 python-pptx==0.6.21
 reportlab==3.6.5
 requests==2.27.1
-setuptools==59.6.0
+setuptools>=65.5.1
 sqlparse==0.4.2
 unicodecsv==0.14.1
 vine==5.0.0
 wcwidth==0.2.5
 werkzeug==2.0.2
 wfastcgi==3.0.0
-wheel==0.37.1
+wheel>=0.38.1
