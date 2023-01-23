@@ -960,7 +960,11 @@ def browse(request, id=None, name=None):
         if fields:
             break
         collection = ic
-        fields = _get_browse_fields(collection.id)
+        if not browse_children:
+            fields = _get_browse_fields(collection.id)
+        else:
+            fields = _get_browse_fields(
+                collection.id, list(collection.all_child_collections))
 
     if not fields:
         logger.debug('No browse fields found for collection %d, '
