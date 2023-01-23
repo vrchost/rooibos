@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License along
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
-Celery==5.2.3
+Celery==5.2.7
 Django==3.2.16
 PyPDF2==1.27.5
 amqp==5.0.9
