@@ -860,7 +860,7 @@ def raw_manifest(request, id, name, offline=False):
             '@id': get_id(
                 request, 'presentation', 'presentation%d' % p.id, 'all',
                 offline=offline),
-            '@type': 'sc:Range',
+            '@type': 'sc:Sequence',
             'label': 'All slides',
             'canvases': [
                 slide_manifest(

@@ -1132,7 +1132,7 @@ def record_manifest(request, identifier, name):
         'description': '',
         'sequences': [{
             '@id': get_id(request, 'record', 'record%d' % record.id),
-            '@type': 'sc:Range',
+            '@type': 'sc:Sequence',
             'label': 'Record',
             'canvases': [
                 single_record_manifest(
