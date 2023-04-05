@@ -654,14 +654,14 @@ def record_usage(request, id, name):
     )
 
 
+def get_server(request, offline=False):
+    return '' if offline else 'https://' + request.META.get(
+        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+
+
 def get_id(request, *args, offline=False):
-    if not offline:
-        server = '//' + request.META.get(
-            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
-    else:
-        server = ''
     s = '/'.join(map(str, args))
-    return '%s/iiif/%s' % (server, s)
+    return '%s/iiif/%s' % (get_server(request, offline), s)
 
 
 def get_metadata(fieldvalues):
@@ -686,11 +686,7 @@ def slide_manifest(request, slide, owner, offline=False):
     title = title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(
         request, 'slide', 'canvas', 'slide%d' % slide.id, offline=offline)
-    if not offline:
-        server = '//' + request.META.get(
-            'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
-    else:
-        server = ''
+    server = get_server(request, offline)
     image = server + slide.record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
@@ -749,7 +745,7 @@ def slide_manifest(request, slide, owner, offline=False):
             viewers = list(get_viewers_for_object(slide.record, request))
             if len(viewers) > 0:
                 other_content.append({
-                    '@id': reverse(
+                    '@id': server + reverse(
                         'presentation-annotation-list',
                         kwargs={
                             'id': slide.presentation.id,
@@ -796,7 +792,7 @@ def slide_manifest(request, slide, owner, offline=False):
 
 
 def special_slide(request, kind, label, index=None, offline=False):
-    image = reverse(
+    image = get_server(request, offline) + reverse(
         'presentation-%s-slide' % kind,
         kwargs={'extra': str(index) if index else ''}
     )
@@ -903,7 +899,7 @@ def annotation_list(request, id, name, slide_id):
                     '@type': 'oa:Annotation',
                     'motivation': 'sc:painting',
                     'resource': {
-                        '@id': viewer.url('embed'),
+                        '@id': get_server(request) + viewer.url('embed'),
                         '@type': 'dctypes:Text',
                         'format': 'text/html',
                     },
@@ -938,7 +934,7 @@ def transparent_png(request, extra):
         return HttpResponse(
             content=_get_info_json_for_png(
                 100,
-                reverse('presentation-blank-slide', kwargs={'extra': ''})
+                get_server(request) + reverse('presentation-blank-slide', kwargs={'extra': ''})
             ),
             content_type='application/json',
         )
@@ -957,7 +953,7 @@ def missing_png(request, extra):
         return HttpResponse(
             content=_get_info_json_for_png(
                 200,
-                reverse('presentation-missing-slide', kwargs={'extra': ''})
+                get_server(request) + reverse('presentation-missing-slide', kwargs={'extra': ''})
             ),
             content_type='application/json',
         )
