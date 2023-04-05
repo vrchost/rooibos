@@ -848,7 +848,7 @@ def raw_manifest(request, id, name, offline=False):
     slides = p.items.select_related('record').filter(hidden=False)
 
     return {
-        '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
+        '@context': 'http://iiif.io/api/presentation/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(
             request, 'presentation', 'presentation%d' % p.id, 'manifest',
@@ -910,7 +910,7 @@ def annotation_list(request, id, name, slide_id):
                 })
 
     return {
-        '@context': reverse(manifest, kwargs=dict(id=p.id, name=p.name)),
+        '@context': 'http://iiif.io/api/presentation/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(
             request, 'presentation', 'presentation%d' % p.id,

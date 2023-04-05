@@ -1106,7 +1106,7 @@ def annotation_list(request, id, name):
             })
 
     return {
-        '@context': reverse('data-record-manifest', kwargs=dict(identifier=id, name=name)),
+        '@context': 'http://iiif.io/api/image/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(
             request, 'record', 'record%d' % record.id,
@@ -1124,8 +1124,7 @@ def record_manifest(request, identifier, name):
     owner = request.user if request.user.is_authenticated else None
 
     return {
-        '@context': reverse(
-            record_manifest, kwargs=dict(identifier=identifier, name=name)),
+        '@context': 'http://iiif.io/api/image/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(request, 'record', 'record%d' % record.id, 'manifest'),
         'label': record.title,
