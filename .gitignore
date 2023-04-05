@@ -1,6 +1,7 @@
 *.log
 *.pyc
 *.pyo
+.DS_Store
 .env/
 .idea/*
 .metadata/
