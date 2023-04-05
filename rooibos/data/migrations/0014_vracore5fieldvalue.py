@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='VRACore5FieldValue',
+            name='VRACore4FieldValue',
             fields=[
                 ('fieldvalue_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='data.FieldValue')),
                 ('notes', models.TextField(blank=True)),

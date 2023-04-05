@@ -62,3 +62,4 @@ wfastcgi
 wheel
 requests
 unicodecsv==0.14.1
+xmlschema

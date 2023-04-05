@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'rooibos.pdfviewer',
     'rooibos.pptexport',
     'rooibos.works',
+    'rooibos.vracore4',
     'compressor',
 )
 
