@@ -35,7 +35,7 @@ import string
 from rooibos.util import safe_int, validate_next_link, json_view
 from rooibos.middleware import HistoryMiddleware
 from .tasks import csvimport
-from rooibos.presentation.views import get_id, get_metadata, special_slide
+from rooibos.presentation.views import get_id, get_metadata, special_slide, get_server
 from ..storage.functions import get_media_for_record
 from ..viewers import get_viewers_for_object
 
@@ -1003,8 +1003,7 @@ def single_record_manifest(request, record, owner):
     fieldvalues = record.get_fieldvalues(owner=owner)
     title = title_from_fieldvalues(fieldvalues) or 'Untitled',
     id = get_id(request, 'record', 'canvas', 'record%d' % record.id)
-    server = '//' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    server = get_server(request)
     image = server + record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
@@ -1047,7 +1046,7 @@ def single_record_manifest(request, record, owner):
         viewers = list(get_viewers_for_object(record, request))
         if len(viewers) > 0:
             other_content.append({
-                '@id': reverse(
+                '@id': server + reverse(
                     'data-annotation-list',
                     kwargs={
                         'id': record.id,
@@ -1099,14 +1098,14 @@ def annotation_list(request, id, name):
                 '@type': 'oa:Annotation',
                 'motivation': 'sc:painting',
                 'resource': {
-                    '@id': viewer.url('embed'),
+                    '@id': get_server(request) + viewer.url('embed'),
                     '@type': 'dctypes:Text',
                     'format': 'text/html',
                 },
             })
 
     return {
-        '@context': reverse('data-record-manifest', kwargs=dict(identifier=id, name=name)),
+        '@context': 'http://iiif.io/api/image/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(
             request, 'record', 'record%d' % record.id,
@@ -1124,8 +1123,7 @@ def record_manifest(request, identifier, name):
     owner = request.user if request.user.is_authenticated else None
 
     return {
-        '@context': reverse(
-            record_manifest, kwargs=dict(identifier=identifier, name=name)),
+        '@context': 'http://iiif.io/api/image/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(request, 'record', 'record%d' % record.id, 'manifest'),
         'label': record.title,
@@ -1133,7 +1131,7 @@ def record_manifest(request, identifier, name):
         'description': '',
         'sequences': [{
             '@id': get_id(request, 'record', 'record%d' % record.id),
-            '@type': 'sc:Range',
+            '@type': 'sc:Sequence',
             'label': 'Record',
             'canvases': [
                 single_record_manifest(
