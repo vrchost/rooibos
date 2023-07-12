@@ -323,7 +323,7 @@ def get_image_for_record(
     else:
         try:
             orig_path = m.get_absolute_file_path()
-        except IOError:
+        except:
             logger.error("get_absolute_file_path() failed for media.id %s" % m.id, exc_info=True)
             return None
         if loris_name:
