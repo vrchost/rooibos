@@ -29,18 +29,18 @@
     var match = window.location.href.match(/[?&]canvas=([^&]+)/);
     var canvas = match ? match[1] : undefined;
 
-    var returnUrl = '{{ return_url }}';
+    var returnUrl = '{{ return_url|escapejs }}';
 
     var options = {
         id: "viewer",
         buildPath: "{% static 'mirador/' %}",
         data: [{
-            manifestUri: "{{ manifest_url }}",
-            location: "{{ record.title }}"
+            manifestUri: "{{ manifest_url|escapejs }}",
+            location: "{{ record.title|escapejs }}"
         }],
         windowObjects: [{
             canvasID: canvas,
-            loadedManifest: "{{ manifest_url }}"
+            loadedManifest: "{{ manifest_url|escapejs }}"
         }],
         workspacePanelSettings: {
             'maxRows': 2,
