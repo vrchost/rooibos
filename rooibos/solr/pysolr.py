@@ -313,10 +313,10 @@ class Solr(object):
         results = []
         for doc in docs:
             result = {}
-            for element in doc.getchildren():
+            for element in doc:
                 if element.tag == 'arr':
                     result_val = []
-                    for array_element in element.getchildren():
+                    for array_element in element:
                         converter_name = '%s_to_python' % array_element.tag
                         converter = getattr(self, converter_name)
                         result_val.append(converter(array_element.text))
