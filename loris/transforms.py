@@ -125,7 +125,7 @@ class _AbstractTransformer(object):
         if size_param.canonical_uri_value != 'full':
             wh = [int(size_param.w), int(size_param.h)]
             logger.debug('Resizing to: %r', wh)
-            im = im.resize(wh, resample=Image.ANTIALIAS)
+            im = im.resize(wh, resample=Image.LANCZOS)
 
         rotation_param = image_request.rotation_param()
 

@@ -179,7 +179,7 @@ def downsize_image(file, width, height, crop_to_square):
                 (0, (h - w) // 2, w, (h - w) // 2 + w))
     w, h = image.size
     if w > width or h > height:
-        image.thumbnail((width, height), Image.ANTIALIAS)
+        image.thumbnail((width, height), Image.LANCZOS)
     if image.mode != "RGB":
         image = image.convert("RGB")
     return image
