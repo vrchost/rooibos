@@ -32,7 +32,7 @@ from .spreadsheetimport import SpreadsheetImport
 import os
 import random
 import string
-from rooibos.util import safe_int, validate_next_link, json_view
+from rooibos.util import safe_int, validate_next_link, json_view, allow_all_origins
 from rooibos.middleware import HistoryMiddleware
 from .tasks import csvimport
 from rooibos.presentation.views import get_id, get_metadata, special_slide, get_server
@@ -1116,6 +1116,7 @@ def annotation_list(request, id, name):
     }
 
 
+@allow_all_origins
 @json_view
 def record_manifest(request, identifier, name):
     record = Record.get_or_404(identifier, request.user)

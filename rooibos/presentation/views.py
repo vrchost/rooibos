@@ -23,7 +23,7 @@ from rooibos.ui.actionbar import update_actionbar_tags
 from rooibos.access.models import ExtendedGroup, AUTHENTICATED_GROUP, \
     AccessControl
 from rooibos.userprofile.views import load_settings, store_settings
-from rooibos.util import json_view, validate_next_link
+from rooibos.util import json_view, validate_next_link, allow_all_origins
 from rooibos.util.markdown import markdown
 from rooibos.storage.functions import get_image_for_record
 from .models import Presentation, PresentationItem
@@ -877,7 +877,7 @@ def raw_manifest(request, id, name, offline=False):
     }
 
 
-manifest = json_view(raw_manifest)
+manifest = allow_all_origins(json_view(raw_manifest))
 
 
 @json_view
