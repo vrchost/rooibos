@@ -68,14 +68,6 @@ def json_view(func):
     return wrap
 
 
-def allow_all_origins(func):
-    def wrap(*a, **kw):
-        response = func(*a, **kw)
-        response["Access-Control-Allow-Origin"] = '*'
-        return response
-    return wrap
-
-
 def unique_slug(item, slug_source=None, slug_literal=None, slug_field='name',
                 id_field='id', check_current_slug=False):
     """Ensures a unique slug field by appending an integer counter to duplicate
