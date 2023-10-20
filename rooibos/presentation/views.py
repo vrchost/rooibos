@@ -901,7 +901,7 @@ def annotation_list(request, id, name, slide_id):
                     'resource': {
                         '@id': get_server(request) + viewer.url('embed'),
                         '@type': 'dctypes:Text',
-                        'format': 'text/html',
+                        'format': 'application/mdid',
                     },
                 })
 

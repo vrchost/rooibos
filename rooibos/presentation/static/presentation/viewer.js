@@ -443,7 +443,10 @@ var Viewer = function (options) {
         if (data && data.annotationsList && data.annotationsList.length &&
                 data.annotationsList[0]) {
             var res = data.annotationsList[0].resource;
-            var url = res.format === 'text/html' ? res['@id'] : undefined;
+            var url = res.format === 'application/mdid' ? res['@id'] : undefined;
+            if (!url) {
+                return;
+            }
             var request = jQuery.ajax({
                 url: url,
                 dataType: 'html',
