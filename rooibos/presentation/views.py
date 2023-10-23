@@ -835,13 +835,22 @@ def special_slide(request, kind, label, index=None, offline=False):
     return result
 
 
-def raw_manifest(request, id, name, offline=False):
+def raw_manifest(request, id, name, offline=False, end_slide=False):
     p = Presentation.get_by_id_for_request(id, request)
     if not p:
         return dict(result='error')
 
     owner = request.user if request.user.is_authenticated else None
     slides = p.items.select_related('record').filter(hidden=False)
+
+    extra = [] if not end_slide else [
+        special_slide(
+            request,
+            kind='blank',
+            label='End of presentation',
+            offline=offline,
+        )
+    ]
 
     return {
         '@context': 'http://iiif.io/api/presentation/2/context.json',
@@ -865,19 +874,15 @@ def raw_manifest(request, id, name, offline=False):
                     owner,
                     offline=offline,
                 ) for slide in slides
-            ] + [
-                special_slide(
-                    request,
-                    kind='blank',
-                    label='End of presentation',
-                    offline=offline,
-                )
-            ]
+            ] + extra
         }],
     }
 
 
-manifest = json_view(raw_manifest)
+@json_view
+def manifest(request, id, name, offline=False):
+    end_slide = bool(request.GET.get('end_slide', False))
+    return raw_manifest(request, id, name, offline, end_slide=end_slide)
 
 
 @json_view

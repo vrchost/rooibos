@@ -63,7 +63,7 @@ class MiradorPackageViewer(Viewer):
         })
 
         manifest = raw_manifest(
-            request, self.obj.id, self.obj.name, offline=True)
+            request, self.obj.id, self.obj.name, offline=True, end_slide=True)
 
         output.writestr('presentation/index.html', page)
         output.writestr('presentation/manifest.json', json.dumps(manifest))

@@ -76,7 +76,7 @@ class PresentationViewer(Viewer):
         return_url = validate_next_link(
             request.GET.get('next'), reverse('presentation-browse'))
         manifest_url = reverse(
-            'presentation-manifest', args=(self.obj.id, self.obj.name))
+            'presentation-manifest', args=(self.obj.id, self.obj.name)) + '?end_slide=1'
         return render(
             request,
             getattr(
