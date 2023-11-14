@@ -860,7 +860,7 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
             offline=offline),
         'label': p.title,
         'metadata': [],
-        'description': p.description,
+        'description': p.description or '',
         'sequences': [{
             '@id': get_id(
                 request, 'presentation', 'presentation%d' % p.id, 'all',
