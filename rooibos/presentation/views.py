@@ -661,7 +661,7 @@ def get_server(request, offline=False):
 
 def get_id(request, *args, offline=False):
     s = '/'.join(map(str, args))
-    return '%s/iiif/%s' % (get_server(request, offline), s)
+    return '%s/%s/' % (get_server(request, offline), s)
 
 
 def get_metadata(fieldvalues):
@@ -856,7 +856,7 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
         '@context': 'http://iiif.io/api/presentation/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_id(
-            request, 'presentation', 'presentation%d' % p.id, 'manifest',
+            request, 'presentation', 'manifest', str(p.id), p.name,
             offline=offline),
         'label': p.title,
         'metadata': [],
