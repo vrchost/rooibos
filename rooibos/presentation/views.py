@@ -879,10 +879,195 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
     }
 
 
+def slide_manifest_v3(request, slide, owner, offline=False):
+
+    fieldvalues = slide.get_fieldvalues(owner=owner)
+    title = title_from_fieldvalues(fieldvalues) or 'Untitled',
+    id = get_id(
+        request, 'slide', 'canvas', 'slide%d' % slide.id, offline=offline)
+    server = get_server(request, offline)
+    image = server + slide.record.get_image_url(
+        force_reprocess=False,
+        handler='storage-retrieve-iiif-image',
+    )
+
+    metadata = get_metadata(fieldvalues)
+    if slide.annotation:
+        metadata.insert(0, dict(label='Annotation', value=slide.annotation))
+
+    passwords = request.session.get('passwords', dict())
+
+    image_path = get_image_for_record(
+        slide.record, user=request.user, passwords=passwords)
+
+    width = height = None
+
+    if image_path:
+        try:
+            width, height = Image.open(image_path).size
+            canvas_width = width
+            canvas_height = height
+        except Exception:
+            logger.warning(
+                'Could not determine image size for "%s"' % image_path,
+                exc_info=True
+            )
+
+    if width is None or height is None:
+        width = height = None
+        canvas_width = 1200
+        canvas_height = 1200
+
+    while canvas_height < 1200 or canvas_width < 1200:
+        canvas_height *= 2
+        canvas_width *= 2
+
+    if width and height:
+
+        resource = {
+            'id': image,
+            'type': 'dctypes:Image',
+            'format': 'image/jpeg',
+            "height": height,
+            "width": width
+        }
+
+        if not offline:
+            resource['service'] = {
+                '@context': 'http://iiif.io/api/image/2/context.json',
+                'id': image,
+                'profile': 'http://iiif.io/api/image/2/level1.json'
+            }
+
+        images = [{
+            'type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': resource,
+            'on': id,
+        }]
+
+    else:
+
+        return special_slide_v3(
+            request,
+            kind='missing',
+            label='Missing image',
+            index=slide.id,
+            offline=offline,
+        )
+
+    result = {
+        'id': id,
+        'type': 'sc:Canvas',
+        'label': {"en": [title]},
+        "height": canvas_height,
+        "width": canvas_width,
+        'items': images,
+        'metadata': metadata,
+    }
+
+    if offline:
+        result['thumbnail'] = {
+            'id': '/thumbs' + image,
+        }
+
+    return result
+
+
+def special_slide_v3(request, kind, label, index=None, offline=False):
+    image = get_server(request, offline) + reverse(
+        'presentation-%s-slide' % kind,
+        kwargs={'extra': str(index) if index else ''}
+    )
+    id = get_id(
+        request, 'slide', 'canvas', 'slide%d' % (index or 0), offline=offline)
+    resource = {
+        'id': image,
+        'type': 'dctypes:Image',
+        'format': 'image/jpeg',
+        "height": 100,
+        "width": 100
+    }
+    if not offline:
+        resource['service'] = {
+            '@context': 'http://iiif.io/api/image/2/context.json',
+            'id': image,
+            'profile': 'http://iiif.io/api/image/2/level1.json'
+        }
+
+    result = {
+        'id': id,
+        'type': 'sc:Canvas',
+        'label': {"en": [label]},
+        "height": 100,
+        "width": 100,
+        'items': [{
+            'type': 'oa:Annotation',
+            'motivation': 'sc:painting',
+            'resource': resource,
+            'on': id,
+        }],
+        'metadata': [],
+    }
+
+    if offline:
+        result['thumbnail'] = {
+            'id': image,
+        }
+
+    return result
+
+
+def raw_manifest_v3(request, id, name, offline=False, end_slide=False):
+    p = Presentation.get_by_id_for_request(id, request)
+    if not p:
+        return dict(result='error')
+
+    owner = request.user if request.user.is_authenticated else None
+    slides = p.items.select_related('record').filter(hidden=False)
+
+    extra = [] if not end_slide else [
+        special_slide_v3(
+            request,
+            kind='blank',
+            label='End of presentation',
+            offline=offline,
+        )
+    ]
+
+    return {
+        '@context': [
+            'http://iiif.io/api/presentation/3/context.json',
+            'https://iiif.io/api/extension/navplace/context.json',
+        ],
+        'type': 'sc:Manifest',
+        'id': get_id(
+            request, 'presentation', 'manifest-v3', str(p.id), p.name,
+            offline=offline),
+        'label': {"en": [p.title]},
+        'metadata': [],
+        'description': {"en": [p.description or '']},
+        'items': [
+            slide_manifest_v3(
+                request,
+                slide,
+                owner,
+                offline=offline,
+            ) for slide in slides
+        ] + extra,
+    }
+
+
 @json_view
 def manifest(request, id, name, offline=False):
     end_slide = bool(request.GET.get('end_slide', False))
     return raw_manifest(request, id, name, offline, end_slide=end_slide)
+
+
+@json_view
+def manifest_v3(request, id, name, offline=False):
+    end_slide = bool(request.GET.get('end_slide', False))
+    return raw_manifest_v3(request, id, name, offline, end_slide=end_slide)
 
 
 @json_view
