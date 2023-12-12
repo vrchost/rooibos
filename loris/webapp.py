@@ -27,9 +27,7 @@ sys.path.append('.')
 from configobj import ConfigObj
 from werkzeug.http import parse_date, http_date
 
-from werkzeug.wrappers import (
-    Request, Response, BaseResponse, CommonResponseDescriptorsMixin
-)
+from werkzeug.wrappers import Request, Response
 
 from loris import constants, img, transforms
 from loris.img_info import InfoCache
@@ -198,7 +196,7 @@ class StdOutFilter(logging.Filter):
     def filter(self,record):
         return 1 if record.levelno <= 20 else 0
 
-class LorisResponse(BaseResponse, CommonResponseDescriptorsMixin):
+class LorisResponse(Response):
     '''Similar to Response, but IIIF Compliance Link and
     Access-Control-Allow-Origin Headers are added and none of the
     ETagResponseMixin, ResponseStreamMixin, or WWWAuthenticateMixin

@@ -76,7 +76,8 @@ def main():
         for path in paths:
             sys.path.append(path)
 
-    if len(sys.argv) > 1 and sys.argv[1] == 'init':
+    args = sys.argv[:]
+    if len(args) > 1 and args[1] == 'init':
         init()
         sys.exit(0)
 
@@ -88,4 +89,7 @@ def main():
         except ImportError:
             print('Could not find MDID settings, have you run "mdid init"?')
             sys.exit(1)
-    sys.exit(execute_from_command_line())
+
+    if args[1] == 'runserver_plus' and '--keep-meta-shutdown' not in args[2:]:
+        args.insert(2, '--keep-meta-shutdown')
+    sys.exit(execute_from_command_line(args))
