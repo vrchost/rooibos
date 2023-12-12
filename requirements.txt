@@ -16,7 +16,7 @@
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
 Celery==5.2.7
-Django==3.2.20
+Django==3.2.23
 PyPDF2==1.27.9
 amqp==5.0.9
 attrs==21.4.0
@@ -31,7 +31,7 @@ click-plugins==1.1.1
 click-repl==0.2.0
 click==8.0.3
 configobj==5.0.8
-cryptography==41.0.0
+cryptography==41.0.6
 django-appconf==1.0.5
 django-cas-ng==4.3.0
 django-celery-results==2.4.0
@@ -70,6 +70,6 @@ sqlparse==0.4.4
 unicodecsv==0.14.1
 vine==5.0.0
 wcwidth==0.2.5
-werkzeug==2.2.3
+werkzeug==2.3.8
 wfastcgi==3.0.0
 wheel>=0.38.1
