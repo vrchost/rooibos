@@ -1,3 +1,5 @@
+import re
+
 from django.contrib import messages
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.urls import reverse
@@ -891,7 +893,7 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
 def slide_manifest_v3(request, slide, owner, offline=False):
 
     fieldvalues = slide.get_fieldvalues(owner=owner)
-    title = title_from_fieldvalues(fieldvalues) or 'Untitled',
+    titles = title_from_fieldvalues(fieldvalues) or ['Untitled'],
     id = get_id(
         request, 'slide', 'canvas', 'slide%d' % slide.id, offline=offline)
     server = get_server(request, offline)
@@ -950,10 +952,43 @@ def slide_manifest_v3(request, slide, owner, offline=False):
 
         images = [{
             'type': 'oa:Annotation',
-            'motivation': 'sc:painting',
+            'motivation': 'painting',
             'resource': resource,
             'on': id,
         }]
+
+        gps_regex = re.compile(r'([-+]?\d+[.,]\d+\s*),?(\s*[-+]?\d+[.,]\d+\s*)')
+        coordinates = []
+        for m in metadata:
+            match = gps_regex.match(m['value'])
+            if match:
+                coordinates.append((match.group(1), match.group(2)))
+
+        nav_place = {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    "id": get_id(request, 'geojson', 'slide%d' % slide.id, str(i), offline=offline),
+                    "type": "Feature",
+                    "properties": {
+                        "label": {
+                            "none": titles,
+                        },
+                        "summary": {
+                            "none": titles,
+                        }
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            float(coordinate[0]),
+                            float(coordinate[1]),
+                        ]
+                    }
+                }
+                for i, coordinate in enumerate(coordinates)
+            ]
+        }
 
     else:
 
@@ -967,12 +1002,27 @@ def slide_manifest_v3(request, slide, owner, offline=False):
 
     result = {
         'id': id,
-        'type': 'sc:Canvas',
-        'label': {"en": [title]},
+        'type': 'Canvas',
+        'label': {"none": titles},
         "height": canvas_height,
         "width": canvas_width,
         'items': images,
-        'metadata': metadata,
+        'navPlace': nav_place,
+        'metadata': [
+            {
+                'label': {
+                    'none': [
+                        data['label']
+                    ]
+                },
+                'value': {
+                    'none': [
+                        data['value']
+                    ]
+                }
+            }
+            for data in metadata
+        ]
     }
 
     if offline:
@@ -1007,7 +1057,7 @@ def special_slide_v3(request, kind, label, index=None, offline=False):
     result = {
         'id': id,
         'type': 'sc:Canvas',
-        'label': {"en": [label]},
+        'label': {"none": [label]},
         "height": 100,
         "width": 100,
         'items': [{
@@ -1049,13 +1099,13 @@ def raw_manifest_v3(request, id, name, offline=False, end_slide=False):
             'http://iiif.io/api/presentation/3/context.json',
             'https://iiif.io/api/extension/navplace/context.json',
         ],
-        'type': 'sc:Manifest',
+        'type': 'Manifest',
         'id': get_id(
             request, 'presentation', 'manifest-v3', str(p.id), p.name,
             offline=offline),
-        'label': {"en": [p.title]},
+        'label': {"none": [p.title]},
         'metadata': [],
-        'description': {"en": [p.description or '']},
+        'description': {"none": [p.description or '']},
         'items': [
             slide_manifest_v3(
                 request,
