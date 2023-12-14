@@ -16,7 +16,7 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
 from rooibos.access.functions import filter_by_access
-from rooibos.data.models import FieldSet, Record, title_from_fieldvalues
+from rooibos.data.models import FieldSet, Record, title_from_fieldvalues, standardfield_ids
 from rooibos.data.forms import FieldSetChoiceField
 from rooibos.data.functions import get_fields_for_set
 from rooibos.ui.actionbar import update_actionbar_tags
@@ -782,6 +782,15 @@ def slide_manifest(request, slide, owner, offline=False):
         'otherContent': other_content,
         'metadata': metadata,
     }
+
+    contributor_fields = list(standardfield_ids('contributor', equiv=True))
+    rights_fields = list(standardfield_ids('rights', equiv=True))
+
+    for fv in fieldvalues:
+        if not result.get('license') and fv.refinement == 'license' and fv.field.id in rights_fields:
+            result['license'] = fv.value
+        elif not result.get('attribution') and not fv.refinement and fv.field.id in contributor_fields:
+            result['attribution'] = fv.value
 
     if offline:
         result['thumbnail'] = {

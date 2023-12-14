@@ -20,7 +20,7 @@ from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 from django.urls import reverse
 from .models import Record, Collection, FieldSet, FieldSetField, \
-    CollectionItem, Field, FieldValue, title_from_fieldvalues
+    CollectionItem, Field, FieldValue, title_from_fieldvalues, standardfield_ids
 from .forms import FieldSetChoiceField, get_collection_visibility_prefs_form
 from .functions import set_collection_visibility_preferences, \
     apply_collection_visibility_preferences, collection_dump
@@ -1081,6 +1081,15 @@ def single_record_manifest(request, record, owner):
         'otherContent': other_content,
         'metadata': metadata,
     }
+
+    contributor_fields = list(standardfield_ids('contributor', equiv=True))
+    rights_fields = list(standardfield_ids('rights', equiv=True))
+
+    for fv in fieldvalues:
+        if not result.get('license') and fv.refinement == 'license' and fv.field.id in rights_fields:
+            result['license'] = fv.value
+        elif not result.get('attribution') and not fv.refinement and fv.field.id in contributor_fields:
+            result['attribution'] = fv.value
 
     return result
 
