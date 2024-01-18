@@ -144,7 +144,7 @@ if getattr(settings, 'CAS_SERVER_URL', None):
             django_cas_ng.views.LogoutView.as_view(),
             {
                 'HELP': 'logging-out',
-                'next_page': settings.LOGOUT_REDIRECT_URL
+                # 'next_page': settings.LOGOUT_REDIRECT_URL
             },
             name='logout'
         ),
