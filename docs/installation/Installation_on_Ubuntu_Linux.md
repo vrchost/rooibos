@@ -1,6 +1,6 @@
 # Installation on Ubuntu Linux
 
-The following instructions are for Ubuntu Linux 20.04 LTS, but
+The following instructions are for Ubuntu Linux 22.04 LTS, but
 should work with minor changes on other distributions as well.
 
 Unless noted otherwise, all commands should be run as `root`.
@@ -101,7 +101,6 @@ sudo -iu mdid  # switch to mdid user
 crontab /opt/mdid/service-config/crontab
 ```
 ### Configure supervisor
-Create a new file `/etc/supervisor/conf.d/mdid.conf` with the following content:
 ```
 ln -s /opt/mdid/service-config/supervisor /etc/supervisor/conf.d/mdid.conf
 supervisorctl reload
@@ -114,8 +113,8 @@ modify your working MDID installation to connect to your IdP.
 
 ### Install additional packages
 ```
-apt-get install apache2 apache2-utils libapache2-mod-shib2 libshibsp-dev \
-    libshibsp-doc opensaml2-tools shibboleth-sp2-schemas
+apt-get install apache2 apache2-utils libapache2-mod-shib libshibsp-dev \
+    libshibsp-doc
 ```
 ### Configure Shibboleth
 
