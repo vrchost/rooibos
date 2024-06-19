@@ -30,7 +30,7 @@ setuptools.setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=REQUIRES,
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     entry_points={
         'console_scripts': [
             'mdid = rooibos.__main__:main',

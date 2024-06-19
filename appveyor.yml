@@ -24,7 +24,7 @@ test_script:
   - django-admin test
 
 after_test:
-  - if [ "$APPVEYOR_REPO_BRANCH" == "master" ]; then twine upload dist/mdid*.whl; fi
+  - if [ "$APPVEYOR_REPO_BRANCH" == "master--disabled" ]; then twine upload dist/mdid*.whl; fi
 
 artifacts:
   - path: dist/mdid*.whl
