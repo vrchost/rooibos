@@ -1,8 +1,8 @@
 image: ubuntu
-stack: python 3.6
+stack: python 3.8
 
 environment:
-  PYTHON: 3.6
+  PYTHON: 3.8
   DJANGO_SETTINGS_MODULE: rooibos.settings.test
   PYTHONPATH: .
   TWINE_REPOSITORY: testpypi
