@@ -289,7 +289,12 @@
 <a href="#properties" style="float: right;">Jump to Properties</a>
 {% endif %}
 
-<h1>{{ presentation.title }}</h1>
+<h1>
+  {{ presentation.title }}
+  <a href="{% url 'presentation-manifest-v3' presentation.id presentation.name %}" target="_blank">
+    <img src="{% static 'images/iiif.png' alt="IIIF Manifest" %}" class="iiif-icon" style="position: initial;"/>
+  </a>
+</h1>
 
 
 
