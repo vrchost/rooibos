@@ -1134,7 +1134,7 @@ def record_manifest(request, identifier, name):
     return {
         '@context': 'http://iiif.io/api/image/2/context.json',
         '@type': 'sc:Manifest',
-        '@id': get_id(request, 'record', 'record%d' % record.id, 'manifest'),
+        '@id': get_server(request) + request.path,  # Manifest ID should be URL of itself
         'label': record.title,
         'metadata': [],
         'description': '',
