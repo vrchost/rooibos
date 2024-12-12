@@ -1,6 +1,7 @@
 from django.conf.urls import url
 from .views import manage, create, edit, duplicate, browse, password, \
-    record_usage, manifest, manifest_v3, annotation_list, transparent_png, missing_png
+    record_usage, manifest, manifest_v3, manifest_from_search_v3, \
+    annotation_list, transparent_png, missing_png
 
 
 urlpatterns = [
@@ -31,6 +32,11 @@ urlpatterns = [
         r'^manifest/(?P<id>\d+)/(?P<name>[-\w]+)/$',
         manifest,
         name='presentation-manifest',
+    ),
+    url(
+        r'^manifest-from-search/$',
+        manifest_from_search_v3,
+        name='presentation-from-search-manifest',
     ),
     url(
         r'^manifest-v3/(?P<id>\d+)/(?P<name>[-\w]+)/$',

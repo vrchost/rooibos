@@ -13,7 +13,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.db import connection
 from django import forms
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from tagging.models import Tag, TaggedItem
 from rooibos.util.models import OwnedWrapper
@@ -35,6 +35,7 @@ import os
 import logging
 from PIL import Image
 
+from ..solr.views import search
 from ..viewers import get_viewers_for_object
 
 
@@ -892,18 +893,18 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
 
 def slide_manifest_v3(request, slide, owner, offline=False):
 
-    fieldvalues = slide.get_fieldvalues(owner=owner)
+    fieldvalues = slide.get_fieldvalues(owner=owner, hidden=True)
     titles = title_from_fieldvalues(fieldvalues) or ['Untitled'],
-    id = get_id(
+    canvas_id = get_id(
         request, 'slide', 'canvas', 'slide%d' % slide.id, offline=offline)
     server = get_server(request, offline)
     image = server + slide.record.get_image_url(
         force_reprocess=False,
         handler='storage-retrieve-iiif-image',
-    )
+    ).rstrip('/')
 
-    metadata = get_metadata(fieldvalues)
-    if slide.annotation:
+    metadata = get_metadata(fv for fv in fieldvalues if not fv.hidden)
+    if slide.presentation.owner_id and slide.annotation:
         metadata.insert(0, dict(label='Annotation', value=slide.annotation))
 
     passwords = request.session.get('passwords', dict())
@@ -936,8 +937,8 @@ def slide_manifest_v3(request, slide, owner, offline=False):
     if width and height:
 
         resource = {
-            'id': image,
-            'type': 'dctypes:Image',
+            'id': image + '/0,0,%s,%s/1200,/0/default.jpg' % (width, height),
+            'type': 'Image',
             'format': 'image/jpeg',
             "height": height,
             "width": width
@@ -951,16 +952,17 @@ def slide_manifest_v3(request, slide, owner, offline=False):
             }
 
         images = [{
-            'type': 'oa:Annotation',
+            'id': get_id(request, 'slide', 'anno', 'slide%d' % slide.id, offline=offline),
+            'type': 'Annotation',
             'motivation': 'painting',
-            'resource': resource,
-            'on': id,
+            'body': resource,
+            'target': canvas_id,
         }]
 
         gps_regex = re.compile(r'([-+]?\d+[.,]\d+\s*),?(\s*[-+]?\d+[.,]\d+\s*)')
         coordinates = []
-        for m in metadata:
-            match = gps_regex.match(m['value'])
+        for fv in fieldvalues:
+            match = gps_regex.match(fv.value)
             if match:
                 coordinates.append((match.group(1), match.group(2)))
 
@@ -981,8 +983,8 @@ def slide_manifest_v3(request, slide, owner, offline=False):
                     "geometry": {
                         "type": "Point",
                         "coordinates": [
-                            float(coordinate[0]),
                             float(coordinate[1]),
+                            float(coordinate[0]),
                         ]
                     }
                 }
@@ -1001,12 +1003,16 @@ def slide_manifest_v3(request, slide, owner, offline=False):
         )
 
     result = {
-        'id': id,
+        'id': canvas_id,
         'type': 'Canvas',
         'label': {"none": titles},
         "height": canvas_height,
         "width": canvas_width,
-        'items': images,
+        'items': [{
+            'id': get_id(request, 'slide', 'anno-page', 'slide%d' % slide.id, offline=offline),
+            'type': 'AnnotationPage',
+            'items': images,
+        }],
         'navPlace': nav_place,
         'metadata': [
             {
@@ -1031,7 +1037,6 @@ def slide_manifest_v3(request, slide, owner, offline=False):
         }
 
     return result
-
 
 def special_slide_v3(request, kind, label, index=None, offline=False):
     image = get_server(request, offline) + reverse(
@@ -1061,7 +1066,7 @@ def special_slide_v3(request, kind, label, index=None, offline=False):
         "height": 100,
         "width": 100,
         'items': [{
-            'type': 'oa:Annotation',
+            'type': 'Annotation',
             'motivation': 'sc:painting',
             'resource': resource,
             'on': id,
@@ -1127,6 +1132,43 @@ def manifest(request, id, name, offline=False):
 def manifest_v3(request, id, name, offline=False):
     end_slide = bool(request.GET.get('end_slide', False))
     return raw_manifest_v3(request, id, name, offline, end_slide=end_slide)
+
+
+@json_view
+def manifest_from_search_v3(request, id=None, name=None):
+    hits, records, _ = search(request, id, name, json=True)
+
+    owner = request.user if request.user.is_authenticated else None
+
+    presentation = Presentation()
+
+    # create temporary slide objects
+    slides = [
+        PresentationItem(
+            id=record.id,
+            record=record,
+            presentation=presentation,
+        ) for record in records or []
+    ]
+
+    return {
+        '@context': [
+            'http://iiif.io/api/presentation/3/context.json',
+            'https://iiif.io/api/extension/navplace/context.json',
+        ],
+        'type': 'Manifest',
+        'id': get_server(request) + request.get_full_path(),
+        'label': {"none": ['Search Results']},
+        'metadata': [],
+        'description': {"none": ['%s hits' % hits]},
+        'items': [
+            slide_manifest_v3(
+                request,
+                slide,
+                owner,
+            ) for slide in slides
+        ],
+    }
 
 
 @json_view
