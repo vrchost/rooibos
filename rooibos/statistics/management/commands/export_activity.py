@@ -1,5 +1,9 @@
+from functools import cache
+
 from django.core.management.base import BaseCommand
 from django.contrib.contenttypes.models import ContentType
+
+from rooibos.data.models import Record
 from rooibos.statistics.models import AccumulatedActivity
 import sys
 import csv
@@ -39,7 +43,8 @@ class Command(BaseCommand):
         if kwargs.get('year'):
             rows = rows.filter(date__year=kwargs.get('year'))
 
-        count = rows.count()
+        row_ids = list(rows.values_list('id', flat=True))
+        count = len(row_ids)
 
         print("Exporting %d rows" % count, file=sys.stderr)
 
@@ -57,18 +62,27 @@ class Command(BaseCommand):
 
         get_description = dict(
             user=lambda user: user.username,
-            record=lambda record: record.identifier,
             media=lambda media: media.url,
         ).get(content_type, lambda unknown: '')
 
+        @cache
+        def get_description_for_record(item_id):
+            try:
+                return Record.objects.get(id=item_id).identifier
+            except Record.DoesNotExist:
+                return ''
+
         processed = 0
         while processed < count:
-            activities = rows[processed:processed + 1000]
+            activities_ids = row_ids[processed:processed + 10000]
+            activities = AccumulatedActivity.objects.filter(id__in=activities_ids)
             for activity in activities:
-                if activity.content_object:
-                    description = get_description(activity.content_object)
-                else:
-                    description = ''
+                description = ''
+                if activity.object_id:
+                    if content_type == 'record':
+                        description = get_description_for_record(activity.object_id)
+                    elif activity.content_object:
+                        description = get_description(activity.content_object)
                 row = {
                     'type': content_type,
                     'id': activity.object_id,
@@ -79,4 +93,4 @@ class Command(BaseCommand):
                 }
                 writer.writerow(row)
 
-            processed += len(activities)
+            processed += len(activities_ids)
