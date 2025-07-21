@@ -53,8 +53,6 @@ importlib-metadata==4.11.4
 ipaddr==2.2.0
 kombu==5.2.3
 markdown==3.2.2
-pep8==1.7.1
-pep8-naming==0.12.1
 pika==1.2.0
 pillow>=11.3.0
 prompt-toolkit==3.0.24
