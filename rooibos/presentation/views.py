@@ -1013,6 +1013,20 @@ def slide_manifest_v3(request, slide, owner, offline=False):
             'type': 'AnnotationPage',
             'items': images,
         }],
+        'thumbnail': [{
+            "id": image + '/full/!200,200/0/default.jpg',
+            "type": "Image",
+            "format": "image/jpeg",
+            "width": 200,
+            "height": 200,
+            "service": [
+                {
+                    "id": image,
+                    "type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level1.json"
+                }
+            ]
+        }],
         'navPlace': nav_place,
         'metadata': [
             {
