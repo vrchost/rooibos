@@ -1,7 +1,7 @@
+import csv
 
 from django.core.management.base import BaseCommand
 from rooibos.data.models import Field, Record
-import unicodecsv as csv
 from rooibos.util.progressbar import ProgressBar
 
 
