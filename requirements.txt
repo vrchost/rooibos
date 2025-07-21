@@ -30,7 +30,7 @@ click-didyoumean==0.3.0
 click-plugins==1.1.1
 click-repl==0.2.0
 click==8.0.3
-configobj==5.0.8
+configobj==5.0.9
 cryptography==44.0.1
 django-appconf==1.0.5
 django-cas-ng==4.3.0
