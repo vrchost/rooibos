@@ -47,7 +47,6 @@ flake8==4.0.1
 flake8-docstrings==1.6.0
 flake8-todo==0.7
 flickrapi==2.4.0
-flup==1.0.3
 gunicorn==23.0.0
 importlib-metadata==4.11.4
 ipaddr==2.2.0
