@@ -1,7 +1,7 @@
 from collections import namedtuple
 from functools import cmp_to_key
 
-from PyPDF2.pdf import PdfFileReader
+from pypdf import PdfReader
 from io import BytesIO
 from PIL import Image
 import logging
@@ -28,10 +28,10 @@ logger = logging.getLogger(__name__)
 
 
 def extract_text_from_pdf_stream(stream):
-    reader = PdfFileReader(stream)
+    reader = PdfReader(stream)
     return '\n'.join(
-        reader.getPage(i).extractText()
-        for i in range(reader.getNumPages())
+        reader.pages[i].extract_text()
+        for i in range(len(reader.pages))
     )
 
 
