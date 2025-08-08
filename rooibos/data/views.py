@@ -1132,7 +1132,7 @@ def record_manifest(request, identifier, name):
     owner = request.user if request.user.is_authenticated else None
 
     return {
-        '@context': 'http://iiif.io/api/image/2/context.json',
+        '@context': 'http://iiif.io/api/presentation/2/context.json',
         '@type': 'sc:Manifest',
         '@id': get_server(request) + request.path,  # Manifest ID should be URL of itself
         'label': record.title,

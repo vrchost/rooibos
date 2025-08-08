@@ -658,8 +658,10 @@ def record_usage(request, id, name):
 
 
 def get_server(request, offline=False):
-    return '' if offline else 'https://' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    host = request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    scheme = request.META.get('HTTP_X_FORWARDED_PROTO', 'https')
+    port = request.META.get('HTTP_X_FORWARDED_PORT', request.META.get('SERVER_PORT', 443 if scheme == 'https' else 80))
+    return '' if offline else scheme + '://' + host + ':' + port
 
 
 def get_id(request, *args, offline=False):
@@ -1012,6 +1014,20 @@ def slide_manifest_v3(request, slide, owner, offline=False):
             'id': get_id(request, 'slide', 'anno-page', 'slide%d' % slide.id, offline=offline),
             'type': 'AnnotationPage',
             'items': images,
+        }],
+        'thumbnail': [{
+            "id": image + '/full/!200,200/0/default.jpg',
+            "type": "Image",
+            "format": "image/jpeg",
+            "width": 200,
+            "height": 200,
+            "service": [
+                {
+                    "id": image,
+                    "type": "ImageService2",
+                    "profile": "http://iiif.io/api/image/2/level1.json"
+                }
+            ]
         }],
         'navPlace': nav_place,
         'metadata': [

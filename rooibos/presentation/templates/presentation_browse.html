@@ -189,6 +189,7 @@
     <tr>
         <th></th>
         <th>Title</th>
+        <th></th>
         {% if manage %}
         {% if perms.presentation.publish_presentations %}
         <th>Hidden</th>
@@ -214,6 +215,11 @@
             {% else %}
             {{ presentation.title }}
             {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'presentation-manifest-v3' presentation.id presentation.name %}" target="_blank">
+              <img src="{% static 'images/iiif.png' alt="IIIF Manifest" %}" class="iiif-icon" style="position: initial;"/>
+            </a>
         </td>
         {% if manage %}
         {% if perms.presentation.publish_presentations %}
