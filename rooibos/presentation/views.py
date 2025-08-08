@@ -658,8 +658,10 @@ def record_usage(request, id, name):
 
 
 def get_server(request, offline=False):
-    return '' if offline else 'https://' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    host = request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    scheme = request.META.get('HTTP_X_FORWARDED_PROTO', 'https')
+    port = request.META.get('HTTP_X_FORWARDED_PORT', request.META.get('SERVER_PORT', 443 if scheme == 'https' else 80))
+    return '' if offline else scheme + '://' + host + ':' + port
 
 
 def get_id(request, *args, offline=False):
