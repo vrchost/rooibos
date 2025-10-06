@@ -893,7 +893,7 @@ def raw_manifest(request, id, name, offline=False, end_slide=False):
     }
 
 
-def slide_manifest_v3(request, slide, owner, offline=False):
+def slide_manifest_v3(request, slide, owner, offline=False, url=None):
 
     fieldvalues = slide.get_fieldvalues(owner=owner, hidden=True)
     titles = title_from_fieldvalues(fieldvalues) or ['Untitled'],
@@ -975,6 +975,7 @@ def slide_manifest_v3(request, slide, owner, offline=False):
                     "id": get_id(request, 'geojson', 'slide%d' % slide.id, str(i), offline=offline),
                     "type": "Feature",
                     "properties": {
+                        "url": url,
                         "label": {
                             "none": titles,
                         },
@@ -1115,15 +1116,15 @@ def raw_manifest_v3(request, id, name, offline=False, end_slide=False):
         )
     ]
 
+    url = get_id(request, 'presentation', 'manifest-v3', str(p.id), p.name, offline=offline),
+
     return {
         '@context': [
             'http://iiif.io/api/presentation/3/context.json',
             'https://iiif.io/api/extension/navplace/context.json',
         ],
         'type': 'Manifest',
-        'id': get_id(
-            request, 'presentation', 'manifest-v3', str(p.id), p.name,
-            offline=offline),
+        'id': url,
         'label': {"none": [p.title]},
         'metadata': [],
         'description': {"none": [p.description or '']},
@@ -1133,6 +1134,7 @@ def raw_manifest_v3(request, id, name, offline=False, end_slide=False):
                 slide,
                 owner,
                 offline=offline,
+                url=url,
             ) for slide in slides
         ] + extra,
     }
@@ -1167,13 +1169,15 @@ def manifest_from_search_v3(request, id=None, name=None):
         ) for record in records or []
     ]
 
+    url = get_server(request) + request.get_full_path(),
+
     return {
         '@context': [
             'http://iiif.io/api/presentation/3/context.json',
             'https://iiif.io/api/extension/navplace/context.json',
         ],
         'type': 'Manifest',
-        'id': get_server(request) + request.get_full_path(),
+        'id': url,
         'label': {"none": ['Search Results']},
         'metadata': [],
         'description': {"none": ['%s hits' % hits]},
@@ -1182,6 +1186,7 @@ def manifest_from_search_v3(request, id=None, name=None):
                 request,
                 slide,
                 owner,
+                url=url,
             ) for slide in slides
         ],
     }
