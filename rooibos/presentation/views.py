@@ -274,7 +274,7 @@ def edit(request, id, name):
         if form.is_valid():
             presentation.title = form.cleaned_data['title']
             presentation.name = None
-            if presentation.owner.has_perm(
+            if request.user.has_perm(
                     'presentation.publish_presentations'):
                 presentation.hidden = form.cleaned_data['hidden']
             presentation.description = form.cleaned_data['description']
