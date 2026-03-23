@@ -1139,7 +1139,7 @@ class TestTagFieldInForms(TestCase):
     def test_tag_get_from_model(self):
         FormTest.objects.create(tags='test3 test2 test1')
         FormTest.objects.create(tags='toto titi')
-        self.assertEquals(FormTest.tags, 'test1 test2 test3 titi toto')
+        self.assertEqual(FormTest.tags, 'test1 test2 test3 titi toto')
 
 
 #########
@@ -1194,7 +1194,7 @@ class TestTaggedObjectList(TestCase):
                  template='tests/article_list.html'):
         with self.assertNumQueries(queries):
             response = self.client.get(url)
-        self.assertEquals(response.status_code, code)
+        self.assertEqual(response.status_code, code)
 
         if code == 200:
             self.assertTrue(isinstance(response.context['tag'], Tag))
@@ -1214,7 +1214,7 @@ class TestTaggedObjectList(TestCase):
     def test_view_related(self):
         response = self.get_view('/static/related/',
                                  queries=2, expected_items=2)
-        self.assertEquals(len(response.context['related_tags']), 2)
+        self.assertEqual(len(response.context['related_tags']), 2)
 
     def test_view_no_queryset_no_model(self):
         self.assertRaises(ImproperlyConfigured, self.get_view,
