@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path as url
 from .views import viewer_shell, viewer_script, viewer_embed, \
     legacy_embedded_video
 

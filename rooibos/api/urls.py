@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path as url
 
 from .views import collections, login, logout, api_search, record, \
     presentations_for_current_user, presentation_detail, keep_alive, \
