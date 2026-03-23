@@ -90,6 +90,6 @@ def main():
             print('Could not find MDID settings, have you run "mdid init"?')
             sys.exit(1)
 
-    if args[1] == 'runserver_plus' and '--keep-meta-shutdown' not in args[2:]:
+    if len(args) > 1 and args[1] == 'runserver_plus' and '--keep-meta-shutdown' not in args[2:]:
         args.insert(2, '--keep-meta-shutdown')
     sys.exit(execute_from_command_line(args))
