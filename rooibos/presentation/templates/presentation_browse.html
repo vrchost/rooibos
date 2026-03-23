@@ -204,9 +204,9 @@
     </tr>
 {% for presentation in presentations %}
     {% owned_tags_for_object presentation for request.user as ptags %}
-    {% ifnotequal request.user.id presentation.owner.id %}
+    {% if request.user.id != presentation.owner.id %}
     {% owned_tags_for_object presentation for presentation.owner as otags %}
-    {% endifnotequal %}
+    {% endif %}
     <tr>
         <td><input type="checkbox" name="h" value="{{ presentation.id }}" /></td>
         <td>

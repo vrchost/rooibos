@@ -2,11 +2,11 @@
 {% if results %}
 Query: {{ query }}<br />
 {% for instance, hits in results %}
-{% ifnotequal hits -1 %}
+{% if hits != -1 %}
 <a href="{{ instance.get_search_url }}?q={{ query|urlencode }}">{{ instance.get_label }}</a>&nbsp;{{ hits|intcomma }}
 {% else %}
 {{ instance.get_label }} (Error)
-{% endifnotequal %}<br />
+{% endif %}<br />
 {% endfor %}
 {% else %}
 No additional content found.

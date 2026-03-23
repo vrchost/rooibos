@@ -26,7 +26,7 @@ $(document).ready(function() {
         <form method="GET" action=".">
             <select name="c">
 {% for collection in collections %}
-<option value="{{ collection.name }}"{% ifequal selected_collection.id collection.id %} selected="selected"{% endifequal %}>{{ collection.title }}</option>
+<option value="{{ collection.name }}"{% if selected_collection.id == collection.id %} selected="selected"{% endif %}>{{ collection.title }}</option>
 {% endfor %}
             </select>
             <input type="submit" value="Browse" />
@@ -39,7 +39,7 @@ $(document).ready(function() {
         <form method="GET" action=".">
             <select name="f">
 {% for field in fields %}
-<option value="{{ field.id }}"{% ifequal selected_field.id field.id %} selected="selected"{% endifequal %}>{{ field.label }}</option>
+<option value="{{ field.id }}"{% if selected_field.id == field.id %} selected="selected"{% endif %}>{{ field.label }}</option>
 {% endfor %}
             </select>
             <input type="submit" value="Browse" />
@@ -73,10 +73,10 @@ Jump to:
 {% for v in values %}
 {% ifchanged %}<div style="font-size: x-large; font-weight: bolder;">{{ v.browse_value|capfirst|slice:":1" }}</div>{% endifchanged %}
     <div><a class="related-images" href="{% url "solr-search" %}?c=allcollections:{{ collection_filter }}&amp;c={{ selected_field.full_name }}_s_lower:{{ v.value|urlencode }}">{{ v.value }}</a> ({{ v.freq }})</div>
-    {% ifequal forloop.counter column_split %}
+    {% if forloop.counter == column_split %}
     </div>
     <div class="browsecolumn">
-    {% endifequal %}
+    {% endif %}
 {% endfor %}
 </div>
 
