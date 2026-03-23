@@ -1,7 +1,6 @@
 from django.http import HttpResponse
 import json as simplejson
 from django.core.mail import mail_admins
-from django.utils.translation import ugettext as _
 from django.utils.decorators import wraps
 from django.utils.functional import SimpleLazyObject
 from django.db.models import Q
@@ -58,7 +57,7 @@ def json_view(func):
             if hasattr(e, 'message'):
                 msg = e.message
             else:
-                msg = _('Internal error') + ': ' + str(e)
+                msg = 'Internal error: ' + str(e)
             response = {'result': 'error',
                         'text': msg}
 

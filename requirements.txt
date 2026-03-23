@@ -16,7 +16,7 @@
 # with MDID. If not, see http://www.gnu.org/licenses/.
 
 Celery==5.2.7
-Django==3.2.23
+Django==4.2.23
 amqp==5.0.9
 attrs==21.4.0
 b2sdk==1.14.1
@@ -41,7 +41,6 @@ django-extensions==3.1.5
 django-pagination==1.0.7
 django-ranged-fileresponse==0.1.2
 django-storages==1.12.3
-django-tagging==0.5.0
 flake8==4.0.1
 flake8-docstrings==1.6.0
 flake8-todo==0.7
