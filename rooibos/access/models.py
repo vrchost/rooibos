@@ -23,10 +23,10 @@ class AccessControl(models.Model):
         unique_together = ('content_type', 'object_id', 'user', 'usergroup')
         app_label = 'access'
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         if (self.user and self.usergroup):
             raise ValueError("Mutually exclusive fields set")
-        super(AccessControl, self).save(kwargs)
+        super(AccessControl, self).save(*args, **kwargs)
 
     def __str__(self):
         def f(flag, char):
