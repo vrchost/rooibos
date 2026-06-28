@@ -14,4 +14,6 @@ except ModuleNotFoundError:
     pass
 
 
+import celery
+
 __all__ = ['celery']
