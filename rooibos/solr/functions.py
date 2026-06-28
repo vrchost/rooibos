@@ -472,8 +472,10 @@ class SolrIndex():
                     # also make sortable
                     if not v.field.name + '_sort' in doc:
                         doc[v.field.name + '_sort'] = clean_value
-            # For exact retrieval through browsing
+            # For exact retrieval
             doc.setdefault(v.field.full_name + '_s', []).append(clean_value)
+            # For browsing - matches whole value, but case and accent insensitive
+            doc.setdefault(v.field.full_name + '_s_lower', []).append(clean_value)
         for _, f in list(required_fields.items()):
             doc[f.name + '_t'] = SOLR_EMPTY_FIELD_VALUE
         all_parents = [g.collection_id for g in groups]

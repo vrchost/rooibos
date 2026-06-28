@@ -568,11 +568,12 @@
     </fieldType>
 
     <!-- lowercases the entire field value, keeping it as a single token.  -->
-    <dynamicField name="*_s_lower" type="lowercase" indexed="true" stored="true"/>
+    <dynamicField name="*_s_lower" type="lowercase" indexed="true" stored="true" multiValued="true"/>
     <fieldType name="lowercase" class="solr.TextField" positionIncrementGap="100">
         <analyzer>
             <tokenizer class="solr.KeywordTokenizerFactory"/>
             <filter class="solr.LowerCaseFilterFactory"/>
+            <filter class="solr.ASCIIFoldingFilterFactory"/>
         </analyzer>
     </fieldType>
 
