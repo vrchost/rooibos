@@ -314,7 +314,7 @@ def _generate_query(search_facets, user, collection, criteria, keywords,
         fname = f.rsplit(' ', 1)[-1]
 
         # create exact match criteria on the fly if needed
-        if fname.endswith('_s') and fname not in search_facets:
+        if (fname.endswith('_s') or fname.endswith('_s_lower')) and fname not in search_facets:
             search_facets[fname] = ExactValueSearchFacet(fname)
 
         if fname in search_facets:
