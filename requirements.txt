@@ -1,45 +1,28 @@
-# Copyright 2016 vrcHost LLC
-#
-# This file is part of MDID.
-#
-# MDID is free software: you can redistribute it and/or modify it under the
-# terms of the GNU General Public License as published by the Free Software
-# Foundation, either version 2 of the License, or (at your option) any later
-# version.
-#
-# MDID is distributed in the hope that it will be useful, but WITHOUT ANY
-# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-# FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
-# details.
-#
-# You should have received a copy of the GNU General Public License along
-# with MDID. If not, see http://www.gnu.org/licenses/.
-
 amqp==5.3.1
 annotated-types==0.7.0
 asgiref==3.11.1
 attrs==26.1.0
-b2sdk==2.10.4
-beautifulsoup4==4.14.3
+b2sdk==2.12.0
+beautifulsoup4==4.15.0
 billiard==4.2.4
-bleach==6.3.0
+bleach==6.4.0
 bleach-allowlist==1.0.3
-boto3==1.42.88
-botocore==1.42.88
+boto3==1.43.40
+botocore==1.43.40
 cached-property==2.0.1
 celery==5.6.3
-certifi==2026.2.25
+certifi==2026.6.17
 cffi==2.0.0
 charset-normalizer==3.4.7
-click==8.3.2
+click==8.4.2
 click-didyoumean==0.3.1
 click-plugins==1.1.1.2
 click-repl==0.3.0
 configobj==5.0.9
-cryptography==46.0.7
-Django==5.2.13
+cryptography==49.0.0
+Django==5.2.15
 django-appconf==1.2.0
-django-cas-ng==5.1.0
+django-cas-ng==5.1.1
 django-contrib-comments==2.2.0
 django-cors-headers==4.9.0
 django-extensions==4.1
@@ -52,22 +35,22 @@ flake8==7.3.0
 flake8-docstrings==1.7.0
 flake8-todo==0.7
 flickrapi==2.4.0
-gunicorn==25.3.0
-idna==3.11
+gunicorn==26.0.0
+idna==3.18
 importlib_metadata==9.0.0
 ipaddr==2.2.0
 jmespath==1.1.0
 kombu==5.6.2
 logfury==1.0.1
-lxml==6.0.3
+lxml==6.1.1
 Markdown==3.10.2
 MarkupSafe==3.0.3
 mccabe==0.7.0
-mysqlclient==2.2.1
+mysqlclient==2.2.8
 oauthlib==3.3.1
-packaging==26.0
-pika==1.3.2
-pillow==12.2.0
+packaging==26.2
+pika==1.4.1
+pillow==12.3.0
 prompt_toolkit==3.0.52
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
@@ -77,34 +60,34 @@ pycryptodome==3.23.0
 pydocstyle==6.3.0
 pyflakes==3.4.0
 pymemcache==4.0.0
-PyMySQL==1.1.2
-pypdf==6.10.0
-python-cas==1.7.1
+PyMySQL==1.2.0
+pypdf==6.14.2
+python-cas==1.7.2
 python-dateutil==2.9.0.post0
-python-ldap==3.4.5
+python-ldap==3.4.7
 python-pptx==1.0.2
-pytz==2026.1.post1
+pytz==2026.2
 rcssmin==1.2.2
-reportlab==4.4.10
-requests==2.33.1
+reportlab==5.0.0
+requests==2.34.2
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
 rjsmin==1.2.5
-s3transfer==0.16.0
+s3transfer==0.19.0
 setuptools==82.0.1
 six==1.17.0
-snowballstemmer==3.0.1
-soupsieve==2.8.3
+snowballstemmer==3.1.1
+soupsieve==2.8.4
 sqlparse==0.5.5
-typing_extensions==4.15.0
-tzdata==2026.1
-tzlocal==5.3.1
-urllib3==2.6.3
+typing_extensions==4.16.0
+tzdata==2026.2
+tzlocal==5.4.4
+urllib3==2.7.0
 vine==5.1.0
-wcwidth==0.6.0
+wcwidth==0.8.2
 webencodings==0.5.1
 Werkzeug==3.1.8
 wfastcgi==3.0.0
-wheel==0.46.3
+wheel==0.47.0
 xlsxwriter==3.2.9
-zipp==3.23.0
+zipp==4.1.0
