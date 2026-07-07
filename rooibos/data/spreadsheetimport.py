@@ -329,7 +329,7 @@ def create_import_job(mapping_file, data_file, collections):
         return value.lower() in ("1", "true", "t", "yes", "y")
 
     mappings = []
-    with open(mapping_file, 'rU') as mapping_fileobj:
+    with open(mapping_file, 'r') as mapping_fileobj:
         mapping = CustomDictReader(mapping_fileobj)
         for m in mapping:
             m['mapto'] = get_field_id(m['mapto'])

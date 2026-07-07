@@ -682,7 +682,7 @@ def data_import_file(request, file):
                 _get_scratch_dir(),
                 _get_filename(request, file)
             )
-            with open(infile, 'rU') as csvfile:
+            with open(infile, 'r') as csvfile:
                 imp = SpreadsheetImport(
                     csvfile,
                     collections,
