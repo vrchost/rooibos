@@ -9,11 +9,10 @@ try:
         # Don't break when running outside of configured Django environment
         pass
 
+    import celery
+
+    __all__ = ['celery']
+
 except ModuleNotFoundError:
     # Running in setup mode
     pass
-
-
-import celery
-
-__all__ = ['celery']
