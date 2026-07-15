@@ -15,7 +15,7 @@ def csvimport(
     from .views import _get_scratch_dir
     file = os.path.join(_get_scratch_dir(), filename)
 
-    infile = open(file, 'rU')
+    infile = open(file, 'r')
 
     class Counter(object):
         def __init__(self):

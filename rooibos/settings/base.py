@@ -326,7 +326,7 @@ SESSION_COOKIE_AGE = 6 * 3600  # in seconds
 
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
         'LOCATION': '127.0.0.1:11211',
         'KEY_PREFIX': INSTANCE_NAME,
     }

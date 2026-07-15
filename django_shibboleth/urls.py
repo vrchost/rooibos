@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with django_shibboleth  If not, see <http://www.gnu.org/licenses/>.
 
-from django.conf.urls import url
+from django.urls import re_path as url
 from .views import shib_register, shib_meta
 
 # URL patterns for django_shibboleth

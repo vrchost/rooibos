@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.template.loader import render_to_string
 from django.urls import reverse
-from django.utils.http import urlquote
+from urllib.parse import quote as urlquote
 from django import forms
 from django.forms.formsets import formset_factory
 from django.db.models import Q

@@ -73,7 +73,7 @@
     <th id="remove-col" style="text-align: center;"></th>
 </tr>
 {% for job in jobs %}
-<tr class="{% cycle '' 'altrow' %}{% ifequal highlight job.task_id %} highlight-row{% endifequal %}{% ifequal highlight job.id %} highlight-row{% endifequal %}">
+<tr class="{% cycle '' 'altrow' %}{% if highlight == job.task_id %} highlight-row{% endif %}{% if highlight == job.id %} highlight-row{% endif %}">
 {% if request.user.is_superuser %}
     <td>{{ job.id }} <!-- {{ job.task_id }} --></td>
     <td>{{ job.owner.username }}</td>

@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path as url
 from .views import manage, create, edit, duplicate, browse, password, \
     record_usage, manifest, manifest_v3, manifest_from_search_v3, \
     annotation_list, transparent_png, missing_png

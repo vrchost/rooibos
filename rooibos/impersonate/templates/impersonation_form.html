@@ -5,7 +5,7 @@ Impersonate:
 <select name="username">
     <option></option>
 {% for user in users %}
-    <option{% ifequal current user %} selected="selected"{% endifequal %}>{{ user }}</option>
+    <option{% if current == user %} selected="selected"{% endif %}>{{ user }}</option>
 {% endfor %}
 </select>
 {% else %}

@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         works = dict()
 
-        with open(mapping_file, 'rU') as mappings:
+        with open(mapping_file, 'r') as mappings:
             reader = csv.DictReader(mappings)
             for row in reader:
                 identifier = row['ImageFileName']

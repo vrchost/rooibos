@@ -1,4 +1,4 @@
-from django.conf.urls import url, handler404, include
+from django.urls import re_path as url, include
 from django.contrib import admin
 from django.urls import path
 from django.conf import settings
@@ -27,7 +27,7 @@ def handler500_with_context(request):
     return HttpResponseServerError(template.render(request=request))
 
 
-handler404 = getattr(settings, 'HANDLER404', handler404)
+handler404 = getattr(settings, 'HANDLER404', None)
 handler500 = getattr(settings, 'HANDLER500', handler500_with_context)
 
 

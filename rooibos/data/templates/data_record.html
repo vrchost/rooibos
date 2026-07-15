@@ -198,9 +198,9 @@
 {% if fv_formset and record.id %}
         <a href="{% if next %}{{ next }}{% else %}{% url "data-record" record.id record.name %}{% endif %}">Cancel Editing</a><br />
 {% endif %}
-{% if record.owner %}{% ifequal record.owner request.user %}
+{% if record.owner %}{% if record.owner == request.user %}
   {% add_tags_form record "suggested" "Suggest" %}
-{% endifequal %}{% endif %}
+{% endif %}{% endif %}
 {% if can_edit and record.id and not fv_formset %}
     <form class="delete-record-form" method="post" action="{% url "data-record-delete" record.id record.name %}">{% csrf_token %}
         <input type="submit" name="delete_record" value="Delete Record" />

@@ -210,21 +210,21 @@
   <div class="dropdown">
         View:
     <select name="v" id="viewmode_dropdown">
-        <option value="thumb"{% ifequal viewmode "thumb" %} selected="selected"{% endifequal %}>Thumbnails</option>
-        <option value="list"{% ifequal viewmode "list" %} selected="selected"{% endifequal %}>List</option>
-        <option value="metadata"{% ifequal viewmode "metadata" %} selected="selected"{% endifequal %}>Metadata</option>
+        <option value="thumb"{% if viewmode == "thumb" %} selected="selected"{% endif %}>Thumbnails</option>
+        <option value="list"{% if viewmode == "list" %} selected="selected"{% endif %}>List</option>
+        <option value="metadata"{% if viewmode == "metadata" %} selected="selected"{% endif %}>Metadata</option>
     </select>
     Sort by:
     <select name="s" id="sort_dropdown">
-        <option value="score desc"{% ifequal sort "score" %} selected="selected"{% endifequal %}>Score</option>
-        <option value="random_{{ random }}"{% ifequal sort "random" %} selected="selected"{% endifequal %}>Random</option>
-        <option value="title_sort"{% ifequal sort "title" %} selected="selected"{% endifequal %}>Title</option>
-        <option value="creator_sort"{% ifequal sort "creator" %} selected="selected"{% endifequal %}>Creator</option>
-        <option value="date_sort"{% ifequal sort "date" %} selected="selected"{% endifequal %}>Date</option>
-        <option value="format_sort"{% ifequal sort "format" %} selected="selected"{% endifequal %}>Format</option>
-        <option value="identifier_sort"{% ifequal sort "identifier" %} selected="selected"{% endifequal %}>Identifier</option>
-        <option value="created desc"{% ifequal sort "created" %} selected="selected"{% endifequal %}>Record creation</option>
-        <option value="modified desc"{% ifequal sort "modified" %} selected="selected"{% endifequal %}>Last modified</option>
+        <option value="score desc"{% if sort == "score" %} selected="selected"{% endif %}>Score</option>
+        <option value="random_{{ random }}"{% if sort == "random" %} selected="selected"{% endif %}>Random</option>
+        <option value="title_sort"{% if sort == "title" %} selected="selected"{% endif %}>Title</option>
+        <option value="creator_sort"{% if sort == "creator" %} selected="selected"{% endif %}>Creator</option>
+        <option value="date_sort"{% if sort == "date" %} selected="selected"{% endif %}>Date</option>
+        <option value="format_sort"{% if sort == "format" %} selected="selected"{% endif %}>Format</option>
+        <option value="identifier_sort"{% if sort == "identifier" %} selected="selected"{% endif %}>Identifier</option>
+        <option value="created desc"{% if sort == "created" %} selected="selected"{% endif %}>Record creation</option>
+        <option value="modified desc"{% if sort == "modified" %} selected="selected"{% endif %}>Last modified</option>
     </select>
     <input type="submit" value="Go" id="sort_go_button" />
   </div>

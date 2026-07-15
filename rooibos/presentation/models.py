@@ -28,14 +28,14 @@ class Presentation(models.Model):
     modified = models.DateTimeField(auto_now=True)
     ownedwrapper = GenericRelation('util.OwnedWrapper')
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(
             self,
             slug_source='title',
             slug_field='name',
             check_current_slug=kwargs.get('force_insert')
         )
-        super(Presentation, self).save(kwargs)
+        super(Presentation, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse(

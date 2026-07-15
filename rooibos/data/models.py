@@ -50,10 +50,10 @@ class Collection(models.Model):
         ordering = ['order', 'title']
         app_label = 'data'
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(self, slug_source='title', slug_field='name',
                     check_current_slug=kwargs.get('force_insert'))
-        super(Collection, self).save(kwargs)
+        super(Collection, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.title, self.name)
@@ -283,7 +283,7 @@ class Record(models.Model):
             url += '?reprocess'
         return url
 
-    def save(self, force_update_name=False, **kwargs):
+    def save(self, force_update_name=False, *args, **kwargs):
         # TODO: update this to use something human readable and/or
         # globally unique
         unique_slug(
@@ -292,7 +292,7 @@ class Record(models.Model):
             slug_field='name',
             check_current_slug=kwargs.get('force_insert') or force_update_name
         )
-        super(Record, self).save(kwargs)
+        super(Record, self).save(*args, **kwargs)
 
     def get_fieldvalues(self, owner=None, context=None, fieldset=None,
                         hidden=False, include_context_owner=False,
@@ -544,14 +544,14 @@ class Field(models.Model):
 
     natural_key.dependencies = ['data.MetadataStandard']
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(
             self,
             slug_source='label',
             slug_field='name',
             check_current_slug=kwargs.get('force_insert')
         )
-        super(Field, self).save(kwargs)
+        super(Field, self).save(*args, **kwargs)
 
     @property
     def full_name(self):
@@ -610,14 +610,14 @@ class FieldSet(models.Model):
         User, null=True, blank=True, on_delete=models.CASCADE)
     standard = models.BooleanField(default=False)
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(
             self,
             slug_source='title',
             slug_field='name',
             check_current_slug=kwargs.get('force_insert')
         )
-        super(FieldSet, self).save(kwargs)
+        super(FieldSet, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -680,11 +680,11 @@ class FieldValue(models.Model):
         null=True, blank=True, serialize=False)
     context = GenericForeignKey('context_type', 'context_id')
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         self.index_value = self.value[:32] if self.value is not None else None
         self.browse_value = FieldValue.make_browse_value(self.value) \
             if self.value is not None else None
-        super(FieldValue, self).save(kwargs)
+        super(FieldValue, self).save(*args, **kwargs)
         if self.value and self.field.id in standardfield_ids(
                 'identifier', equiv=True):
             # update record slug name
@@ -720,10 +720,10 @@ class FieldValue(models.Model):
     class Meta:
         app_label = 'data'
         ordering = ['order']
-        index_together = [
-            ['record', 'field'],
-            ['field', 'record', 'index_value'],
-            ['field', 'record', 'browse_value'],
+        indexes = [
+            models.Index(fields=['record', 'field']),
+            models.Index(fields=['field', 'record', 'index_value']),
+            models.Index(fields=['field', 'record', 'browse_value']),
         ]
 
 

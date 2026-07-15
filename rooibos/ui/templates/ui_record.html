@@ -19,7 +19,7 @@
     {% endif %}
     <img src="{% static 'images/info.png' %}" alt="Information" class="info-icon metadata-anchor" id="info-record-id-{{ record.id }}" />
     {% if record.owner %}
-    <img src="{% static 'images/user_grey.png' %}" alt="User" class="owner-icon {% ifnotequal request.user record.owner %}other-{% endifnotequal %}user-icon" title="{{ record.owner.get_full_name }}" />
+    <img src="{% static 'images/user_grey.png' %}" alt="User" class="owner-icon {% if request.user != record.owner %}other-{% endif %}user-icon" title="{{ record.owner.get_full_name }}" />
     {% if record.shared %}
     <img src="{% static 'images/unlocked.png' %}" alt="Shared" title="Shared" class="shared-icon" />
     {% else %}

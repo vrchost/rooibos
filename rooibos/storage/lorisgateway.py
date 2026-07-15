@@ -50,8 +50,11 @@ def handle_loris_request(request, filepath, record_id, record_name):
 
     basename = os.path.basename(filepath)
 
-    ident = '//' + request.META.get(
-        'HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    host = request.META.get('HTTP_X_FORWARDED_HOST', request.META['HTTP_HOST'])
+    scheme = request.META.get('HTTP_X_FORWARDED_PROTO', 'https')
+    port = request.META.get('HTTP_X_FORWARDED_PORT', 443 if scheme == 'https' else 80)
+    ident = scheme + '://' + host + ':' + str(port)
+
     ident += reverse(
         'storage-retrieve-iiif-image', args=(record_id, record_name))
     ident = ident.rstrip('/')

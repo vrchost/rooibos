@@ -17,3 +17,4 @@ travis-build/
 scratch/
 log/
 local/
+venv/

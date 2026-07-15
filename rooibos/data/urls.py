@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path as url
 from .views import manage_collections, manage_collection, record_preview, \
     record, record_delete, data_import_file, data_import, \
     save_collection_visibility_preferences, collection_dump_view, \

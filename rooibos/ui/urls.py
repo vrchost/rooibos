@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path as url
 from django.views.generic.base import TemplateView
 from .views import css, select_record, add_tags, remove_tag, manage, options, \
     clear_selected_records, delete_selected_records, \

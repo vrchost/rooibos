@@ -53,10 +53,10 @@ class SharedCollection(models.Model):
     class Meta:
         ordering = ['title']
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(self, slug_source='title', slug_field='name',
                     check_current_slug=kwargs.get('force_insert'))
-        super(SharedCollection, self).save(kwargs)
+        super(SharedCollection, self).save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.title, self.name)

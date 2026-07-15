@@ -62,14 +62,14 @@ class Storage(models.Model):
         verbose_name_plural = 'storage'
         app_label = 'storage'
 
-    def save(self, **kwargs):
+    def save(self, *args, **kwargs):
         unique_slug(
             self,
             slug_source='title',
             slug_field='name',
             check_current_slug=kwargs.get('force_insert')
         )
-        super(Storage, self).save(kwargs)
+        super(Storage, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -207,7 +207,7 @@ class Media(models.Model):
             self.id, self.record, self.storage, self.mimetype, self.url
         )
 
-    def save(self, force_update_name=False, **kwargs):
+    def save(self, force_update_name=False, *args, **kwargs):
         if self.url:
             slug_literal = os.path.splitext(os.path.basename(self.url))[0]
         else:
@@ -218,7 +218,7 @@ class Media(models.Model):
             slug_field='name',
             check_current_slug=kwargs.get('force_insert') or force_update_name
         )
-        super(Media, self).save(kwargs)
+        super(Media, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         if self.storage:
