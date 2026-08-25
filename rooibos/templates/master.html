@@ -109,7 +109,8 @@
                     <li><a href="{% url "logout" %}?next={{ SHIB_LOGOUT_URL|urlencode }}">Log out</a></li>
                 {% endif %}
             {% else %}
-                <li><a href="{% url "logout" %}?next={% url "main" %}">Log out</a></li>
+                <form id="logout-form" method="post" action="{% url "logout" %}?next={% url "main" %}" style="display: none;">{% csrf_token %}</form>
+                <li><a href="javascript:$('#logout-form').submit();">Log out</a></li>
             {% endif %}
             <li><a href="{% url "ui-options" %}">Options</a></li>
             <li><a href="{% url "ui-management" %}">Management</a></li>
