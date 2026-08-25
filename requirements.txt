@@ -19,8 +19,8 @@ click-didyoumean==0.3.1
 click-plugins==1.1.1.2
 click-repl==0.3.0
 configobj==5.0.9
-cryptography==49.0.0
-Django==5.2.15
+cryptography==50.0.0
+Django==5.2.17
 django-appconf==1.2.0
 django-cas-ng==5.1.1
 django-contrib-comments==2.2.0
@@ -61,7 +61,7 @@ pydocstyle==6.3.0
 pyflakes==3.4.0
 pymemcache==4.0.0
 PyMySQL==1.2.0
-pypdf==6.14.2
+pypdf==6.16.2
 python-cas==1.7.2
 python-dateutil==2.9.0.post0
 python-ldap>=3.4.0,<3.5.0
@@ -78,7 +78,7 @@ setuptools==83.0.0
 six==1.17.0
 snowballstemmer==3.1.1
 soupsieve==2.8.4
-sqlparse==0.5.5
+sqlparse==0.6.0
 typing_extensions==4.16.0
 tzdata==2026.2
 tzlocal==5.4.4
