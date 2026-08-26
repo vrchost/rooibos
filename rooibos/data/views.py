@@ -132,7 +132,7 @@ def record(request, id, name, contexttype=None, contextid=None,
     media = Media.objects.select_related().filter(
         record=record,
         storage__in=filter_by_access(request.user, Storage)
-    )
+    ) if record.id else Media.objects.none()
 
     # Can any media be downloaded?
     download_image = False
@@ -251,8 +251,10 @@ def record(request, id, name, contexttype=None, contextid=None,
             fieldvalues = record.get_fieldvalues(
                 owner=request.user, context=context, hidden=True
             ).filter(owner=request.user)
-        else:
+        elif record.id:
             fieldvalues = record.get_fieldvalues(hidden=True)
+        else:
+            fieldvalues = FieldValue.objects.none()
 
         field_value_formset = modelformset_factory(
             FieldValue,
@@ -386,11 +388,12 @@ def record(request, id, name, contexttype=None, contextid=None,
                     )
                 )
 
-                for item in (copyrecord or record).collectionitem_set.all():
-                    collections.get(item.collection_id, {}).update(dict(
-                        member=True,
-                        shared=not item.hidden,
-                    ))
+                if copyrecord or record.id:
+                    for item in (copyrecord or record).collectionitem_set.all():
+                        collections.get(item.collection_id, {}).update(dict(
+                            member=True,
+                            shared=not item.hidden,
+                        ))
 
                 collections = list(collections.values())
 
@@ -435,7 +438,7 @@ def record(request, id, name, contexttype=None, contextid=None,
         upload_form = None
 
     record_usage = record.presentationitem_set.values('presentation') \
-        .distinct().count() if can_edit else 0
+        .distinct().count() if can_edit and record.id else 0
 
     back_url = HistoryMiddleware.go_back(
         request,
