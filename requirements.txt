@@ -74,7 +74,7 @@ requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
 rjsmin==1.2.5
 s3transfer==0.19.0
-setuptools==83.0.0
+setuptools==84.2.1
 six==1.17.0
 snowballstemmer==3.1.1
 soupsieve==2.10
